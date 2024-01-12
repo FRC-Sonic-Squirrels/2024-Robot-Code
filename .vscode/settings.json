@@ -14,6 +14,13 @@
     "**/.factorypath": true,
     "**/*~": true
   },
+
+  //spotless on save
+    "spotlessGradle.format.enable": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.spotlessGradle": true
+    },
+  
   "java.test.config": [
     {
       "name": "WPIlibUnitTests",
