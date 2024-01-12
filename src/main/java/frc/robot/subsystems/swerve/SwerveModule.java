@@ -13,8 +13,6 @@
 
 package frc.robot.subsystems.swerve;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
+import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   public static final double ODOMETRY_FREQUENCY = 250.0;

@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
@@ -22,6 +20,7 @@ import frc.robot.configs.ExampleRobotConfig;
 import frc.robot.configs.RobotConfig;
 import frc.robot.configs.RobotConfig2023Rober;
 import frc.robot.configs.SimulatorRobotConfig;
+import java.util.function.Supplier;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean

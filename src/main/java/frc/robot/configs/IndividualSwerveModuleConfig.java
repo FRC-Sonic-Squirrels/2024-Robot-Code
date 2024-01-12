@@ -1,7 +1,6 @@
 package frc.robot.configs;
 
 import com.ctre.phoenix6.signals.InvertedValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.constants.SwerveModuleConstants;
 

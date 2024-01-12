@@ -13,19 +13,17 @@
 
 package frc.robot.subsystems.swerve.gyro;
 
-import java.util.Queue;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.SwerveModule;
+import java.util.Queue;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {

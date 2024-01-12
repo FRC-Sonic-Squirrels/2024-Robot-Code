@@ -13,10 +13,6 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -34,6 +30,8 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
+import java.util.ArrayList;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a

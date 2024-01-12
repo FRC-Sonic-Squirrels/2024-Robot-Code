@@ -13,19 +13,6 @@
 
 package frc.robot.subsystems.swerve;
 
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -36,12 +23,16 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.team6328.LocalADStarAK;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Drivetrain extends SubsystemBase {
   public static final Lock odometryLock = new ReentrantLock();
@@ -81,15 +72,15 @@ public class Drivetrain extends SubsystemBase {
     // Configure AutoBuilder for PathPlanner
     // FIXME: pass in custom PID constants? Issue for this use case has been created:
     // https://github.com/mjansen4857/pathplanner/issues/474
-    //FIXME: fix all the pathplanner jank
+    // FIXME: fix all the pathplanner jank
     // AutoBuilder.configureHolonomic(
     //   this::getPose,
-    //   this::setPose, 
+    //   this::setPose,
     //   () -> kinematics.toChassisSpeeds(getModuleStates()),
-    //   this::runVelocity, 
+    //   this::runVelocity,
     //   new HolonomicPathFollowerConfig(
-    //     getMaxAngularSpeedRadPerSec(), 
-    //     getCharacterizationVelocity(), 
+    //     getMaxAngularSpeedRadPerSec(),
+    //     getCharacterizationVelocity(),
     //     new ReplanningConfig()),
     //   () -> true,
     //   this);

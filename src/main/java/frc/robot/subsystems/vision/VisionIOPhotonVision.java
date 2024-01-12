@@ -1,16 +1,14 @@
 package frc.robot.subsystems.vision;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
-import org.photonvision.targeting.PhotonPipelineResult;
-
 import com.ctre.phoenix6.Utils;
-
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
+import org.photonvision.PhotonCamera;
+import org.photonvision.common.hardware.VisionLEDMode;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionIOPhotonVision implements VisionIO {
 
