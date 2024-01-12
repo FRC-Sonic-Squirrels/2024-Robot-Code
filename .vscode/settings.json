@@ -18,7 +18,7 @@
   //spotless on save
     "spotlessGradle.format.enable": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.spotlessGradle": true
+      "source.fixAll.spotlessGradle": "explicit"
     },
   
   "java.test.config": [
