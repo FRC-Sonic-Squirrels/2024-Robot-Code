@@ -1,4 +1,4 @@
-package frc.robot.commands.Auto;
+package frc.robot.Autonomous;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,11 +29,11 @@ public class Autos {
     }
 
     private AutoCommand doNothing(){
-        return new AutoCommand(new InstantCommand(), "doNothing", new Pose2d(0,0,new Rotation2d(0)));
+        return new AutoCommand("doNothing", new InstantCommand(), new Pose2d(0,0,new Rotation2d(0)));
     }
 
     private AutoCommand testAuto(){
-        return new AutoCommand(generateFollowPathCommand("testAuto"), "testAuto", Choreo.getTrajectory("testAuto").getInitialPose());
+        return new AutoCommand("testAuto", generateFollowPathCommand("testAuto"), Choreo.getTrajectory("testAuto").getInitialPose());
     }
 
     public AutoCommand[] autoCommands(){
