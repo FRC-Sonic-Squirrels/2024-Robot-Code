@@ -13,7 +13,7 @@
         "wheelRadius": 0.050799972568014815
     },
     "paths": {
-        "TestAuto": {
+        "TestPath": {
             "waypoints": [
                 {
                     "x": 0,
