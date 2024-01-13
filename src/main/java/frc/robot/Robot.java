@@ -17,9 +17,13 @@ import com.ctre.phoenix6.Utils;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.Auto.AutoCommand;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -31,7 +35,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
-  private Command autonomousCommand;
+  private LoggedDashboardChooser<AutoCommand> autonomousChooser;
+  private Command currentAutoCommand = new InstantCommand();
   private RobotContainer robotContainer;
 
   /**
@@ -120,20 +125,33 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    if(autonomousChooser == null){
+      autonomousChooser = robotContainer.getAutonomousChooser();
+    }
+  }
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    
+    if (autonomousChooser.get() != null) {
+      if(currentAutoCommand != autonomousChooser.get().command){
+        currentAutoCommand = autonomousChooser.get().command;
+        robotContainer.setPose(autonomousChooser.get().initPose);
+      }
+      
+    }
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    autonomousCommand = robotContainer.getAutonomousCommand();
-
+    
     // schedule the autonomous command (example)
-    if (autonomousCommand != null) {
-      autonomousCommand.schedule();
+    if (autonomousChooser.get() != null) {
+      currentAutoCommand = autonomousChooser.get().command;
+      currentAutoCommand.schedule();
     }
   }
 
@@ -148,8 +166,8 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (autonomousCommand != null) {
-      autonomousCommand.cancel();
+    if (currentAutoCommand != null) {
+      currentAutoCommand.cancel();
     }
   }
 

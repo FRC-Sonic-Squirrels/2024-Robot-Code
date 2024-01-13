@@ -15,6 +15,7 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -23,7 +24,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.commands.Auto.AutoCommands;
+import frc.robot.commands.Auto.AutoCommand;
+import frc.robot.commands.Auto.Autos;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.swerve.Drivetrain;
@@ -34,6 +36,7 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -50,7 +53,7 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private LoggedDashboardChooser<Command> autoChooser;
+  private LoggedDashboardChooser<AutoCommand> autoChooser = new LoggedDashboardChooser<>("Auto Routine");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -175,17 +178,16 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    autoChooser = new LoggedDashboardChooser<>("Auto Routine");
+  public LoggedDashboardChooser<AutoCommand> getAutonomousChooser() {
 
-    AutoCommands autos = new AutoCommands(drivetrain);
+    Autos autos = new Autos(drivetrain);
 
     for (int i = 0; i < autos.autoCommands().length; i++) {
       if (i == 0) {
         // Do nothing command must be first in list.
-        autoChooser.addDefaultOption(autos.autoCommands()[i].getName(), autos.autoCommands()[i]);
+        autoChooser.addDefaultOption(autos.autoCommands()[i].name, autos.autoCommands()[i]);
       } else {
-        autoChooser.addOption(autos.autoCommands()[i].getName(), autos.autoCommands()[i]);
+        autoChooser.addOption(autos.autoCommands()[i].name, autos.autoCommands()[i]);
       }
     }
 
@@ -200,6 +202,9 @@ public class RobotContainer {
     //        drivetrain::getCharacterizationVelocity));
 
     Shuffleboard.getTab("MAIN").add(autoChooser.getSendableChooser());
-    return autoChooser.get();
+    return autoChooser;
+  }
+  public void setPose(Pose2d pose){
+    drivetrain.setPose(pose);
   }
 }
