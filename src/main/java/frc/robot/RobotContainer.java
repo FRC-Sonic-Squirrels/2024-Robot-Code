@@ -24,6 +24,8 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.commands.DrivetrainDefaultTeleopDrive;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.subsystems.limelight.Limelight;
+import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
@@ -42,6 +44,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   private final Drivetrain drivetrain;
   private final Vision vision;
+  private final Limelight limelight;
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -67,12 +70,14 @@ public class RobotContainer {
     if (mode == Mode.REPLAY) {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
       vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+      limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_DEFAULT:
           drivetrain = null;
           vision = null;
+          limelight = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -107,6 +112,7 @@ public class RobotContainer {
           };
 
           vision = new Vision(aprilTagLayout, drivetrain, visionModules);
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -114,12 +120,14 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
           break;
 
         default:
           drivetrain =
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
           vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
           break;
       }
     }
