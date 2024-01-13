@@ -33,7 +33,7 @@ public class Autos {
     }
 
     private AutoCommand testAuto(){
-        return generateAutoCommand("testAuto");
+        return new AutoCommand(generateFollowPathCommand("testAuto"), "testAuto", Choreo.getTrajectory("testAuto").getInitialPose());
     }
 
     public AutoCommand[] autoCommands(){
@@ -43,7 +43,7 @@ public class Autos {
         };
     }
 
-    private AutoCommand generateAutoCommand(String name, AutoEvent... events){
+    private Command generateFollowPathCommand(String name, AutoEvent... events){
         ChoreoTrajectory traj = Choreo.getTrajectory(name);
         Command command = Choreo.choreoSwerveCommand(
             traj, 
@@ -61,6 +61,6 @@ public class Autos {
         for (AutoEvent autoEvent : events) {
             command = command.alongWith(new SequentialCommandGroup(new WaitCommand(autoEvent.timeSeconds), autoEvent.command));
         }
-        return new AutoCommand(command, name, traj.getInitialPose());
+        return command;
     }
 }
