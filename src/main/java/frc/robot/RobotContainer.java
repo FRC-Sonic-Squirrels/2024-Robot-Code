@@ -17,12 +17,14 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.commands.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.Auto.AutoCommands;
+import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -47,7 +49,10 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -64,6 +69,8 @@ public class RobotContainer {
   private final Shooter shooter;
 
   private final CommandXboxController controller = new CommandXboxController(0);
+
+  private LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -220,7 +227,30 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // return autoChooser.get();
-    return new InstantCommand();
+    autoChooser = new LoggedDashboardChooser<>("Auto Routine");
+
+    AutoCommands autos = new AutoCommands(drivetrain);
+
+    for (int i = 0; i < autos.autoCommands().length; i++) {
+      if (i == 0) {
+        // Do nothing command must be first in list.
+        autoChooser.addDefaultOption(autos.autoCommands()[i].getName(), autos.autoCommands()[i]);
+      } else {
+        autoChooser.addOption(autos.autoCommands()[i].getName(), autos.autoCommands()[i]);
+      }
+    }
+
+    // TODO: add drive characterization command? maybe not necessary?
+    // autoChooser.addOption(
+    //   "Drive Characterization",
+    //    new FeedForwardCharacterization(
+    //        drivetrain,
+    //        true,
+    //        new FeedForwardCharacterizationData("drive"),
+    //        drivetrain::runCharacterizationVolts,
+    //        drivetrain::getCharacterizationVelocity));
+
+    Shuffleboard.getTab("MAIN").add(autoChooser.getSendableChooser());
+    return autoChooser.get();
   }
 }
