@@ -1,4 +1,4 @@
-package frc.robot.commands.Auto;
+package frc.robot.Autonomous;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,7 +9,7 @@ public class AutoCommand {
     public String name;
     public Pose2d initPose;
 
-    public AutoCommand(Command command, String name, Pose2d initPose){
+    public AutoCommand(String name, Command command, Pose2d initPose){
         this.command = command;
         this.name = name;
         this.initPose = initPose;
