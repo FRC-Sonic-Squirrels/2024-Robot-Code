@@ -19,8 +19,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Autonomous.AutoCommand;
 import frc.robot.Autonomous.Autos;
@@ -51,9 +49,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -73,7 +68,9 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private LoggedDashboardChooser<AutoCommand> autoChooser = new LoggedDashboardChooser<>("Auto Routine");
+  private LoggedDashboardChooser<AutoCommand> autoChooser =
+      new LoggedDashboardChooser<>("Auto Routine");
+  private Autos autos;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -111,6 +108,7 @@ public class RobotContainer {
           climber = null;
           intake = null;
           shooter = null;
+          autos = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -149,6 +147,7 @@ public class RobotContainer {
           climber = new Climber(new ClimberSim());
           intake = new Intake(new IntakeSim());
           shooter = new Shooter(new ShooterSim());
+          autos = new Autos(drivetrain, config);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -160,6 +159,7 @@ public class RobotContainer {
           climber = new Climber(new ClimberIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
+          autos = new Autos(drivetrain, config);
           break;
 
         case ROBOT_2024:
@@ -171,6 +171,7 @@ public class RobotContainer {
           climber = new Climber(new ClimberReal());
           intake = new Intake(new IntakeReal());
           shooter = new Shooter(new ShooterReal());
+          autos = new Autos(drivetrain, config);
           break;
 
         default:
@@ -181,6 +182,7 @@ public class RobotContainer {
           climber = new Climber(new ClimberIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
+          autos = new Autos(drivetrain, config);
           break;
       }
     }
@@ -231,8 +233,6 @@ public class RobotContainer {
    */
   public LoggedDashboardChooser<AutoCommand> getAutonomousChooser() {
 
-    Autos autos = new Autos(drivetrain);
-
     for (int i = 0; i < autos.autoCommands().length; i++) {
       if (i == 0) {
         // Do nothing command must be first in list.
@@ -255,7 +255,8 @@ public class RobotContainer {
     Shuffleboard.getTab("MAIN").add(autoChooser.getSendableChooser());
     return autoChooser;
   }
-  public void setPose(Pose2d pose){
+
+  public void setPose(Pose2d pose) {
     drivetrain.setPose(pose);
   }
 }
