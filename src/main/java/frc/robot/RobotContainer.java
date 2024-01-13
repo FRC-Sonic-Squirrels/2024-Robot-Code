@@ -32,10 +32,10 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeReal;
-import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.intakes.Intake;
+import frc.robot.subsystems.intakes.IntakeIO;
+import frc.robot.subsystems.intakes.IntakeReal;
+import frc.robot.subsystems.intakes.IntakeSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
@@ -88,8 +88,8 @@ public class RobotContainer {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
       vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
       arm = new Arm(new ArmIO() {});
-      climber = new Climber(new ClimberIO() {});        
-      intake = new Intake(new IntakeIO() {});    
+      climber = new Climber(new ClimberIO() {});
+      intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
 
     } else { // REAL and SIM robots HERE
@@ -136,8 +136,8 @@ public class RobotContainer {
 
           vision = new Vision(aprilTagLayout, drivetrain, visionModules);
           arm = new Arm(new ArmSim());
-          climber = new Climber(new ClimberSim());        
-          intake = new Intake(new IntakeSim());    
+          climber = new Climber(new ClimberSim());
+          intake = new Intake(new IntakeSim());
           shooter = new Shooter(new ShooterSim());
           break;
 
@@ -146,10 +146,10 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
-          arm = new Arm(new ArmIO(){});
-          climber = new Climber(new ClimberIO(){});        
-          intake = new Intake(new IntakeIO(){});    
-          shooter = new Shooter(new ShooterIO(){});
+          arm = new Arm(new ArmIO() {});
+          climber = new Climber(new ClimberIO() {});
+          intake = new Intake(new IntakeIO() {});
+          shooter = new Shooter(new ShooterIO() {});
           break;
 
         case ROBOT_2024:
@@ -158,8 +158,8 @@ public class RobotContainer {
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
           arm = new Arm(new ArmReal());
-          climber = new Climber(new ClimberReal());        
-          intake = new Intake(new IntakeReal());    
+          climber = new Climber(new ClimberReal());
+          intake = new Intake(new IntakeReal());
           shooter = new Shooter(new ShooterReal());
           break;
 
@@ -168,8 +168,8 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
           vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
-          climber = new Climber(new ClimberIO() {});        
-          intake = new Intake(new IntakeIO() {});    
+          climber = new Climber(new ClimberIO() {});
+          intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           break;
       }
