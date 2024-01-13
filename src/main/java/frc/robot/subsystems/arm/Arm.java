@@ -2,17 +2,17 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.intake.IntakeIO.IntakeIOInputs;
+import frc.robot.subsystems.arm.ArmIO.ArmIOInputs;
 
-public class Intake extends Command {
-  private final IntakeIO io;
-  private final IntakeIOInputs inputs = new IntakeIOInputs();
+public class Arm extends Command {
+  private final ArmIO io;
+  private final ArmIOInputs inputs = new ArmIOInputs();
 
-  /** Creates a new IntakeSubsystem. */
-  public Intake(IntakeIO io) {
+  /** Creates a new ArmSubsystem. */
+  public Arm(ArmIO io) {
     this.io = io;
     // Use addRequirements() here to declare subsystem dependencies.
   }

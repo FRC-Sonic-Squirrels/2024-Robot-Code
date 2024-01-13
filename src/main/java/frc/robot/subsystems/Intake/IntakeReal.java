@@ -1,8 +1,8 @@
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.intake;
 
-public class IntakeReal implements IntakeIO{
-    public IntakeReal() {}
+public class IntakeReal implements IntakeIO {
+  public IntakeReal() {}
 
-    @Override
-    public void updateInputs(IntakeIOInputs inputs) {}
+  @Override
+  public void updateInputs(IntakeIOInputs inputs) {}
 }

@@ -24,6 +24,22 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.commands.DrivetrainDefaultTeleopDrive;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmReal;
+import frc.robot.subsystems.arm.ArmSim;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberReal;
+import frc.robot.subsystems.climber.ClimberSim;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeReal;
+import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterReal;
+import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
@@ -42,6 +58,10 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
   private final Drivetrain drivetrain;
   private final Vision vision;
+  private final Arm arm;
+  private final Climber climber;
+  private final Intake intake;
+  private final Shooter shooter;
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -67,12 +87,20 @@ public class RobotContainer {
     if (mode == Mode.REPLAY) {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
       vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+      arm = new Arm(new ArmIO() {});
+      climber = new Climber(new ClimberIO() {});        
+      intake = new Intake(new IntakeIO() {});    
+      shooter = new Shooter(new ShooterIO() {});
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_DEFAULT:
           drivetrain = null;
           vision = null;
+          arm = null;
+          climber = null;
+          intake = null;
+          shooter = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -107,6 +135,10 @@ public class RobotContainer {
           };
 
           vision = new Vision(aprilTagLayout, drivetrain, visionModules);
+          arm = new Arm(new ArmSim());
+          climber = new Climber(new ClimberSim());        
+          intake = new Intake(new IntakeSim());    
+          shooter = new Shooter(new ShooterSim());
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -114,12 +146,31 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          arm = new Arm(new ArmIO(){});
+          climber = new Climber(new ClimberIO(){});        
+          intake = new Intake(new IntakeIO(){});    
+          shooter = new Shooter(new ShooterIO(){});
+          break;
+
+        case ROBOT_2024:
+          drivetrain =
+              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+
+          vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          arm = new Arm(new ArmReal());
+          climber = new Climber(new ClimberReal());        
+          intake = new Intake(new IntakeReal());    
+          shooter = new Shooter(new ShooterReal());
           break;
 
         default:
           drivetrain =
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
           vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+          arm = new Arm(new ArmIO() {});
+          climber = new Climber(new ClimberIO() {});        
+          intake = new Intake(new IntakeIO() {});    
+          shooter = new Shooter(new ShooterIO() {});
           break;
       }
     }
