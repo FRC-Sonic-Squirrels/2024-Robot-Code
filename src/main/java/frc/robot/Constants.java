@@ -19,6 +19,7 @@ import frc.lib.team6328.Alert.AlertType;
 import frc.robot.configs.ExampleRobotConfig;
 import frc.robot.configs.RobotConfig;
 import frc.robot.configs.RobotConfig2023Rober;
+import frc.robot.configs.RobotConfig2024;
 import frc.robot.configs.SimulatorRobotConfig;
 import java.util.function.Supplier;
 
@@ -33,7 +34,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2023_RETIRED_ROBER;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -72,7 +73,8 @@ public final class Constants {
       // by only creating the specific config object coresponding to the robot type
       ROBOT_DEFAULT(() -> new ExampleRobotConfig()),
       ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
-      ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober());
+      ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
+      ROBOT_2024(() -> new RobotConfig2024());
 
       public Supplier<RobotConfig> config;
 
