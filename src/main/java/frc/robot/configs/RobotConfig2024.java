@@ -19,6 +19,8 @@ public class RobotConfig2024 extends RobotConfig {
 
   private static final boolean PHOENIX_PRO_LICENSE = true;
 
+  // TODO: ----- !IMPORTANT! FILL IN ALL VALUES !IMPORTANT! -----
+
   // ------------ SWERVE ---------------------
   private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 

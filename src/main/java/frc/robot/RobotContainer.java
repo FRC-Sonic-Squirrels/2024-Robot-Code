@@ -88,6 +88,7 @@ public class RobotContainer {
 
   private LoggedDashboardChooser<AutoCommand> autoChooser =
       new LoggedDashboardChooser<>("Auto Routine");
+  private Autos autos;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -131,6 +132,7 @@ public class RobotContainer {
           wrist = null;
           endEffector = null;
           limelight = null;
+          autos = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -172,6 +174,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           limelight = new Limelight(new LimelightIOReal(), drivetrain::getRawOdometryPose);
+          autos = new Autos(drivetrain, config);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -186,6 +189,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          autos = new Autos(drivetrain, config);
           break;
 
         case ROBOT_2024:
@@ -200,6 +204,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+          autos = new Autos(drivetrain, config);
           break;
 
         default:
@@ -213,6 +218,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          autos = new Autos(drivetrain, config);
           break;
       }
     }
@@ -280,8 +286,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public LoggedDashboardChooser<AutoCommand> getAutonomousChooser() {
-
-    Autos autos = new Autos(drivetrain);
 
     for (int i = 0; i < autos.autoCommands().length; i++) {
       if (i == 0) {
