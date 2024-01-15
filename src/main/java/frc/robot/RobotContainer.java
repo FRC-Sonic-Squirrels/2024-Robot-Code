@@ -35,6 +35,10 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.endEffector.EndEffectorIO;
+import frc.robot.subsystems.endEffector.EndEffectorReal;
+import frc.robot.subsystems.endEffector.EndEffectorSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
@@ -49,6 +53,10 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
+import frc.robot.subsystems.wrist.Wrist;
+import frc.robot.subsystems.wrist.WristIO;
+import frc.robot.subsystems.wrist.WristReal;
+import frc.robot.subsystems.wrist.WristSim;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -65,6 +73,8 @@ public class RobotContainer {
   private final Climber climber;
   private final Intake intake;
   private final Shooter shooter;
+  private final Wrist wrist;
+  private final EndEffector endEffector;
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -94,6 +104,8 @@ public class RobotContainer {
       climber = new Climber(new ClimberIO() {});
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
+      wrist = new Wrist(new WristIO() {});
+      endEffector = new EndEffector(new EndEffectorIO() {});
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -104,6 +116,8 @@ public class RobotContainer {
           climber = null;
           intake = null;
           shooter = null;
+          wrist = null;
+          endEffector = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -142,6 +156,8 @@ public class RobotContainer {
           climber = new Climber(new ClimberSim());
           intake = new Intake(new IntakeSim());
           shooter = new Shooter(new ShooterSim());
+          wrist = new Wrist(new WristSim());
+          endEffector = new EndEffector(new EndEffectorSim());
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -153,6 +169,8 @@ public class RobotContainer {
           climber = new Climber(new ClimberIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
+          wrist = new Wrist(new WristIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
           break;
 
         case ROBOT_2024:
@@ -164,6 +182,8 @@ public class RobotContainer {
           climber = new Climber(new ClimberReal());
           intake = new Intake(new IntakeReal());
           shooter = new Shooter(new ShooterReal());
+          wrist = new Wrist(new WristReal());
+          endEffector = new EndEffector(new EndEffectorReal());
           break;
 
         default:
@@ -174,6 +194,8 @@ public class RobotContainer {
           climber = new Climber(new ClimberIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
+          wrist = new Wrist(new WristIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
           break;
       }
     }
