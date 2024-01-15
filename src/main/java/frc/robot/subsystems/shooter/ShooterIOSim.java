@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter;
 
-public class ShooterReal implements ShooterIO {
-  public ShooterReal() {}
+public class ShooterIOSim implements ShooterIO {
+  public ShooterIOSim() {}
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {}

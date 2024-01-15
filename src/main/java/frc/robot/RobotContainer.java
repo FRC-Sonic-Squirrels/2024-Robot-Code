@@ -29,24 +29,24 @@ import frc.robot.commands.intake.IntakeDefaultIdleRPM;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
-import frc.robot.subsystems.arm.ArmReal;
-import frc.robot.subsystems.arm.ArmSim;
+import frc.robot.subsystems.arm.ArmIOReal;
+import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorReal;
-import frc.robot.subsystems.elevator.ElevatorSim;
+import frc.robot.subsystems.elevator.ElevatorIOReal;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
-import frc.robot.subsystems.endEffector.EndEffectorReal;
-import frc.robot.subsystems.endEffector.EndEffectorSim;
+import frc.robot.subsystems.endEffector.EndEffectorIOReal;
+import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeReal;
-import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.intake.IntakeIOReal;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterReal;
-import frc.robot.subsystems.shooter.ShooterSim;
+import frc.robot.subsystems.shooter.ShooterIOReal;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
@@ -55,8 +55,8 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIO;
-import frc.robot.subsystems.wrist.WristReal;
-import frc.robot.subsystems.wrist.WristSim;
+import frc.robot.subsystems.wrist.WristIOReal;
+import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -152,12 +152,12 @@ public class RobotContainer {
           };
 
           vision = new Vision(aprilTagLayout, drivetrain, visionModules);
-          arm = new Arm(new ArmSim());
-          elevator = new Elevator(new ElevatorSim());
-          intake = new Intake(new IntakeSim());
-          shooter = new Shooter(new ShooterSim());
-          wrist = new Wrist(new WristSim());
-          endEffector = new EndEffector(new EndEffectorSim());
+          arm = new Arm(new ArmIOSim());
+          elevator = new Elevator(new ElevatorIOSim());
+          intake = new Intake(new IntakeIOSim());
+          shooter = new Shooter(new ShooterIOSim());
+          wrist = new Wrist(new WristIOSim());
+          endEffector = new EndEffector(new EndEffectorIOSim());
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -178,12 +178,12 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
-          arm = new Arm(new ArmReal());
-          elevator = new Elevator(new ElevatorReal());
-          intake = new Intake(new IntakeReal());
-          shooter = new Shooter(new ShooterReal());
-          wrist = new Wrist(new WristReal());
-          endEffector = new EndEffector(new EndEffectorReal());
+          arm = new Arm(new ArmIOReal());
+          elevator = new Elevator(new ElevatorIOReal());
+          intake = new Intake(new IntakeIOReal());
+          shooter = new Shooter(new ShooterIOReal());
+          wrist = new Wrist(new WristIOReal());
+          endEffector = new EndEffector(new EndEffectorIOReal());
           break;
 
         default:

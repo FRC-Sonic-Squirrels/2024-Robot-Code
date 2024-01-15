@@ -6,12 +6,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 
-public class IntakeReal implements IntakeIO {
+public class IntakeIOReal implements IntakeIO {
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private TalonFX motor = new TalonFX(Constants.CanIDs.INTAKE_CAN_ID);
 
-  public IntakeReal() {
+  public IntakeIOReal() {
 
     motor.setInverted(false);
     motor.setNeutralMode(NeutralModeValue.Brake);

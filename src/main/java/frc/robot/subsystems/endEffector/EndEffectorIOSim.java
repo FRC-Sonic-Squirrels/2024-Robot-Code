@@ -1,7 +1,7 @@
 package frc.robot.subsystems.endEffector;
 
-public class EndEffectorSim implements EndEffectorIO {
-  public EndEffectorSim() {}
+public class EndEffectorIOSim implements EndEffectorIO {
+  public EndEffectorIOSim() {}
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {}
