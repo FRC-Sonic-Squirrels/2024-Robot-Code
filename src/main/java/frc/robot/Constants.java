@@ -89,4 +89,29 @@ public final class Constants {
       SIM
     }
   }
+
+  public class MotorConstants {
+    public static final double KRAKEN_MAX_RPM = 6000.0;
+  }
+
+  public class IntakeConstants {
+    public static final double INTAKE_IDLE_RPM = 5000.0;
+
+    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
+    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
+    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
+    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
+  }
+
+  public class CanIDs {
+    // TODO: get actual can ids
+    public static final int INTAKE_CAN_ID = 0;
+    public static final int SHOOTER_LEAD_CAN_ID = 1;
+    public static final int SHOOTER_FOLLOW_CAN_ID = 2;
+    public static final int ARM_CAN_ID = 3;
+    public static final int ELEVATOR_LEAD_CAN_ID = 4;
+    public static final int ELEVATOR_FOLLOW_CAN_ID = 5;
+    public static final int END_EFFECTOR_CAN_ID = 6;
+    public static final int WRIST_CAN_ID = 7;
+  }
 }

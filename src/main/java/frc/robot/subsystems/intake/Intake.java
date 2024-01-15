@@ -4,36 +4,40 @@
 
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeIO.IntakeIOInputs;
+import org.littletonrobotics.junction.Logger;
 
-public class Intake extends Command {
+public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputs inputs = new IntakeIOInputs();
 
-  /** Creates a new IntakeSubsystem. */
+  /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
+  public void periodic() {
+    // This method will be called once per scheduler run
     io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
   }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
+  public double getCurrentDraw() {
+    return inputs.currentAmps;
+  }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+  public double getRPM() {
+    return inputs.velocityRPM;
+  }
+
+  public void setTargetRPM(double target) {
+    io.setPercentOut(target / Constants.MotorConstants.KRAKEN_MAX_RPM);
+  }
+
+  public void setPercentOut(double percent) {
+    io.setPercentOut(percent);
   }
 }

@@ -20,9 +20,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.commands.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.intake.EjectGamepiece;
+import frc.robot.commands.intake.IntakeDefaultIdleRPM;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -182,6 +185,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
+    intake.setDefaultCommand(new IntakeDefaultIdleRPM(intake));
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -212,7 +216,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -222,5 +228,15 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // return autoChooser.get();
     return new InstantCommand();
+  }
+
+  public double[] getCurrentDraws() {
+    double[] current =
+        new double[] {
+          intake.getCurrentDraw(),
+        };
+
+    current = ArrayUtil.concatWithArrayCopy(current, drivetrain.getCurrentDrawAmps());
+    return current;
   }
 }
