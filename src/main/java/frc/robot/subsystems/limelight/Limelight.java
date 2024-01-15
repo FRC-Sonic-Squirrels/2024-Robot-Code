@@ -52,10 +52,14 @@ public class Limelight extends SubsystemBase {
     // closestGamepiece.pose = new Pose2d(1.47, 0.88, new Rotation2d(0));
 
     if (inputs.validTarget) {
+      rawGamepieceData = new RawGamepieceData[results.targetingResults.targets_Detector.length];
+      processedGamepieceData =
+          new ProcessedGamepieceData[results.targetingResults.targets_Detector.length];
       for (int index = 0; index < results.targetingResults.targets_Detector.length; index++) {
-        resultsToRawGamepiecData(
-            results.targetingResults.targets_Detector[index],
-            results.targetingResults.timestamp_RIOFPGA_capture);
+        rawGamepieceData[index] =
+            resultsToRawGamepiecData(
+                results.targetingResults.targets_Detector[index],
+                results.targetingResults.timestamp_RIOFPGA_capture);
         processedGamepieceData[index] = processGamepieceData(rawGamepieceData[index]);
         if (index == 0) {
           closestGamepiece = processedGamepieceData[0];
