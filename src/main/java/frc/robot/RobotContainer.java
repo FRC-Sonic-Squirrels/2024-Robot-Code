@@ -31,10 +31,10 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmReal;
 import frc.robot.subsystems.arm.ArmSim;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberReal;
-import frc.robot.subsystems.climber.ClimberSim;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorReal;
+import frc.robot.subsystems.elevator.ElevatorSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
 import frc.robot.subsystems.endEffector.EndEffectorReal;
@@ -70,7 +70,7 @@ public class RobotContainer {
   private final Drivetrain drivetrain;
   private final Vision vision;
   private final Arm arm;
-  private final Climber climber;
+  private final Elevator elevator;
   private final Intake intake;
   private final Shooter shooter;
   private final Wrist wrist;
@@ -101,7 +101,7 @@ public class RobotContainer {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
       vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
       arm = new Arm(new ArmIO() {});
-      climber = new Climber(new ClimberIO() {});
+      elevator = new Elevator(new ElevatorIO() {});
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
       wrist = new Wrist(new WristIO() {});
@@ -113,7 +113,7 @@ public class RobotContainer {
           drivetrain = null;
           vision = null;
           arm = null;
-          climber = null;
+          elevator = null;
           intake = null;
           shooter = null;
           wrist = null;
@@ -153,7 +153,7 @@ public class RobotContainer {
 
           vision = new Vision(aprilTagLayout, drivetrain, visionModules);
           arm = new Arm(new ArmSim());
-          climber = new Climber(new ClimberSim());
+          elevator = new Elevator(new ElevatorSim());
           intake = new Intake(new IntakeSim());
           shooter = new Shooter(new ShooterSim());
           wrist = new Wrist(new WristSim());
@@ -166,7 +166,7 @@ public class RobotContainer {
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
           arm = new Arm(new ArmIO() {});
-          climber = new Climber(new ClimberIO() {});
+          elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
@@ -179,7 +179,7 @@ public class RobotContainer {
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
           arm = new Arm(new ArmReal());
-          climber = new Climber(new ClimberReal());
+          elevator = new Elevator(new ElevatorReal());
           intake = new Intake(new IntakeReal());
           shooter = new Shooter(new ShooterReal());
           wrist = new Wrist(new WristReal());
@@ -191,7 +191,7 @@ public class RobotContainer {
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
           vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
-          climber = new Climber(new ClimberIO() {});
+          elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
