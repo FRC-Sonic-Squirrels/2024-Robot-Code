@@ -144,6 +144,14 @@ public abstract class RobotConfig {
 
   public abstract CurrentLimitsConfigs getSteerTalonCurrentLimitConfig();
 
+  // -------- LIMELIGHT --------
+
+  // public abstract Pose3d getlimelightPose();
+
+  // public abstract double getNoteInnerRadiusMeters();
+
+  // public abstract double getNoteOuterRadiusMeters();
+
   // --------- Build IO layers for subsystems -------------
 
   // return IO layers needed for subsystems
