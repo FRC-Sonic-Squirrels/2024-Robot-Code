@@ -18,6 +18,8 @@ import java.util.Optional;
 
 public class Autos {
 
+  // FIXME: fill in drive characterization for choreo and regenerate paths
+
   private Drivetrain drivetrain;
   private RobotConfig config;
 
@@ -37,8 +39,17 @@ public class Autos {
         Choreo.getTrajectory("testAuto").getInitialPose());
   }
 
+  // TODO: decide on better names for autos
+
+  private AutoCommand auto1() {
+    return new AutoCommand(
+        "Auto1",
+        generateFollowPathCommand("Auto1"),
+        Choreo.getTrajectory("Auto1").getInitialPose());
+  }
+
   public AutoCommand[] autoCommands() {
-    return new AutoCommand[] {doNothing(), testAuto()};
+    return new AutoCommand[] {doNothing(), testAuto(), auto1()};
   }
 
   private Command generateFollowPathCommand(String name, AutoEvent... events) {
