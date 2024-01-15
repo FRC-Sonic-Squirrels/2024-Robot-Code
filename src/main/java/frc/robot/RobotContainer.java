@@ -43,6 +43,9 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.limelight.Limelight;
+import frc.robot.subsystems.limelight.LimelightIO;
+import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOReal;
@@ -75,6 +78,7 @@ public class RobotContainer {
   private final Shooter shooter;
   private final Wrist wrist;
   private final EndEffector endEffector;
+  private final Limelight limelight;
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -106,6 +110,7 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIO() {});
       wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
+      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -118,6 +123,7 @@ public class RobotContainer {
           shooter = null;
           wrist = null;
           endEffector = null;
+          limelight = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -158,6 +164,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -171,6 +178,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
           break;
 
         case ROBOT_2024:
@@ -184,6 +192,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOReal());
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
           break;
 
         default:
@@ -196,6 +205,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
           break;
       }
     }
