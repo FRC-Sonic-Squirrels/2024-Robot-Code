@@ -5,12 +5,11 @@
 package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.wrist.WristIO.WristIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class Wrist extends SubsystemBase {
   private final WristIO io;
-  private final WristIOInputs inputs = new WristIOInputs();
+  private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
 
   /** Creates a new WristSubsystem. */
   public Wrist(WristIO io) {
