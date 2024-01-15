@@ -1,7 +1,7 @@
 package frc.robot.subsystems.arm;
 
-public class ArmSim implements ArmIO {
-  public ArmSim() {}
+public class ArmIOSim implements ArmIO {
+  public ArmIOSim() {}
 
   @Override
   public void updateInputs(ArmIOInputs inputs) {}

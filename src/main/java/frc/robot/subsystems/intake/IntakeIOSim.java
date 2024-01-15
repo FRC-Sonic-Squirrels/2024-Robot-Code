@@ -5,12 +5,12 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 
-public class IntakeSim implements IntakeIO {
+public class IntakeIOSim implements IntakeIO {
 
   private TalonFX intakeMotor = new TalonFX(0);
   private TalonFXSimState intakeMotorSim = intakeMotor.getSimState();
 
-  public IntakeSim() {}
+  public IntakeIOSim() {}
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {

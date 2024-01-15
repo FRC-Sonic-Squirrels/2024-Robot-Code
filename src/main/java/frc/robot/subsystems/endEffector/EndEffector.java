@@ -5,12 +5,11 @@
 package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.endEffector.EndEffectorIO.EndEffectorIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
-  private final EndEffectorIOInputs inputs = new EndEffectorIOInputs();
+  private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {

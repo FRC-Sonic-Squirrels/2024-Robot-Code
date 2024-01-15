@@ -1,7 +1,7 @@
 package frc.robot.subsystems.wrist;
 
-public class WristSim implements WristIO {
-  public WristSim() {}
+public class WristIOSim implements WristIO {
+  public WristIOSim() {}
 
   @Override
   public void updateInputs(WristIOInputs inputs) {}

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.endEffector;
 
-public class EndEffectorReal implements EndEffectorIO {
-  public EndEffectorReal() {}
+public class EndEffectorIOReal implements EndEffectorIO {
+  public EndEffectorIOReal() {}
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {}

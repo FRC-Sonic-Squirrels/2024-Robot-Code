@@ -1,17 +1,23 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 
-public class IntakeReal implements IntakeIO {
+public class IntakeIOReal implements IntakeIO {
   private TalonFXConfiguration config = new TalonFXConfiguration();
   private CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private TalonFX motor = new TalonFX(Constants.CanIDs.INTAKE_CAN_ID);
 
-  public IntakeReal() {
+  private StatusSignal<Double> currentAmps;
+  private StatusSignal<Double> velocityRPS;
+  private StatusSignal<Double> deviceTemp;
+
+  public IntakeIOReal() {
 
     motor.setInverted(false);
     motor.setNeutralMode(NeutralModeValue.Brake);
@@ -25,13 +31,19 @@ public class IntakeReal implements IntakeIO {
     config.CurrentLimits = currentLimitConfig;
 
     motor.getConfigurator().apply(config);
+
+    currentAmps = motor.getStatorCurrent();
+    velocityRPS = motor.getVelocity();
+    deviceTemp = motor.getDeviceTemp();
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    inputs.currentAmps = motor.getStatorCurrent().getValueAsDouble();
-    inputs.velocityRPM = motor.getVelocity().getValueAsDouble() / 60.0;
-    inputs.deviceTemp = motor.getDeviceTemp().getValueAsDouble();
+    BaseStatusSignal.refreshAll(currentAmps, velocityRPS, deviceTemp);
+
+    inputs.currentAmps = currentAmps.getValueAsDouble();
+    inputs.velocityRPM = velocityRPS.getValueAsDouble() / 60.0;
+    inputs.deviceTemp = deviceTemp.getValueAsDouble();
   }
 
   @Override

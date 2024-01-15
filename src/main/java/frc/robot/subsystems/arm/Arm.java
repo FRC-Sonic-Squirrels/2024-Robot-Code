@@ -5,12 +5,11 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.arm.ArmIO.ArmIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
   private final ArmIO io;
-  private final ArmIOInputs inputs = new ArmIOInputs();
+  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
 
   /** Creates a new ArmSubsystem. */
   public Arm(ArmIO io) {
