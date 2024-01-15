@@ -4,36 +4,22 @@
 
 package frc.robot.subsystems.arm;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.arm.ArmIO.ArmIOInputs;
+import org.littletonrobotics.junction.Logger;
 
-public class Arm extends Command {
+public class Arm extends SubsystemBase {
   private final ArmIO io;
   private final ArmIOInputs inputs = new ArmIOInputs();
 
   /** Creates a new ArmSubsystem. */
   public Arm(ArmIO io) {
     this.io = io;
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
+  public void periodic() {
     io.updateInputs(inputs);
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+    Logger.processInputs("Arm", inputs);
   }
 }

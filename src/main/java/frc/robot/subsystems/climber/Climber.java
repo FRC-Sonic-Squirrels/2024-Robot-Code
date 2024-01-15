@@ -4,36 +4,22 @@
 
 package frc.robot.subsystems.climber;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climber.ClimberIO.ClimberIOInputs;
+import org.littletonrobotics.junction.Logger;
 
-public class Climber extends Command {
+public class Climber extends SubsystemBase {
   private final ClimberIO io;
   private final ClimberIOInputs inputs = new ClimberIOInputs();
 
   /** Creates a new ClimberSubsystem. */
   public Climber(ClimberIO io) {
     this.io = io;
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
+  public void periodic() {
     io.updateInputs(inputs);
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+    Logger.processInputs("Climber", inputs);
   }
 }

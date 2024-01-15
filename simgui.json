@@ -1,0 +1,12 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d"
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  }
+}

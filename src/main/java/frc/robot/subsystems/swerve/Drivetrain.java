@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ArrayUtil;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.configs.RobotConfig;
@@ -267,5 +268,13 @@ public class Drivetrain extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return config.getRobotMaxAngularVelocity();
+  }
+
+  public double[] getCurrentDrawAmps() {
+    double[] current = new double[] {0};
+    for (int i = 0; i < 4; i++) {
+      current = ArrayUtil.concatWithArrayCopy(current, modules[i].getCurrentAmps());
+    }
+    return current;
   }
 }

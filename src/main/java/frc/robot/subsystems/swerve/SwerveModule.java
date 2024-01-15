@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.lib.team2930.ArrayUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
 import org.littletonrobotics.junction.Logger;
@@ -232,5 +233,9 @@ public class SwerveModule {
   /** Returns the drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
     return inputs.driveVelocityRadPerSec;
+  }
+
+  public double[] getCurrentAmps() {
+    return ArrayUtil.concatWithArrayCopy(inputs.driveCurrentAmps, inputs.turnCurrentAmps);
   }
 }
