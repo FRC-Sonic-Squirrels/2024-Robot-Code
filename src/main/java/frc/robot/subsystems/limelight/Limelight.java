@@ -31,7 +31,8 @@ public class Limelight extends SubsystemBase {
 
   private RawGamepieceData[] rawGamepieceData;
   private ProcessedGamepieceData[] processedGamepieceData;
-  private ProcessedGamepieceData closestGamepiece;
+  private ProcessedGamepieceData closestGamepiece =
+      new ProcessedGamepieceData(new Rotation2d(), new Rotation2d(), 0, new Pose2d(), 0, 0);
 
   private static ObjectMapper mapper;
   private LimelightResults results;
@@ -73,7 +74,11 @@ public class Limelight extends SubsystemBase {
       Logger.recordOutput("Limelight/ClosestGamepiece/distance", closestGamepiece.distance);
       Logger.recordOutput("Limelight/ClosestGamepiece/targetYaw", closestGamepiece.targetYaw);
       Logger.recordOutput("Limelight/ClosestGamepiece/targetPitch", closestGamepiece.targetPitch);
-      Logger.recordOutput("Limelight/ClosestGamepiece/pose", closestGamepiece.pose);
+      Logger.recordOutput(
+          "Limelight/ClosestGamepiece/pose",
+          robotPoseSupplier
+              .get()
+              .transformBy(new Transform2d(new Pose2d(), closestGamepiece.pose)));
       Logger.recordOutput("Limelight/ClosestGamepiece/confidence", closestGamepiece.confidence);
       Logger.recordOutput(
           "Limelight/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
@@ -161,10 +166,7 @@ public class Limelight extends SubsystemBase {
   }
 
   private Pose2d groundGamepiecePose(double distanceMeters, Rotation2d targetYaw) {
-    return robotPoseSupplier
-        .get()
-        .transformBy(
-            new Transform2d(new Translation2d(distanceMeters, targetYaw), new Rotation2d()));
+    return new Pose2d(new Translation2d(distanceMeters, targetYaw), new Rotation2d());
   }
 
   private RawGamepieceData resultsToRawGamepiecData(
