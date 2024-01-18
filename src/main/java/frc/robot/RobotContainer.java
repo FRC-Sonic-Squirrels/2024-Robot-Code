@@ -88,6 +88,7 @@ public class RobotContainer {
   private final LED led;
 
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
@@ -270,6 +271,9 @@ public class RobotContainer {
     //     new FeedForwardCharacterization(
     //         flywheel, flywheel::runCharacterizationVolts,
     // flywheel::getCharacterizationVelocity));
+
+    shuffleBoardLayouts =
+        new ShuffleBoardLayouts(arm, elevator, wrist, endEffector, intake, shooter, drivetrain);
 
     // Configure the button bindings
     configureButtonBindings();
