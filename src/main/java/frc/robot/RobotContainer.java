@@ -15,7 +15,6 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.commands.arm.ArmSetAngle;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultIdleRPM;
@@ -266,9 +264,6 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
-
-    controller.y().onTrue(new ArmSetAngle(arm, Rotation2d.fromDegrees(90)));
-    controller.b().onTrue(new ArmSetAngle(arm, Rotation2d.fromRadians(0)));
   }
 
   /**
