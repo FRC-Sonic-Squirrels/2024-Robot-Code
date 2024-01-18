@@ -119,6 +119,8 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("TIME/CTRE TIME", Utils.getCurrentTimeSeconds());
     Logger.recordOutput("TIME/FPGA TIME", Timer.getFPGATimestamp());
     Logger.recordOutput("TIME/REAL FPGA", Logger.getRealTimestamp());
+
+    robotContainer.updateVisualization();
   }
 
   /** This function is called once when the robot is disabled. */
