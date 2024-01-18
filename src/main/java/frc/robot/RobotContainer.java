@@ -101,6 +101,8 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
+  private final ShuffleBoardLayouts shuffleBoardLayouts;
+
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
   private final AutosManager autoManager;
@@ -285,6 +287,9 @@ public class RobotContainer {
     //     new FeedForwardCharacterization(
     //         flywheel, flywheel::runCharacterizationVolts,
     // flywheel::getCharacterizationVelocity));
+
+    shuffleBoardLayouts =
+        new ShuffleBoardLayouts(arm, elevator, wrist, endEffector, intake, shooter, drivetrain);
 
     // Configure the button bindings
     configureButtonBindings();
