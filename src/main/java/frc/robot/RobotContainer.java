@@ -86,6 +86,7 @@ public class RobotContainer {
   private final Limelight limelight;
 
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -249,6 +250,9 @@ public class RobotContainer {
     //     new FeedForwardCharacterization(
     //         flywheel, flywheel::runCharacterizationVolts,
     // flywheel::getCharacterizationVelocity));
+
+    shuffleBoardLayouts =
+        new ShuffleBoardLayouts(arm, elevator, wrist, endEffector, intake, shooter, drivetrain);
 
     // Configure the button bindings
     configureButtonBindings();
