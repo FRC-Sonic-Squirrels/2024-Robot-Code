@@ -7,16 +7,21 @@ package frc.robot.commands.arm;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.arm.Arm;
+import java.util.function.Supplier;
 
 public class ArmSetAngle extends Command {
   /** Creates a new ArmSetAngle. */
   Arm arm;
 
-  Rotation2d angle;
+  Supplier<Rotation2d> angleSupplier;
 
   public ArmSetAngle(Arm arm, Rotation2d angle) {
+    this(arm, () -> angle);
+  }
+
+  public ArmSetAngle(Arm arm, Supplier<Rotation2d> angleSupplier) {
     this.arm = arm;
-    this.angle = angle;
+    this.angleSupplier = angleSupplier;
 
     addRequirements(arm);
   }
@@ -24,20 +29,12 @@ public class ArmSetAngle extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    arm.setAngle(angle);
+    arm.setAngle(angleSupplier.get());
   }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {}
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return arm.isAtTargetAngle();
   }
 }
