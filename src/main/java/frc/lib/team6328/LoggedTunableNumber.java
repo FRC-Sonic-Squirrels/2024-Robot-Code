@@ -37,7 +37,7 @@ public class LoggedTunableNumber {
    *
    * @param dashboardKey Key on dashboard
    */
-  private LoggedTunableNumber(String dashboardKey) {
+  public LoggedTunableNumber(String dashboardKey) {
     this.key = tableKey + "/" + dashboardKey;
   }
 
