@@ -35,6 +35,7 @@
   "java.test.defaultConfig": "WPIlibUnitTests",
   "cSpell.words": [
     "CTRE",
-    "ODOMETRY"
+    "ODOMETRY",
+    "Setpoint"
   ]
 }
