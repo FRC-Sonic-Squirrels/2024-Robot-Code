@@ -154,7 +154,7 @@ public class Vision extends SubsystemBase {
     PhotonPipelineResult cameraResult;
     double currentResultTimeStamp;
 
-    Pose2d prevEstimatedRobotPose = drivetrain.getPose();
+    Pose2d prevEstimatedRobotPose = drivetrain.getPoseEstimatorPose();
 
     Pose3d newCalculatedRobotPose;
 

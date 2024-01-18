@@ -5,6 +5,7 @@
 package frc.robot.commands.drive;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,22 +21,25 @@ public class DriveToGamepiece extends Command {
 
   private final Drivetrain drive;
 
+  private Supplier<Boolean> gamepieceIntaked;
+
   private LoggedTunableNumber rotationKp =
       new LoggedTunableNumber("DriveToGamepiece/rotationKp", 4.9);
 
-  private LoggedTunableNumber xKp = new LoggedTunableNumber("DriveToGamepiece/xKp", 3.2);
-  private LoggedTunableNumber yKp = new LoggedTunableNumber("DriveToGamepiece/yKp", 3.2);
+  private LoggedTunableNumber Kp = new LoggedTunableNumber("DriveToGamepiece/Kp", 3.2);
+  private LoggedTunableNumber xKpSourceArea =
+      new LoggedTunableNumber("DriveToGamepiece/xKpSourceArea", 5.0);
+  private LoggedTunableNumber yKpSourceArea =
+      new LoggedTunableNumber("DriveToGamepiece/yKpSourceArea", 5.0);
 
-  private LoggedTunableNumber xKi = new LoggedTunableNumber("DriveToGamepiece/xKi", 0.0);
-  private LoggedTunableNumber yKi = new LoggedTunableNumber("DriveToGamepiece/yKi", 0.0);
+  private LoggedTunableNumber Ki = new LoggedTunableNumber("DriveToGamepiece/Ki", 0.0);
 
-  private LoggedTunableNumber xKd = new LoggedTunableNumber("DriveToGamepiece/xKd", 0);
-  private LoggedTunableNumber yKd = new LoggedTunableNumber("DriveToGamepiece/yKd", 0);
+  private LoggedTunableNumber Kd = new LoggedTunableNumber("DriveToGamepiece/Kd", 0.0);
 
   private PIDController rotationController = new PIDController(rotationKp.get(), 0, 0);
 
-  private PIDController xController = new PIDController(xKp.get(), xKi.get(), xKd.get());
-  private PIDController yController = new PIDController(yKp.get(), yKi.get(), yKd.get());
+  private PIDController xController = new PIDController(Kp.get(), Ki.get(), Kd.get());
+  private PIDController yController = new PIDController(Kp.get(), Ki.get(), Kd.get());
 
   private double rotationalErrorDegrees;
   private double xVel;
@@ -45,15 +49,22 @@ public class DriveToGamepiece extends Command {
       new LoggedTunableNumber("DriveToGamepiece/allowedRotationalErrorDegrees", 20);
 
   private LoggedTunableNumber advancedMode =
-      new LoggedTunableNumber("DriveToGamepiece/advancedMode/doAdvancedMotion", 0);
+      new LoggedTunableNumber("DriveToGamepiece/advancedMode/doAdvancedMotion", 1);
 
   private double rotVelCorrection = 0;
+  private Rotation2d gamepieceDirection = new Rotation2d();
+
+  private Rotation2d sourceAngle = new Rotation2d();
 
   /** Drives robot to gamepiece, intended for ground gamepieces only */
-  public DriveToGamepiece(Supplier<ProcessedGamepieceData> targetGamepiece, Drivetrain drive) {
+  public DriveToGamepiece(
+      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Drivetrain drive,
+      Supplier<Boolean> gamepieceIntaked) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.targetGamepiece = targetGamepiece;
     this.drive = drive;
+    this.gamepieceIntaked = gamepieceIntaked;
 
     addRequirements(drive);
   }
@@ -78,42 +89,64 @@ public class DriveToGamepiece extends Command {
     rotationalErrorDegrees =
         Math.abs(
             targetGamepiece.get().targetYaw.getDegrees()
-                - 180.0
-                - drive.getPose().getRotation().getDegrees());
+                // - 180.0
+                - drive.getRawOdometryPose().getRotation().getDegrees());
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
 
-    if (advancedMode.get() == 0) {
-      xVel =
-          rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-              ? xController.calculate(0.0, targetGamepiece.get().pose.getX())
-              : 0.0;
-      yVel =
-          rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-              ? yController.calculate(0.0, targetGamepiece.get().pose.getY())
-              : 0.0;
+    if (isInSourceArea(targetGamepiece.get().globalPose)) {
+
+      sourceAngle =
+          new Rotation2d(
+              isInBlueSourceArea(targetGamepiece.get().globalPose)
+                  ? -1.0417663596685425
+                  : -2.103952069121958);
+
+      gamepieceDirection =
+          new Rotation2d(targetGamepiece.get().pose.getX(), targetGamepiece.get().pose.getY());
+
+      xVel = xKpSourceArea.get() * Math.cos(gamepieceDirection.getRadians());
+      yVel = yKpSourceArea.get() * Math.sin(gamepieceDirection.getRadians());
+
+      rotVel =
+          rotationController.calculate(
+              drive.getRawOdometryPose().getRotation().getRadians(), sourceAngle.getRadians());
     } else {
-      xVel =
-          xController.calculate(0.0, targetGamepiece.get().pose.getX())
-              / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
-      yVel =
-          yController.calculate(0.0, targetGamepiece.get().pose.getY())
-              / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
+      if (advancedMode.get() == 0) {
+
+        xVel =
+            rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
+                ? xController.calculate(0.0, targetGamepiece.get().pose.getX())
+                : 0.0;
+        yVel =
+            rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
+                ? yController.calculate(0.0, targetGamepiece.get().pose.getY())
+                : 0.0;
+      } else {
+        xVel =
+            xController.calculate(0.0, targetGamepiece.get().pose.getX())
+                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
+        yVel =
+            yController.calculate(0.0, targetGamepiece.get().pose.getY())
+                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
+      }
+      // rotVelCorrection =
+      //     Math.hypot(xVel, yVel)
+      //         * Math.cos(
+      //             targetGamepiece.get().targetYaw.getRadians()
+      //                 - new Rotation2d(xVel, yVel).getRadians()
+      //                 - Math.PI / 2)
+      //         / targetGamepiece.get().distance;
+
+      rotVel =
+          rotationController.calculate(
+              drive.getRawOdometryPose().getRotation().getRadians(),
+              targetGamepiece.get().targetYaw.getRadians());
     }
 
-    rotVel =
-        rotationController.calculate(
-            drive.getPose().getRotation().getRadians(),
-            targetGamepiece.get().targetYaw.getRadians());
-
-    rotVelCorrection =
-        Math.hypot(xVel, yVel)
-            * Math.cos(
-                targetGamepiece.get().targetYaw.getRadians()
-                    - new Rotation2d(xVel, yVel).getRadians()
-                    - Math.PI / 2)
-            / targetGamepiece.get().distance;
-
-    drive.runVelocity(new ChassisSpeeds(xVel, yVel, rotVel));
+    // TODO: ---------------change to estimated pose if using this IRL------------------
+    drive.runVelocity(
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xVel, yVel, rotVel, drive.getRawOdometryPose().getRotation()));
 
     Logger.recordOutput("DriveToGamepiece/rotationalErrorDegrees", rotationalErrorDegrees);
     Logger.recordOutput("DriveToGamepiece/xVel", xVel);
@@ -133,6 +166,15 @@ public class DriveToGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return gamepieceIntaked.get();
+  }
+
+  private boolean isInSourceArea(Pose2d pose) {
+    return (pose.getX() >= 14.26539134979248 || pose.getX() <= 2.154930830001831)
+        && pose.getY() <= 1.803399920463562;
+  }
+
+  private boolean isInBlueSourceArea(Pose2d pose) {
+    return pose.getX() >= 14.26539134979248 && pose.getY() <= 1.803399920463562;
   }
 }

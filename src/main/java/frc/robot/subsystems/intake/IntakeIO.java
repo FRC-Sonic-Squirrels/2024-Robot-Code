@@ -9,6 +9,7 @@ public interface IntakeIO {
     public double velocityRPM = 0.0;
     public double currentAmps = 0.0;
     public double deviceTemp = 0.0;
+    public boolean beamBreak = false;
   }
 
   /** Updates the set of loggable inputs. */

@@ -39,4 +39,8 @@ public class Intake extends SubsystemBase {
   public void setPercentOut(double percent) {
     io.setPercentOut(percent);
   }
+
+  public Boolean getBeamBreak() {
+    return new Boolean(inputs.beamBreak);
+  }
 }

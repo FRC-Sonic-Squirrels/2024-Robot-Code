@@ -21,8 +21,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class RotateToGamepiece extends Command {
-  Supplier<ProcessedGamepieceData> targetGamepiece;
-  Drivetrain drive;
+  private Supplier<ProcessedGamepieceData> targetGamepiece;
+  private Drivetrain drive;
+  private Supplier<Boolean> gamepieceIntaked;
 
   private Rotation2d robotRotationOffset;
 
@@ -47,17 +48,23 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param limelight limelight subsystem
+   * @param targetGamepiece gamepiece to target
    * @param drive drivetrain subsystem
-   * @param gamepiece gamepiece to target
    * @return Command to lock rotation in direction of target gamepiece
    */
   public RotateToGamepiece(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
       Supplier<ProcessedGamepieceData> targetGamepiece,
-      Drivetrain drive) {
-    this(translationXSupplier, translationYSupplier, targetGamepiece, drive, new Rotation2d(0.0));
+      Drivetrain drive,
+      Supplier<Boolean> gamepieceIntaked) {
+    this(
+        translationXSupplier,
+        translationYSupplier,
+        targetGamepiece,
+        drive,
+        gamepieceIntaked,
+        new Rotation2d(0.0));
   }
 
   /**
@@ -65,9 +72,8 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param limelight limelight subsystem
+   * @param targetGamepiece gamepiece to target
    * @param drive drivetrain subsystem
-   * @param gamepiece gamepiece to target
    * @param robotRotationOffset rotation of robot you want facing gamepiece
    * @return Command to lock rotation in direction of target gamepiece
    */
@@ -76,12 +82,14 @@ public class RotateToGamepiece extends Command {
       DoubleSupplier translationYSupplier,
       Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
+      Supplier<Boolean> gamepieceIntaked,
       Rotation2d robotRotationOffset) {
     this(
         translationXSupplier,
         translationYSupplier,
         targetGamepiece,
         drive,
+        gamepieceIntaked,
         robotRotationOffset,
         () -> 0.0,
         0.0);
@@ -92,9 +100,8 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param limelight limelight subsystem
+   * @param targetGamepiece gamepiece to target
    * @param drive drivetrain subsystem
-   * @param gamepiece gamepiece to target
    * @param robotRotationOffset rotation of robot you want facing gamepiece
    * @param omegaSupplier controller rotation output
    * @return Command to lock rotation in direction of target gamepiece
@@ -104,6 +111,7 @@ public class RotateToGamepiece extends Command {
       DoubleSupplier translationYSupplier,
       Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
+      Supplier<Boolean> gamepieceIntaked,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier) {
     this(
@@ -111,6 +119,7 @@ public class RotateToGamepiece extends Command {
         translationYSupplier,
         targetGamepiece,
         drive,
+        gamepieceIntaked,
         robotRotationOffset,
         omegaSupplier,
         0.3);
@@ -129,9 +138,8 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param limelight limelight subsystem
+   * @param targetGamepiece gamepiece to target
    * @param drive drivetrain subsystem
-   * @param gamepiece gamepiece to target
    * @param robotRotationOffset rotation of robot you want facing gamepiece
    * @param omegaSupplier controller rotation output
    * @param driverInfluencePercent 0.0 (rotation is fully based on command) -> 1.0 (when
@@ -143,6 +151,7 @@ public class RotateToGamepiece extends Command {
       DoubleSupplier translationYSupplier,
       Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
+      Supplier<Boolean> gamepieceIntaked,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier,
       Double driverInfluencePercent) {
@@ -151,6 +160,7 @@ public class RotateToGamepiece extends Command {
     this.translationYSupplier = translationYSupplier;
     this.targetGamepiece = targetGamepiece;
     this.drive = drive;
+    this.gamepieceIntaked = gamepieceIntaked;
     this.robotRotationOffset = robotRotationOffset;
     this.omegaSupplier = omegaSupplier;
     this.driverInfluencePercent = driverInfluencePercent;
@@ -254,6 +264,6 @@ public class RotateToGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return gamepieceIntaked.get();
   }
 }

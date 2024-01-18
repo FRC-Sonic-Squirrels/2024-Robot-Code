@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -27,12 +26,13 @@ public class Limelight extends SubsystemBase {
   private final LimelightIO io;
   private final LimelightIOInputs inputs = new LimelightIOInputs();
 
-  private static Supplier<Pose2d> robotPoseSupplier;
+  private Supplier<Pose2d> robotPoseSupplier;
 
   private RawGamepieceData[] rawGamepieceData;
   private ProcessedGamepieceData[] processedGamepieceData;
   private ProcessedGamepieceData closestGamepiece =
-      new ProcessedGamepieceData(new Rotation2d(), new Rotation2d(), 0, new Pose2d(), 0, 0);
+      new ProcessedGamepieceData(
+          new Rotation2d(), new Rotation2d(), 0, new Pose2d(), new Pose2d(), 0, 0);
 
   private static ObjectMapper mapper;
   private LimelightResults results;
@@ -40,7 +40,7 @@ public class Limelight extends SubsystemBase {
   /** Creates a new Limelight. */
   public Limelight(LimelightIO io, Supplier<Pose2d> robotPose) {
     this.io = io;
-    Limelight.robotPoseSupplier = robotPose;
+    this.robotPoseSupplier = robotPose;
   }
 
   @Override
@@ -49,8 +49,21 @@ public class Limelight extends SubsystemBase {
     Logger.processInputs("Limelight", inputs);
     results = getLatestResults(inputs.json);
 
-    // uncomment if simming for target "gamepiece" at (1.47, 0.88)
-    // closestGamepiece.pose = new Pose2d(1.47, 0.88, new Rotation2d(0));
+    // uncomment if simming for target gamepiece
+    // center field:
+    // Translation2d simPose = new Translation2d(8.288247108459473, 2.3854970932006836);
+    // blue source:
+    // Translation2d simPose = new Translation2d(15.472177505493164, 0.7243906259536743);
+    // red source:
+    // Translation2d simPose = new Translation2d(1.1043164730072021, 0.7243906259536743);
+
+    // closestGamepiece.pose =
+    //     new Pose2d(
+    //         simPose.getX() - robotPoseSupplier.get().getX(),
+    //         simPose.getY() - robotPoseSupplier.get().getY(),
+    //         new Rotation2d(0));
+
+    // closestGamepiece.globalPose = new Pose2d(simPose.getX(), simPose.getY(), new Rotation2d(0));
 
     if (inputs.validTarget) {
       rawGamepieceData = new RawGamepieceData[results.targetingResults.targets_Detector.length];
@@ -71,30 +84,26 @@ public class Limelight extends SubsystemBase {
         }
         logGamepieceData(rawGamepieceData[index], processedGamepieceData[index], index);
       }
-      Logger.recordOutput("Limelight/ClosestGamepiece/distance", closestGamepiece.distance);
-      Logger.recordOutput("Limelight/ClosestGamepiece/targetYaw", closestGamepiece.targetYaw);
-      Logger.recordOutput("Limelight/ClosestGamepiece/targetPitch", closestGamepiece.targetPitch);
-      Logger.recordOutput(
-          "Limelight/ClosestGamepiece/pose",
-          robotPoseSupplier
-              .get()
-              .transformBy(new Transform2d(new Pose2d(), closestGamepiece.pose)));
-      Logger.recordOutput("Limelight/ClosestGamepiece/confidence", closestGamepiece.confidence);
-      Logger.recordOutput(
-          "Limelight/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
     } else {
       closestGamepiece.targetYaw =
-          new Rotation2d(
-              closestGamepiece.pose.getX() - robotPoseSupplier.get().getX(),
-              closestGamepiece.pose.getY() - robotPoseSupplier.get().getY());
+          new Rotation2d(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
       closestGamepiece.distance =
-          Math.hypot(
-              robotPoseSupplier.get().getX() - closestGamepiece.pose.getX(),
-              robotPoseSupplier.get().getY() - closestGamepiece.pose.getY());
+          Math.hypot(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
     }
 
     Logger.recordOutput(
         "Limelight/totalLatencyMs", inputs.pipelineLatencyMs + inputs.captureLatencyMs);
+
+    Logger.recordOutput("Limelight/ClosestGamepiece/distance", closestGamepiece.distance);
+    Logger.recordOutput(
+        "Limelight/ClosestGamepiece/targetYawDegrees", closestGamepiece.targetYaw.getDegrees());
+    Logger.recordOutput(
+        "Limelight/ClosestGamepiece/targetPitchDegrees", closestGamepiece.targetPitch.getDegrees());
+    Logger.recordOutput("Limelight/ClosestGamepiece/poseRobotCentric", closestGamepiece.pose);
+    Logger.recordOutput("Limelight/ClosestGamepiece/pose", closestGamepiece.globalPose);
+    Logger.recordOutput("Limelight/ClosestGamepiece/confidence", closestGamepiece.confidence);
+    Logger.recordOutput(
+        "Limelight/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
   }
 
   /**
@@ -192,6 +201,10 @@ public class Limelight extends SubsystemBase {
         targetPitch,
         distance,
         groundGamepiecePose(distance, targetYaw),
+        new Pose2d(
+            closestGamepiece.pose.getX() + robotPoseSupplier.get().getX(),
+            closestGamepiece.pose.getY() + robotPoseSupplier.get().getY(),
+            new Rotation2d()),
         rawGamepieceData.timestamp_RIOFPGA_capture,
         rawGamepieceData.confidence);
   }
@@ -230,6 +243,9 @@ public class Limelight extends SubsystemBase {
     Logger.recordOutput(
         "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/pose",
         processedGamepieceData.pose);
+    Logger.recordOutput(
+        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/globalPose",
+        processedGamepieceData.globalPose);
   }
 
   // ----------------------- JSON DUMP PROCESSING BELOW -----------------------

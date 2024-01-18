@@ -8,6 +8,7 @@ public class ProcessedGamepieceData {
   public Rotation2d targetPitch;
   public double distance;
   public Pose2d pose;
+  public Pose2d globalPose;
   public double timestamp_RIOFPGA_capture;
   public double confidence;
 
@@ -16,12 +17,14 @@ public class ProcessedGamepieceData {
       Rotation2d targetPitch,
       double distance,
       Pose2d pose,
+      Pose2d globalPose,
       double timestamp_RIOFPGA_capture,
       double confidence) {
     this.targetYaw = targetYaw;
     this.targetPitch = targetPitch;
     this.distance = distance;
     this.pose = pose;
+    this.globalPose = globalPose;
     this.timestamp_RIOFPGA_capture = timestamp_RIOFPGA_capture;
     this.confidence = confidence;
   }

@@ -23,9 +23,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
-import frc.robot.commands.intake.IntakeDefaultIdleRPM;
+import frc.robot.commands.intake.IntakeDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -110,7 +111,7 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIO() {});
       wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
+      limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -134,7 +135,7 @@ public class RobotContainer {
             new VisionModule(
                 new VisionIOSim(
                     config,
-                    drivetrain::getPose,
+                    drivetrain::getRawOdometryPose,
                     SimulatorRobotConfig.FRONT_LEFT_ROBOT_TO_CAMERA,
                     SimulatorRobotConfig.FRONT_LEFT_CAMERA_NAME),
                 SimulatorRobotConfig.FRONT_LEFT_CAMERA_NAME,
@@ -142,7 +143,7 @@ public class RobotContainer {
             new VisionModule(
                 new VisionIOSim(
                     config,
-                    drivetrain::getPose,
+                    drivetrain::getRawOdometryPose,
                     SimulatorRobotConfig.FRONT_RIGHT_ROBOT_TO_CAMERA,
                     SimulatorRobotConfig.FRONT_RIGHT_CAMERA_NAME),
                 SimulatorRobotConfig.FRONT_RIGHT_CAMERA_NAME,
@@ -164,7 +165,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getRawOdometryPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -178,7 +179,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2024:
@@ -192,7 +193,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOReal());
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPose);
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         default:
@@ -205,7 +206,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPose);
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           break;
       }
     }
@@ -217,7 +218,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    intake.setDefaultCommand(new IntakeDefaultIdleRPM(intake));
+    intake.setDefaultCommand(new IntakeDefaultCommand(intake, controller.getHID()));
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -250,6 +251,21 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
+    // controller
+    //     .leftTrigger()
+    //     .whileTrue(
+    //         new RotateToGamepiece(
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             limelight::getClosestGamepiece,
+    //             drivetrain,
+    //             new Rotation2d(),
+    //             () -> -controller.getRightX(),
+    //             0.3));
+    controller
+        .leftTrigger()
+        .whileTrue(
+            new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
   }
 
   /**
