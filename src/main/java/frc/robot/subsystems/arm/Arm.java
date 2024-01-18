@@ -18,6 +18,7 @@ public class Arm extends SubsystemBase {
   private static final String ROOT_TABLE = "Arm";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP");
   private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD");
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG");
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
@@ -28,13 +29,15 @@ public class Arm extends SubsystemBase {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
       kP.initDefault(0.0);
       kD.initDefault(0);
+      kG.initDefault(0);
 
       closedLoopMaxVelocityConstraint.initDefault(0);
       closedLoopMaxAccelerationConstraint.initDefault(0);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
 
-      kP.initDefault(1.0);
+      kP.initDefault(2.5);
       kD.initDefault(0);
+      kG.initDefault(1.485);
 
       closedLoopMaxVelocityConstraint.initDefault(40);
       closedLoopMaxAccelerationConstraint.initDefault(80);
@@ -48,6 +51,7 @@ public class Arm extends SubsystemBase {
     io.setClosedLoopConstants(
         kP.get(),
         kD.get(),
+        kG.get(),
         closedLoopMaxVelocityConstraint.get(),
         closedLoopMaxAccelerationConstraint.get());
   }
@@ -61,11 +65,13 @@ public class Arm extends SubsystemBase {
     var hc = hashCode();
     if (kP.hasChanged(hc)
         || kD.hasChanged(hc)
+        || kG.hasChanged(hc)
         || closedLoopMaxVelocityConstraint.hasChanged(hc)
         || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
       io.setClosedLoopConstants(
           kP.get(),
           kP.get(),
+          kG.get(),
           closedLoopMaxVelocityConstraint.get(),
           closedLoopMaxAccelerationConstraint.get());
     }
