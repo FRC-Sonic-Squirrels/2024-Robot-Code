@@ -22,7 +22,7 @@ public class Arm extends SubsystemBase {
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint");
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
