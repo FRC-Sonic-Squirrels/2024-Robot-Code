@@ -161,7 +161,7 @@ public class Drivetrain extends SubsystemBase {
      * Pending https://github.com/Mechanical-Advantage/AdvantageKit/issues/55
      * all @autoLogOutput fields need to be manually logged
      */
-    Logger.recordOutput("Drivetrain/Pose", getPose());
+    Logger.recordOutput("Drivetrain/Pose", getRawOdometryPose());
     Logger.recordOutput("Drivetrain/PoseEstimatorPose", getPoseEstimatorPose());
     Logger.recordOutput("SwerveStates/Measured", getModuleStates());
   }
@@ -241,11 +241,12 @@ public class Drivetrain extends SubsystemBase {
 
   // FIXME: use pose estimator to get pose
   /** Returns the current odometry pose. */
-  @AutoLogOutput(key = "Odometry/Robot")
-  public Pose2d getPose() {
+  @AutoLogOutput(key = "Odometry/RobotOdometry")
+  public Pose2d getRawOdometryPose() {
     return rawOdometryPose;
   }
 
+  @AutoLogOutput(key = "Odometry/RobotEstimated")
   public Pose2d getPoseEstimatorPose() {
     return poseEstimator.getLatestPose();
   }

@@ -114,4 +114,9 @@ public final class Constants {
     public static final int END_EFFECTOR_CAN_ID = 6;
     public static final int WRIST_CAN_ID = 7;
   }
+
+  public class DIOPorts {
+    // TODO: get actual DIO ports
+    public static final int INTAKE_BEAM_BREAK = 0;
+  }
 }
