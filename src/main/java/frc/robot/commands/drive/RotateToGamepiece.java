@@ -14,13 +14,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.limelight.Limelight;
+import frc.robot.subsystems.limelight.ProcessedGamepieceData;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class RotateToGamepiece extends Command {
-  Limelight limelight;
+  Supplier<ProcessedGamepieceData> targetGamepiece;
   Drivetrain drive;
 
   private Rotation2d robotRotationOffset;
@@ -54,9 +55,9 @@ public class RotateToGamepiece extends Command {
   public RotateToGamepiece(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Limelight limelight,
+      Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive) {
-    this(translationXSupplier, translationYSupplier, limelight, drive, new Rotation2d(0.0));
+    this(translationXSupplier, translationYSupplier, targetGamepiece, drive, new Rotation2d(0.0));
   }
 
   /**
@@ -73,13 +74,13 @@ public class RotateToGamepiece extends Command {
   public RotateToGamepiece(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Limelight limelight,
+      Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
       Rotation2d robotRotationOffset) {
     this(
         translationXSupplier,
         translationYSupplier,
-        limelight,
+        targetGamepiece,
         drive,
         robotRotationOffset,
         () -> 0.0,
@@ -101,14 +102,14 @@ public class RotateToGamepiece extends Command {
   public RotateToGamepiece(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Limelight limelight,
+      Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier) {
     this(
         translationXSupplier,
         translationYSupplier,
-        limelight,
+        targetGamepiece,
         drive,
         robotRotationOffset,
         omegaSupplier,
@@ -140,7 +141,7 @@ public class RotateToGamepiece extends Command {
   public RotateToGamepiece(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Limelight limelight,
+      Supplier<ProcessedGamepieceData> targetGamepiece,
       Drivetrain drive,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier,
@@ -148,7 +149,7 @@ public class RotateToGamepiece extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
-    this.limelight = limelight;
+    this.targetGamepiece = targetGamepiece;
     this.drive = drive;
     this.robotRotationOffset = robotRotationOffset;
     this.omegaSupplier = omegaSupplier;
@@ -193,7 +194,7 @@ public class RotateToGamepiece extends Command {
 
     var currentRot = drive.getRotation();
 
-    var goalRot = limelight.getClosestGamepiece().targetYaw.plus(robotRotationOffset);
+    var goalRot = targetGamepiece.get().targetYaw.plus(robotRotationOffset);
 
     var driverRotVel = omega * drive.getMaxAngularSpeedRadPerSec();
 
@@ -221,10 +222,10 @@ public class RotateToGamepiece extends Command {
     rotVelCorrection =
         Math.hypot(xVel, yVel)
             * Math.cos(
-                limelight.getClosestGamepiece().targetYaw.getRadians()
+                targetGamepiece.get().targetYaw.getRadians()
                     - new Rotation2d(xVel, yVel).getRadians()
                     - Math.PI / 2)
-            / limelight.getClosestGamepiece().distance;
+            / targetGamepiece.get().distance;
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("RotateToGamepiece/RotationalEffort", rotationalEffort);

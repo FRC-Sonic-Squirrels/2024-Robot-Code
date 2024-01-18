@@ -5,16 +5,18 @@
 package frc.robot.commands.drive;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.limelight.Limelight;
+import frc.robot.subsystems.limelight.ProcessedGamepieceData;
 import frc.robot.subsystems.swerve.Drivetrain;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToGamepiece extends Command {
   /** Creates a new DriveToGamepiece. */
-  private final Limelight limelight;
+  private Supplier<ProcessedGamepieceData> targetGamepiece;
 
   private final Drivetrain drive;
 
@@ -45,10 +47,12 @@ public class DriveToGamepiece extends Command {
   private LoggedTunableNumber advancedMode =
       new LoggedTunableNumber("DriveToGamepiece/advancedMode/doAdvancedMotion", 0);
 
+  private double rotVelCorrection = 0;
+
   /** Drives robot to gamepiece, intended for ground gamepieces only */
-  public DriveToGamepiece(Limelight limelight, Drivetrain drive) {
+  public DriveToGamepiece(Supplier<ProcessedGamepieceData> targetGamepiece, Drivetrain drive) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.limelight = limelight;
+    this.targetGamepiece = targetGamepiece;
     this.drive = drive;
 
     addRequirements(drive);
@@ -73,7 +77,7 @@ public class DriveToGamepiece extends Command {
 
     rotationalErrorDegrees =
         Math.abs(
-            limelight.getClosestGamepiece().targetYaw.getDegrees()
+            targetGamepiece.get().targetYaw.getDegrees()
                 - 180.0
                 - drive.getPose().getRotation().getDegrees());
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
@@ -81,27 +85,33 @@ public class DriveToGamepiece extends Command {
     if (advancedMode.get() == 0) {
       xVel =
           rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-              ? xController.calculate(
-                  drive.getPose().getX(), limelight.getClosestGamepiece().pose.getX())
+              ? xController.calculate(0.0, targetGamepiece.get().pose.getX())
               : 0.0;
       yVel =
           rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-              ? yController.calculate(
-                  drive.getPose().getY(), limelight.getClosestGamepiece().pose.getY())
+              ? yController.calculate(0.0, targetGamepiece.get().pose.getY())
               : 0.0;
     } else {
       xVel =
-          xController.calculate(drive.getPose().getX(), limelight.getClosestGamepiece().pose.getX())
+          xController.calculate(0.0, targetGamepiece.get().pose.getX())
               / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
       yVel =
-          yController.calculate(drive.getPose().getY(), limelight.getClosestGamepiece().pose.getY())
+          yController.calculate(0.0, targetGamepiece.get().pose.getY())
               / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
     }
 
     rotVel =
         rotationController.calculate(
             drive.getPose().getRotation().getRadians(),
-            limelight.getClosestGamepiece().targetYaw.getRadians() + Math.PI);
+            targetGamepiece.get().targetYaw.getRadians());
+
+    rotVelCorrection =
+        Math.hypot(xVel, yVel)
+            * Math.cos(
+                targetGamepiece.get().targetYaw.getRadians()
+                    - new Rotation2d(xVel, yVel).getRadians()
+                    - Math.PI / 2)
+            / targetGamepiece.get().distance;
 
     drive.runVelocity(new ChassisSpeeds(xVel, yVel, rotVel));
 
