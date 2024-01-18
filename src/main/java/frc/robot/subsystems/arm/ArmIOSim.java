@@ -1,18 +1,21 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmIOSim implements ArmIO {
-  private double armGearing = 6.0;
-  private double momentOfInertia = 1.4;
+  private double armGearing = 10;
+  private double momentOfInertia = 0.15;
   private double armLengthMeters = Units.inchesToMeters(12);
 
-  private double minAngleRad = Units.degreesToRadians(270);
+  private double minAngleRad = Units.degreesToRadians(-90);
   private double maxAngleRad = Units.degreesToRadians(90);
 
   SingleJointedArmSim armSim =
@@ -21,12 +24,14 @@ public class ArmIOSim implements ArmIO {
           armGearing,
           momentOfInertia,
           armLengthMeters,
-          minAngleRad,
-          maxAngleRad,
-          false,
+          Constants.ArmConstants.MIN_ARM_ANGLE.getRadians(),
+          Constants.ArmConstants.MAX_ARM_ANGLE.getRadians(),
+          true,
           0);
 
   private final ProfiledPIDController feedback;
+
+  private double kG;
 
   private boolean closedLoop = false;
   private Rotation2d closedLoopTargetAngle = new Rotation2d();
@@ -38,21 +43,32 @@ public class ArmIOSim implements ArmIO {
 
   @Override
   public void updateInputs(ArmIOInputs inputs) {
+    var controlEffort = 0.0;
 
     if (closedLoop) {
-      var controlEffort =
-          feedback.calculate(inputs.armPositionRad, closedLoopTargetAngle.getRadians());
+      var fb =
+          feedback.calculate(inputs.armPosition.getRadians(), closedLoopTargetAngle.getRadians());
+      var ff = kG * Math.cos(armSim.getAngleRads());
 
-      armSim.setInputVoltage(controlEffort);
+      controlEffort = fb + ff;
+
+      Logger.recordOutput("Arm/FF_fG", ff);
+      Logger.recordOutput("Arm/error", feedback.getPositionError());
+
     } else {
-      armSim.setInputVoltage(openLoopVolts);
+      controlEffort = openLoopVolts;
     }
 
+    controlEffort = MathUtil.clamp(controlEffort, -12, 12);
+
+    armSim.setInputVoltage(controlEffort);
     armSim.update(0.02);
 
-    inputs.armPositionRad = armSim.getAngleRads();
-    inputs.armAppliedVolts = armSim.getOutput(0);
+    inputs.armPosition = Rotation2d.fromRadians(armSim.getAngleRads());
+    inputs.armAppliedVolts = controlEffort;
     inputs.armCurrentAmps = armSim.getCurrentDrawAmps();
+
+    Logger.recordOutput("Arm/controlEffort", controlEffort);
   }
 
   @Override
@@ -65,14 +81,21 @@ public class ArmIOSim implements ArmIO {
   public void setClosedLoopPosition(Rotation2d angle) {
     closedLoop = true;
     closedLoopTargetAngle = angle;
+    openLoopVolts = 0.0;
   }
 
   @Override
   public void setClosedLoopConstants(
-      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {
+      double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
 
+    this.kG = kG;
     feedback.setP(kP);
     feedback.setD(kD);
     feedback.setConstraints(new Constraints(maxProfiledVelocity, maxProfiledAcceleration));
+  }
+
+  @Override
+  public void resetSensorPosition(Rotation2d angle) {
+    armSim.setState(angle.getRadians(), 0.0);
   }
 }

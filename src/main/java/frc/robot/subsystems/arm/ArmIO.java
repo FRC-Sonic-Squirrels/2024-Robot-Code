@@ -7,7 +7,7 @@ public interface ArmIO {
   /** Contains all of the input data received from hardware. */
   @AutoLog
   public static class ArmIOInputs {
-    public double armPositionRad;
+    public Rotation2d armPosition = new Rotation2d();
     public double armAppliedVolts;
     public double armCurrentAmps;
     public double armTempCelsius;
@@ -18,8 +18,14 @@ public interface ArmIO {
 
   public default void setVoltage(double volts) {}
 
+  public default void resetSensorPosition(Rotation2d angle) {}
+
   public default void setClosedLoopPosition(Rotation2d angle) {}
 
   public default void setClosedLoopConstants(
-      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {}
+      double kP,
+      double kD,
+      double kG,
+      double maxProfiledVelocity,
+      double maxProfiledAcceleration) {}
 }

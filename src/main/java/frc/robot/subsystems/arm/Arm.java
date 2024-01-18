@@ -4,17 +4,16 @@
 
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ControlMode;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
-  private final ArmIO io;
-  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
-
   private static final String ROOT_TABLE = "Arm";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP");
   private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD");
@@ -44,9 +43,21 @@ public class Arm extends SubsystemBase {
     }
   }
 
+  private final ArmIO io;
+  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+
+  private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
+  private Rotation2d closedLoopTargetAngle = new Rotation2d();
+  // FIXME: tune this value
+  private final Rotation2d closedLoopTolerance = Rotation2d.fromDegrees(1);
+  private final double MAX_VOLTAGE = 12;
+
   /** Creates a new ArmSubsystem. */
   public Arm(ArmIO io) {
     this.io = io;
+
+    io.resetSensorPosition(Constants.ArmConstants.HOME_POSITION);
+    io.setVoltage(0.0);
 
     io.setClosedLoopConstants(
         kP.get(),
@@ -78,10 +89,41 @@ public class Arm extends SubsystemBase {
   }
 
   public void setAngle(Rotation2d angle) {
+    angle =
+        Rotation2d.fromRadians(
+            MathUtil.clamp(
+                angle.getRadians(),
+                Constants.ArmConstants.MIN_ARM_ANGLE.getRadians(),
+                Constants.ArmConstants.MAX_ARM_ANGLE.getRadians()));
+
+    currentControlMode = ControlMode.CLOSED_LOOP;
+    closedLoopTargetAngle = angle;
     io.setClosedLoopPosition(angle);
   }
 
+  public void setVoltage(double volts) {
+    volts = MathUtil.clamp(volts, -MAX_VOLTAGE, MAX_VOLTAGE);
+    currentControlMode = ControlMode.OPEN_LOOP;
+    io.setVoltage(volts);
+  }
+
   public Rotation2d getAngle() {
-    return Rotation2d.fromRadians(inputs.armPositionRad);
+    return inputs.armPosition;
+  }
+
+  public void resetSensorToHomePosition() {
+    io.resetSensorPosition(Constants.ArmConstants.MIN_ARM_ANGLE);
+  }
+
+  public boolean isAtTargetAngle() {
+    return isAtTargetAngle(closedLoopTolerance);
+  }
+
+  public boolean isAtTargetAngle(Rotation2d tolerance) {
+    if (currentControlMode == ControlMode.OPEN_LOOP) {
+      return false;
+    }
+    var error = inputs.armPosition.minus(closedLoopTargetAngle).getRadians();
+    return error <= tolerance.getRadians() ? true : false;
   }
 }
