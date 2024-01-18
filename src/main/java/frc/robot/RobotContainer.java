@@ -29,6 +29,7 @@ import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -320,5 +321,9 @@ public class RobotContainer {
 
     current = ArrayUtil.concatWithArrayCopy(current, drivetrain.getCurrentDrawAmps());
     return current;
+  }
+
+  public void updateVisualization() {
+    SimpleMechanismVisualization.updateVisualization(arm.getAngle());
   }
 }
