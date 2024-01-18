@@ -210,6 +210,4 @@ public final class Constants {
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
   }
-
-  public static final double MAX_VOLTAGE = 12.0;
 }
