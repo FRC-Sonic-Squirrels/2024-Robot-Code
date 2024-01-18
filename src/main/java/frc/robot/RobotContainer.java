@@ -289,5 +289,6 @@ public class RobotContainer {
 
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(arm.getAngle());
+    SimpleMechanismVisualization.logMechanism();
   }
 }
