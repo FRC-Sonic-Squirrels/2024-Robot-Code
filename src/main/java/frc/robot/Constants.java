@@ -118,5 +118,8 @@ public final class Constants {
   public class DIOPorts {
     // TODO: get actual DIO ports
     public static final int INTAKE_BEAM_BREAK = 0;
+  public class ArmConstants {
+    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
+    public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
   }
 }
