@@ -64,8 +64,4 @@ public class SimpleMechanismVisualization {
     Logger.recordOutput("Mechanism/SimpleArm", armMechanism2d);
     Logger.recordOutput("Mechanism/SimpleShooter", shooterMechanism2d);
   }
-
-  public static void logMechanism() {
-    Logger.recordOutput("Mechanism/Simple", mechanism2d);
-  }
 }
