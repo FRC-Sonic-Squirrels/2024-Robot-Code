@@ -1,15 +1,19 @@
 {
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo",
-      "/Shuffleboard/AUTO/SendableChooser[0]": "String Chooser",
-      "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
-      "/SmartDashboard/Auto Routine": "String Chooser",
-      "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
+            "/FMSInfo": "FMSInfo",
+            "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d"
+    },
+    "windows": {
+      "/AdvantageKit/RealOutputs/Mechanism/Simple": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables Info": {
     "visible": true
-  }
+    }
 }
