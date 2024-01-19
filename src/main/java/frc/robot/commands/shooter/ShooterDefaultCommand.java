@@ -54,7 +54,7 @@ public class ShooterDefaultCommand extends Command {
   @Override
   public void execute() {
     shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
-    if (RobotState.getInstance().getShootMode().equals(RobotState.ShootMode.SPEAKER)) {
+    if (RobotState.getInstance().getScoringMode().equals(RobotState.ScoringMode.SPEAKER)) {
       double distToSpeaker =
           Math.hypot(
               drive.getRawOdometryPose().getX() - speakerPose.getX(),

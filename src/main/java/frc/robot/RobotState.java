@@ -8,7 +8,7 @@ package frc.robot;
 public class RobotState {
   private static RobotState instance = null;
   private IntakeMode intakeMode = IntakeMode.INTAKE;
-  private ShootMode shootMode = ShootMode.NONE;
+  private ScoringMode shootMode = ScoringMode.NONE;
 
   public static RobotState getInstance() {
     if (instance == null) {
@@ -28,11 +28,11 @@ public class RobotState {
     this.intakeMode = intakeMode;
   }
 
-  public ShootMode getShootMode() {
+  public ScoringMode getScoringMode() {
     return shootMode;
   }
 
-  public void setShootMode(ShootMode shootMode) {
+  public void setScoringMode(ScoringMode shootMode) {
     this.shootMode = shootMode;
   }
 
@@ -41,7 +41,7 @@ public class RobotState {
     STOW;
   }
 
-  public static enum ShootMode {
+  public static enum ScoringMode {
     NONE,
     SPEAKER,
     AMP;

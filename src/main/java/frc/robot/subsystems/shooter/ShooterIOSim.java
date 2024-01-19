@@ -24,7 +24,7 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Pitch.MIN_ANGLE_RAD,
           Constants.ShooterConstants.Pitch.MAX_ANGLE_RAD,
           true,
-          Math.toRadians(84.0));
+          Constants.ShooterConstants.Pitch.SIM_INITIAL_ANGLE);
 
   private double targetVelRadPerSec = 0.0;
   private PIDController pitchController = new PIDController(0.01, 0, 0);

@@ -15,6 +15,7 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,13 +24,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.RobotState.ShootMode;
+import frc.robot.RobotState.ScoringMode;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
 import frc.robot.commands.shooter.ShooterDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -276,7 +278,8 @@ public class RobotContainer {
 
     operatorController
         .a()
-        .onTrue(new InstantCommand(() -> RobotState.getInstance().setShootMode(ShootMode.SPEAKER)));
+        .onTrue(
+            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)));
   }
 
   /**
@@ -297,5 +300,10 @@ public class RobotContainer {
 
     current = ArrayUtil.concatWithArrayCopy(current, drivetrain.getCurrentDrawAmps());
     return current;
+  }
+
+  public void updateVisualization() {
+    SimpleMechanismVisualization.updateVisualization(new Rotation2d(), shooter.getPitch());
+    SimpleMechanismVisualization.logMechanism();
   }
 }
