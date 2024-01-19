@@ -1,4 +1,4 @@
-package frc.robot.autonomous;
+package frc.robot.autonomous1;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
