@@ -16,6 +16,7 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -226,6 +227,22 @@ public class Drivetrain extends SubsystemBase {
       states[i] = modules[i].getState();
     }
     return states;
+  }
+
+  private ChassisSpeeds getChassisSpeeds() {
+    return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  @AutoLogOutput(key = "Robot/FieldRelativeVel")
+  public Pose2d getFieldRelativeVelocities() {
+    Translation2d translation =
+        new Translation2d(
+                getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
+            .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
+    return new Pose2d(
+        translation.getX(),
+        translation.getY(),
+        new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
