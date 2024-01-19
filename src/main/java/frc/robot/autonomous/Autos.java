@@ -1,4 +1,4 @@
-package frc.robot.autonomous1;
+package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
@@ -57,7 +57,7 @@ public class Autos {
     Command command =
         Choreo.choreoSwerveCommand(
             traj,
-            drivetrain::getPose,
+            drivetrain::getPoseEstimatorPose,
             new PIDController(
                 config.getAutoTranslationKP().get(),
                 config.getAutoTranslationKI().get(),

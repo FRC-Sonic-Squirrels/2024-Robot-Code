@@ -1,4 +1,4 @@
-package frc.robot.autonomous1;
+package frc.robot.autonomous;
 
 import edu.wpi.first.math.controller.PIDController;
 
