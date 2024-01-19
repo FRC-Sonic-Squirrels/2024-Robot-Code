@@ -18,8 +18,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Autonomous.AutoCommand;
-
+import frc.robot.autonomous.AutoCommand;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -126,7 +125,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    if(autonomousChooser == null){
+    if (autonomousChooser == null) {
       autonomousChooser = robotContainer.getAutonomousChooser();
     }
   }
@@ -134,20 +133,19 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    
+
     if (autonomousChooser.get() != null) {
-      if(currentAutoCommand != autonomousChooser.get().command){
+      if (currentAutoCommand != autonomousChooser.get().command) {
         currentAutoCommand = autonomousChooser.get().command;
         robotContainer.setPose(autonomousChooser.get().initPose);
       }
-      
     }
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    
+
     // schedule the autonomous command (example)
     if (autonomousChooser.get() != null) {
       currentAutoCommand = autonomousChooser.get().command;
