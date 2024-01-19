@@ -84,6 +84,7 @@ public final class Constants {
   public class FieldConstants {
     // FIXME: double check this number
     public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
+    public static final double SPEAKER_HEIGHT_METERS = 1.9812;
   }
 
   public class MotorConstants {
@@ -117,6 +118,28 @@ public final class Constants {
     public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
     ;
+  }
+
+  public class ShooterConstants {
+    public static final double PREP_RPM = 2500.0;
+    public static final double SHOOTING_RPM = 5000.0;
+    public static final double SHOOTER_OFFSET_METERS = 0.0;
+
+    public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
+      return new Rotation2d(
+          Math.atan2(FieldConstants.SPEAKER_HEIGHT_METERS, distanceMeters - SHOOTER_OFFSET_METERS));
+    }
+
+    public static final double PITCH_VEL_RAD_PER_SEC(
+        double velMetersPerSecond, double distanceMeters) {
+      // velocity times derivative of distance to shooting pitch formula to get pitch velocity
+      return velMetersPerSecond
+          * -FieldConstants.SPEAKER_HEIGHT_METERS
+          / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS, 2)
+              + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
+    }
+
+    public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
   }
 
   public class CanIDs {
