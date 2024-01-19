@@ -33,7 +33,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void setTargetRPM(double target) {
-    io.setPercentOut(target / Constants.MotorConstants.KRAKEN_MAX_RPM);
+    io.setPercentOut(target / Constants.MotorConstants.KrakenConstants.MAX_RPM);
   }
 
   public void setPercentOut(double percent) {

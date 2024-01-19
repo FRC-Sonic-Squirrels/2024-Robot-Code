@@ -68,7 +68,7 @@ public class ShooterDefaultCommand extends Command {
               drive.getRawOdometryPose().getX() - speakerPose.getX(),
               drive.getRawOdometryPose().getY() - speakerPose.getY());
       shooterPitchVelCorrection =
-          Constants.ShooterConstants.PITCH_VEL_RAD_PER_SEC(
+          Constants.ShooterConstants.Pitch.PITCH_VEL_RAD_PER_SEC(
               new Translation2d(
                       drive.getFieldRelativeVelocities().getX(),
                       drive.getFieldRelativeVelocities().getY())
@@ -78,14 +78,15 @@ public class ShooterDefaultCommand extends Command {
       shooter.setPitchAngularVel(
           shooterPitchPID.calculate(
                   shooter.getPitch().getRadians(),
-                  Constants.ShooterConstants.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians())
+                  Constants.ShooterConstants.Pitch.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker)
+                      .getRadians())
               + shooterPitchVelCorrection);
     } else {
       shooter.setRPM(0.0);
       shooter.setPitchAngularVel(
           shooterPitchPID.calculate(
               shooter.getPitch().getRadians(),
-              Constants.ShooterConstants.SHOOTER_STOW_PITCH.getRadians()));
+              Constants.ShooterConstants.Pitch.SHOOTER_STOW_PITCH.getRadians()));
     }
   }
 

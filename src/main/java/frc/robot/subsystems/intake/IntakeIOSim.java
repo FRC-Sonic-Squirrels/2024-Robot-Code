@@ -17,7 +17,7 @@ public class IntakeIOSim implements IntakeIO {
     intakeMotorSim = intakeMotor.getSimState();
     intakeMotorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
     inputs.currentAmps = intakeMotorSim.getSupplyCurrent();
-    inputs.velocityRPM = intakeMotor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
+    inputs.velocityRPM = intakeMotor.get() * Constants.MotorConstants.KrakenConstants.MAX_RPM;
   }
 
   @Override

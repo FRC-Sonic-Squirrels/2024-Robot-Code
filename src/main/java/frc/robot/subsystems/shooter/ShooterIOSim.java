@@ -5,19 +5,27 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants;
 
 public class ShooterIOSim implements ShooterIO {
 
   private SingleJointedArmSim arm =
       new SingleJointedArmSim(
-          new DCMotor(12.0, 7.09, 40.0, 30.0, 6000.0 / (Math.PI * 2), 1),
-          1.0,
+          new DCMotor(
+              Constants.MotorConstants.KrakenConstants.NOMINAL_VOLTAGE_VOLTS,
+              Constants.MotorConstants.KrakenConstants.STALL_TORQUE_NEWTON_METERS,
+              Constants.MotorConstants.KrakenConstants.STALL_CURRENT_AMPS,
+              Constants.MotorConstants.KrakenConstants.FREE_CURRENT_AMPS,
+              Constants.MotorConstants.KrakenConstants.FREE_SPEED_RPM / (Math.PI * 2),
+              1),
+          Constants.ShooterConstants.Pitch.GEARING,
           SingleJointedArmSim.estimateMOI(Units.feetToMeters(1.5), 20.0),
-          Units.feetToMeters(1.5),
-          Math.toRadians(20.0),
-          Math.toRadians(87.0),
+          Constants.ShooterConstants.SHOOTER_LENGTH,
+          Constants.ShooterConstants.Pitch.MIN_ANGLE_RAD,
+          Constants.ShooterConstants.Pitch.MAX_ANGLE_RAD,
           true,
           Math.toRadians(84.0));
+
   private double targetVelRadPerSec = 0.0;
   private PIDController pitchController = new PIDController(0.01, 0, 0);
 
