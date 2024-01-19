@@ -14,6 +14,9 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -137,11 +140,18 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledPeriodic() {
 
-    if (autonomousChooser.get() != null) {
+    if (autonomousChooser.get() != null && DriverStation.getAlliance().isPresent()) {
       if (currentAutoCommand != autonomousChooser.get().command) {
         currentAutoCommand = autonomousChooser.get().command;
-        robotContainer.setPose(autonomousChooser.get().initPose);
+        robotContainer.setPose(
+            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                ? autonomousChooser.get().initPose
+                : new Pose2d(
+                    Constants.FieldConstants.FIELD_LENGTH - autonomousChooser.get().initPose.getX(),
+                    autonomousChooser.get().initPose.getY(),
+                    new Rotation2d(-autonomousChooser.get().initPose.getRotation().getRadians())));
       }
+      Logger.recordOutput("Odometry/autoPath", autonomousChooser.get().traj.getPoses());
     }
   }
 

@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -12,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.Optional;
@@ -29,14 +29,15 @@ public class Autos {
   }
 
   private AutoCommand doNothing() {
-    return new AutoCommand("doNothing", new InstantCommand(), new Pose2d(0, 0, new Rotation2d(0)));
+    return new AutoCommand("doNothing", new InstantCommand(), new Pose2d(), new ChoreoTrajectory());
   }
 
   private AutoCommand testAuto() {
     return new AutoCommand(
         "testAuto",
-        generateFollowPathCommand("testAuto"),
-        Choreo.getTrajectory("testAuto").getInitialPose());
+        generateFollowPathCommand("TestAuto"),
+        Choreo.getTrajectory("TestAuto").getInitialPose(),
+        Choreo.getTrajectory("TestAuto"));
   }
 
   // TODO: decide on better names for autos
@@ -45,7 +46,8 @@ public class Autos {
     return new AutoCommand(
         "Auto1",
         generateFollowPathCommand("Auto1"),
-        Choreo.getTrajectory("Auto1").getInitialPose());
+        Choreo.getTrajectory("Auto1").getInitialPose(),
+        Choreo.getTrajectory("Auto1"));
   }
 
   public AutoCommand[] autoCommands() {
@@ -57,7 +59,9 @@ public class Autos {
     Command command =
         Choreo.choreoSwerveCommand(
             traj,
-            drivetrain::getPoseEstimatorPose,
+            Robot.isSimulation()
+                ? (drivetrain::getRawOdometryPose)
+                : (drivetrain::getPoseEstimatorPose),
             new PIDController(
                 config.getAutoTranslationKP().get(),
                 config.getAutoTranslationKI().get(),
