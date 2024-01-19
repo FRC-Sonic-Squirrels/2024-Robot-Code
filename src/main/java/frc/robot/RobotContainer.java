@@ -174,7 +174,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
-          autos = new Autos(drivetrain, config);
+          autos = new Autos(drivetrain, intake, config);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -189,7 +189,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, config);
+          autos = new Autos(drivetrain, intake, config);
           break;
 
         case ROBOT_2024:
@@ -204,7 +204,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, config);
+          autos = new Autos(drivetrain, intake, config);
           break;
 
         default:
@@ -218,7 +218,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, config);
+          autos = new Autos(drivetrain, intake, config);
           break;
       }
     }

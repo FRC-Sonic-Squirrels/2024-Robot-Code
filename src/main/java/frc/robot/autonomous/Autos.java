@@ -1,7 +1,10 @@
 package frc.robot.autonomous;
 
+import java.util.Optional;
+
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,9 +15,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Robot;
+import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.swerve.Drivetrain;
-import java.util.Optional;
 
 public class Autos {
 
@@ -23,9 +27,12 @@ public class Autos {
   private Drivetrain drivetrain;
   private RobotConfig config;
 
-  public Autos(Drivetrain drivetrain, RobotConfig config) {
+  private Intake intake;
+
+  public Autos(Drivetrain drivetrain, Intake intake, RobotConfig config) {
     this.drivetrain = drivetrain;
     this.config = config;
+    this.intake = intake;
   }
 
   private AutoCommand doNothing() {
@@ -58,8 +65,24 @@ public class Autos {
         Choreo.getTrajectory("Auto2"));
   }
 
+  private AutoCommand exampleBrokenAuto() {
+    AutoEvent[] events = {new AutoEvent(new EjectGamepiece(intake), 0), new AutoEvent(new EjectGamepiece(intake), 4) };
+
+    return new AutoCommand("broken auto", generateFollowPathCommand("Auto1", events), 
+    Choreo.getTrajectory("Auto2").getInitialPose(), 
+    Choreo.getTrajectory("Auto2"));
+  }
+
+  private AutoCommand exampleWorkingAuto() {
+    AutoEvent[] events = {new AutoEvent(new EjectGamepiece(intake).asProxy(), 0), new AutoEvent(new EjectGamepiece(intake).asProxy(), 4) };
+
+    return new AutoCommand("broken auto", generateFollowPathCommand("Auto1", events), 
+    Choreo.getTrajectory("Auto2").getInitialPose(), 
+    Choreo.getTrajectory("Auto2"));
+  }
+
   public AutoCommand[] autoCommands() {
-    return new AutoCommand[] {doNothing(), testAuto(), auto1(), auto2()};
+    return new AutoCommand[] {doNothing(), testAuto(), auto1(), auto2(), exampleBrokenAuto(), exampleWorkingAuto()};
   }
 
   private Command generateFollowPathCommand(String name, AutoEvent... events) {
