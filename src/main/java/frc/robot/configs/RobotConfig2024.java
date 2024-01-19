@@ -57,9 +57,9 @@ public class RobotConfig2024 extends RobotConfig {
 
   // --------- SWERVE GEAR RATIO ---------
   private static final double SWERVE_DRIVE_GEAR_RATIO =
-      SwerveModuleConstants.MK4I.LEVEL_2_GEARING_DRIVE_GEAR_RATIO;
+      SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
   private static final double SWERVE_STEER_GEAR_RATIO =
-      SwerveModuleConstants.MK4I.LEVEL_2_GEARING_TURN_GEAR_RATIO;
+      SwerveModuleConstants.MK4I.GEARING_TURN_GEAR_RATIO;
 
   // ---------- SWERVE STEERING MOTOR PID CONSTANTS -----------
   private static final LoggedTunableNumber ANGLE_KP =

@@ -75,7 +75,7 @@ public class RobotConfig2023Rober extends RobotConfig {
   private static final double SWERVE_DRIVE_GEAR_RATIO =
       SwerveModuleConstants.MK4I.LEVEL_2_GEARING_DRIVE_GEAR_RATIO;
   private static final double SWERVE_STEER_GEAR_RATIO =
-      SwerveModuleConstants.MK4I.LEVEL_2_GEARING_TURN_GEAR_RATIO;
+      SwerveModuleConstants.MK4I.GEARING_TURN_GEAR_RATIO;
 
   // ---------- SWERVE STEERING MOTOR PID CONSTANTS -----------
   // FIXE: RN copied from Mechanical advantage (6328) 2023 codebase. Should learn to tune
