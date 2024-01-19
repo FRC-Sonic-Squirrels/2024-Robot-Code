@@ -13,11 +13,19 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
@@ -28,6 +36,7 @@ import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
+import frc.robot.commands.shooter.ShooterDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
@@ -63,10 +72,6 @@ import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIO;
 import frc.robot.subsystems.wrist.WristIOReal;
 import frc.robot.subsystems.wrist.WristIOSim;
-import java.util.ArrayList;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -86,7 +91,8 @@ public class RobotContainer {
   private final Limelight limelight;
   private final LED led;
 
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
@@ -245,11 +251,13 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
             drivetrain,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
-    intake.setDefaultCommand(new IntakeDefaultCommand(intake, controller.getHID()));
+    intake.setDefaultCommand(new IntakeDefaultCommand(intake, driverController.getHID()));
+
+    shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, drivetrain));
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -281,8 +289,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
-    // controller
+    // ----------- DRIVER CONTROLS ------------
+    driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
+    // driverController
     //     .leftTrigger()
     //     .whileTrue(
     //         new RotateToGamepiece(
@@ -293,10 +302,15 @@ public class RobotContainer {
     //             new Rotation2d(),
     //             () -> -controller.getRightX(),
     //             0.3));
-    controller
+    driverController
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+    // ----------- OPERATOR CONTROLS ------------
+
+    operatorController
+        .a()
+        .onTrue(new InstantCommand(() -> RobotState.getInstance().setShootMode(ShootMode.SPEAKER)));
   }
 
   /**
