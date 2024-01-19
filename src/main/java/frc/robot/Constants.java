@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
@@ -90,6 +91,10 @@ public final class Constants {
     }
   }
 
+  public class FieldConstants {
+    public static final double SPEAKER_HEIGHT_METERS = 1.9812;
+  }
+
   public class MotorConstants {
     public static final double KRAKEN_MAX_RPM = 6000.0;
   }
@@ -101,6 +106,28 @@ public final class Constants {
     public static final double SUPPLY_CURRENT_LIMIT = 50.0;
     public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
     public static final double SUPPLY_TIME_THRESHOLD = 2.0;
+  }
+
+  public class ShooterConstants {
+    public static final double PREP_RPM = 2500.0;
+    public static final double SHOOTING_RPM = 5000.0;
+    public static final double SHOOTER_OFFSET_METERS = 0.0;
+
+    public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
+      return new Rotation2d(
+          Math.atan2(FieldConstants.SPEAKER_HEIGHT_METERS, distanceMeters - SHOOTER_OFFSET_METERS));
+    }
+
+    public static final double PITCH_VEL_RAD_PER_SEC(
+        double velMetersPerSecond, double distanceMeters) {
+      // velocity times derivative of distance to shooting pitch formula to get pitch velocity
+      return velMetersPerSecond
+          * -FieldConstants.SPEAKER_HEIGHT_METERS
+          / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS, 2)
+              + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
+    }
+
+    public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
   }
 
   public class CanIDs {
