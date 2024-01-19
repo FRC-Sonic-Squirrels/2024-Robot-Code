@@ -41,6 +41,6 @@ public class Intake extends SubsystemBase {
   }
 
   public Boolean getBeamBreak() {
-    return new Boolean(inputs.beamBreak);
+    return inputs.beamBreak;
   }
 }
