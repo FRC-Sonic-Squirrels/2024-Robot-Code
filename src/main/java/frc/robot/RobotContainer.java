@@ -23,10 +23,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.RobotState.ShootMode;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
+import frc.robot.commands.shooter.ShooterDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -81,7 +83,8 @@ public class RobotContainer {
   private final EndEffector endEffector;
   private final Limelight limelight;
 
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -214,11 +217,13 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
             drivetrain,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
-    intake.setDefaultCommand(new IntakeDefaultCommand(intake, controller.getHID()));
+    intake.setDefaultCommand(new IntakeDefaultCommand(intake, driverController.getHID()));
+
+    shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, drivetrain));
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -250,8 +255,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
-    // controller
+    // ----------- DRIVER CONTROLS ------------
+    driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
+    // driverController
     //     .leftTrigger()
     //     .whileTrue(
     //         new RotateToGamepiece(
@@ -262,10 +268,15 @@ public class RobotContainer {
     //             new Rotation2d(),
     //             () -> -controller.getRightX(),
     //             0.3));
-    controller
+    driverController
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+    // ----------- OPERATOR CONTROLS ------------
+
+    operatorController
+        .a()
+        .onTrue(new InstantCommand(() -> RobotState.getInstance().setShootMode(ShootMode.SPEAKER)));
   }
 
   /**
