@@ -50,8 +50,16 @@ public class Autos {
         Choreo.getTrajectory("Auto1"));
   }
 
+  private AutoCommand auto2() {
+    return new AutoCommand(
+        "Auto2",
+        generateFollowPathCommand("Auto2"),
+        Choreo.getTrajectory("Auto2").getInitialPose(),
+        Choreo.getTrajectory("Auto2"));
+  }
+
   public AutoCommand[] autoCommands() {
-    return new AutoCommand[] {doNothing(), testAuto(), auto1()};
+    return new AutoCommand[] {doNothing(), testAuto(), auto1(), auto2()};
   }
 
   private Command generateFollowPathCommand(String name, AutoEvent... events) {
