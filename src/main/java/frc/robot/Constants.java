@@ -156,6 +156,8 @@ public final class Constants {
 
       public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
       public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
+
+      public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
     }
   }
 
