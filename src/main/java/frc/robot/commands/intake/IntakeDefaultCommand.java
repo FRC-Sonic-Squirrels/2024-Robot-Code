@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.RobotState;
 import frc.robot.subsystems.intake.Intake;
 
 public class IntakeDefaultCommand extends Command {
@@ -28,6 +29,7 @@ public class IntakeDefaultCommand extends Command {
     this.controller = controller;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
+    setName("IntakeDefaultCommand");
   }
 
   // Called when the command is initially scheduled.
@@ -47,7 +49,13 @@ public class IntakeDefaultCommand extends Command {
         && gamepieceTimeInIntake.get() <= rumbleDurationSeconds.get()) {
       controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
     }
-    intake.setTargetRPM(Constants.IntakeConstants.INTAKE_IDLE_RPM);
+    if (gamepieceTimeInIntake.get() >= 0.1 && gamepieceTimeInIntake.get() <= 0.15) {
+      RobotState.getInstance().setIntakeMode(RobotState.IntakeMode.STOW);
+    }
+    intake.setTargetRPM(
+        RobotState.getInstance().getIntakeMode().equals(RobotState.IntakeMode.INTAKE)
+            ? Constants.IntakeConstants.INTAKE_IDLE_RPM
+            : 0.0);
   }
 
   // Called once the command ends or is interrupted.

@@ -15,6 +15,7 @@ public class EjectGamepiece extends Command {
     this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
+    setName("EjectGamepiece");
   }
 
   // Called when the command is initially scheduled.
