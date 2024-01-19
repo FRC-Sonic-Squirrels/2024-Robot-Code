@@ -173,7 +173,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getRawOdometryPose);
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
           autos = new Autos(drivetrain, config);
           break;
 
