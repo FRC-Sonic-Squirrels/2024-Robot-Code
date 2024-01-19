@@ -167,6 +167,7 @@ public class RotateToGamepiece extends Command {
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     addRequirements(drive);
+    setName("RotateToGamepiece");
   }
 
   // Called when the command is initially scheduled.

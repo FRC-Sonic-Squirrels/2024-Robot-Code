@@ -67,6 +67,7 @@ public class DriveToGamepiece extends Command {
     this.gamepieceIntaked = gamepieceIntaked;
 
     addRequirements(drive);
+    setName("DriveToGamepiece");
   }
 
   // Called when the command is initially scheduled.
