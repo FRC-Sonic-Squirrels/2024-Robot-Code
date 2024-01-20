@@ -34,7 +34,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-
+    // FIXME: get actual arm code
     inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
   }
 
