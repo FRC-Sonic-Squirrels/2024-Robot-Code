@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -196,15 +197,15 @@ public class Limelight extends SubsystemBase {
     Rotation2d targetYaw = targetYaw(rawGamepieceData.tx);
     Rotation2d targetPitch = targetPitch(rawGamepieceData.ty);
     double distance = groundGamepieceDistance(targetPitch);
+    Pose2d pose = groundGamepiecePose(distance, targetYaw);
     return new ProcessedGamepieceData(
         targetYaw,
         targetPitch,
         distance,
-        groundGamepiecePose(distance, targetYaw),
-        new Pose2d(
-            closestGamepiece.pose.getX() + robotPoseSupplier.get().getX(),
-            closestGamepiece.pose.getY() + robotPoseSupplier.get().getY(),
-            new Rotation2d()),
+        pose,
+        robotPoseSupplier
+            .get()
+            .transformBy(new Transform2d(pose.getX(), pose.getY(), pose.getRotation())),
         rawGamepieceData.timestamp_RIOFPGA_capture,
         rawGamepieceData.confidence);
   }
@@ -234,6 +235,9 @@ public class Limelight extends SubsystemBase {
     Logger.recordOutput(
         "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/distance",
         processedGamepieceData.distance);
+    Logger.recordOutput(
+        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/distanceInches",
+        Units.metersToInches(processedGamepieceData.distance));
     Logger.recordOutput(
         "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/targetYaw",
         processedGamepieceData.targetYaw);

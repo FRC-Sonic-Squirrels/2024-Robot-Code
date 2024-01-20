@@ -24,13 +24,13 @@ public class DriveToGamepiece extends Command {
   private Supplier<Boolean> gamepieceIntaked;
 
   private LoggedTunableNumber rotationKp =
-      new LoggedTunableNumber("DriveToGamepiece/rotationKp", 4.9);
+      new LoggedTunableNumber("DriveToGamepiece/rotationKp", 0.4);
 
-  private LoggedTunableNumber Kp = new LoggedTunableNumber("DriveToGamepiece/Kp", 3.2);
+  private LoggedTunableNumber Kp = new LoggedTunableNumber("DriveToGamepiece/Kp", 0.4);
   private LoggedTunableNumber xKpSourceArea =
-      new LoggedTunableNumber("DriveToGamepiece/xKpSourceArea", 5.0);
+      new LoggedTunableNumber("DriveToGamepiece/xKpSourceArea", 0.1);
   private LoggedTunableNumber yKpSourceArea =
-      new LoggedTunableNumber("DriveToGamepiece/yKpSourceArea", 5.0);
+      new LoggedTunableNumber("DriveToGamepiece/yKpSourceArea", 0.1);
 
   private LoggedTunableNumber Ki = new LoggedTunableNumber("DriveToGamepiece/Ki", 0.0);
 
@@ -141,7 +141,7 @@ public class DriveToGamepiece extends Command {
       rotVel =
           rotationController.calculate(
               drive.getRawOdometryPose().getRotation().getRadians(),
-              targetGamepiece.get().targetYaw.getRadians());
+              targetGamepiece.get().targetYaw.getRadians() + Math.PI);
     }
 
     // TODO: ---------------change to estimated pose if using this IRL------------------
