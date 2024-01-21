@@ -84,7 +84,7 @@ public class VisionIOSim implements VisionIO {
   public synchronized void updateInputs(VisionIOInputs inputs) {
     visionSim.update(poseSupplier.get());
 
-    inputs.lastTimestamp = this.lastTimestamp;
+    inputs.lastTimestampCTRETime = this.lastTimestamp;
     inputs.lastResult = this.lastResult;
     inputs.connected = camera.isConnected();
   }
