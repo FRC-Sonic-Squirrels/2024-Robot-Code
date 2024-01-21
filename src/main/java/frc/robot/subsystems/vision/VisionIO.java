@@ -10,7 +10,7 @@ public interface VisionIO {
 
   public static class VisionIOInputs implements LoggableInputs {
     PhotonPipelineResult lastResult = new PhotonPipelineResult();
-    double lastTimestamp = -1.0;
+    double lastTimestampCTRETime = -1.0;
     boolean connected = false;
 
     @Override
@@ -19,7 +19,7 @@ public interface VisionIO {
       PhotonPipelineResult.serde.pack(new Packet(photonPacketBytes), lastResult);
       table.put("photonPacketBytes", photonPacketBytes);
 
-      table.put("lastTimestamp", lastTimestamp);
+      table.put("lastTimestampCTRETime", lastTimestampCTRETime);
       table.put("connected", connected);
     }
 
@@ -28,7 +28,7 @@ public interface VisionIO {
       byte[] photonPacketBytes = table.get("photonPacketBytes", new byte[0]);
       lastResult = PhotonPipelineResult.serde.unpack(new Packet(photonPacketBytes));
 
-      lastTimestamp = table.get("lastTimestamp", -1.0);
+      lastTimestampCTRETime = table.get("lastTimestampCTRETime", -1.0);
       connected = table.get("connected", false);
     }
   }
