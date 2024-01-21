@@ -13,7 +13,7 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionModule;
+import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
   // private static final boolean PHOENIX_PRO_LICENSE = true;
@@ -105,7 +105,7 @@ public class SimulatorRobotConfig extends RobotConfig {
   public static final String FRONT_RIGHT_CAMERA_NAME = "RightCamera";
   public static final String BACK_CAMERA_NAME = "BackCamera";
 
-  public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2023ChargedUp;
+  public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
   /*
    *
@@ -145,7 +145,7 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   // FIXME: define vision modules here
   @Override
-  public VisionModule[] getVisionModuleObjects() {
+  public VisionModuleConfiguration[] getVisionModuleObjects() {
     // does not work for SIM because we need to give VisionIOSim a pose supplier which can only be
     // obtained from the drivetrain
     throw new RuntimeException("Unsupported action for SIM BOT");
@@ -159,14 +159,15 @@ public class SimulatorRobotConfig extends RobotConfig {
   }
 
   @Override
-  public VisionModule[] getReplayVisionModules() {
-    VisionModule frontLeft =
-        new VisionModule(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModule frontRight =
-        new VisionModule(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-    VisionModule back = new VisionModule(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
+  public VisionModuleConfiguration[] getReplayVisionModules() {
+    VisionModuleConfiguration frontLeft =
+        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration frontRight =
+        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration back =
+        new VisionModuleConfiguration(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
 
-    return new VisionModule[] {frontLeft, frontRight, back};
+    return new VisionModuleConfiguration[] {frontLeft, frontRight, back};
   }
 
   @Override
