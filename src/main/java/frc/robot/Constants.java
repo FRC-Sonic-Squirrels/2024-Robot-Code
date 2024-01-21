@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -119,7 +119,7 @@ public final class Constants {
   public class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
-    public static final double SHOOTER_OFFSET_METERS = 0.0;
+    public static final double SHOOTER_OFFSET_METERS = Units.inchesToMeters(12);
     public static final double SHOOTER_LENGTH = Units.feetToMeters(1.5);
 
     public class Pitch {

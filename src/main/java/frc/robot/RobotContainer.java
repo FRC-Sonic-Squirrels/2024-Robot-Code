@@ -288,11 +288,11 @@ public class RobotContainer {
                   if (DriverStation.getAlliance().isPresent()) {
                     return new Translation2d(
                         DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                            ? 0.23826955258846283
+                            ? 0.03950466960668564
                             : 16.281435012817383,
                         5.498747638702393);
                   } else {
-                    return new Translation2d(0.23826955258846283, 5.498747638702393);
+                    return new Translation2d(0.03950466960668564, 5.498747638702393);
                   }
                 },
                 drivetrain,
