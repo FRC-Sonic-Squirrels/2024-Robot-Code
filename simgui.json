@@ -1,6 +1,8 @@
 {
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleArm": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleShooter": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d"
