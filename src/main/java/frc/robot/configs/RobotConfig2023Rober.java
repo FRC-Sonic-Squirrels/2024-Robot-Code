@@ -16,7 +16,7 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionModule;
+import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class RobotConfig2023Rober extends RobotConfig {
 
@@ -157,7 +157,7 @@ public class RobotConfig2023Rober extends RobotConfig {
   public static final String FRONT_RIGHT_CAMERA_NAME = "RightCamera";
   public static final String BACK_CAMERA_NAME = "Arducam_OV9281_Camera_4";
 
-  public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2023ChargedUp;
+  public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
   /*
    *
@@ -200,33 +200,33 @@ public class RobotConfig2023Rober extends RobotConfig {
 
   // FIXME: define vision modules here
   @Override
-  public VisionModule[] getVisionModuleObjects() {
-    VisionModule frontLeft =
-        new VisionModule(
+  public VisionModuleConfiguration[] getVisionModuleObjects() {
+    VisionModuleConfiguration frontLeft =
+        new VisionModuleConfiguration(
             new VisionIOPhotonVision(FRONT_LEFT_CAMERA_NAME),
             "frontLeft",
             FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModule frontRight =
-        new VisionModule(
+    VisionModuleConfiguration frontRight =
+        new VisionModuleConfiguration(
             new VisionIOPhotonVision(FRONT_RIGHT_CAMERA_NAME),
             "frontRight",
             FRONT_RIGHT_ROBOT_TO_CAMERA);
     // VisionModule back = new VisionModule(new VisionIOPhotonVision(BACK_CAMERA_NAME), "back",
     // BACK_ROBOT_TO_CAMERA);
 
-    return new VisionModule[] {
+    return new VisionModuleConfiguration[] {
       frontLeft, frontRight, /*back*/
     };
   }
 
   @Override
-  public VisionModule[] getReplayVisionModules() {
-    VisionModule frontLeft =
-        new VisionModule(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModule frontRight =
-        new VisionModule(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
+  public VisionModuleConfiguration[] getReplayVisionModules() {
+    VisionModuleConfiguration frontLeft =
+        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration frontRight =
+        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
 
-    return new VisionModule[] {frontLeft, frontRight};
+    return new VisionModuleConfiguration[] {frontLeft, frontRight};
   }
 
   @Override
