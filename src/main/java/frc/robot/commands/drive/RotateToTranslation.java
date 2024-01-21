@@ -13,17 +13,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.limelight.ProcessedGamepieceData;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class RotateToGamepiece extends Command {
-  private Supplier<ProcessedGamepieceData> targetGamepiece;
+public class RotateToTranslation extends Command {
+  private Supplier<Translation2d> target;
   private Drivetrain drive;
-  private Supplier<Boolean> gamepieceIntaked;
+  private Supplier<Boolean> endCondition;
 
   private Rotation2d robotRotationOffset;
 
@@ -48,22 +48,22 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
    * @return Command to lock rotation in direction of target gamepiece
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked) {
+      Supplier<Boolean> endCondition) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         new Rotation2d(0.0));
   }
 
@@ -72,24 +72,25 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
-   * @return Command to lock rotation in direction of target gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing taget
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         robotRotationOffset,
         () -> 0.0,
         0.0);
@@ -100,26 +101,27 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing target
    * @param omegaSupplier controller rotation output
-   * @return Command to lock rotation in direction of target gamepiece
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         robotRotationOffset,
         omegaSupplier,
         0.3);
@@ -138,29 +140,30 @@ public class RotateToGamepiece extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing target
    * @param omegaSupplier controller rotation output
    * @param driverInfluencePercent 0.0 (rotation is fully based on command) -> 1.0 (when
    *     omegaSupplier is at 1 or -1, rotation is fully based on driver input)
-   * @return Command to lock rotation in direction of target gamepiece
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier,
       Double driverInfluencePercent) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
-    this.targetGamepiece = targetGamepiece;
+    this.target = target;
     this.drive = drive;
-    this.gamepieceIntaked = gamepieceIntaked;
+    this.endCondition = endCondition;
     this.robotRotationOffset = robotRotationOffset;
     this.omegaSupplier = omegaSupplier;
     this.driverInfluencePercent = driverInfluencePercent;
@@ -205,7 +208,10 @@ public class RotateToGamepiece extends Command {
 
     var currentRot = drive.getRotation();
 
-    var goalRot = targetGamepiece.get().targetYaw.plus(robotRotationOffset);
+    Rotation2d heading =
+        GeometryUtil.getHeading(drive.getRawOdometryPose().getTranslation(), target.get());
+
+    var goalRot = heading.plus(robotRotationOffset);
 
     var driverRotVel = omega * drive.getMaxAngularSpeedRadPerSec();
 
@@ -232,11 +238,10 @@ public class RotateToGamepiece extends Command {
 
     rotVelCorrection =
         Math.hypot(xVel, yVel)
-            * Math.cos(
-                targetGamepiece.get().targetYaw.getRadians()
-                    - new Rotation2d(xVel, yVel).getRadians()
-                    - Math.PI / 2)
-            / targetGamepiece.get().distance;
+            * Math.cos(heading.getRadians() - new Rotation2d(xVel, yVel).getRadians() - Math.PI / 2)
+            / Math.hypot(
+                drive.getRawOdometryPose().getX() - target.get().getX(),
+                drive.getRawOdometryPose().getY() - target.get().getY());
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("RotateToGamepiece/RotationalEffort", rotationalEffort);
@@ -265,6 +270,6 @@ public class RotateToGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return gamepieceIntaked.get();
+    return endCondition.get();
   }
 }
