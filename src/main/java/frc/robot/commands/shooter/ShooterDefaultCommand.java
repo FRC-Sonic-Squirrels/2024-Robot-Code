@@ -55,10 +55,14 @@ public class ShooterDefaultCommand extends Command {
     }
   }
 
+  // TODO: find everywhere that rawodometry pose is used and evaluate whether its needed
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
+
+    shooter.setLauncherClosedLoopConstants(10.0, 0, 0);
     if (RobotState.getInstance().getScoringMode().equals(RobotState.ScoringMode.SPEAKER)) {
       double distToSpeaker =
           Math.hypot(
