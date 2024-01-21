@@ -23,6 +23,8 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController;
@@ -36,6 +38,7 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.RobotState.ScoringMode;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.drive.RotateToTranslation;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
 import frc.robot.commands.shooter.ShooterDefaultCommand;
@@ -309,6 +312,29 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new RotateToTranslation(
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> {
+                  if (DriverStation.getAlliance().isPresent()) {
+                    return new Translation2d(
+                        DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                            ? 0.23826955258846283
+                            : 16.281435012817383,
+                        5.498747638702393);
+                  } else {
+                    return new Translation2d(0.23826955258846283, 5.498747638702393);
+                  }
+                },
+                drivetrain,
+                () -> false,
+                new Rotation2d(0.0),
+                () -> 0.0,
+                0.0));
     // ----------- OPERATOR CONTROLS ------------
 
     operatorController
