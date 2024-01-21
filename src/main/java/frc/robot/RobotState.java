@@ -8,7 +8,7 @@ package frc.robot;
 public class RobotState {
   private static RobotState instance = null;
   private IntakeMode intakeMode = IntakeMode.INTAKE;
-  private ScoringMode shootMode = ScoringMode.NONE;
+  private ScoringMode shootMode = ScoringMode.SPEAKER;
 
   public static RobotState getInstance() {
     if (instance == null) {
