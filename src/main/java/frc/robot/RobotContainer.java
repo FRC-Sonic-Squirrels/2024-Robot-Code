@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
@@ -32,7 +33,8 @@ import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.drive.RotateToTranslation;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
-import frc.robot.commands.shooter.ShooterDefaultCommand;
+import frc.robot.commands.shooter.ShooterShootMode;
+import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.arm.Arm;
@@ -228,7 +230,8 @@ public class RobotContainer {
 
     intake.setDefaultCommand(new IntakeDefaultCommand(intake, driverController.getHID()));
 
-    shooter.setDefaultCommand(new ShooterDefaultCommand(shooter, drivetrain));
+    shooter.setDefaultCommand(new ShooterStowMode(shooter));
+
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -284,22 +287,20 @@ public class RobotContainer {
             new RotateToTranslation(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
-                () -> {
-                  if (DriverStation.getAlliance().isPresent()) {
-                    return new Translation2d(
-                        DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                            ? 0.03950466960668564
-                            : 16.281435012817383,
-                        5.498747638702393);
-                  } else {
-                    return new Translation2d(0.03950466960668564, 5.498747638702393);
-                  }
-                },
+                () ->
+                    DriverStation.getAlliance().isPresent()
+                        ? new Translation2d(
+                            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                                ? 0.03950466960668564
+                                : 16.281435012817383,
+                            5.498747638702393)
+                        : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
                 new Rotation2d(0.0),
                 () -> 0.0,
                 0.0));
+
     // ----------- OPERATOR CONTROLS ------------
 
     operatorController
@@ -331,5 +332,13 @@ public class RobotContainer {
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(new Rotation2d(), shooter.getPitch());
     SimpleMechanismVisualization.logMechanism();
+  }
+
+  public void updateRobotState() {
+    if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER))
+      CommandScheduler.getInstance()
+          .schedule(
+              (new ShooterShootMode(
+                  shooter, endEffector, drivetrain, driverController.rightTrigger())));
   }
 }

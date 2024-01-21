@@ -124,6 +124,7 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("RobotState/intake mode", RobotState.getInstance().getIntakeMode());
 
     robotContainer.updateVisualization();
+    robotContainer.updateRobotState();
   }
 
   /** This function is called once when the robot is disabled. */
