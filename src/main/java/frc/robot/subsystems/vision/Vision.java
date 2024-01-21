@@ -280,10 +280,15 @@ public class Vision extends SubsystemBase {
     cleanTargets.forEach(
         (PhotonTrackedTarget tag) -> tagsUsedInPoseEstimation.add(tag.getFiducialId()));
 
-    var status =
-        multiTagFailed
-            ? VisionResultStatus.SUCCESSFUL_MULTI_TAG_FAILED
-            : VisionResultStatus.SUCCESSFUL;
+    VisionResultStatus status;
+    if (numTargetsSeen == 1) {
+      status = VisionResultStatus.SUCCESSFUL_SINGLE_TAG;
+    } else {
+      status =
+          multiTagFailed
+              ? VisionResultStatus.SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK
+              : VisionResultStatus.SUCCESSFUL_MULTI_TAG;
+    }
 
     return new VisionResultLoggedFields(
         status,
@@ -340,8 +345,14 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         ROOT_TABLE_PATH + "thetaStandardDeviation", fieldsToLog.thetaStandardDeviation());
 
+    var currentStatus = fieldsToLog.status();
     boolean addedVisionEstimateToPoseEstimator =
-        (fieldsToLog.status() == VisionResultStatus.SUCCESSFUL) ? true : false;
+        (currentStatus == VisionResultStatus.SUCCESSFUL_MULTI_TAG
+                || currentStatus == VisionResultStatus.SUCCESSFUL_SINGLE_TAG
+                || currentStatus
+                    == VisionResultStatus.SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK)
+            ? true
+            : false;
     Logger.recordOutput(
         ROOT_TABLE_PATH + "addedVisionEstimateToPoseEstimator(AKA SUCCESSFUL?)",
         addedVisionEstimateToPoseEstimator);
