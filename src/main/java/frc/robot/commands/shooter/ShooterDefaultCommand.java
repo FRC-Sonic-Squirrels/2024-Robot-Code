@@ -14,13 +14,14 @@ import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterDefaultCommand extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
 
-  private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp", 3.0);
+  private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp", 10.0);
   private LoggedTunableNumber ki = new LoggedTunableNumber("ShooterDefaultCommand/pitchKi", 0.0);
   private LoggedTunableNumber kd = new LoggedTunableNumber("ShooterDefaultCommand/pitchKd", 0.0);
   private LoggedTunableNumber tolerance =
@@ -42,12 +43,16 @@ public class ShooterDefaultCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    speakerPose =
-        new Translation2d(
-            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                ? 0.23826955258846283
-                : 16.281435012817383,
-            5.498747638702393);
+    if (DriverStation.getAlliance().isPresent()) {
+      speakerPose =
+          new Translation2d(
+              DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                  ? 0.23826955258846283
+                  : 16.281435012817383,
+              5.498747638702393);
+    } else {
+      speakerPose = new Translation2d(0.23826955258846283, 5.498747638702393);
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -67,20 +72,26 @@ public class ShooterDefaultCommand extends Command {
           new Rotation2d(
               drive.getRawOdometryPose().getX() - speakerPose.getX(),
               drive.getRawOdometryPose().getY() - speakerPose.getY());
+      double linearVelSpeaker =
+          new Translation2d(
+                  drive.getFieldRelativeVelocities().getX(),
+                  drive.getFieldRelativeVelocities().getY())
+              .rotateBy(speakerHeading)
+              .getX();
       shooterPitchVelCorrection =
-          Constants.ShooterConstants.Pitch.PITCH_VEL_RAD_PER_SEC(
-              new Translation2d(
-                      drive.getFieldRelativeVelocities().getX(),
-                      drive.getFieldRelativeVelocities().getY())
-                  .rotateBy(speakerHeading)
-                  .getY(),
-              distToSpeaker);
-      shooter.setPitchAngularVel(
-          shooterPitchPID.calculate(
-                  shooter.getPitch().getRadians(),
-                  Constants.ShooterConstants.Pitch.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker)
-                      .getRadians())
-              + shooterPitchVelCorrection);
+          Constants.ShooterConstants.Pitch.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
+
+      double targetAngle =
+          Constants.ShooterConstants.Pitch.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
+      double vel =
+          shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
+              + shooterPitchVelCorrection;
+      shooter.setPitchAngularVel(vel);
+
+      Logger.recordOutput("ShooterDefaultCommand/velCorrection", shooterPitchVelCorrection);
+      Logger.recordOutput("ShooterDefaultCommand/vel", vel);
+      Logger.recordOutput("ShooterDefaultCommand/targetAngleDegrees", Math.toDegrees(targetAngle));
+      Logger.recordOutput("ShooterDefaultCommand/linearVelSpeaker", linearVelSpeaker);
     } else {
       shooter.setRPM(0.0);
       shooter.setPitchAngularVel(
