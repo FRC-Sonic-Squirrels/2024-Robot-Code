@@ -15,18 +15,22 @@ public class Shooter extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
     this.io = io;
-    Logger.processInputs("Shooter", inputs);
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+
+    Logger.processInputs("Shooter", inputs);
+    Logger.recordOutput("Shooter/PitchDegrees", inputs.pitch.getDegrees());
   }
 
-  public void setPitchAngularVel(double radiansPerSecond) {}
+  public void setPitchAngularVel(double radiansPerSecond) {
+    io.setVel(radiansPerSecond);
+  }
 
   public Rotation2d getPitch() {
-    return new Rotation2d();
+    return inputs.pitch;
   }
 
   public void setPercentOut(double percent) {}
