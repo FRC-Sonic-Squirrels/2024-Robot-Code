@@ -58,7 +58,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.subsystems.vision.VisionModule;
+import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIO;
 import frc.robot.subsystems.wrist.WristIOReal;
@@ -113,7 +113,14 @@ public class RobotContainer {
 
     if (mode == Mode.REPLAY) {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
-      vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+
+      vision =
+          new Vision(
+              aprilTagLayout,
+              drivetrain::getPoseEstimatorPose,
+              drivetrain::addVisionEstimate,
+              config.getReplayVisionModules());
+
       arm = new Arm(new ArmIO() {});
       elevator = new Elevator(new ElevatorIO() {});
       intake = new Intake(new IntakeIO() {});
@@ -142,19 +149,19 @@ public class RobotContainer {
           com.ctre.phoenix6.unmanaged.Unmanaged.setPhoenixDiagnosticsStartTime(0.0);
 
           drivetrain = new Drivetrain(config, new GyroIO() {}, config.getSwerveModuleObjects());
-          VisionModule[] visionModules = {
-            new VisionModule(
+          VisionModuleConfiguration[] visionModules = {
+            new VisionModuleConfiguration(
                 new VisionIOSim(
                     config,
-                    drivetrain::getRawOdometryPose,
+                    drivetrain::getPoseEstimatorPose,
                     SimulatorRobotConfig.FRONT_LEFT_ROBOT_TO_CAMERA,
                     SimulatorRobotConfig.FRONT_LEFT_CAMERA_NAME),
                 SimulatorRobotConfig.FRONT_LEFT_CAMERA_NAME,
                 SimulatorRobotConfig.FRONT_LEFT_ROBOT_TO_CAMERA),
-            new VisionModule(
+            new VisionModuleConfiguration(
                 new VisionIOSim(
                     config,
-                    drivetrain::getRawOdometryPose,
+                    drivetrain::getPoseEstimatorPose,
                     SimulatorRobotConfig.FRONT_RIGHT_ROBOT_TO_CAMERA,
                     SimulatorRobotConfig.FRONT_RIGHT_CAMERA_NAME),
                 SimulatorRobotConfig.FRONT_RIGHT_CAMERA_NAME,
@@ -169,7 +176,12 @@ public class RobotContainer {
             //     SimulatorRobotConfig.BACK_ROBOT_TO_CAMERA),
           };
 
-          vision = new Vision(aprilTagLayout, drivetrain, visionModules);
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::addVisionEstimate,
+                  visionModules);
           arm = new Arm(new ArmIOSim());
           elevator = new Elevator(new ElevatorIOSim());
           intake = new Intake(new IntakeIOSim());
@@ -184,7 +196,12 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
-          vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::addVisionEstimate,
+                  config.getVisionModuleObjects());
           arm = new Arm(new ArmIO() {});
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
@@ -199,7 +216,12 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
-          vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::addVisionEstimate,
+                  config.getVisionModuleObjects());
           arm = new Arm(new ArmIOReal());
           elevator = new Elevator(new ElevatorIOReal());
           intake = new Intake(new IntakeIOReal());
@@ -213,7 +235,12 @@ public class RobotContainer {
         default:
           drivetrain =
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
-          vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::addVisionEstimate,
+                  config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
