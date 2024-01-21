@@ -165,4 +165,10 @@ public final class Constants {
     // TODO: get actual DIO ports
     public static final int INTAKE_BEAM_BREAK = 0;
   }
+
+  public enum ControlMode {
+    POSITION,
+    VELOCITY,
+    VOLTAGE
+  }
 }
