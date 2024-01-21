@@ -6,11 +6,16 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team6328.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+
+  private double launcherTargetRPM = 0.0;
+
+  private LoggedTunableNumber RPMTolerance = new LoggedTunableNumber("Shooter/RPMTolerance", 20.0);
 
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
@@ -37,10 +42,6 @@ public class Shooter extends SubsystemBase {
     io.setLauncherPercentOut(percent);
   }
 
-  public void setRPM(double RPM) {
-    io.setLauncherRPM(RPM);
-  }
-
   public void setPivotClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
     io.setPivotClosedLoopConstants(kP, kD, kG, maxProfiledVelocity, maxProfiledAcceleration);
@@ -62,7 +63,20 @@ public class Shooter extends SubsystemBase {
     io.setLauncherPercentOut(percent);
   }
 
+  public void setRPM(double RPM) {
+    io.setLauncherRPM(RPM);
+    launcherTargetRPM = RPM;
+  }
+
   public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {
     io.setLauncherClosedLoopConstants(kP, kI, kD);
+  }
+
+  public boolean launcherIsAtTargetVel() {
+    return Math.abs(inputs.RPM - launcherTargetRPM) <= RPMTolerance.get();
+  }
+
+  public boolean launcherIsAtTargetVel(double RPM) {
+    return Math.abs(inputs.RPM - RPM) <= RPMTolerance.get();
   }
 }
