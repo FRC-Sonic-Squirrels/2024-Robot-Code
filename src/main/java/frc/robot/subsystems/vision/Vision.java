@@ -44,6 +44,7 @@ public class Vision extends SubsystemBase {
   private boolean useMaxDistanceAwayFromExistingEstimate = true;
 
   private HashMap<Integer, Double> lastTagDetectionTimes = new HashMap<Integer, Double>();
+  private ArrayList<Integer> tagsUsedInPoseEstimation = new ArrayList<Integer>();
 
   private List<Pose3d> posesFedToPoseEstimator3D = new ArrayList<>();
   private List<Pose2d> posesFedToPoseEstimator2D = new ArrayList<>();
@@ -66,10 +67,6 @@ public class Vision extends SubsystemBase {
 
     for (VisionModuleConfiguration config : visionModuleConfigs) {
       visionModules.add(new VisionModule(config, aprilTagLayout));
-    }
-
-    for (AprilTag tag : aprilTagLayout.getTags()) {
-      Logger.recordOutput("Vision/AllAprilTags3D/" + tag.ID, tag.pose);
     }
 
     aprilTagLayout.getTags().forEach((AprilTag tag) -> lastTagDetectionTimes.put(tag.ID, -1.0));
@@ -115,14 +112,6 @@ public class Vision extends SubsystemBase {
       logVisionModule(visionModule);
     }
 
-    List<Pose3d> allSeenTags = new ArrayList<>();
-    for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
-      if (detectionEntry.getValue() == Timer.getFPGATimestamp()) {
-        var tagPose = aprilTagLayout.getTagPose(detectionEntry.getKey());
-        allSeenTags.add(tagPose.get());
-      }
-    }
-
     // activate alerts if camera is not connected
     for (VisionModule module : visionModules) {
       module.missingCameraAlert.set(module.visionIOInputs.connected);
@@ -136,8 +125,27 @@ public class Vision extends SubsystemBase {
       Logger.recordOutput("Vision/" + visionModule.name + "/CameraPose", camPose);
     }
 
+    // logging all visible tags
+    List<Pose3d> allSeenTags = new ArrayList<>();
+    for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
+      if (detectionEntry.getValue() == Timer.getFPGATimestamp()) {
+        var tagPose = aprilTagLayout.getTagPose(detectionEntry.getKey());
+        allSeenTags.add(tagPose.get());
+      }
+    }
     Logger.recordOutput(
-        "Vision/currentVisibleTags", allSeenTags.toArray(new Pose3d[allSeenTags.size()]));
+        "Vision/visibleTags/rawAllVisibleTags",
+        allSeenTags.toArray(new Pose3d[allSeenTags.size()]));
+
+    // logging tags actually used in pose estimation
+    Pose3d[] tagsUsedInPoseEstimationPoses = new Pose3d[tagsUsedInPoseEstimation.size()];
+    for (int i = 0; i < tagsUsedInPoseEstimation.size(); i++) {
+      tagsUsedInPoseEstimationPoses[i] =
+          aprilTagLayout.getTagPose(tagsUsedInPoseEstimation.get(i)).get();
+    }
+    Logger.recordOutput(
+        "Vision/visibleTags/tagsActuallyUsedInPoseEstimation", tagsUsedInPoseEstimationPoses);
+
     Logger.recordOutput(
         "Vision/posesFedToPoseEstimator3D",
         posesFedToPoseEstimator3D.toArray(new Pose3d[posesFedToPoseEstimator3D.size()]));
@@ -145,6 +153,7 @@ public class Vision extends SubsystemBase {
         "Vision/posesFedToPoseEstimator2D",
         posesFedToPoseEstimator2D.toArray(new Pose2d[posesFedToPoseEstimator2D.size()]));
 
+    tagsUsedInPoseEstimation.clear();
     posesFedToPoseEstimator3D.clear();
     posesFedToPoseEstimator2D.clear();
 
@@ -268,6 +277,8 @@ public class Vision extends SubsystemBase {
 
     posesFedToPoseEstimator3D.add(newCalculatedRobotPose);
     posesFedToPoseEstimator2D.add(newCalculatedRobotPose.toPose2d());
+    cleanTargets.forEach(
+        (PhotonTrackedTarget tag) -> tagsUsedInPoseEstimation.add(tag.getFiducialId()));
 
     var status =
         multiTagFailed
