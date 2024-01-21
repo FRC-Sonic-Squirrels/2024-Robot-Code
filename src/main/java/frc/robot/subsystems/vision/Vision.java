@@ -73,6 +73,13 @@ public class Vision extends SubsystemBase {
     }
 
     aprilTagLayout.getTags().forEach((AprilTag tag) -> lastTagDetectionTimes.put(tag.ID, -1.0));
+
+    Pose3d[] allTagsArray = new Pose3d[aprilTagLayout.getTags().size()];
+    var allTagsList = aprilTagLayout.getTags();
+    for (int i = 0; i < aprilTagLayout.getTags().size(); i++) {
+      allTagsArray[i] = allTagsList.get(i).pose;
+    }
+    Logger.recordOutput("Vision/AllAprilTags3D", allTagsArray);
   }
 
   @Override
