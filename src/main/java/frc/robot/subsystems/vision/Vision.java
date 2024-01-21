@@ -26,9 +26,9 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Vision extends SubsystemBase {
   private static LoggedTunableNumber thetaStdDevCoefficient =
-      new LoggedTunableNumber("vision/thetaStdDevCoefficient", 0.075);
+      new LoggedTunableNumber("Vision/thetaStdDevCoefficient", 0.075);
   private static LoggedTunableNumber xyStdDevCoefficient =
-      new LoggedTunableNumber("vision/xyStdDevCoefficient", 0.075);
+      new LoggedTunableNumber("Vision/xyStdDevCoefficient", 0.075);
 
   private static LoggedTunableNumber maxSingleTargetAmbiguity =
       new LoggedTunableNumber("Vision/MaxSingleTargetAmbiguity", 0.08);
