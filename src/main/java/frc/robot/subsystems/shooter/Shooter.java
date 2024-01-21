@@ -26,14 +26,43 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setPitchAngularVel(double radiansPerSecond) {
-    io.setVel(radiansPerSecond);
+    io.setPivotVel(radiansPerSecond);
   }
 
   public Rotation2d getPitch() {
     return inputs.pitch;
   }
 
-  public void setPercentOut(double percent) {}
+  public void setPercentOut(double percent) {
+    io.setLauncherPercentOut(percent);
+  }
 
-  public void setRPM(double RPM) {}
+  public void setRPM(double RPM) {
+    io.setLauncherRPM(RPM);
+  }
+
+  public void setPivotClosedLoopConstants(
+      double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
+    io.setPivotClosedLoopConstants(kP, kD, kG, maxProfiledVelocity, maxProfiledAcceleration);
+  }
+
+  public void setPivotVoltage(double volts) {
+    io.setPivotVoltage(volts);
+  }
+
+  public void setPivotPosition(Rotation2d rot) {
+    io.setPivotPosition(rot);
+  }
+
+  public void setLauncherVoltage(double volts) {
+    io.setLauncherVoltage(volts);
+  }
+
+  public void setLauncherPercentOut(double percent) {
+    io.setLauncherPercentOut(percent);
+  }
+
+  public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {
+    io.setLauncherClosedLoopConstants(kP, kI, kD);
+  }
 }
