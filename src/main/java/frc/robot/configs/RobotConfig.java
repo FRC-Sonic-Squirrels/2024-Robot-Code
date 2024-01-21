@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
-import frc.robot.subsystems.vision.VisionModule;
+import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public abstract class RobotConfig {
 
@@ -159,9 +159,9 @@ public abstract class RobotConfig {
 
   public abstract SwerveModule[] getReplaySwerveModuleObjects();
 
-  public abstract VisionModule[] getVisionModuleObjects();
+  public abstract VisionModuleConfiguration[] getVisionModuleObjects();
 
-  public abstract VisionModule[] getReplayVisionModules();
+  public abstract VisionModuleConfiguration[] getReplayVisionModules();
 
   public abstract AprilTagFieldLayout getAprilTagFieldLayout();
 }
