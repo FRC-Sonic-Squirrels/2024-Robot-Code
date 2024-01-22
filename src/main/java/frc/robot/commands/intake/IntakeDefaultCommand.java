@@ -47,7 +47,7 @@ public class IntakeDefaultCommand extends Command {
         && gamepieceTimeInIntake.get() <= rumbleDurationSeconds.get()) {
       controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
     }
-    intake.setTargetRPM(Constants.IntakeConstants.INTAKE_IDLE_RPM);
+    intake.setRPM(Constants.IntakeConstants.INTAKE_IDLE_RPM);
   }
 
   // Called once the command ends or is interrupted.
