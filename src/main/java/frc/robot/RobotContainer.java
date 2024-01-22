@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
+import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.RobotState.ScoringMode;
@@ -330,7 +331,19 @@ public class RobotContainer {
   }
 
   public void updateVisualization() {
-    SimpleMechanismVisualization.updateVisualization(new Rotation2d(), shooter.getPitch());
+    SimpleMechanismVisualization.updateVisualization(
+        new Rotation2d(),
+        shooter.getPitch(),
+        Math.hypot(
+            GeometryUtil.getDist(
+                drivetrain.getPoseEstimatorPose().getTranslation(),
+                DriverStation.getAlliance().isPresent()
+                    ? (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                        ? Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION
+                        : Constants.FieldConstants.RED_SPEAKER_TRANSLATION)
+                    : Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION),
+            Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
+        shooter.getRPM());
     SimpleMechanismVisualization.logMechanism();
   }
 
