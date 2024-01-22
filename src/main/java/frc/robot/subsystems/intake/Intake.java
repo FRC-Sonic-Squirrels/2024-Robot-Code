@@ -5,13 +5,12 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
-
-  private final double MAX_VOLTAGE = 12.0;
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
@@ -34,7 +33,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void setPercentOut(double percent) {
-    io.setVoltage(percent * MAX_VOLTAGE);
+    io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
   public Boolean getBeamBreak() {

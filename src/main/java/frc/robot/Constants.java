@@ -98,6 +98,9 @@ public final class Constants {
     public static final double SUPPLY_CURRENT_LIMIT = 50.0;
     public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
     public static final double SUPPLY_TIME_THRESHOLD = 2.0;
+
+    public static final double GEARING = 1.0;
+    public static final double MOI = 5.0;
   }
 
   public class EndEffectorConstants {
@@ -137,4 +140,6 @@ public final class Constants {
     VELOCITY,
     VOLTAGE
   }
+
+  public static final double MAX_VOLTAGE = 12.0;
 }
