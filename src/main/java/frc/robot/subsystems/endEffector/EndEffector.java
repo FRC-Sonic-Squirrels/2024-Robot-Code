@@ -11,6 +11,8 @@ public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
 
+  private final double MAX_VOLTAGE = 12.0;
+
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
@@ -31,7 +33,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public void setPercentOut(double percent) {
-    io.setPercentOut(percent);
+    io.setVoltage(percent / MAX_VOLTAGE);
   }
 
   public Boolean getBeamBreak() {
