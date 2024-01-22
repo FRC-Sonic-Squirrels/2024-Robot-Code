@@ -5,7 +5,6 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -29,11 +28,11 @@ public class Intake extends SubsystemBase {
   }
 
   public double getRPM() {
-    return inputs.velocityRPM;
+    return inputs.RPM;
   }
 
-  public void setTargetRPM(double target) {
-    io.setPercentOut(target / Constants.MotorConstants.KRAKEN_MAX_RPM);
+  public void setRPM(double RPM) {
+    io.setRPM(RPM);
   }
 
   public void setPercentOut(double percent) {
