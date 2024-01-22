@@ -91,12 +91,8 @@ public final class Constants {
     }
   }
 
-  public class MotorConstants {
-    public static final double KRAKEN_MAX_RPM = 6000.0;
-  }
-
   public class IntakeConstants {
-    public static final double INTAKE_IDLE_RPM = 5000.0;
+    public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
     public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
     public static final double SUPPLY_CURRENT_LIMIT = 50.0;

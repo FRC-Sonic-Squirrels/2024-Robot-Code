@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.Constants;
 
 public class IntakeIOSim implements IntakeIO {
 
@@ -17,6 +16,5 @@ public class IntakeIOSim implements IntakeIO {
     motorSim = motor.getSimState();
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
     inputs.currentAmps = motorSim.getSupplyCurrent();
-    inputs.RPM = motor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
   }
 }
