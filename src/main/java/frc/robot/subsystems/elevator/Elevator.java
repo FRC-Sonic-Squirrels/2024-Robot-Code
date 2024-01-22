@@ -13,6 +13,16 @@ public class Elevator extends SubsystemBase {
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
+  private static final String ROOT_TABLE = "Elevator";
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 10.0);
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 0.0);
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
+
+  private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 10.0);
+  private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 10.0);
+
   private final LoggedTunableNumber tolerance =
       new LoggedTunableNumber("Elevator/toleranceInches", 0.5);
 
@@ -21,12 +31,34 @@ public class Elevator extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
   public Elevator(ElevatorIO io) {
     this.io = io;
+
+    io.setPIDConstraints(
+        kP.get(),
+        kD.get(),
+        kG.get(),
+        new Constraints(
+            closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
+
+    // ---- UPDATE TUNABLE NUMBERS
+    var hc = hashCode();
+    if (kP.hasChanged(hc)
+        || kD.hasChanged(hc)
+        || kG.hasChanged(hc)
+        || closedLoopMaxVelocityConstraint.hasChanged(hc)
+        || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+      io.setPIDConstraints(
+          kP.get(),
+          kP.get(),
+          kG.get(),
+          new Constraints(
+              closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
+    }
   }
 
   public void setVoltage(double volts) {
@@ -52,9 +84,5 @@ public class Elevator extends SubsystemBase {
 
   public double getHeightInches() {
     return inputs.heightInches;
-  }
-
-  public void setPIDConstraints(double kP, double kD, double kG, Constraints constraints) {
-    io.setPIDConstraints(kP, kD, kG, constraints);
   }
 }
