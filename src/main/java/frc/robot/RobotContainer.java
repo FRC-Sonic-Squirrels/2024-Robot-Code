@@ -18,13 +18,12 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutoCommand;
-import frc.robot.autonomous.Autos;
+import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
@@ -64,6 +63,7 @@ import frc.robot.subsystems.wrist.WristIO;
 import frc.robot.subsystems.wrist.WristIOReal;
 import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -86,9 +86,9 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  private LoggedDashboardChooser<AutoCommand> autoChooser =
-      new LoggedDashboardChooser<>("Auto Routine");
-  private Autos autos;
+  private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
+      new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
+  private final AutosManager autoManager;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -132,7 +132,6 @@ public class RobotContainer {
           wrist = null;
           endEffector = null;
           limelight = null;
-          autos = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -174,7 +173,6 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
-          autos = new Autos(drivetrain, intake, config);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -189,7 +187,6 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, intake, config);
           break;
 
         case ROBOT_2024:
@@ -204,7 +201,6 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, intake, config);
           break;
 
         default:
@@ -218,10 +214,11 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
-          autos = new Autos(drivetrain, intake, config);
           break;
       }
     }
+
+    autoManager = new AutosManager(drivetrain, intake, config, autoChooser);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
@@ -285,28 +282,7 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public LoggedDashboardChooser<AutoCommand> getAutonomousChooser() {
-
-    for (int i = 0; i < autos.autoCommands().length; i++) {
-      if (i == 0) {
-        // Do nothing command must be first in list.
-        autoChooser.addDefaultOption(autos.autoCommands()[i].name, autos.autoCommands()[i]);
-      } else {
-        autoChooser.addOption(autos.autoCommands()[i].name, autos.autoCommands()[i]);
-      }
-    }
-
-    // TODO: add drive characterization command? maybe not necessary?
-    // autoChooser.addOption(
-    //   "Drive Characterization",
-    //    new FeedForwardCharacterization(
-    //        drivetrain,
-    //        true,
-    //        new FeedForwardCharacterizationData("drive"),
-    //        drivetrain::runCharacterizationVolts,
-    //        drivetrain::getCharacterizationVelocity));
-
-    Shuffleboard.getTab("MAIN").add(autoChooser.getSendableChooser());
+  public LoggedDashboardChooser<Supplier<AutoCommand>> getAutonomousChooser() {
     return autoChooser;
   }
 
