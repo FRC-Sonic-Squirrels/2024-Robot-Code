@@ -15,9 +15,5 @@ public interface IntakeIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IntakeIOInputs inputs) {}
 
-  public default void setPercentOut(double percent) {}
-
   public default void setVoltage(double volts) {}
-
-  public default void setRPM(double RPM) {}
 }

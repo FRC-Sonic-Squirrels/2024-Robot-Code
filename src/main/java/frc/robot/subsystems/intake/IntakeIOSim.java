@@ -19,9 +19,4 @@ public class IntakeIOSim implements IntakeIO {
     inputs.currentAmps = motorSim.getSupplyCurrent();
     inputs.RPM = motor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
   }
-
-  @Override
-  public void setPercentOut(double percent) {
-    motor.set(percent);
-  }
 }
