@@ -21,11 +21,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
-
-  // FIXME: fill in drive characterization for choreo and regenerate paths
-
-  // FIXME
-
   private Drivetrain drivetrain;
   private Intake intake;
 
