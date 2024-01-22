@@ -15,14 +15,15 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.autonomous.AutoCommand;
+import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
@@ -62,7 +63,9 @@ import frc.robot.subsystems.wrist.WristIO;
 import frc.robot.subsystems.wrist.WristIOReal;
 import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -82,6 +85,10 @@ public class RobotContainer {
   private final Limelight limelight;
 
   private final CommandXboxController controller = new CommandXboxController(0);
+
+  private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
+      new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
+  private final AutosManager autoManager;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -165,7 +172,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getRawOdometryPose);
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -210,6 +217,8 @@ public class RobotContainer {
           break;
       }
     }
+
+    autoManager = new AutosManager(drivetrain, intake, config, autoChooser);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
@@ -273,9 +282,12 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    // return autoChooser.get();
-    return new InstantCommand();
+  public LoggedDashboardChooser<Supplier<AutoCommand>> getAutonomousChooser() {
+    return autoChooser;
+  }
+
+  public void setPose(Pose2d pose) {
+    drivetrain.setPose(pose);
   }
 
   public double[] getCurrentDraws() {
