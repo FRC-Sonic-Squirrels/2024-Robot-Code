@@ -27,7 +27,7 @@ public class ShooterStowMode extends Command {
   @Override
   public void execute() {
     shooter.setLauncherClosedLoopConstants(10.0, 0, 0);
-    shooter.setPivotPosition(Constants.ShooterConstants.Pitch.SHOOTER_STOW_PITCH);
+    shooter.setPivotPosition(Constants.ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
   }
 
   // Called once the command ends or is interrupted.

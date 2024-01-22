@@ -134,7 +134,7 @@ public final class Constants {
     public static final double SHOOTER_OFFSET_METERS = Units.inchesToMeters(12);
     public static final double SHOOTER_LENGTH = Units.feetToMeters(1.5);
 
-    public class Pitch {
+    public class Pivot {
       public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
         return new Rotation2d(
             Math.atan2(
@@ -158,6 +158,11 @@ public final class Constants {
       public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
 
       public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
+    }
+
+    public static class Launcher {
+      public static final double MOI = 5.0;
+      public static final double GEARING = 1.0;
     }
   }
 

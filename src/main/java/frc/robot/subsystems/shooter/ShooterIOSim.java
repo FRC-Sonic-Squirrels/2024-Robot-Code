@@ -1,15 +1,12 @@
 package frc.robot.subsystems.shooter;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
@@ -20,18 +17,19 @@ public class ShooterIOSim implements ShooterIO {
   private SingleJointedArmSim pivot =
       new SingleJointedArmSim(
           DCMotor.getFalcon500Foc(1),
-          Constants.ShooterConstants.Pitch.GEARING,
+          Constants.ShooterConstants.Pivot.GEARING,
           SingleJointedArmSim.estimateMOI(Units.feetToMeters(1.5), 20.0),
           Constants.ShooterConstants.SHOOTER_LENGTH,
-          Constants.ShooterConstants.Pitch.MIN_ANGLE_RAD,
-          Constants.ShooterConstants.Pitch.MAX_ANGLE_RAD,
+          Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD,
+          Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD,
           false,
-          Constants.ShooterConstants.Pitch.SIM_INITIAL_ANGLE);
+          Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE);
 
-  private TalonFX leadMotor = new TalonFX(0);
-  private TalonFXSimState leadMotorSim = new TalonFXSimState(leadMotor);
-  private TalonFX followMotor = new TalonFX(0);
-  private TalonFXSimState followMotorSim = new TalonFXSimState(followMotor);
+  private DCMotorSim launcherMotorSim =
+      new DCMotorSim(
+          DCMotor.getFalcon500Foc(2),
+          Constants.ShooterConstants.Launcher.GEARING,
+          Constants.ShooterConstants.Launcher.MOI);
 
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
@@ -49,30 +47,18 @@ public class ShooterIOSim implements ShooterIO {
   private ControlMode launcherControlMode = ControlMode.VOLTAGE;
   private double launcherOpenLoopVolts = 0.0;
   private double launcherTargetVelRPM = 0.0;
+  private double launcherControlEffort = 0.0;
 
-  private StatusSignal<Double> launcherRotorVelocity;
-  private StatusSignal<Double> launcherLeadTempCelsius;
-  private StatusSignal<Double> launcherFollowTempCelsius;
-  private StatusSignal<Double> launcherVoltage;
-
-  public ShooterIOSim() {
-    followMotor.setControl(leadMotor.getAppliedControl());
-
-    launcherRotorVelocity = leadMotor.getRotorVelocity();
-    launcherLeadTempCelsius = leadMotor.getDeviceTemp();
-    launcherFollowTempCelsius = followMotor.getDeviceTemp();
-    launcherVoltage = leadMotor.getMotorVoltage();
-  }
+  public ShooterIOSim() {}
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        launcherRotorVelocity, launcherLeadTempCelsius, launcherFollowTempCelsius, launcherVoltage);
 
     pivot.update(0.02);
+    launcherMotorSim.update(0.02);
 
     inputs.pitch = new Rotation2d(pivot.getAngleRads());
-    inputs.launcherVoltage = leadMotorSim.getMotorVoltage();
+    inputs.RPM = launcherMotorSim.getAngularVelocityRPM();
 
     double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
 
@@ -83,7 +69,6 @@ public class ShooterIOSim implements ShooterIO {
                   inputs.pitch.getRadians(), pivotClosedLoopTargetAngle.getRadians())
               + ff;
 
-      Logger.recordOutput("Shooter/feedForward", ff);
       Logger.recordOutput("Shooter/error", pivotFeedback.getPositionError());
 
     } else if (pivotControlMode.equals(ControlMode.VELOCITY)) {
@@ -96,14 +81,20 @@ public class ShooterIOSim implements ShooterIO {
       pivotControlEffort = pivotOpenLoopVolts;
     }
 
+    Logger.recordOutput("Shooter/feedForward", ff);
+
     if (launcherControlMode.equals(ControlMode.VELOCITY)) {
 
-      leadMotorSim.setSupplyVoltage(launcherTargetVelRPM / 6000.0);
+      launcherControlEffort =
+          launcherVelController.calculate(
+              launcherMotorSim.getAngularVelocityRPM(), launcherTargetVelRPM);
 
     } else {
 
-      leadMotorSim.setSupplyVoltage(launcherOpenLoopVolts);
+      launcherControlEffort = launcherOpenLoopVolts;
     }
+
+    launcherMotorSim.setInputVoltage(launcherControlEffort);
 
     pivot.setInputVoltage(pivotControlEffort);
 

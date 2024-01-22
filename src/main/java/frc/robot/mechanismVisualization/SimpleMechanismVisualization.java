@@ -30,7 +30,7 @@ public class SimpleMechanismVisualization {
           new MechanismLigament2d(
               "shooter",
               Constants.ShooterConstants.SHOOTER_LENGTH,
-              Constants.ShooterConstants.Pitch.SIM_INITIAL_ANGLE));
+              Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE));
 
   public static void updateVisualization(Rotation2d armAngle, Rotation2d shooterAngle) {
     arm.setAngle(armAngle);
