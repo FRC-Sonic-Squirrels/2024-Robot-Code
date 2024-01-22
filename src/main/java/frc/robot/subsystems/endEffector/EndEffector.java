@@ -21,4 +21,20 @@ public class EndEffector extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("EndEffector", inputs);
   }
+
+  public double getRPM() {
+    return inputs.RPM;
+  }
+
+  public void setRPM(double target) {
+    io.setRPM(target);
+  }
+
+  public void setPercentOut(double percent) {
+    io.setPercentOut(percent);
+  }
+
+  public Boolean getBeamBreak() {
+    return inputs.beamBreak;
+  }
 }
