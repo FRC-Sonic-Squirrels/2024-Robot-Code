@@ -377,7 +377,7 @@ public class RobotContainer {
     if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER))
       CommandScheduler.getInstance()
           .schedule(
-              (new ShooterShootMode(
-                  shooter, endEffector, drivetrain, driverController.rightTrigger())));
+              new ShooterShootMode(
+                  shooter, endEffector, drivetrain, driverController.rightTrigger()));
   }
 }

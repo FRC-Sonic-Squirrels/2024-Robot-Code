@@ -209,7 +209,7 @@ public class RotateToTranslation extends Command {
     var currentRot = drive.getRotation();
 
     Rotation2d heading =
-        GeometryUtil.getHeading(drive.getRawOdometryPose().getTranslation(), target.get());
+        GeometryUtil.getHeading(drive.getPoseEstimatorPose().getTranslation(), target.get());
 
     var goalRot = heading.plus(robotRotationOffset);
 
@@ -240,8 +240,8 @@ public class RotateToTranslation extends Command {
         Math.hypot(xVel, yVel)
             * Math.cos(heading.getRadians() - new Rotation2d(xVel, yVel).getRadians() - Math.PI / 2)
             / Math.hypot(
-                drive.getRawOdometryPose().getX() - target.get().getX(),
-                drive.getRawOdometryPose().getY() - target.get().getY());
+                drive.getPoseEstimatorPose().getX() - target.get().getX(),
+                drive.getPoseEstimatorPose().getY() - target.get().getY());
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("RotateToGamepiece/RotationalEffort", rotationalEffort);
