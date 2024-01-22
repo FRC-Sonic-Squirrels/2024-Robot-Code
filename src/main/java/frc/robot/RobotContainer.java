@@ -121,7 +121,7 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIO() {});
       wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
+      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -175,7 +175,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -189,7 +189,7 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getRawOdometryPose);
+          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2024:
@@ -338,7 +338,7 @@ public class RobotContainer {
     if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER))
       CommandScheduler.getInstance()
           .schedule(
-              (new ShooterShootMode(
-                  shooter, endEffector, drivetrain, driverController.rightTrigger())));
+              new ShooterShootMode(
+                  shooter, endEffector, drivetrain, driverController.rightTrigger()));
   }
 }

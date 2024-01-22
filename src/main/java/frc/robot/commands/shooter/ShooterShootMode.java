@@ -71,8 +71,8 @@ public class ShooterShootMode extends Command {
     shooter.setLauncherClosedLoopConstants(10.0, 0, 0);
     double distToSpeaker =
         Math.hypot(
-            drive.getRawOdometryPose().getX() - speakerPose.getX(),
-            drive.getRawOdometryPose().getY() - speakerPose.getY());
+            drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
+            drive.getPoseEstimatorPose().getY() - speakerPose.getY());
 
     if (shootSupplier.getAsBoolean()) {
       shooter.setRPM(Constants.ShooterConstants.SHOOTING_RPM);
@@ -87,8 +87,8 @@ public class ShooterShootMode extends Command {
     }
     speakerHeading =
         new Rotation2d(
-            drive.getRawOdometryPose().getX() - speakerPose.getX(),
-            drive.getRawOdometryPose().getY() - speakerPose.getY());
+            drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
+            drive.getPoseEstimatorPose().getY() - speakerPose.getY());
     double linearVelSpeaker =
         new Translation2d(
                 drive.getFieldRelativeVelocities().getX(),
