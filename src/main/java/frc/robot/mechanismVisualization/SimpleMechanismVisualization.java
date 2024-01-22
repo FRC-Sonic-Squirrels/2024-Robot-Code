@@ -5,6 +5,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,9 +33,31 @@ public class SimpleMechanismVisualization {
               Constants.ShooterConstants.SHOOTER_LENGTH,
               Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE));
 
-  public static void updateVisualization(Rotation2d armAngle, Rotation2d shooterAngle) {
+  static MechanismLigament2d gamepieceTraj =
+      shooterRoot.append(
+          new MechanismLigament2d(
+              "gamepieceTraj",
+              Constants.ShooterConstants.SHOOTER_LENGTH,
+              Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE));
+
+  public static void updateVisualization(
+      Rotation2d armAngle, Rotation2d shooterAngle, double distToSpeaker, double shooterRPM) {
     arm.setAngle(armAngle);
     shooter.setAngle(shooterAngle);
+    int Red;
+    int Green;
+    if (shooterRPM / Constants.ShooterConstants.SHOOTING_RPM <= 0.5) {
+      Red = (int) (shooterRPM / Constants.ShooterConstants.SHOOTING_RPM * 2.0 * 255.0);
+      Green = 255;
+    } else {
+      Green = (int) (255 - shooterRPM / Constants.ShooterConstants.SHOOTING_RPM * 2.0 * 255.0);
+      Red = 255;
+    }
+    shooter.setColor(new Color8Bit(Red, Green, 0));
+    gamepieceTraj.setAngle(shooterAngle);
+    gamepieceTraj.setLength(distToSpeaker);
+    gamepieceTraj.setLineWeight(5.0);
+    gamepieceTraj.setColor(new Color8Bit("#FF8000"));
   }
 
   public static void logMechanism() {

@@ -79,4 +79,8 @@ public class Shooter extends SubsystemBase {
   public boolean launcherIsAtTargetVel(double RPM) {
     return Math.abs(inputs.RPM - RPM) <= RPMTolerance.get();
   }
+
+  public double getRPM() {
+    return inputs.RPM;
+  }
 }

@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
@@ -86,6 +87,8 @@ public final class Constants {
     // FIXME: double check this number
     public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
     public static final double SPEAKER_HEIGHT_METERS = 1.9812;
+    public static final Translation2d BLUE_SPEAKER_TRANSLATION = new Translation2d(0.03950466960668564, 5.508944988250732);
+    public static final Translation2d RED_SPEAKER_TRANSLATION = new Translation2d(16.508594512939453, 5.508944988250732);
   }
 
   public class MotorConstants {
@@ -132,7 +135,7 @@ public final class Constants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
     public static final double SHOOTER_OFFSET_METERS = Units.inchesToMeters(12);
-    public static final double SHOOTER_LENGTH = Units.feetToMeters(1.5);
+    public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
 
     public class Pivot {
       public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
