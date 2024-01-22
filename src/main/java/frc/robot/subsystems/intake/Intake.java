@@ -11,6 +11,8 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
+  private final double MAX_VOLTAGE = 12.0;
+
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
@@ -31,12 +33,8 @@ public class Intake extends SubsystemBase {
     return inputs.RPM;
   }
 
-  public void setRPM(double RPM) {
-    io.setRPM(RPM);
-  }
-
   public void setPercentOut(double percent) {
-    io.setPercentOut(percent);
+    io.setVoltage(percent * MAX_VOLTAGE);
   }
 
   public Boolean getBeamBreak() {
