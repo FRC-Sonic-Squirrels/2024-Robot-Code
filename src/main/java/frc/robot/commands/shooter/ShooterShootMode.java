@@ -96,10 +96,10 @@ public class ShooterShootMode extends Command {
             .rotateBy(speakerHeading)
             .getX();
     shooterPitchVelCorrection =
-        Constants.ShooterConstants.Pitch.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
+        Constants.ShooterConstants.Pivot.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
 
     double targetAngle =
-        Constants.ShooterConstants.Pitch.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
+        Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
     double vel =
         shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
             + shooterPitchVelCorrection;
