@@ -67,7 +67,7 @@ public class IntakeIOReal implements IntakeIO {
 
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
-    inputs.deviceTemp = deviceTemp.getValueAsDouble();
+    inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.beamBreak = beamBreak.get();
   }
 
