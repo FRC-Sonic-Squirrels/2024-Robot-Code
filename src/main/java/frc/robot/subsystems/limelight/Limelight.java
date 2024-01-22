@@ -47,7 +47,7 @@ public class Limelight extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Limelight", inputs);
-    results = getLatestResults(inputs.json);
+    if (!inputs.json.isEmpty()) results = getLatestResults(inputs.json);
 
     // uncomment if simming for target gamepiece
     // center field:
