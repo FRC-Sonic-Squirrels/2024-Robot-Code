@@ -18,9 +18,4 @@ public class EndEffectorIOSim implements EndEffectorIO {
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
     inputs.RPM = motor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
   }
-
-  @Override
-  public void setPercentOut(double percent) {
-    motor.set(percent);
-  }
 }
