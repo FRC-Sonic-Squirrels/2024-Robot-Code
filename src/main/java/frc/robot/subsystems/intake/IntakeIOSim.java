@@ -7,21 +7,21 @@ import frc.robot.Constants;
 
 public class IntakeIOSim implements IntakeIO {
 
-  private TalonFX intakeMotor = new TalonFX(0);
-  private TalonFXSimState intakeMotorSim = intakeMotor.getSimState();
+  private TalonFX motor = new TalonFX(0);
+  private TalonFXSimState motorSim = motor.getSimState();
 
   public IntakeIOSim() {}
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    intakeMotorSim = intakeMotor.getSimState();
-    intakeMotorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    inputs.currentAmps = intakeMotorSim.getSupplyCurrent();
-    inputs.RPM = intakeMotor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
+    motorSim = motor.getSimState();
+    motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    inputs.currentAmps = motorSim.getSupplyCurrent();
+    inputs.RPM = motor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
   }
 
   @Override
   public void setPercentOut(double percent) {
-    intakeMotor.set(percent);
+    motor.set(percent);
   }
 }
