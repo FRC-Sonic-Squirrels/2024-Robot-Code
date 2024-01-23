@@ -29,15 +29,11 @@ public class Intake extends SubsystemBase {
   }
 
   public double getRPM() {
-    return inputs.velocityRPM;
-  }
-
-  public void setTargetRPM(double target) {
-    io.setPercentOut(target / Constants.MotorConstants.KRAKEN_MAX_RPM);
+    return inputs.RPM;
   }
 
   public void setPercentOut(double percent) {
-    io.setPercentOut(percent);
+    io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
   public Boolean getBeamBreak() {

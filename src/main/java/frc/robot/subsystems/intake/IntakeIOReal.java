@@ -4,14 +4,13 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class IntakeIOReal implements IntakeIO {
-  private TalonFXConfiguration config = new TalonFXConfiguration();
-  private CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
   private TalonFX motor = new TalonFX(Constants.CanIDs.INTAKE_CAN_ID);
 
   // Initializes a DigitalInput on DIO 0
@@ -21,10 +20,15 @@ public class IntakeIOReal implements IntakeIO {
   private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
 
+  private double voltage = 0.0;
+
   public IntakeIOReal() {
 
     motor.setInverted(false);
     motor.setNeutralMode(NeutralModeValue.Brake);
+
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
     currentLimitConfig.SupplyCurrentLimitEnable =
         Constants.IntakeConstants.SUPPLY_CURRENT_LIMIT_ENABLE;
@@ -45,14 +49,16 @@ public class IntakeIOReal implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     BaseStatusSignal.refreshAll(currentAmps, velocityRPS, deviceTemp);
 
+    motor.setControl(new VoltageOut(voltage));
+
     inputs.currentAmps = currentAmps.getValueAsDouble();
-    inputs.velocityRPM = velocityRPS.getValueAsDouble() / 60.0;
-    inputs.deviceTemp = deviceTemp.getValueAsDouble();
+    inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
+    inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.beamBreak = beamBreak.get();
   }
 
   @Override
-  public void setPercentOut(double percent) {
-    motor.set(percent);
+  public void setVoltage(double volts) {
+    voltage = volts;
   }
 }

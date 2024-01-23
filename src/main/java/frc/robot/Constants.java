@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
@@ -100,12 +101,32 @@ public final class Constants {
   }
 
   public class IntakeConstants {
-    public static final double INTAKE_IDLE_RPM = 5000.0;
+    public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
     public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
     public static final double SUPPLY_CURRENT_LIMIT = 50.0;
     public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
     public static final double SUPPLY_TIME_THRESHOLD = 2.0;
+
+    public static final double GEARING = 1.0;
+    public static final double MOI = 5.0;
+  }
+
+  public class EndEffectorConstants {
+    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
+    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
+    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
+    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
+
+    public static final double GEARING = 1.0;
+    public static final double MOI = 5.0;
+  }
+
+  public class WristConstants {
+    public static final Rotation2d MAX_WRIST_ANGLE = Rotation2d.fromDegrees(90);
+    public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
+    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
+    ;
   }
 
   public class CanIDs {
@@ -123,5 +144,14 @@ public final class Constants {
   public class DIOPorts {
     // TODO: get actual DIO ports
     public static final int INTAKE_BEAM_BREAK = 0;
+    public static final int END_EFFECTOR_BEAM_BREAK = 0;
   }
+
+  public enum ControlMode {
+    POSITION,
+    VELOCITY,
+    VOLTAGE
+  }
+
+  public static final double MAX_VOLTAGE = 12.0;
 }

@@ -29,6 +29,7 @@ import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeDefaultCommand;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -83,6 +84,7 @@ public class RobotContainer {
   private final Wrist wrist;
   private final EndEffector endEffector;
   private final Limelight limelight;
+  private final LED led;
 
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -119,6 +121,7 @@ public class RobotContainer {
       wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
       limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
+      led = new LED();
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -132,6 +135,7 @@ public class RobotContainer {
           wrist = null;
           endEffector = null;
           limelight = null;
+          led = null;
           break;
 
         case ROBOT_SIMBOT:
@@ -172,7 +176,8 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
+          led = new LED();
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -187,6 +192,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          led = new LED();
           break;
 
         case ROBOT_2024:
@@ -201,6 +207,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+          led = new LED();
           break;
 
         default:
@@ -214,6 +221,7 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          led = new LED();
           break;
       }
     }

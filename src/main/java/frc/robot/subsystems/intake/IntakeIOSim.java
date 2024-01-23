@@ -1,27 +1,35 @@
 package frc.robot.subsystems.intake;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.sim.TalonFXSimState;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class IntakeIOSim implements IntakeIO {
 
-  private TalonFX intakeMotor = new TalonFX(0);
-  private TalonFXSimState intakeMotorSim = intakeMotor.getSimState();
+  private DCMotorSim motor =
+      new DCMotorSim(
+          DCMotor.getFalcon500(1),
+          Constants.IntakeConstants.GEARING,
+          Constants.IntakeConstants.MOI);
+
+  private double voltage = 0.0;
+
+  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Intake/BeamBreak", false);
 
   public IntakeIOSim() {}
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    intakeMotorSim = intakeMotor.getSimState();
-    intakeMotorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    inputs.currentAmps = intakeMotorSim.getSupplyCurrent();
-    inputs.velocityRPM = intakeMotor.get() * Constants.MotorConstants.KRAKEN_MAX_RPM;
+    motor.update(0.02);
+    motor.setInputVoltage(voltage);
+    inputs.currentAmps = motor.getCurrentDrawAmps();
+    inputs.RPM = motor.getAngularVelocityRPM();
+    inputs.beamBreak = beamBreak.get();
   }
 
   @Override
-  public void setPercentOut(double percent) {
-    intakeMotor.set(percent);
+  public void setVoltage(double volts) {
+    volts = voltage;
   }
 }
