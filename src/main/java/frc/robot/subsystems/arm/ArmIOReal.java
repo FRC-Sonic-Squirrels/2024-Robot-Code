@@ -102,4 +102,11 @@ public class ArmIOReal implements ArmIO {
   public void setVoltage(double volts) {
     motor.setControl(openLoopControl.withOutput(volts));
   }
+
+  @Override
+  public void resetSensorPosition(Rotation2d angle) {
+      var rotations = angle.getRadians() / OUTPUT_ROTATIONS_TO_OUTPUT_RADS;
+
+      motor.setPosition(rotations);
+  }
 }
