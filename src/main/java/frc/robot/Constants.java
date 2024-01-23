@@ -187,7 +187,8 @@ public final class Constants {
     public static final int INTAKE_CAN_ID = 0;
     public static final int SHOOTER_LEAD_CAN_ID = 1;
     public static final int SHOOTER_FOLLOW_CAN_ID = 2;
-    public static final int ARM_CAN_ID = 40;
+    public static final int SHOOTER_PIVOT_CAN_ID = 8;
+    public static final int ARM_CAN_ID = 3;
     public static final int ELEVATOR_LEAD_CAN_ID = 4;
     public static final int ELEVATOR_FOLLOW_CAN_ID = 5;
     public static final int END_EFFECTOR_CAN_ID = 6;
