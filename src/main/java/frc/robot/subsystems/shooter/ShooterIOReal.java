@@ -15,14 +15,21 @@ public class ShooterIOReal implements ShooterIO {
   private double RPM = 0.0;
   public Rotation2d pitch = new Rotation2d();
 
+  public double launcherLeadTempCelsius = 0.0;
+  public double launcherFollowTempCelsius = 0.0;
+  public double launcherVoltage = 0.0;
+  
+  public double pivotVoltage = 0.0;
+  public double pivotTempCelsius = 0.0;
+
   private PIDController pivotController = new PIDController(0.01, 0, 0);
   private Arm arm;
 
   Slot0Configs slot0Configs = new Slot0Configs();
   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
-
+  
   public ShooterIOReal() {
-    slot0Configs.kP = 0.11;
+    slot0Configs.kP = 0;
     slot0Configs.kG = 0;
     slot0Configs.kD = 0;
     lead.getConfigurator().apply(slot0Configs);
