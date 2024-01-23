@@ -15,8 +15,9 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -37,22 +38,17 @@ import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
-import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.limelight.Limelight;
 import frc.robot.subsystems.limelight.LimelightIO;
-import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -63,7 +59,6 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModule;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIO;
-import frc.robot.subsystems.wrist.WristIOReal;
 import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -201,7 +196,7 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
-        //FIXME: 
+          // FIXME:
           // drivetrain =
           //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
@@ -214,7 +209,9 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIOReal());
           // limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
 
-          drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+          DriverStation.silenceJoystickConnectionWarning(true);
+          drivetrain =
+              new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
           vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
           arm = new Arm(new ArmIOReal());
