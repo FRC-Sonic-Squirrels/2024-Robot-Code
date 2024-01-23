@@ -72,6 +72,7 @@ public class Arm extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Arm", inputs);
 
+    Logger.recordOutput("Arm/PositionDegrees", inputs.armPosition.getDegrees() % 360);
     // ---- UPDATE TUNABLE NUMBERS
     var hc = hashCode();
     if (kP.hasChanged(hc)
