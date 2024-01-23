@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -89,6 +89,11 @@ public final class Constants {
       REPLAY,
       SIM
     }
+  }
+
+  public class FieldConstants {
+    // FIXME: double check this number
+    public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
   }
 
   public class MotorConstants {
