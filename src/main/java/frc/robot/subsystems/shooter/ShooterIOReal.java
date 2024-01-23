@@ -14,19 +14,18 @@ public class ShooterIOReal implements ShooterIO {
   TalonFX lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
   TalonFX follow = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
 
-  private double targetVelRadPerSec = 0.0;
+  private double RPM = 0.0;
   public Rotation2d pitch = new Rotation2d();
 
-  private PIDController pitchController = new PIDController(0.01, 0, 0);
-  private Arm arm = new Arm(new ArmIOReal());
+  private PIDController pivotController = new PIDController(0.01, 0, 0);
+  private Arm arm;
 
   Slot0Configs slot0Configs = new Slot0Configs();
   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
   public ShooterIOReal() {
-    TalonFXConfiguration config = new TalonFXConfiguration();
     slot0Configs.kP = 0.11;
-    slot0Configs.kI = 0;
+    slot0Configs.kG = 0;
     slot0Configs.kD = 0;
     lead.getConfigurator().apply(slot0Configs);
     follow.getConfigurator().apply(slot0Configs);
@@ -38,10 +37,10 @@ public class ShooterIOReal implements ShooterIO {
     inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
   }
 
-  @Override
-  public void setVel(double radPerSec) {
-    targetVelRadPerSec = radPerSec;
-    lead.setControl(request.withVelocity(radPerSec));
-    follow.setControl(request.withVelocity(radPerSec));
+  // @Override
+  public void setLauncherRPM(double rpm) {
+    RPM = rpm;
+    lead.setControl(request.withVelocity(rpm));
+    follow.setControl(request.withVelocity(rpm));
   }
 }
