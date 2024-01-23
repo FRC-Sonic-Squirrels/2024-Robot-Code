@@ -16,7 +16,7 @@ import frc.robot.Constants;
 public class ArmIOReal implements ArmIO {
   // place holder numbers
   private static final double GEAR_RATIO =
-      (60.0 / 12.0) * (50.0 / 36.0) * (50.0 / 18.0) * (58.0 / 10.0);
+    (72.0 / 12.0)* (42.0/16.0);
   // adapted from
   // https://pro.docs.ctr-electronics.com/en/latest/docs/api-reference/device-specific/talonfx/closed-loop-requests.html#converting-from-meters
   private static final double OUTPUT_RADS_TO_MOTOR_ROTATIONS = (1 / (2 * Math.PI)) * GEAR_RATIO;
@@ -27,14 +27,15 @@ public class ArmIOReal implements ArmIO {
   private final StatusSignal<Double> currentAmps;
   private final StatusSignal<Double> tempCelsius;
 
+  //FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
-      new MotionMagicVoltage(0.0).withEnableFOC(true);
-  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(true);
+      new MotionMagicVoltage(0.0).withEnableFOC(false);
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   private final TalonFX motor;
 
   public ArmIOReal() {
-    motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID);
+    motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID, "CANivore");
 
     TalonFXConfiguration config = new TalonFXConfiguration();
 
@@ -105,8 +106,8 @@ public class ArmIOReal implements ArmIO {
 
   @Override
   public void resetSensorPosition(Rotation2d angle) {
-      var rotations = angle.getRadians() / OUTPUT_ROTATIONS_TO_OUTPUT_RADS;
+    var rotations = angle.getRadians() / OUTPUT_ROTATIONS_TO_OUTPUT_RADS;
 
-      motor.setPosition(rotations);
+    motor.setPosition(rotations);
   }
 }
