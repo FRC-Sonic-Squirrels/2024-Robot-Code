@@ -18,6 +18,7 @@ public class ShooterIOReal implements ShooterIO {
   public Rotation2d pitch = new Rotation2d();
   public double pivotVoltage = 0.0;
   public double pivotTempCelsius = 0.0;
+  public double pivotVelocity = 0.0;
 
   public double RPM = 0.0;
   public StatusSignal<Double> launcherLeadTempCelsius;
@@ -44,6 +45,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
+    // FIXME: add other variables
     BaseStatusSignal.refreshAll(launcherLeadTempCelsius, launcherFollowTempCelsius);
     // FIXME: get actual arm code
     inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
@@ -54,7 +56,9 @@ public class ShooterIOReal implements ShooterIO {
   // PIVOT
 
   @Override
-  public void setPivotVel(double radPerSec) {}
+  public void setPivotVel(double radPerSec) {
+    pivot.set(radPerSec);
+  }
 
   @Override
   public void setPivotPosition(Rotation2d rot) {
