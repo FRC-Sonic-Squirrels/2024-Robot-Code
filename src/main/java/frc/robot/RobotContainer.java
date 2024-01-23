@@ -201,17 +201,29 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
-          drivetrain =
-              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+        //FIXME: 
+          // drivetrain =
+          //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
-          vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          // vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          // arm = new Arm(new ArmIOReal());
+          // elevator = new Elevator(new ElevatorIOReal());
+          // intake = new Intake(new IntakeIOReal());
+          // shooter = new Shooter(new ShooterIOReal());
+          // wrist = new Wrist(new WristIOReal());
+          // endEffector = new EndEffector(new EndEffectorIOReal());
+          // limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+
+          drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+
+          vision = new Vision(aprilTagLayout, drivetrain, config.getReplayVisionModules());
           arm = new Arm(new ArmIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
-          intake = new Intake(new IntakeIOReal());
-          shooter = new Shooter(new ShooterIOReal());
-          wrist = new Wrist(new WristIOReal());
-          endEffector = new EndEffector(new EndEffectorIOReal());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+          elevator = new Elevator(new ElevatorIO() {});
+          intake = new Intake(new IntakeIO() {});
+          shooter = new Shooter(new ShooterIO() {});
+          wrist = new Wrist(new WristIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         default:
