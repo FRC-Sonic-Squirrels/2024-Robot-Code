@@ -35,10 +35,38 @@ public class ShooterIOReal implements ShooterIO {
     inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
   }
 
-  // @Override
+  @Override
+  public void setPivotVel(double radPerSec) {}
+
+  @Override
+  public void setPivotPosition(Rotation2d rot) {}
+
+  @Override
+  public void setPivotClosedLoopConstants(
+      double kP,
+      double kD,
+      double kG,
+      double maxProfiledVelocity,
+      double maxProfiledAcceleration) {}
+
+  @Override
+  public void setPivotVoltage(double volts) {}
+
+  // LAUNCHER
+
+  @Override
+  public void setLauncherVoltage(double volts) {}
+
+  @Override
+  public void setLauncherPercentOut(double percent) {}
+
+  @Override
   public void setLauncherRPM(double rpm) {
     RPM = rpm;
     lead.setControl(request.withVelocity(rpm));
     follow.setControl(request.withVelocity(rpm));
   }
+  
+  @Override
+  public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {}
 }
