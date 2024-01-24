@@ -1,4 +1,11 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Mechanism/SimpleArm": "Mechanism2d",
