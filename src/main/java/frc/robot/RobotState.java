@@ -32,8 +32,8 @@ public class RobotState {
     return scoringMode;
   }
 
-  public void setScoringMode(ScoringMode shootMode) {
-    this.scoringMode = shootMode;
+  public void setScoringMode(ScoringMode scoringMode) {
+    this.scoringMode = scoringMode;
   }
 
   public static enum IntakeMode {
