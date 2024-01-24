@@ -258,6 +258,7 @@ public class Drivetrain extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    this.poseEstimator.resetPose(pose);
     this.rawOdometryPose = pose;
   }
 

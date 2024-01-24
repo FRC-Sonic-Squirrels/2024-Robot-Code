@@ -147,10 +147,10 @@ public class Robot extends LoggedRobot {
       autonomousChooser = robotContainer.getAutonomousChooser();
     }
 
-    var currentAlliance = DriverStation.getAlliance().orElse(null);
+    var currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     var currentChooserSelectedName = autonomousChooser.getSendableChooser().getSelected();
 
-    if (lastAlliance == null || currentAlliance == null || lastAlliance != currentAlliance) {
+    if (lastAlliance == null || lastAlliance != currentAlliance) {
       shouldUpdateAutonomousCommand = true;
     }
 
