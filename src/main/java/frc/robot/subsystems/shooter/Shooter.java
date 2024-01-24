@@ -13,10 +13,6 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-  private double launcherTargetRPM = 0.0;
-
-  private LoggedTunableNumber RPMTolerance = new LoggedTunableNumber("Shooter/RPMTolerance", 20.0);
-
   private static final String ROOT_TABLE = "Shooter";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 15.0);
