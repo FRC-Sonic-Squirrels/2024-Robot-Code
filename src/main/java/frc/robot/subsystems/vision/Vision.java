@@ -122,7 +122,7 @@ public class Vision extends SubsystemBase {
       var robotPose = new Pose3d(poseEstimatorPoseSupplier.get());
       var camPose = robotPose.transformBy(visionModule.RobotToCamera);
 
-      Logger.recordOutput("Vision/" + visionModule.name + "/CameraPose", camPose);
+      Logger.recordOutput("Vision/VisionModules/" + visionModule.name + "/CameraPose", camPose);
     }
 
     // logging all visible tags
@@ -320,7 +320,7 @@ public class Vision extends SubsystemBase {
 
   private void logVisionModule(VisionModule visionModule) {
 
-    String ROOT_TABLE_PATH = "Vision/" + visionModule.name + "/";
+    String ROOT_TABLE_PATH = "Vision/VisionModules/" + visionModule.name + "/";
     var fieldsToLog = visionModule.loggedFields;
 
     Logger.recordOutput(
