@@ -24,7 +24,7 @@ public class SimpleMechanismVisualization {
       new Mechanism2d(Units.inchesToMeters(32.0), Units.inchesToMeters(50.0));
 
   static MechanismRoot2d shooterRoot =
-      shooterMechanism2d.getRoot("shooterRoot", Units.inchesToMeters(27), Units.inchesToMeters(4));
+      shooterMechanism2d.getRoot("shooterRoot", Units.inchesToMeters(4), Units.inchesToMeters(12));
 
   static MechanismLigament2d shooter =
       shooterRoot.append(
@@ -43,7 +43,7 @@ public class SimpleMechanismVisualization {
   public static void updateVisualization(
       Rotation2d armAngle, Rotation2d shooterAngle, double distToSpeaker, double shooterRPM) {
     arm.setAngle(armAngle);
-    shooter.setAngle(shooterAngle);
+    shooter.setAngle(new Rotation2d(-shooterAngle.getRadians()));
     int Red;
     int Green;
     if (shooterRPM / Constants.ShooterConstants.SHOOTING_RPM <= 0.5) {
