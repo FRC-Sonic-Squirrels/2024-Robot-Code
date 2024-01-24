@@ -17,7 +17,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
-import frc.robot.configs.ExampleRobotConfig;
 import frc.robot.configs.RobotConfig;
 import frc.robot.configs.RobotConfig2023Rober;
 import frc.robot.configs.RobotConfig2024;
@@ -42,25 +41,17 @@ public final class Constants {
 
     // FIXME: update for various robots
     public static Mode getMode() {
-      switch (getRobot()) {
-        case ROBOT_DEFAULT:
-          return RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
-
-        case ROBOT_SIMBOT:
-          return Mode.SIM;
-
-        case ROBOT_2023_RETIRED_ROBER:
-          return Mode.REAL;
-
-        default:
-          return Mode.REAL;
+      if (getRobot() == RobotType.ROBOT_SIMBOT) {
+        return Mode.SIM;
       }
+
+      return RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
     }
 
     public static RobotType getRobot() {
       if (RobotBase.isReal() && ROBOT == RobotType.ROBOT_SIMBOT) {
         invalidRobotAlert.set(true);
-        return RobotType.ROBOT_DEFAULT;
+        return RobotType.ROBOT_2024;
       }
 
       return ROBOT;
@@ -72,7 +63,6 @@ public final class Constants {
       // config classes are also created. Meaning tunableNumber values are stuck to the first
       // object that is created. In this case ExampleRobotConfig. Suppliers solve this
       // by only creating the specific config object coresponding to the robot type
-      ROBOT_DEFAULT(() -> new ExampleRobotConfig()),
       ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
       ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
       ROBOT_2024(() -> new RobotConfig2024());

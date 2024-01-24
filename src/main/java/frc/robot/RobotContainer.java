@@ -132,19 +132,6 @@ public class RobotContainer {
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
-        case ROBOT_DEFAULT:
-          drivetrain = null;
-          vision = null;
-          arm = null;
-          elevator = null;
-          intake = null;
-          shooter = null;
-          wrist = null;
-          endEffector = null;
-          limelight = null;
-          led = null;
-          break;
-
         case ROBOT_SIMBOT:
           com.ctre.phoenix6.unmanaged.Unmanaged.setPhoenixDiagnosticsStartTime(0.0);
 
