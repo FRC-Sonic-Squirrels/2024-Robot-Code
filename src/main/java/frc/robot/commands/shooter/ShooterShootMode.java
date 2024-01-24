@@ -66,24 +66,23 @@ public class ShooterShootMode extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
 
-    shooter.setLauncherClosedLoopConstants(10.0, 0, 0);
     double distToSpeaker =
         Math.hypot(
             drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
             drive.getPoseEstimatorPose().getY() - speakerPose.getY());
 
+    // VELOCITY CONTROL
+
+    shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
+
     if (shootSupplier.getAsBoolean()) {
-      shooter.setRPM(Constants.ShooterConstants.SHOOTING_RPM);
-      if (shooter.launcherIsAtTargetVel()) {
-        // TODO: logic for end effector running. Also check if arm is in correct position
-      }
+      shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+      // if (shooter.launcherIsAtTargetVel()) {
+      // TODO: logic for end effector running. Also check if arm is in correct position
+      // }
     } else {
-      shooter.setRPM(
-          DriverStation.isAutonomous()
-              ? Constants.ShooterConstants.SHOOTING_RPM
-              : Constants.ShooterConstants.PREP_RPM);
+      shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
     }
     speakerHeading =
         new Rotation2d(
@@ -104,6 +103,11 @@ public class ShooterShootMode extends Command {
         shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
             + shooterPitchVelCorrection;
     shooter.setPitchAngularVel(vel);
+
+    // POSITIONAL CONTROL
+
+    // shooter.setPivotPosition(
+    //     Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker));
 
     Logger.recordOutput("ShooterShootMode/velCorrection", shooterPitchVelCorrection);
     Logger.recordOutput("ShooterShootMode/vel", vel);
