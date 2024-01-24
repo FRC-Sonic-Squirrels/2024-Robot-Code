@@ -17,6 +17,16 @@ public class Shooter extends SubsystemBase {
 
   private LoggedTunableNumber RPMTolerance = new LoggedTunableNumber("Shooter/RPMTolerance", 20.0);
 
+  private static final String ROOT_TABLE = "Shooter";
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 15.0);
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
+
+  private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 5.0);
+  private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 5.0);
+
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
     this.io = io;
@@ -28,6 +38,13 @@ public class Shooter extends SubsystemBase {
 
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/PitchDegrees", inputs.pitch.getDegrees());
+
+    io.setPivotClosedLoopConstants(
+        kP.get(),
+        kD.get(),
+        kG.get(),
+        closedLoopMaxVelocityConstraint.get(),
+        closedLoopMaxAccelerationConstraint.get());
   }
 
   public void setPitchAngularVel(double radiansPerSecond) {
@@ -61,23 +78,6 @@ public class Shooter extends SubsystemBase {
 
   public void setLauncherPercentOut(double percent) {
     io.setLauncherPercentOut(percent);
-  }
-
-  public void setRPM(double RPM) {
-    io.setLauncherRPM(RPM);
-    launcherTargetRPM = RPM;
-  }
-
-  public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {
-    io.setLauncherClosedLoopConstants(kP, kI, kD);
-  }
-
-  public boolean launcherIsAtTargetVel() {
-    return Math.abs(inputs.RPM - launcherTargetRPM) <= RPMTolerance.get();
-  }
-
-  public boolean launcherIsAtTargetVel(double RPM) {
-    return Math.abs(inputs.RPM - RPM) <= RPMTolerance.get();
   }
 
   public double getRPM() {
