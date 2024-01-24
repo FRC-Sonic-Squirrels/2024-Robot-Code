@@ -34,8 +34,6 @@ public class ShooterIOSim implements ShooterIO {
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 
-  private final PIDController launcherVelController = new PIDController(0, 0, 0);
-
   private double pivotTargetVelRadPerSec = 0.0;
   private PIDController pivotVelController = new PIDController(60, 0, 0);
   private ControlMode pivotControlMode = ControlMode.VELOCITY;
@@ -44,10 +42,7 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotOpenLoopVolts = 0.0;
   private double pivotKg = 0.0;
 
-  private ControlMode launcherControlMode = ControlMode.VOLTAGE;
   private double launcherOpenLoopVolts = 0.0;
-  private double launcherTargetVelRPM = 0.0;
-  private double launcherControlEffort = 0.0;
 
   public ShooterIOSim() {}
 
@@ -57,10 +52,13 @@ public class ShooterIOSim implements ShooterIO {
     pivot.update(0.02);
     launcherMotorSim.update(0.02);
 
+    pivotFeedback.setTolerance(1.0);
+
     inputs.pitch = new Rotation2d(pivot.getAngleRads());
     inputs.RPM = launcherMotorSim.getAngularVelocityRPM();
 
-    double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
+    // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
+    double ff = 0.0;
 
     if (pivotControlMode.equals(ControlMode.POSITION)) {
 
@@ -83,18 +81,7 @@ public class ShooterIOSim implements ShooterIO {
 
     Logger.recordOutput("Shooter/feedForward", ff);
 
-    if (launcherControlMode.equals(ControlMode.VELOCITY)) {
-
-      launcherControlEffort =
-          launcherVelController.calculate(
-              launcherMotorSim.getAngularVelocityRPM(), launcherTargetVelRPM);
-
-    } else {
-
-      launcherControlEffort = launcherOpenLoopVolts;
-    }
-
-    launcherMotorSim.setInputVoltage(launcherControlEffort);
+    launcherMotorSim.setInputVoltage(launcherOpenLoopVolts);
 
     pivot.setInputVoltage(pivotControlEffort);
 
@@ -103,6 +90,8 @@ public class ShooterIOSim implements ShooterIO {
     Logger.recordOutput(
         "Shooter/pitchController",
         pivotVelController.calculate(pivot.getVelocityRadPerSec(), pivotTargetVelRadPerSec));
+    Logger.recordOutput("Shooter/pivotControlMode", pivotControlMode.toString());
+    Logger.recordOutput("Shooter/targetPositionDegrees", pivotClosedLoopTargetAngle.getDegrees());
   }
 
   @Override
@@ -136,25 +125,10 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setLauncherVoltage(double volts) {
     launcherOpenLoopVolts = volts;
-    launcherControlMode = ControlMode.VOLTAGE;
   }
 
   @Override
   public void setLauncherPercentOut(double percent) {
     launcherOpenLoopVolts = percent * 12.0;
-    launcherControlMode = ControlMode.VOLTAGE;
-  }
-
-  @Override
-  public void setLauncherRPM(double rpm) {
-    launcherTargetVelRPM = rpm;
-    launcherControlMode = ControlMode.VELOCITY;
-  }
-
-  @Override
-  public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {
-    launcherVelController.setP(kP);
-    launcherVelController.setI(kI);
-    launcherVelController.setD(kD);
   }
 }

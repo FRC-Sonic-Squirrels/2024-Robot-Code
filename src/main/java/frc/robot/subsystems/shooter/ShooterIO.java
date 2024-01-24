@@ -40,8 +40,4 @@ public interface ShooterIO {
   public default void setLauncherVoltage(double volts) {}
 
   public default void setLauncherPercentOut(double percent) {}
-
-  public default void setLauncherRPM(double rpm) {}
-
-  public default void setLauncherClosedLoopConstants(double kP, double kI, double kD) {}
 }
