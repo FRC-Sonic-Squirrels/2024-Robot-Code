@@ -90,7 +90,7 @@ public class DriveToGamepiece extends Command {
         Math.abs(
             targetGamepiece.get().targetYaw.getDegrees()
                 // - 180.0
-                - drive.getRawOdometryPose().getRotation().getDegrees());
+                - drive.getPoseEstimatorPose().getRotation().getDegrees());
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
 
     if (isInSourceArea(targetGamepiece.get().globalPose)) {
@@ -109,7 +109,7 @@ public class DriveToGamepiece extends Command {
 
       rotVel =
           rotationController.calculate(
-              drive.getRawOdometryPose().getRotation().getRadians(), sourceAngle.getRadians());
+              drive.getPoseEstimatorPose().getRotation().getRadians(), sourceAngle.getRadians());
     } else {
       if (advancedMode.get() == 0) {
 
@@ -139,14 +139,14 @@ public class DriveToGamepiece extends Command {
 
       rotVel =
           rotationController.calculate(
-              drive.getRawOdometryPose().getRotation().getRadians(),
+              drive.getPoseEstimatorPose().getRotation().getRadians(),
               targetGamepiece.get().targetYaw.getRadians());
     }
 
     // TODO: ---------------change to estimated pose if using this IRL------------------
     drive.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            xVel, yVel, rotVel, drive.getRawOdometryPose().getRotation()));
+            xVel, yVel, rotVel, drive.getPoseEstimatorPose().getRotation()));
 
     Logger.recordOutput("DriveToGamepiece/rotationalErrorDegrees", rotationalErrorDegrees);
     Logger.recordOutput("DriveToGamepiece/xVel", xVel);

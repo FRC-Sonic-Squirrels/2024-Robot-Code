@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.swerve.Drivetrain;
@@ -110,9 +109,7 @@ public class AutosManager {
     Command command =
         Choreo.choreoSwerveCommand(
             traj,
-            Robot.isSimulation()
-                ? (drivetrain::getRawOdometryPose)
-                : (drivetrain::getPoseEstimatorPose),
+            drivetrain::getPoseEstimatorPose,
             new PIDController(
                 config.getAutoTranslationKP().get(),
                 config.getAutoTranslationKI().get(),
