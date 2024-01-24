@@ -223,7 +223,7 @@ public class Robot extends LoggedRobot {
     }
 
     hasEnteredTeleAtSomePoint = true;
-      }
+  }
 
   /** This function is called periodically during operator control. */
   @Override
