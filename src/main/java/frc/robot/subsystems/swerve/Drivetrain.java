@@ -156,7 +156,7 @@ public class Drivetrain extends SubsystemBase {
       poseEstimator.addDriveData(timestamp, twist);
     }
 
-    // FIXME:
+// FIXME:
     /*
      * Pending https://github.com/Mechanical-Advantage/AdvantageKit/issues/55
      * all @autoLogOutput fields need to be manually logged
@@ -239,7 +239,7 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator.addVisionData(visionData);
   }
 
-  // FIXME: use pose estimator to get pose
+// FIXME: use pose estimator to get pose
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/RobotOdometry")
   public Pose2d getRawOdometryPose() {
@@ -258,6 +258,7 @@ public class Drivetrain extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    this.poseEstimator.resetPose(pose);
     this.rawOdometryPose = pose;
   }
 
