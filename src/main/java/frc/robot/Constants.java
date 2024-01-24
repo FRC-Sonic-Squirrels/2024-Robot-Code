@@ -17,7 +17,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
-import frc.robot.configs.ExampleRobotConfig;
 import frc.robot.configs.RobotConfig;
 import frc.robot.configs.RobotConfig2023Rober;
 import frc.robot.configs.RobotConfig2024;
@@ -42,7 +41,7 @@ public final class Constants {
 
     // FIXME: update for various robots
     public static Mode getMode() {
-      if(getRobot() == RobotType.ROBOT_SIMBOT) {
+      if (getRobot() == RobotType.ROBOT_SIMBOT) {
         return Mode.SIM;
       }
 
