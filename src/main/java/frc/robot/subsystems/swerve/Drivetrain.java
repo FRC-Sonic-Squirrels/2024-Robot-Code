@@ -239,10 +239,11 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator.addVisionData(visionData);
   }
 
-  // FIXME: use pose estimator to get pose
-  /** Returns the current odometry pose. */
-  @AutoLogOutput(key = "Odometry/RobotOdometry")
-  public Pose2d getRawOdometryPose() {
+  /**
+   * WARNING - THIS IS THE RAW *ODOMETRY* POSE, THIS DOES NOT ACCOUNT FOR VISION DATA & SHOULD
+   * EXCLUSIVELY BE USED FOR LOGGING AND ANALYSIS
+   */
+  private Pose2d getRawOdometryPose() {
     return rawOdometryPose;
   }
 

@@ -127,7 +127,7 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIO() {});
       wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      limelight = new Limelight(new LimelightIO() {}, drivetrain::getRawOdometryPose);
+      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
 
     } else { // REAL and SIM robots HERE
