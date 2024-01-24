@@ -52,10 +52,7 @@ public class IntakeDefaultCommand extends Command {
     if (gamepieceTimeInIntake.get() >= 0.1 && gamepieceTimeInIntake.get() <= 0.15) {
       RobotState.getInstance().setIntakeMode(RobotState.IntakeMode.STOW);
     }
-    intake.setTargetRPM(
-        RobotState.getInstance().getIntakeMode().equals(RobotState.IntakeMode.INTAKE)
-            ? Constants.IntakeConstants.INTAKE_IDLE_RPM
-            : 0.0);
+    intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT);
   }
 
   // Called once the command ends or is interrupted.
