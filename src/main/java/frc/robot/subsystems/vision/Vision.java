@@ -353,8 +353,6 @@ public class Vision extends SubsystemBase {
                     == VisionResultStatus.SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK)
             ? true
             : false;
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "addedVisionEstimateToPoseEstimator(AKA SUCCESSFUL?)",
-        addedVisionEstimateToPoseEstimator);
+    Logger.recordOutput(ROOT_TABLE_PATH + "SUCCESSFUL_RESULT?", addedVisionEstimateToPoseEstimator);
   }
 }
