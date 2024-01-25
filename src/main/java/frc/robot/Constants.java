@@ -157,7 +157,7 @@ public final class Constants {
 
       public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
 
-      public static final double GEARING = 1.0;
+      public static final double GEARING = 90.0;
 
       public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
       public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);

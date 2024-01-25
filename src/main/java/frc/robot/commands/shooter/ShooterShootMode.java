@@ -5,6 +5,7 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -67,52 +68,62 @@ public class ShooterShootMode extends Command {
   @Override
   public void execute() {
 
+    Pose2d futurePose = drive.getFutureEstimatedPose(shooter.getPivotPIDLatency());
+
     double distToSpeaker =
-        Math.hypot(
-            drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
-            drive.getPoseEstimatorPose().getY() - speakerPose.getY());
+        Math.hypot(futurePose.getX() - speakerPose.getX(), futurePose.getY() - speakerPose.getY());
+
+    Logger.recordOutput("ShooterShootMode/futurePose", futurePose);
 
     // VELOCITY CONTROL
 
-    shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
+    // shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
 
-    if (shootSupplier.getAsBoolean()) {
-      shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
-      // if (shooter.launcherIsAtTargetVel()) {
-      // TODO: logic for end effector running. Also check if arm is in correct position
-      // }
-    } else {
-      shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
-    }
-    speakerHeading =
-        new Rotation2d(
-            drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
-            drive.getPoseEstimatorPose().getY() - speakerPose.getY());
-    double linearVelSpeaker =
-        new Translation2d(
-                drive.getFieldRelativeVelocities().getX(),
-                drive.getFieldRelativeVelocities().getY())
-            .rotateBy(speakerHeading)
-            .getX();
-    shooterPitchVelCorrection =
-        Constants.ShooterConstants.Pivot.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
+    // if (shootSupplier.getAsBoolean()) {
+    //   shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+    //   // if (shooter.launcherIsAtTargetVel()) {
+    //   // TODO: logic for end effector running. Also check if arm is in correct position
+    //   // }
+    // } else {
+    //   shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+    // }
+    // speakerHeading =
+    //     new Rotation2d(
+    //         drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
+    //         drive.getPoseEstimatorPose().getY() - speakerPose.getY());
+    // double linearVelSpeaker =
+    //     new Translation2d(
+    //             drive.getFieldRelativeVelocities().getX(),
+    //             drive.getFieldRelativeVelocities().getY())
+    //         .rotateBy(speakerHeading)
+    //         .getX();
+    // shooterPitchVelCorrection =
+    //     Constants.ShooterConstants.Pivot.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
 
-    double targetAngle =
-        Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
-    double vel =
-        shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
-            + shooterPitchVelCorrection;
-    shooter.setPitchAngularVel(vel);
+    // double targetAngle =
+    //     Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
+    // double vel =
+    //     shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
+    //         + shooterPitchVelCorrection;
+    // shooter.setPitchAngularVel(vel);
 
     // POSITIONAL CONTROL
 
-    // shooter.setPivotPosition(
-    //     Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker));
+    shooter.setPivotPosition(
+        Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker));
 
-    Logger.recordOutput("ShooterShootMode/velCorrection", shooterPitchVelCorrection);
-    Logger.recordOutput("ShooterShootMode/vel", vel);
-    Logger.recordOutput("ShooterShootMode/targetAngleDegrees", Math.toDegrees(targetAngle));
-    Logger.recordOutput("ShooterShootMode/linearVelSpeaker", linearVelSpeaker);
+    // Logger.recordOutput("ShooterShootMode/velCorrection", shooterPitchVelCorrection);
+    // Logger.recordOutput("ShooterShootMode/vel", vel);
+    // Logger.recordOutput("ShooterShootMode/targetAngleDegrees", Math.toDegrees(targetAngle));
+    // Logger.recordOutput("ShooterShootMode/linearVelSpeaker", linearVelSpeaker);
+
+    Logger.recordOutput(
+        "ShooterShootMode/optimalAngle",
+        Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(
+                Math.hypot(
+                    drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
+                    drive.getPoseEstimatorPose().getY() - speakerPose.getY()))
+            .getDegrees());
   }
 
   // Called once the command ends or is interrupted.

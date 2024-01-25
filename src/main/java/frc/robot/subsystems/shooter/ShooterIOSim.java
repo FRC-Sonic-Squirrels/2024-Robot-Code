@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -83,7 +84,8 @@ public class ShooterIOSim implements ShooterIO {
 
     launcherMotorSim.setInputVoltage(launcherOpenLoopVolts);
 
-    pivot.setInputVoltage(pivotControlEffort);
+    pivot.setInputVoltage(MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
+    Logger.recordOutput("Shooter/outputVoltage", MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
 
     Logger.recordOutput("Shooter/targetVelRadPerSec", pivotTargetVelRadPerSec);
     Logger.recordOutput("Shooter/currentVelRadPerSec", pivot.getVelocityRadPerSec());

@@ -4,9 +4,12 @@
 
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team6328.LoggedTunableNumber;
+import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -15,13 +18,24 @@ public class Shooter extends SubsystemBase {
 
   private static final String ROOT_TABLE = "Shooter";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 15.0);
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 1.0);
   private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 5.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 19.0);
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 5.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 19.0);
+
+  // Creates a new flat moving average filter
+  // Average will be taken over the last 20 samples
+  private LinearFilter pivotPidLatencyfilter = LinearFilter.movingAverage(20);
+
+  private ArrayList<PivotTargetMeasurement> pivotTargetMeasurements =
+      new ArrayList<PivotTargetMeasurement>();
+
+  private Rotation2d currentTarget = new Rotation2d();
+
+  private double pivotPidLatency = 0.0;
 
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
@@ -32,8 +46,8 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
 
-    Logger.processInputs("Shooter", inputs);
-    Logger.recordOutput("Shooter/PitchDegrees", inputs.pitch.getDegrees());
+    Logger.processInputs(ROOT_TABLE, inputs);
+    Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pitch.getDegrees());
 
     io.setPivotClosedLoopConstants(
         kP.get(),
@@ -41,6 +55,26 @@ public class Shooter extends SubsystemBase {
         kG.get(),
         closedLoopMaxVelocityConstraint.get(),
         closedLoopMaxAccelerationConstraint.get());
+
+    pivotTargetMeasurements.add(
+        new PivotTargetMeasurement(
+            Timer.getFPGATimestamp(),
+            currentTarget,
+            inputs.pitch.getRadians() <= currentTarget.getRadians()));
+    for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
+      PivotTargetMeasurement measurement = pivotTargetMeasurements.get(index);
+      if ((measurement.upDirection
+              && inputs.pitch.getRadians() >= measurement.targetRot.getRadians())
+          || (!measurement.upDirection
+              && inputs.pitch.getRadians() <= measurement.targetRot.getRadians())) {
+        pivotPidLatency =
+            pivotPidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
+        pivotTargetMeasurements.remove(index);
+      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
+        pivotTargetMeasurements.remove(index);
+      }
+    }
+    Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
   }
 
   public void setPitchAngularVel(double radiansPerSecond) {
@@ -66,6 +100,7 @@ public class Shooter extends SubsystemBase {
 
   public void setPivotPosition(Rotation2d rot) {
     io.setPivotPosition(rot);
+    currentTarget = rot;
   }
 
   public void setLauncherVoltage(double volts) {
@@ -78,5 +113,9 @@ public class Shooter extends SubsystemBase {
 
   public double getRPM() {
     return inputs.RPM;
+  }
+
+  public double getPivotPIDLatency() {
+    return pivotPidLatency;
   }
 }

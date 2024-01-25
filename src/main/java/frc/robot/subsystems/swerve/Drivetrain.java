@@ -238,11 +238,14 @@ public class Drivetrain extends SubsystemBase {
     Translation2d translation =
         new Translation2d(
                 getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
-            .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
-    return new Pose2d(
-        translation.getX(),
-        translation.getY(),
-        new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+            .rotateBy(getRawOdometryPose().getRotation());
+    return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+  }
+
+  @AutoLogOutput(key = "Robot/FieldRelativeAcceleration")
+  public Translation2d getFieldRelativeAccelerations() {
+    return new Translation2d(gyroInputs.xAcceleration, gyroInputs.yAcceleration)
+        .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
@@ -261,6 +264,21 @@ public class Drivetrain extends SubsystemBase {
   @AutoLogOutput(key = "Localization/RobotPosition")
   public Pose2d getPoseEstimatorPose() {
     return poseEstimator.getLatestPose();
+  }
+
+  public Pose2d getFutureEstimatedPose(double sec) {
+    return new Pose2d(
+        getPoseEstimatorPose().getX()
+            + (getFieldRelativeVelocities().getX()
+                    + getFieldRelativeAccelerations().getX() * sec * 0.5)
+                * sec,
+        getPoseEstimatorPose().getY()
+            + (getFieldRelativeVelocities().getY()
+                    + getFieldRelativeAccelerations().getY() * sec * 0.5)
+                * sec,
+        new Rotation2d(
+            getPoseEstimatorPose().getRotation().getRadians()
+                + gyroInputs.yawVelocityRadPerSec * sec));
   }
 
   /** Returns the current odometry rotation. */
