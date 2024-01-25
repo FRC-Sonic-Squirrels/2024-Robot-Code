@@ -297,6 +297,67 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    /*
+    Button binding summary:
+
+      Driver:
+
+        right trigger: spin intake
+
+        left trigger: drive to GP
+
+        right bumper: speaker mode
+
+        A button: confirm speaker shot
+
+        left bumper: score in amp (may have A button confirmation)
+
+        B button: force stow everything
+
+        X button: move all position controlled subsystems to hard stops to reset sensor position
+
+        Y button: toggle climb mode (A: confirm climb)
+
+        Start: reset odometry
+
+        POV down: eject gamepiece (through intake)
+
+      Operator:
+
+        B: (when not connected to FMS) run systems check command: press B to continue onto next stage of systems check
+          Drivetrain
+            1. Forward
+            2. Spin
+          Intake
+            3. Spin
+          Shooter
+            4. Pivot
+            5. Flywheel + kicker
+          Elevator
+            6. up
+          Arm
+            7. Rotate to amp or trap position
+          Wrist
+            8. move through range of motion
+          End Effector
+            9. (after moving mech back to stow position) spin
+          ----- end command -----
+          Vision
+            10. check localization vision (preferably with april tag)
+          Limelight
+            11. check limelight (preferably with note)
+
+            12. look at LEDs
+            13. double check connection from pigeon
+
+        X: cancel systems check
+
+        Right trigger (plus right stick): manual control of elevator
+
+        POV down: initiate no vision mode?
+
+
+    */
     // ----------- DRIVER CONTROLS ------------
     driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
     // driverController
