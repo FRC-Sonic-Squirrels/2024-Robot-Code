@@ -1,5 +1,7 @@
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -38,9 +40,7 @@ public class ArmIOReal implements ArmIO {
 
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    config.CurrentLimits.SupplyCurrentThreshold = 0.0;
-    config.CurrentLimits.SupplyTimeThreshold = 0.0;
-    config.CurrentLimits.SupplyCurrentLimit = 0.0;
+    config.CurrentLimits.SupplyCurrentLimit = 40;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -48,6 +48,8 @@ public class ArmIOReal implements ArmIO {
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     // other closed loop configuration is handled by setClosedLoopConstants()
+
+    motor.getConfigurator().apply(config);
 
     appliedVols = motor.getMotorVoltage();
     positionRotations = motor.getPosition();
@@ -66,8 +68,7 @@ public class ArmIOReal implements ArmIO {
     BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius);
     // could look into latency compensating this value
     inputs.armPosition =
-        Rotation2d.fromRadians(
-            positionRotations.getValueAsDouble() * OUTPUT_ROTATIONS_TO_OUTPUT_RADS);
+        Rotation2d.fromRotations(positionRotations.getValueAsDouble());
 
     inputs.armAppliedVolts = appliedVols.getValueAsDouble();
     inputs.armCurrentAmps = currentAmps.getValueAsDouble();
@@ -86,11 +87,15 @@ public class ArmIOReal implements ArmIO {
   public void setClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
+     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+
+     motor.getConfigurator().refresh(pidConfig);
+    motor.getConfigurator().refresh(mmConfig);
+
     pidConfig.kP = kP;
     pidConfig.kD = kD;
     pidConfig.kG = kG;
 
-    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
     mmConfig.MotionMagicCruiseVelocity = maxProfiledAcceleration;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
@@ -105,8 +110,6 @@ public class ArmIOReal implements ArmIO {
 
   @Override
   public void resetSensorPosition(Rotation2d angle) {
-    var rotations = angle.getRadians() / OUTPUT_ROTATIONS_TO_OUTPUT_RADS;
-
-    motor.setPosition(rotations);
+    motor.setPosition(angle.getRotations());
   }
 }
