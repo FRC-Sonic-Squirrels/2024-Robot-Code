@@ -73,6 +73,9 @@ public class Arm extends SubsystemBase {
     Logger.processInputs("Arm", inputs);
 
     Logger.recordOutput("Arm/PositionDegrees", inputs.armPosition.getDegrees() % 360);
+    Logger.recordOutput("Arm/ControlMode", currentControlMode);
+    Logger.recordOutput("Arm/targetClosedLoopSetpointDegrees", closedLoopTargetAngle.getDegrees());
+
     // ---- UPDATE TUNABLE NUMBERS
     var hc = hashCode();
     if (kP.hasChanged(hc)
