@@ -284,7 +284,7 @@ public class Drivetrain extends SubsystemBase {
     Logger.recordOutput(
         userClassName + "/futureEstimatedPose/velocityContribution", velocityContribution);
     Logger.recordOutput(
-        userClassName + "/futureEstimatedPose/accelerationContribution", velocityContribution);
+        userClassName + "/futureEstimatedPose/accelerationContribution", accelerationContribution);
     Logger.recordOutput(userClassName + "/futureEstimatedPose/pose", pose);
     return pose;
   }
