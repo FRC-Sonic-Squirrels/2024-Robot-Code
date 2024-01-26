@@ -146,6 +146,8 @@ public final class Constants {
   }
 
   public class ArmConstants {
+    public static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
+
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
