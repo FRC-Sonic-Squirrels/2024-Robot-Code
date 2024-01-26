@@ -266,19 +266,27 @@ public class Drivetrain extends SubsystemBase {
     return poseEstimator.getLatestPose();
   }
 
-  public Pose2d getFutureEstimatedPose(double sec) {
-    return new Pose2d(
-        getPoseEstimatorPose().getX()
-            + (getFieldRelativeVelocities().getX()
-                    + getFieldRelativeAccelerations().getX() * sec * 0.5)
-                * sec,
-        getPoseEstimatorPose().getY()
-            + (getFieldRelativeVelocities().getY()
-                    + getFieldRelativeAccelerations().getY() * sec * 0.5)
-                * sec,
-        new Rotation2d(
-            getPoseEstimatorPose().getRotation().getRadians()
-                + gyroInputs.yawVelocityRadPerSec * sec));
+  public Pose2d getFutureEstimatedPose(double sec, String userClassName) {
+    Translation2d velocityContribution = getFieldRelativeVelocities().getTranslation().times(sec);
+    Translation2d accelerationContribution =
+        getFieldRelativeAccelerations().times(Math.pow(sec, 2) * 0.5);
+    Pose2d pose =
+        new Pose2d(
+            getPoseEstimatorPose().getX()
+                + velocityContribution.getX()
+                + accelerationContribution.getX(),
+            getPoseEstimatorPose().getY()
+                + velocityContribution.getY()
+                + accelerationContribution.getY(),
+            new Rotation2d(
+                getPoseEstimatorPose().getRotation().getRadians()
+                    + gyroInputs.yawVelocityRadPerSec * sec));
+    Logger.recordOutput(
+        userClassName + "/futureEstimatedPose/velocityContribution", velocityContribution);
+    Logger.recordOutput(
+        userClassName + "/futureEstimatedPose/accelerationContribution", velocityContribution);
+    Logger.recordOutput(userClassName + "/futureEstimatedPose/pose", pose);
+    return pose;
   }
 
   /** Returns the current odometry rotation. */

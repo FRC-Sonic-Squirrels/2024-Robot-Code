@@ -71,7 +71,8 @@ public class ShooterShootMode extends Command {
 
     shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
 
-    Pose2d futurePose = drive.getFutureEstimatedPose(shooter.getPivotPIDLatency());
+    Pose2d futurePose =
+        drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode");
 
     Translation2d shooterBaseTranslation =
         futurePose

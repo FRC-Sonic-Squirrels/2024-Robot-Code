@@ -201,7 +201,7 @@ public class RotateToTranslation extends Command {
     // from
     // DrivetrainDeafultTeleopDrive
 
-    Pose2d futurePose = drive.getFutureEstimatedPose(pidLatency);
+    Pose2d futurePose = drive.getFutureEstimatedPose(pidLatency, "RotateToTranslation");
 
     double linearMagnitude =
         MathUtil.applyDeadband(
