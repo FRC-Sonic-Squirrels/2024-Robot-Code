@@ -14,8 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
 public class ArmIOReal implements ArmIO {
-  private static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
-
   private final StatusSignal<Double> appliedVols;
   private final StatusSignal<Double> positionRotations;
   private final StatusSignal<Double> currentAmps;
@@ -38,7 +36,7 @@ public class ArmIOReal implements ArmIO {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+    config.Feedback.SensorToMechanismRatio = Constants.ArmConstants.GEAR_RATIO;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     // other closed loop configuration is handled by setClosedLoopConstants()
 
@@ -61,7 +59,6 @@ public class ArmIOReal implements ArmIO {
     BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius);
     // could look into latency compensating this value
     inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());
-
     inputs.armAppliedVolts = appliedVols.getValueAsDouble();
     inputs.armCurrentAmps = currentAmps.getValueAsDouble();
     inputs.armTempCelsius = tempCelsius.getValueAsDouble();
@@ -76,6 +73,7 @@ public class ArmIOReal implements ArmIO {
   @Override
   public void setClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
+
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 

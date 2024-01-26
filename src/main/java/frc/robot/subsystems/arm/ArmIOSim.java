@@ -11,19 +11,15 @@ import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class ArmIOSim implements ArmIO {
-  private double armGearing = 10;
-  private double momentOfInertia = 0.15;
-  private double armLengthMeters = Units.inchesToMeters(12);
-
-  private double minAngleRad = Units.degreesToRadians(-90);
-  private double maxAngleRad = Units.degreesToRadians(90);
+  private double MOMENT_OF_INERTIA = 0.15;
+  private double ARM_LENGTH_METERS = Units.inchesToMeters(14);
 
   SingleJointedArmSim armSim =
       new SingleJointedArmSim(
           DCMotor.getFalcon500Foc(1),
-          armGearing,
-          momentOfInertia,
-          armLengthMeters,
+          Constants.ArmConstants.GEAR_RATIO,
+          MOMENT_OF_INERTIA,
+          ARM_LENGTH_METERS,
           Constants.ArmConstants.MIN_ARM_ANGLE.getRadians(),
           Constants.ArmConstants.MAX_ARM_ANGLE.getRadians(),
           true,
@@ -52,8 +48,8 @@ public class ArmIOSim implements ArmIO {
 
       controlEffort = fb + ff;
 
-      Logger.recordOutput("Arm/FF_fG", ff);
-      Logger.recordOutput("Arm/error", feedback.getPositionError());
+      Logger.recordOutput("Arm/SIM_FF_fG", ff);
+      Logger.recordOutput("Arm/SIM_error", feedback.getPositionError());
 
     } else {
       controlEffort = openLoopVolts;
@@ -68,7 +64,7 @@ public class ArmIOSim implements ArmIO {
     inputs.armAppliedVolts = controlEffort;
     inputs.armCurrentAmps = armSim.getCurrentDrawAmps();
 
-    Logger.recordOutput("Arm/controlEffort", controlEffort);
+    Logger.recordOutput("Arm/SIM_controlEffort", controlEffort);
   }
 
   @Override
