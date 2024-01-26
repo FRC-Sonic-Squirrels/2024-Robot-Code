@@ -26,12 +26,12 @@ public class Arm extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
-      kP.initDefault(0.0);
+      kP.initDefault(0.5);
       kD.initDefault(0);
-      kG.initDefault(0);
+      kG.initDefault(0.295);
 
-      closedLoopMaxVelocityConstraint.initDefault(0);
-      closedLoopMaxAccelerationConstraint.initDefault(0);
+      closedLoopMaxVelocityConstraint.initDefault(40);
+      closedLoopMaxAccelerationConstraint.initDefault(40);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
 
       kP.initDefault(2.5);
@@ -85,7 +85,7 @@ public class Arm extends SubsystemBase {
         || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
       io.setClosedLoopConstants(
           kP.get(),
-          kP.get(),
+          kD.get(),
           kG.get(),
           closedLoopMaxVelocityConstraint.get(),
           closedLoopMaxAccelerationConstraint.get());
