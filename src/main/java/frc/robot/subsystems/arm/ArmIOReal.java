@@ -1,7 +1,5 @@
 package frc.robot.subsystems.arm;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -62,8 +60,7 @@ public class ArmIOReal implements ArmIO {
   public void updateInputs(ArmIOInputs inputs) {
     BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius);
     // could look into latency compensating this value
-    inputs.armPosition =
-        Rotation2d.fromRotations(positionRotations.getValueAsDouble());
+    inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());
 
     inputs.armAppliedVolts = appliedVols.getValueAsDouble();
     inputs.armCurrentAmps = currentAmps.getValueAsDouble();
@@ -80,9 +77,9 @@ public class ArmIOReal implements ArmIO {
   public void setClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
-     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-     motor.getConfigurator().refresh(pidConfig);
+    motor.getConfigurator().refresh(pidConfig);
     motor.getConfigurator().refresh(mmConfig);
 
     pidConfig.kP = kP;
