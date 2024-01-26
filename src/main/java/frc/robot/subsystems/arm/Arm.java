@@ -125,6 +125,6 @@ public class Arm extends SubsystemBase {
       return false;
     }
     var error = inputs.armPosition.minus(closedLoopTargetAngle).getRadians();
-    return error <= tolerance.getRadians() ? true : false;
+    return Math.abs(error) <= tolerance.getRadians();
   }
 }
