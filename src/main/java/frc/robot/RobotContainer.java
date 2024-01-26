@@ -238,6 +238,8 @@ public class RobotContainer {
           wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+
+          led = new LED();
           break;
 
         default:

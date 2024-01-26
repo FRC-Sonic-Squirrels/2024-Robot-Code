@@ -15,8 +15,7 @@ import frc.robot.Constants;
 
 public class ArmIOReal implements ArmIO {
   // place holder numbers
-  private static final double GEAR_RATIO =
-    (72.0 / 12.0)* (42.0/16.0);
+  private static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
   // adapted from
   // https://pro.docs.ctr-electronics.com/en/latest/docs/api-reference/device-specific/talonfx/closed-loop-requests.html#converting-from-meters
   private static final double OUTPUT_RADS_TO_MOTOR_ROTATIONS = (1 / (2 * Math.PI)) * GEAR_RATIO;
@@ -27,7 +26,7 @@ public class ArmIOReal implements ArmIO {
   private final StatusSignal<Double> currentAmps;
   private final StatusSignal<Double> tempCelsius;
 
-  //FIXME: add FOC
+  // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
       new MotionMagicVoltage(0.0).withEnableFOC(false);
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);

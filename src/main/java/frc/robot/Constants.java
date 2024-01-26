@@ -84,6 +84,8 @@ public final class Constants {
     }
   }
 
+  public static double MAX_VOLTAGE = 12.0;
+
   public class FieldConstants {
     // FIXME: double check this number
     public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
