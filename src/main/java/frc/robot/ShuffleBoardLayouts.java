@@ -74,6 +74,7 @@ public class ShuffleBoardLayouts {
         new ConsumeSuppliedValue(arm, () -> tunableVoltage.getDouble(0.0), arm::setVoltage));
 
     var stopCommand = Commands.runOnce(() -> arm.setVoltage(0.0), arm);
+    stopCommand.runsWhenDisabled();
     stopCommand.setName("ARM STOP");
     armCommandsLayout.add(stopCommand);
 
