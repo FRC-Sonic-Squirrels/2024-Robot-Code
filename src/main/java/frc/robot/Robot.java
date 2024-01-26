@@ -132,7 +132,6 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("TIME/REAL FPGA", Logger.getRealTimestamp());
 
     Logger.recordOutput("RobotState/scoring mode", RobotState.getInstance().getScoringMode());
-    Logger.recordOutput("RobotState/intake mode", RobotState.getInstance().getIntakeMode());
 
     robotContainer.updateVisualization();
     robotContainer.updateRobotState();

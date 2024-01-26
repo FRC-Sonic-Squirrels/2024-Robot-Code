@@ -7,6 +7,7 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -72,10 +73,23 @@ public class ShooterShootMode extends Command {
 
     Pose2d futurePose = drive.getFutureEstimatedPose(shooter.getPivotPIDLatency());
 
+    Translation2d shooterBaseTranslation =
+        futurePose
+            .transformBy(
+                new Transform2d(
+                    -Constants.ShooterConstants.SHOOTER_OFFSET_METERS, 0.0, new Rotation2d()))
+            .getTranslation();
+
     double distToSpeaker =
-        Math.hypot(futurePose.getX() - speakerPose.getX(), futurePose.getY() - speakerPose.getY());
+        Math.hypot(
+            shooterBaseTranslation.getX() - speakerPose.getX(),
+            shooterBaseTranslation.getY() - speakerPose.getY());
 
     Logger.recordOutput("ShooterShootMode/futurePose", futurePose);
+
+    Logger.recordOutput(
+        "ShooterShootMode/futureShooterBasePose",
+        new Pose2d(shooterBaseTranslation, futurePose.getRotation()));
 
     // VELOCITY CONTROL
 
@@ -116,12 +130,20 @@ public class ShooterShootMode extends Command {
     // Logger.recordOutput("ShooterShootMode/targetAngleDegrees", Math.toDegrees(targetAngle));
     // Logger.recordOutput("ShooterShootMode/linearVelSpeaker", linearVelSpeaker);
 
+    Translation2d currentShooterTranslation =
+        drive
+            .getPoseEstimatorPose()
+            .transformBy(
+                new Transform2d(
+                    -Constants.ShooterConstants.SHOOTER_OFFSET_METERS, 0.0, new Rotation2d()))
+            .getTranslation();
+
     Logger.recordOutput(
         "ShooterShootMode/optimalAngle",
         Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(
                 Math.hypot(
-                    drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
-                    drive.getPoseEstimatorPose().getY() - speakerPose.getY()))
+                    currentShooterTranslation.getX() - speakerPose.getX(),
+                    currentShooterTranslation.getY() - speakerPose.getY()))
             .getDegrees());
   }
 

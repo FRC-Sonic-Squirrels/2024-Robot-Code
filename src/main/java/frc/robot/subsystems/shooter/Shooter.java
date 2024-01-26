@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
@@ -30,8 +31,8 @@ public class Shooter extends SubsystemBase {
   // Average will be taken over the last 20 samples
   private LinearFilter pivotPidLatencyfilter = LinearFilter.movingAverage(20);
 
-  private ArrayList<PivotTargetMeasurement> pivotTargetMeasurements =
-      new ArrayList<PivotTargetMeasurement>();
+  private ArrayList<PIDTargetMeasurement> pivotTargetMeasurements =
+      new ArrayList<PIDTargetMeasurement>();
 
   private Rotation2d currentTarget = new Rotation2d();
 
@@ -57,12 +58,12 @@ public class Shooter extends SubsystemBase {
         closedLoopMaxAccelerationConstraint.get());
 
     pivotTargetMeasurements.add(
-        new PivotTargetMeasurement(
+        new PIDTargetMeasurement(
             Timer.getFPGATimestamp(),
             currentTarget,
             inputs.pitch.getRadians() <= currentTarget.getRadians()));
     for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
-      PivotTargetMeasurement measurement = pivotTargetMeasurements.get(index);
+      PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
       if ((measurement.upDirection
               && inputs.pitch.getRadians() >= measurement.targetRot.getRadians())
           || (!measurement.upDirection

@@ -36,7 +36,7 @@ import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.drive.RotateToTranslation;
 import frc.robot.commands.intake.EjectGamepiece;
-import frc.robot.commands.intake.IntakeDefaultCommand;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
@@ -262,7 +262,7 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    intake.setDefaultCommand(new IntakeDefaultCommand(intake, driverController.getHID()));
+    intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
 
     shooter.setDefaultCommand(new ShooterStowMode(shooter));
 
@@ -363,7 +363,7 @@ public class RobotContainer {
     // driverController
     //     .leftTrigger()
     //     .whileTrue(
-    //         new RotateToGamepiece(
+    //         new RotateToTranslation(
     //             () -> -controller.getLeftY(),
     //             () -> -controller.getLeftX(),
     //             limelight::getClosestGamepiece,
@@ -377,7 +377,11 @@ public class RobotContainer {
             new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
     driverController
-        .rightTrigger()
+        .rightBumper()
+        .onTrue(
+            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)))
+        .onFalse(
+            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.NONE)))
         .whileTrue(
             new RotateToTranslation(
                 () -> -driverController.getLeftY(),
@@ -395,13 +399,7 @@ public class RobotContainer {
                 new Rotation2d(Math.PI),
                 () -> 0.0,
                 0.0));
-
-    // ----------- OPERATOR CONTROLS ------------
-
-    operatorController
-        .a()
-        .onTrue(
-            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)));
+    ;
   }
 
   /**

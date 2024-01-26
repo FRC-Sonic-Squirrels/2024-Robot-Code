@@ -7,7 +7,6 @@ package frc.robot;
 /** Add your docs here. */
 public class RobotState {
   private static RobotState instance = null;
-  private IntakeMode intakeMode = IntakeMode.INTAKE;
   private ScoringMode scoringMode = ScoringMode.NONE;
 
   public static RobotState getInstance() {
@@ -19,14 +18,6 @@ public class RobotState {
   }
 
   private RobotState() {}
-
-  public IntakeMode getIntakeMode() {
-    return intakeMode;
-  }
-
-  public void setIntakeMode(IntakeMode intakeMode) {
-    this.intakeMode = intakeMode;
-  }
 
   public ScoringMode getScoringMode() {
     return scoringMode;

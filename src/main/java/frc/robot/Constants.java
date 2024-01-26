@@ -137,13 +137,14 @@ public final class Constants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
     public static final double SHOOTER_OFFSET_METERS = Units.inchesToMeters(12);
+    public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
     public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
 
     public class Pivot {
       public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
         return new Rotation2d(
             Math.atan2(
-                FieldConstants.SPEAKER_HEIGHT_METERS, distanceMeters - SHOOTER_OFFSET_METERS));
+                FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS, distanceMeters));
       }
 
       public static final double PITCH_VEL_RAD_PER_SEC(

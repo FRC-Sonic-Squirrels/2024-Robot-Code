@@ -10,26 +10,28 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
-import frc.robot.RobotState;
 import frc.robot.subsystems.intake.Intake;
 
-public class IntakeDefaultCommand extends Command {
+public class IntakeGamepiece extends Command {
   private Intake intake;
   private XboxController controller;
-  private Timer gamepieceTimeInIntake = new Timer();
+  private Timer timeSinceLastGamepiece = new Timer();
+
+  private boolean controllerRumbled = false;
+  private boolean beamBreakPrev = false;
 
   private LoggedTunableNumber rumbleDurationSeconds =
-      new LoggedTunableNumber("IntakeDefaultCommand/rumbleDurationSeconds", 0.4);
+      new LoggedTunableNumber("IntakeGamepiece/rumbleDurationSeconds", 0.4);
   private LoggedTunableNumber rumbleIntensityPercent =
-      new LoggedTunableNumber("IntakeDefaultCommand/rumbleIntensityPercent", 0.3);
+      new LoggedTunableNumber("IntakeGamepiece/rumbleIntensityPercent", 0.3);
 
   /** Creates a new IntakeDefaultIdleRPM. */
-  public IntakeDefaultCommand(Intake intake, XboxController controller) {
+  public IntakeGamepiece(Intake intake, XboxController controller) {
     this.intake = intake;
     this.controller = controller;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
-    setName("IntakeDefaultCommand");
+    setName("IntakeGamepiece");
   }
 
   // Called when the command is initially scheduled.
@@ -39,18 +41,18 @@ public class IntakeDefaultCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (intake.getBeamBreak()) {
-      gamepieceTimeInIntake.start();
-    } else {
-      gamepieceTimeInIntake.stop();
-      gamepieceTimeInIntake.reset();
+    if (intake.getBeamBreak() && !beamBreakPrev) {
+      timeSinceLastGamepiece.reset();
+      timeSinceLastGamepiece.start();
     }
-    if (gamepieceTimeInIntake.get() >= 0.01
-        && gamepieceTimeInIntake.get() <= rumbleDurationSeconds.get()) {
+    beamBreakPrev = intake.getBeamBreak();
+    if (timeSinceLastGamepiece.get() >= 0.01
+        && timeSinceLastGamepiece.get() <= rumbleDurationSeconds.get()) {
       controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
-    }
-    if (gamepieceTimeInIntake.get() >= 0.1 && gamepieceTimeInIntake.get() <= 0.15) {
-      RobotState.getInstance().setIntakeMode(RobotState.IntakeMode.STOW);
+      controllerRumbled = true;
+    } else if (controllerRumbled) {
+      controller.setRumble(RumbleType.kBothRumble, 0.0);
+      controllerRumbled = false;
     }
     intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT);
   }
