@@ -222,6 +222,8 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIOReal());
           // limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
 
+          DriverStation.silenceJoystickConnectionWarning(true);
+
           drivetrain =
               new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
