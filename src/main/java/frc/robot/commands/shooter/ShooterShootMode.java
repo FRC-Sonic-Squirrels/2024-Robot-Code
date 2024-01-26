@@ -68,6 +68,8 @@ public class ShooterShootMode extends Command {
   @Override
   public void execute() {
 
+    shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+
     Pose2d futurePose = drive.getFutureEstimatedPose(shooter.getPivotPIDLatency());
 
     double distToSpeaker =
@@ -80,13 +82,10 @@ public class ShooterShootMode extends Command {
     // shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
 
     // if (shootSupplier.getAsBoolean()) {
-    //   shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+    //
     //   // if (shooter.launcherIsAtTargetVel()) {
     //   // TODO: logic for end effector running. Also check if arm is in correct position
     //   // }
-    // } else {
-    //   shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
-    // }
     // speakerHeading =
     //     new Rotation2d(
     //         drive.getPoseEstimatorPose().getX() - speakerPose.getX(),

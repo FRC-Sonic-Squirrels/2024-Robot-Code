@@ -233,9 +233,6 @@ public class RotateToTranslation extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
-    drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
-
     rotVelCorrection =
         Math.hypot(xVel, yVel)
             * Math.cos(heading.getRadians() - new Rotation2d(xVel, yVel).getRadians() - Math.PI / 2)
@@ -243,15 +240,18 @@ public class RotateToTranslation extends Command {
                 drive.getPoseEstimatorPose().getX() - target.get().getX(),
                 drive.getPoseEstimatorPose().getY() - target.get().getY());
 
+    drive.runVelocity(
+        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
+
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("RotateToGamepiece/RotationalEffort", rotationalEffort);
-    Logger.recordOutput("ActiveCommands/RotateToGamepiece", true);
     Logger.recordOutput(
         "RotateToGamepiece/rotationalErrorDegrees",
         Units.radiansToDegrees(rotationController.getPositionError()));
     Logger.recordOutput("RotateToGamepiece/desiredLinearVelocity", linearVelocity);
     Logger.recordOutput("RotateToGamepiece/rotationCorrection", rotVelCorrection);
     Logger.recordOutput("RotateToGamepiece/robotRotationDegrees", drive.getRotation().getDegrees());
+    Logger.recordOutput("RotateToGamepiece/targetRotationDegrees", goalRot.getDegrees());
     Logger.recordOutput("RotateToGamepiece/atSetpoint", rotationController.atSetpoint());
 
     if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
@@ -264,7 +264,6 @@ public class RotateToTranslation extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.runVelocity(new ChassisSpeeds(0, 0, 0));
-    Logger.recordOutput("ActiveCommands/RotateToGamepiece", false);
   }
 
   // Returns true when the command should end.

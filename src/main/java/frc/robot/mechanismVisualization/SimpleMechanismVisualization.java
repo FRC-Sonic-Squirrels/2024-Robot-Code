@@ -24,13 +24,13 @@ public class SimpleMechanismVisualization {
       new Mechanism2d(Units.inchesToMeters(32.0), Units.inchesToMeters(50.0));
 
   static MechanismRoot2d shooterRoot =
-      shooterMechanism2d.getRoot("shooterRoot", Units.inchesToMeters(4), Units.inchesToMeters(12));
+      shooterMechanism2d.getRoot("shooterRoot", Units.inchesToMeters(4), Units.inchesToMeters(4));
 
   static MechanismLigament2d shooter =
       shooterRoot.append(
           new MechanismLigament2d(
               "shooter",
-              Constants.ShooterConstants.SHOOTER_LENGTH,
+              -Constants.ShooterConstants.SHOOTER_LENGTH,
               Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE));
 
   static MechanismLigament2d gamepieceTraj =
@@ -54,8 +54,8 @@ public class SimpleMechanismVisualization {
       Red = 255;
     }
     shooter.setColor(new Color8Bit(Red, Green, 0));
-    gamepieceTraj.setAngle(shooterAngle);
-    gamepieceTraj.setLength(distToSpeaker);
+    gamepieceTraj.setAngle(new Rotation2d(-shooterAngle.getRadians()));
+    gamepieceTraj.setLength(-distToSpeaker);
     gamepieceTraj.setLineWeight(5.0);
     gamepieceTraj.setColor(new Color8Bit("#FF8000"));
   }

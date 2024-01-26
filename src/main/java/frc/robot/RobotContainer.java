@@ -392,7 +392,7 @@ public class RobotContainer {
                         : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
-                new Rotation2d(0.0),
+                new Rotation2d(Math.PI),
                 () -> 0.0,
                 0.0));
 
