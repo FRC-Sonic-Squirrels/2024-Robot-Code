@@ -79,6 +79,7 @@ public class ShuffleBoardLayouts {
     armCommandsLayout.add(stopCommand);
 
     var resetSensorPositionHome = Commands.runOnce(() -> arm.resetSensorToHomePosition(), arm);
+    resetSensorPositionHome.runsWhenDisabled();
     resetSensorPositionHome.setName("resetSensorToHomePosition");
     armCommandsLayout.add(resetSensorPositionHome);
   }
