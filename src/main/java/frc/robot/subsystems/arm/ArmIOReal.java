@@ -18,7 +18,7 @@ public class ArmIOReal implements ArmIO {
   private static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
   // adapted from
   // https://pro.docs.ctr-electronics.com/en/latest/docs/api-reference/device-specific/talonfx/closed-loop-requests.html#converting-from-meters
-  private static final double OUTPUT_RADS_TO_MOTOR_ROTATIONS = (1 / (2 * Math.PI)) * GEAR_RATIO;
+  // private static final double OUTPUT_RADS_TO_MOTOR_ROTATIONS = (1 / (2 * Math.PI)) * GEAR_RATIO;
   private static final double OUTPUT_ROTATIONS_TO_OUTPUT_RADS = 2 * Math.PI;
 
   private final StatusSignal<Double> appliedVols;
@@ -76,7 +76,7 @@ public class ArmIOReal implements ArmIO {
 
   @Override
   public void setClosedLoopPosition(Rotation2d angle) {
-    var rotations = angle.getRadians() * OUTPUT_RADS_TO_MOTOR_ROTATIONS;
+    var rotations = angle.getRadians() / OUTPUT_ROTATIONS_TO_OUTPUT_RADS;
     closedLoopControl.withPosition(rotations);
 
     motor.setControl(closedLoopControl);
