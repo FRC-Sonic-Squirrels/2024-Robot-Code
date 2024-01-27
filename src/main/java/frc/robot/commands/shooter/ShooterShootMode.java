@@ -99,8 +99,8 @@ public class ShooterShootMode extends Command {
 
     double distToSpeaker =
         Math.hypot(
-            shooterBaseTranslation.getX() - speakerPose.getX(),
-            shooterBaseTranslation.getY() - speakerPose.getY());
+            shooterBaseTranslation.getX() - virtualSpeakerTranslation.getX(),
+            shooterBaseTranslation.getY() - virtualSpeakerTranslation.getY());
 
     Logger.recordOutput("ShooterShootMode/futurePose", futurePose);
 
