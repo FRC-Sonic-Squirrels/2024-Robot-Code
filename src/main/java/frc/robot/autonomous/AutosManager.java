@@ -53,8 +53,7 @@ public class AutosManager {
 
     list.add(this::doNothing);
     list.add(this::testAuto);
-    list.add(this::auto1);
-    list.add(this::auto2);
+    list.add(this::middleAuto);
     list.add(this::testFlipping);
 
     return list;
@@ -89,18 +88,11 @@ public class AutosManager {
 
   // TODO: decide on better names for autos
 
-  private AutoCommand auto1() {
+  private AutoCommand middleAuto() {
     return new AutoCommand(
-        "Auto1",
-        generateFollowPathCommand("Auto1", true),
-        Choreo.getTrajectory("Auto1").getInitialPose());
-  }
-
-  private AutoCommand auto2() {
-    return new AutoCommand(
-        "Auto2",
-        generateFollowPathCommand("Auto2", true),
-        Choreo.getTrajectory("Auto2").getInitialPose());
+        "middleAuto",
+        generateFollowPathCommand("middleAuto", true),
+        Choreo.getTrajectory("middleAuto").getInitialPose());
   }
 
   public AutoCommand testFlipping() {
