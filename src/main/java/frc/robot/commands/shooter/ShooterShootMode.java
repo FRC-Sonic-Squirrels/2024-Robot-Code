@@ -16,13 +16,16 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
+  private EndEffector endEffector;
   private Translation2d speakerPose;
   private DoubleSupplier shooterRPM;
+  private Supplier<Pose2d> staticRobotPose;
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
   // 10.0);
@@ -36,19 +39,29 @@ public class ShooterShootMode extends Command {
   // private double shooterPitchVelCorrection = 0.0;
   private BooleanSupplier shootSupplier;
 
-  /** Creates a new ShooterDefaultCommand. */
   public ShooterShootMode(
       Shooter shooter,
       EndEffector endEffector,
       Drivetrain drive,
       BooleanSupplier shootSupplier,
       DoubleSupplier shooterRPM) {
+    this(shooter, endEffector, drive, shootSupplier, shooterRPM, () -> null);
+  }
+
+  /** Creates a new ShooterDefaultCommand. */
+  public ShooterShootMode(
+      Shooter shooter,
+      EndEffector endEffector,
+      Drivetrain drive,
+      BooleanSupplier shootSupplier,
+      DoubleSupplier shooterRPM,
+      Supplier<Pose2d> staticRobotPose) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
     this.shootSupplier = shootSupplier;
     this.shooterRPM = shooterRPM;
-    addRequirements(shooter);
+    addRequirements(shooter, endEffector);
     setName("ShooterShootMode");
   }
 
@@ -67,16 +80,17 @@ public class ShooterShootMode extends Command {
     }
   }
 
-  // TODO: find everywhere that rawodometry pose is used and evaluate whether its needed
-
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d futurePose =
-        drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode");
+    Pose2d usedRobotPose =
+        (staticRobotPose.get() == null)
+            ? drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode")
+            : staticRobotPose.get();
 
     double horizDist =
-        Math.hypot(futurePose.getX() - speakerPose.getX(), futurePose.getY() - speakerPose.getY());
+        Math.hypot(
+            usedRobotPose.getX() - speakerPose.getX(), usedRobotPose.getY() - speakerPose.getY());
 
     double dist = Math.hypot(horizDist, Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
 
@@ -95,18 +109,22 @@ public class ShooterShootMode extends Command {
     shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
 
     Translation2d shooterBaseTranslation =
-        futurePose.transformBy(Constants.ShooterConstants.SHOOTER_OFFSET_METERS).getTranslation();
+        usedRobotPose
+            .transformBy(Constants.ShooterConstants.SHOOTER_OFFSET_METERS)
+            .getTranslation();
 
     double distToSpeaker =
         Math.hypot(
             shooterBaseTranslation.getX() - virtualSpeakerTranslation.getX(),
             shooterBaseTranslation.getY() - virtualSpeakerTranslation.getY());
 
-    Logger.recordOutput("ShooterShootMode/futurePose", futurePose);
+    Logger.recordOutput("ShooterShootMode/usedRobotPose", usedRobotPose);
 
     Logger.recordOutput(
         "ShooterShootMode/futureShooterBasePose",
-        new Pose2d(shooterBaseTranslation, futurePose.getRotation()));
+        new Pose2d(shooterBaseTranslation, usedRobotPose.getRotation()));
+
+    if (shootSupplier.getAsBoolean()) endEffector.setPercentOut(distToSpeaker);
 
     // VELOCITY CONTROL
 
