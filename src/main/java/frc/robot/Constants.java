@@ -134,6 +134,11 @@ public final class Constants {
     ;
   }
 
+  public class ElevatorConstants {
+    public static final double ELEVATOR_GEAR_RATIO = 25.93;
+    public static final double ELEVATOR_WHEEL_RADIUS = 1.118;
+  }
+
   public class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
