@@ -16,6 +16,4 @@ public interface EndEffectorIO {
   public default void updateInputs(EndEffectorIOInputs inputs) {}
 
   public default void setVoltage(double volts) {}
-
-  public default void setRPM(double RPM) {}
 }
