@@ -10,8 +10,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
   private Drivetrain drivetrain;
+  private Shooter shooter;
+  private EndEffector endEffector;
   private Intake intake;
 
   private RobotConfig config;
@@ -30,10 +35,14 @@ public class AutosManager {
   // FIXME: add all other subssystems
   public AutosManager(
       Drivetrain drivetrain,
+      Shooter shooter,
       Intake intake,
+      EndEffector endEffector,
       RobotConfig config,
       LoggedDashboardChooser<Supplier<AutoCommand>> chooser) {
     this.drivetrain = drivetrain;
+    this.shooter = shooter;
+    this.endEffector = endEffector;
     this.intake = intake;
 
     this.config = config;
@@ -77,7 +86,7 @@ public class AutosManager {
   private AutoCommand testAuto() {
     return new AutoCommand(
         "testAuto",
-        generateFollowPathCommand("TestAuto"),
+        generateFollowPathCommand("TestAuto", false),
         Choreo.getTrajectory("TestAuto").getInitialPose());
   }
 
@@ -86,25 +95,26 @@ public class AutosManager {
   private AutoCommand auto1() {
     return new AutoCommand(
         "Auto1",
-        generateFollowPathCommand("Auto1"),
+        generateFollowPathCommand("Auto1", true),
         Choreo.getTrajectory("Auto1").getInitialPose());
   }
 
   private AutoCommand auto2() {
     return new AutoCommand(
         "Auto2",
-        generateFollowPathCommand("Auto2"),
+        generateFollowPathCommand("Auto2", true),
         Choreo.getTrajectory("Auto2").getInitialPose());
   }
 
   public AutoCommand testFlipping() {
     return new AutoCommand(
         "testFlipping",
-        generateFollowPathCommand("TestFlipping"),
+        generateFollowPathCommand("TestFlipping", false),
         Choreo.getTrajectory("testFlipping").getInitialPose());
   }
 
-  private Command generateFollowPathCommand(String trajName, AutoEvent... events) {
+  private Command generateFollowPathCommand(
+      String trajName, boolean intaking, AutoEvent... events) {
     ChoreoTrajectory traj = Choreo.getTrajectory(trajName);
     Command command =
         Choreo.choreoSwerveCommand(
@@ -133,6 +143,24 @@ public class AutosManager {
           command.deadlineWith(
               Commands.sequence(Commands.waitSeconds(autoEvent.timeSeconds), autoEvent.command));
     }
+    if (intaking) {
+      command = command.deadlineWith(new IntakeGamepiece(intake));
+    }
     return command;
   }
+
+  // work in progress
+
+  // private AutoEvent[] setShootPoints(double[] timesSec){
+
+  //   ArrayList<AutoEvent> autoEvents = new ArrayList<>();
+
+  //   for (double timeSec : timesSec) {
+  //     autoEvents.add(new AutoEvent(new IndexGamepiece(endEffector), timeSec));
+  //   }
+
+  //   autoEvents.add(new ShooterShootMode(shooter, drivetrain))
+
+  //   return autoEvents.toArray(new AutoEvent[]{});
+  // }
 }

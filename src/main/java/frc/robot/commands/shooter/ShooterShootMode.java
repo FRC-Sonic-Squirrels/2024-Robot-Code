@@ -11,10 +11,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.ScoringMode;
-import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +20,6 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
-  private EndEffector endEffector;
   private Translation2d speakerPose;
   private DoubleSupplier shooterRPM;
   private Supplier<Pose2d> staticRobotPose;
@@ -37,31 +34,14 @@ public class ShooterShootMode extends Command {
 
   // private Rotation2d speakerHeading;
   // private double shooterPitchVelCorrection = 0.0;
-  private BooleanSupplier shootSupplier;
-
-  public ShooterShootMode(
-      Shooter shooter,
-      EndEffector endEffector,
-      Drivetrain drive,
-      BooleanSupplier shootSupplier,
-      DoubleSupplier shooterRPM) {
-    this(shooter, endEffector, drive, shootSupplier, shooterRPM, () -> null);
-  }
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterShootMode(
-      Shooter shooter,
-      EndEffector endEffector,
-      Drivetrain drive,
-      BooleanSupplier shootSupplier,
-      DoubleSupplier shooterRPM,
-      Supplier<Pose2d> staticRobotPose) {
+  public ShooterShootMode(Shooter shooter, Drivetrain drive, DoubleSupplier shooterRPM) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
-    this.shootSupplier = shootSupplier;
     this.shooterRPM = shooterRPM;
-    addRequirements(shooter, endEffector);
+    addRequirements(shooter);
     setName("ShooterShootMode");
   }
 
@@ -84,9 +64,7 @@ public class ShooterShootMode extends Command {
   @Override
   public void execute() {
     Pose2d usedRobotPose =
-        (staticRobotPose.get() == null)
-            ? drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode")
-            : staticRobotPose.get();
+        drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode");
 
     double horizDist =
         Math.hypot(
@@ -123,8 +101,6 @@ public class ShooterShootMode extends Command {
     Logger.recordOutput(
         "ShooterShootMode/futureShooterBasePose",
         new Pose2d(shooterBaseTranslation, usedRobotPose.getRotation()));
-
-    if (shootSupplier.getAsBoolean()) endEffector.setPercentOut(distToSpeaker);
 
     // VELOCITY CONTROL
 

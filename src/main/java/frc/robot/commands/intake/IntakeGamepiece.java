@@ -48,10 +48,11 @@ public class IntakeGamepiece extends Command {
     beamBreakPrev = intake.getBeamBreak();
     if (timeSinceLastGamepiece.get() >= 0.01
         && timeSinceLastGamepiece.get() <= rumbleDurationSeconds.get()) {
-      controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
+      if (controller != null)
+        controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
       controllerRumbled = true;
     } else if (controllerRumbled) {
-      controller.setRumble(RumbleType.kBothRumble, 0.0);
+      if (controller != null) controller.setRumble(RumbleType.kBothRumble, 0.0);
       controllerRumbled = false;
     }
     intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT);
@@ -59,7 +60,9 @@ public class IntakeGamepiece extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    intake.setPercentOut(0.0);
+  }
 
   // Returns true when the command should end.
   @Override
