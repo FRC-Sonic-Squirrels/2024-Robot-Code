@@ -134,7 +134,6 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("RobotState/scoring mode", RobotState.getInstance().getScoringMode());
 
     robotContainer.updateVisualization();
-    robotContainer.updateRobotState();
   }
 
   /** This function is called once when the robot is disabled. */
@@ -232,7 +231,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    robotContainer.updateRobotState();
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override

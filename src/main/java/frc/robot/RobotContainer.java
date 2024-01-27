@@ -265,7 +265,7 @@ public class RobotContainer {
       }
     }
 
-    autoManager = new AutosManager(drivetrain, intake, config, autoChooser);
+    autoManager = new AutosManager(drivetrain, shooter, intake, endEffector, config, autoChooser);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
@@ -457,9 +457,7 @@ public class RobotContainer {
   }
 
   public void updateRobotState() {
-    Command shootModeCommand =
-        new ShooterShootMode(
-            shooter, endEffector, drivetrain, driverController.rightTrigger(), shooter::getRPM);
+    Command shootModeCommand = new ShooterShootMode(shooter, drivetrain, shooter::getRPM);
     if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
         && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
       CommandScheduler.getInstance().schedule(shootModeCommand);
