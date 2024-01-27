@@ -86,49 +86,50 @@ public class DriveToGamepiece extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    var closestGamepiece = targetGamepiece.get();
+    var poseEstimatorPose = drive.getPoseEstimatorPose();
 
     rotationalErrorDegrees =
         Math.abs(
-            targetGamepiece.get().targetYaw.getDegrees()
+            closestGamepiece.targetYaw.getDegrees()
                 // - 180.0
-                - drive.getPoseEstimatorPose().getRotation().getDegrees());
+                - poseEstimatorPose.getRotation().getDegrees());
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
 
-    if (isInSourceArea(targetGamepiece.get().globalPose)) {
-
+    if (isInSourceArea(closestGamepiece.globalPose)) {
       sourceAngle =
           new Rotation2d(
-              isInBlueSourceArea(targetGamepiece.get().globalPose)
+              isInBlueSourceArea(closestGamepiece.globalPose)
                   ? -1.0417663596685425
                   : -2.103952069121958);
 
       gamepieceDirection =
-          new Rotation2d(targetGamepiece.get().pose.getX(), targetGamepiece.get().pose.getY());
+          new Rotation2d(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
 
       xVel = xKpSourceArea.get() * Math.cos(gamepieceDirection.getRadians());
       yVel = yKpSourceArea.get() * Math.sin(gamepieceDirection.getRadians());
 
       rotVel =
           rotationController.calculate(
-              drive.getPoseEstimatorPose().getRotation().getRadians(), sourceAngle.getRadians());
+              poseEstimatorPose.getRotation().getRadians(), sourceAngle.getRadians());
     } else {
+      double allowedRotationalErrorDegreesValue = allowedRotationalErrorDegrees.get();
       if (advancedMode.get() == 0) {
-
         xVel =
-            rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-                ? xController.calculate(0.0, targetGamepiece.get().pose.getX())
+            rotationalErrorDegrees < allowedRotationalErrorDegreesValue
+                ? xController.calculate(0.0, closestGamepiece.pose.getX())
                 : 0.0;
         yVel =
-            rotationalErrorDegrees < allowedRotationalErrorDegrees.get()
-                ? yController.calculate(0.0, targetGamepiece.get().pose.getY())
+            rotationalErrorDegrees < allowedRotationalErrorDegreesValue
+                ? yController.calculate(0.0, closestGamepiece.pose.getY())
                 : 0.0;
       } else {
         xVel =
-            xController.calculate(0.0, targetGamepiece.get().pose.getX())
-                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
+            xController.calculate(0.0, closestGamepiece.pose.getX())
+                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
         yVel =
-            yController.calculate(0.0, targetGamepiece.get().pose.getY())
-                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegrees.get(), 1.0);
+            yController.calculate(0.0, closestGamepiece.pose.getY())
+                / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
       }
       // rotVelCorrection =
       //     Math.hypot(xVel, yVel)
@@ -140,14 +141,13 @@ public class DriveToGamepiece extends Command {
 
       rotVel =
           rotationController.calculate(
-              drive.getPoseEstimatorPose().getRotation().getRadians(),
-              targetGamepiece.get().targetYaw.getRadians());
+              poseEstimatorPose.getRotation().getRadians(),
+              closestGamepiece.targetYaw.getRadians());
     }
 
     // TODO: ---------------change to estimated pose if using this IRL------------------
     drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            xVel, yVel, rotVel, drive.getPoseEstimatorPose().getRotation()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotVel, poseEstimatorPose.getRotation()));
 
     Logger.recordOutput("DriveToGamepiece/rotationalErrorDegrees", rotationalErrorDegrees);
     Logger.recordOutput("DriveToGamepiece/xVel", xVel);
