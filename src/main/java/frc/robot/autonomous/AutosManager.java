@@ -104,8 +104,8 @@ public class AutosManager {
         Choreo.getTrajectory("testFlipping").getInitialPose());
   }
 
-  private Command generateFollowPathCommand(String name, AutoEvent... events) {
-    ChoreoTrajectory traj = Choreo.getTrajectory(name);
+  private Command generateFollowPathCommand(String trajName, AutoEvent... events) {
+    ChoreoTrajectory traj = Choreo.getTrajectory(trajName);
     Command command =
         Choreo.choreoSwerveCommand(
             traj,
