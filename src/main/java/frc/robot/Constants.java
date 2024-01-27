@@ -14,6 +14,9 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
@@ -84,10 +87,22 @@ public final class Constants {
   public class FieldConstants {
     // FIXME: double check this number
     public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
+    public static final double SPEAKER_HEIGHT_METERS = 1.9812;
+    public static final Translation2d BLUE_SPEAKER_TRANSLATION =
+        new Translation2d(0.03950466960668564, 5.508944988250732);
+    public static final Translation2d RED_SPEAKER_TRANSLATION =
+        new Translation2d(16.508594512939453, 5.508944988250732);
   }
 
   public class MotorConstants {
-    public static final double KRAKEN_MAX_RPM = 6000.0;
+    public class KrakenConstants {
+      public static final double MAX_RPM = 6000.0;
+      public static final double NOMINAL_VOLTAGE_VOLTS = 12.0;
+      public static final double STALL_TORQUE_NEWTON_METERS = 7.09;
+      public static final double STALL_CURRENT_AMPS = 40.0;
+      public static final double FREE_CURRENT_AMPS = 30.0;
+      public static final double FREE_SPEED_RPM = 6000.0;
+    }
   }
 
   public class IntakeConstants {
@@ -117,6 +132,48 @@ public final class Constants {
     public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
     ;
+  }
+
+  public class ShooterConstants {
+    public static final double PREP_RPM = 2500.0;
+    public static final double SHOOTING_RPM = 5000.0;
+    public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
+    public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
+
+    public static final Transform2d SHOOTER_OFFSET_METERS =
+        new Transform2d(0, -Units.inchesToMeters(12), new Rotation2d());
+
+    public class Pivot {
+      public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
+        return new Rotation2d(
+            Math.atan2(
+                FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS, distanceMeters));
+      }
+
+      public static final double PITCH_VEL_RAD_PER_SEC(
+          double velMetersPerSecond, double distanceMeters) {
+        // velocity times derivative of distance to shooting pitch formula to get pitch velocity
+        return velMetersPerSecond
+            * -FieldConstants.SPEAKER_HEIGHT_METERS
+            / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
+                + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
+      }
+
+      public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
+
+      public static final double GEARING = 90.0;
+
+      public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
+      public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
+
+      public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
+    }
+
+    public static class Launcher {
+      public static final double MOI = 5.0;
+      public static final double GEARING = 1.0;
+      public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
+    }
   }
 
   public class CanIDs {

@@ -16,19 +16,31 @@ package frc.robot;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
+import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.RobotState.ScoringMode;
 import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.EjectGamepiece;
-import frc.robot.commands.intake.IntakeDefaultCommand;
+import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.shooter.ShooterShootMode;
+import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -86,7 +98,8 @@ public class RobotContainer {
   private final Limelight limelight;
   private final LED led;
 
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
@@ -245,11 +258,14 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
             drivetrain,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
-    intake.setDefaultCommand(new IntakeDefaultCommand(intake, controller.getHID()));
+    intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
+
+    shooter.setDefaultCommand(new ShooterStowMode(shooter));
+
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
     //     "Run Flywheel",
@@ -281,11 +297,73 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightTrigger().whileTrue(new EjectGamepiece(intake));
-    // controller
+    /*
+    Button binding summary:
+
+      Driver:
+
+        right trigger: spin intake
+
+        left trigger: drive to GP
+
+        right bumper: speaker mode
+
+        A button: confirm speaker shot
+
+        left bumper: score in amp (may have A button confirmation)
+
+        B button: force stow everything
+
+        X button: move all position controlled subsystems to hard stops to reset sensor position
+
+        Y button: toggle climb mode (A: confirm climb)
+
+        Start: reset odometry
+
+        POV down: eject gamepiece (through intake)
+
+      Operator:
+
+        B: (when not connected to FMS) run systems check command: press B to continue onto next stage of systems check
+          Drivetrain
+            1. Forward
+            2. Spin
+          Intake
+            3. Spin
+          Shooter
+            4. Pivot
+            5. Flywheel + kicker
+          Elevator
+            6. up
+          Arm
+            7. Rotate to amp or trap position
+          Wrist
+            8. move through range of motion
+          End Effector
+            9. (after moving mech back to stow position) spin
+          ----- end command -----
+          Vision
+            10. check localization vision (preferably with april tag)
+          Limelight
+            11. check limelight (preferably with note)
+
+            12. look at LEDs
+            13. double check connection from pigeon
+
+        X: cancel systems check
+
+        Right trigger (plus right stick): manual control of elevator
+
+        POV down: initiate no vision mode?
+
+
+    */
+    // ----------- DRIVER CONTROLS ------------
+    driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
+    // driverController
     //     .leftTrigger()
     //     .whileTrue(
-    //         new RotateToGamepiece(
+    //         new RotateToSpeaker(
     //             () -> -controller.getLeftY(),
     //             () -> -controller.getLeftX(),
     //             limelight::getClosestGamepiece,
@@ -293,10 +371,34 @@ public class RobotContainer {
     //             new Rotation2d(),
     //             () -> -controller.getRightX(),
     //             0.3));
-    controller
+    driverController
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+
+    driverController
+        .rightBumper()
+        .onTrue(
+            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)))
+        .onFalse(
+            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.NONE)))
+        .whileTrue(
+            new RotateToSpeaker(
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () ->
+                    DriverStation.getAlliance().isPresent()
+                        ? new Translation2d(
+                            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                                ? 0.03950466960668564
+                                : 16.281435012817383,
+                            5.498747638702393)
+                        : new Translation2d(0.03950466960668564, 5.498747638702393),
+                drivetrain,
+                () -> false,
+                new Rotation2d(Math.PI),
+                shooter::getRPM));
+    ;
   }
 
   /**
@@ -320,5 +422,31 @@ public class RobotContainer {
 
     current = ArrayUtil.concatWithArrayCopy(current, drivetrain.getCurrentDrawAmps());
     return current;
+  }
+
+  public void updateVisualization() {
+    SimpleMechanismVisualization.updateVisualization(
+        new Rotation2d(),
+        shooter.getPitch(),
+        Math.hypot(
+            GeometryUtil.getDist(
+                drivetrain.getPoseEstimatorPose().getTranslation(),
+                DriverStation.getAlliance().isPresent()
+                    ? (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
+                        ? Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION
+                        : Constants.FieldConstants.RED_SPEAKER_TRANSLATION)
+                    : Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION),
+            Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
+        shooter.getRPM());
+    SimpleMechanismVisualization.logMechanism();
+  }
+
+  public void updateRobotState() {
+    Command shootModeCommand =
+        new ShooterShootMode(
+            shooter, endEffector, drivetrain, driverController.rightTrigger(), shooter::getRPM);
+    if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
+        && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
+      CommandScheduler.getInstance().schedule(shootModeCommand);
   }
 }

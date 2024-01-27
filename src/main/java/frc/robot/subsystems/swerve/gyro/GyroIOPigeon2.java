@@ -32,6 +32,10 @@ public class GyroIOPigeon2 implements GyroIO {
   private final Queue<Double> yawPositionQueue;
   private final StatusSignal<Double> yawVelocity;
 
+  private final StatusSignal<Double> xAcceleration;
+  private final StatusSignal<Double> yAcceleration;
+  private final StatusSignal<Double> zAcceleration;
+
   private final RobotConfig config;
 
   public GyroIOPigeon2(RobotConfig config) {
@@ -43,10 +47,17 @@ public class GyroIOPigeon2 implements GyroIO {
     // FIXME: is this the correct method call
     yawVelocity = pigeon.getAngularVelocityZDevice();
 
+    xAcceleration = pigeon.getAccelerationX();
+    yAcceleration = pigeon.getAccelerationY();
+    zAcceleration = pigeon.getAccelerationZ();
+
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
     yaw.setUpdateFrequency(SwerveModule.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
+    xAcceleration.setUpdateFrequency(100.0);
+    yAcceleration.setUpdateFrequency(100.0);
+    zAcceleration.setUpdateFrequency(100.0);
     pigeon.optimizeBusUtilization();
     yawPositionQueue =
         PhoenixOdometryThread.getInstance()
@@ -55,7 +66,9 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
+    inputs.connected =
+        BaseStatusSignal.refreshAll(yaw, yawVelocity, xAcceleration, yAcceleration, zAcceleration)
+            .equals(StatusCode.OK);
     inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
@@ -64,5 +77,9 @@ public class GyroIOPigeon2 implements GyroIO {
             .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
     yawPositionQueue.clear();
+
+    inputs.xAcceleration = xAcceleration.getValueAsDouble();
+    inputs.yAcceleration = yAcceleration.getValueAsDouble();
+    inputs.zAcceleration = zAcceleration.getValueAsDouble();
   }
 }

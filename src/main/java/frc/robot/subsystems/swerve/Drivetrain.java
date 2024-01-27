@@ -16,6 +16,7 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -228,6 +229,25 @@ public class Drivetrain extends SubsystemBase {
     return states;
   }
 
+  private ChassisSpeeds getChassisSpeeds() {
+    return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  @AutoLogOutput(key = "Robot/FieldRelativeVel")
+  public Pose2d getFieldRelativeVelocities() {
+    Translation2d translation =
+        new Translation2d(
+                getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
+            .rotateBy(getRawOdometryPose().getRotation());
+    return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+  }
+
+  @AutoLogOutput(key = "Robot/FieldRelativeAcceleration")
+  public Translation2d getFieldRelativeAccelerations() {
+    return new Translation2d(gyroInputs.xAcceleration, gyroInputs.yAcceleration)
+        .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
+  }
+
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     poseEstimator.addVisionData(visionData);
   }
@@ -244,6 +264,29 @@ public class Drivetrain extends SubsystemBase {
   @AutoLogOutput(key = "Localization/RobotPosition")
   public Pose2d getPoseEstimatorPose() {
     return poseEstimator.getLatestPose();
+  }
+
+  public Pose2d getFutureEstimatedPose(double sec, String userClassName) {
+    Translation2d velocityContribution = getFieldRelativeVelocities().getTranslation().times(sec);
+    Translation2d accelerationContribution =
+        getFieldRelativeAccelerations().times(Math.pow(sec, 2) * 0.5);
+    Pose2d pose =
+        new Pose2d(
+            getPoseEstimatorPose().getX()
+                + velocityContribution.getX()
+                + accelerationContribution.getX(),
+            getPoseEstimatorPose().getY()
+                + velocityContribution.getY()
+                + accelerationContribution.getY(),
+            new Rotation2d(
+                getPoseEstimatorPose().getRotation().getRadians()
+                    + gyroInputs.yawVelocityRadPerSec * sec));
+    Logger.recordOutput(
+        userClassName + "/futureEstimatedPose/velocityContribution", velocityContribution);
+    Logger.recordOutput(
+        userClassName + "/futureEstimatedPose/accelerationContribution", accelerationContribution);
+    Logger.recordOutput(userClassName + "/futureEstimatedPose/pose", pose);
+    return pose;
   }
 
   /** Returns the current odometry rotation. */

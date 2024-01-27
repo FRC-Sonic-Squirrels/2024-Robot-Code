@@ -6,31 +6,35 @@ package frc.robot.commands.drive;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.limelight.ProcessedGamepieceData;
 import frc.robot.subsystems.swerve.Drivetrain;
+import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class RotateToGamepiece extends Command {
-  private Supplier<ProcessedGamepieceData> targetGamepiece;
+public class RotateToTranslation extends Command {
+  private Supplier<Translation2d> target;
   private Drivetrain drive;
-  private Supplier<Boolean> gamepieceIntaked;
+  private Supplier<Boolean> endCondition;
 
   private Rotation2d robotRotationOffset;
 
   private final LoggedTunableNumber rotationKp =
-      new LoggedTunableNumber("RotateToGamepiece/rotationKp", 4.9);
+      new LoggedTunableNumber("RotateToTranslation/rotationKp", 4.9);
   private final LoggedTunableNumber rotationKd =
-      new LoggedTunableNumber("RotateToGamepiece/rotationKd", 0.0);
+      new LoggedTunableNumber("RotateToTranslation/rotationKd", 0.0);
 
   private final PIDController rotationController;
 
@@ -43,83 +47,94 @@ public class RotateToGamepiece extends Command {
 
   public static final double DEADBAND = 0.1;
 
+  // Creates a new flat moving average filter
+  // Average will be taken over the last 20 samples
+  private LinearFilter pidLatencyfilter = LinearFilter.movingAverage(20);
+
+  private ArrayList<PIDTargetMeasurement> targetMeasurements =
+      new ArrayList<PIDTargetMeasurement>();
+
+  private double pidLatency = 0.0;
+
   /**
-   * Creates a new RotateToGamepiece.
+   * Creates a new RotateToTranslation.
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
    * @return Command to lock rotation in direction of target gamepiece
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked) {
+      Supplier<Boolean> endCondition) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         new Rotation2d(0.0));
   }
 
   /**
-   * Creates a new RotateToGamepiece.
+   * Creates a new RotateToTranslation.
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
-   * @return Command to lock rotation in direction of target gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing taget
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         robotRotationOffset,
         () -> 0.0,
         0.0);
   }
 
   /**
-   * Creates a new RotateToGamepiece.
+   * Creates a new RotateToTranslation.
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing target
    * @param omegaSupplier controller rotation output
-   * @return Command to lock rotation in direction of target gamepiece
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier) {
     this(
         translationXSupplier,
         translationYSupplier,
-        targetGamepiece,
+        target,
         drive,
-        gamepieceIntaked,
+        endCondition,
         robotRotationOffset,
         omegaSupplier,
         0.3);
@@ -134,39 +149,41 @@ public class RotateToGamepiece extends Command {
   // that way it is generic and not tied just to limelight?
   //
   /**
-   * Creates a new RotateToGamepiece.
+   * Creates a new RotateToTranslation.
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetGamepiece gamepiece to target
+   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param robotRotationOffset rotation of robot you want facing gamepiece
+   * @param endCondition when this command should end
+   * @param robotRotationOffset rotation of robot you want facing target
    * @param omegaSupplier controller rotation output
    * @param driverInfluencePercent 0.0 (rotation is fully based on command) -> 1.0 (when
    *     omegaSupplier is at 1 or -1, rotation is fully based on driver input)
-   * @return Command to lock rotation in direction of target gamepiece
+   * @return Command to lock rotation in direction of target
    */
-  public RotateToGamepiece(
+  public RotateToTranslation(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<ProcessedGamepieceData> targetGamepiece,
+      Supplier<Translation2d> target,
       Drivetrain drive,
-      Supplier<Boolean> gamepieceIntaked,
+      Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset,
       DoubleSupplier omegaSupplier,
       Double driverInfluencePercent) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
-    this.targetGamepiece = targetGamepiece;
+    this.target = target;
     this.drive = drive;
-    this.gamepieceIntaked = gamepieceIntaked;
+    this.endCondition = endCondition;
     this.robotRotationOffset = robotRotationOffset;
     this.omegaSupplier = omegaSupplier;
     this.driverInfluencePercent = driverInfluencePercent;
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     addRequirements(drive);
+    setName("RotateToTranslation");
   }
 
   // Called when the command is initially scheduled.
@@ -183,6 +200,8 @@ public class RotateToGamepiece extends Command {
     // TODO: add some kind of controller utilizties to make this easier and not have to copy code
     // from
     // DrivetrainDeafultTeleopDrive
+
+    Pose2d futurePose = drive.getFutureEstimatedPose(pidLatency, "RotateToTranslation");
 
     double linearMagnitude =
         MathUtil.applyDeadband(
@@ -204,7 +223,9 @@ public class RotateToGamepiece extends Command {
 
     var currentRot = drive.getRotation();
 
-    var goalRot = targetGamepiece.get().targetYaw.plus(robotRotationOffset);
+    Rotation2d heading = GeometryUtil.getHeading(futurePose.getTranslation(), target.get());
+
+    var goalRot = heading.plus(robotRotationOffset);
 
     var driverRotVel = omega * drive.getMaxAngularSpeedRadPerSec();
 
@@ -226,27 +247,50 @@ public class RotateToGamepiece extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
+    rotVelCorrection =
+        Math.hypot(xVel, yVel)
+            * Math.cos(heading.getRadians() - new Rotation2d(xVel, yVel).getRadians() - Math.PI / 2)
+            / Math.hypot(
+                futurePose.getX() - target.get().getX(), futurePose.getY() - target.get().getY());
+
+    targetMeasurements.add(
+        new PIDTargetMeasurement(
+            Timer.getFPGATimestamp(),
+            goalRot,
+            drive.getRotation().getRadians() <= goalRot.getRadians()));
+    for (int index = 0; index < targetMeasurements.size(); index++) {
+      PIDTargetMeasurement measurement = targetMeasurements.get(index);
+      if ((measurement.upDirection
+              && drive.getRotation().getRadians() >= measurement.targetRot.getRadians())
+          || (!measurement.upDirection
+              && drive.getRotation().getRadians() <= measurement.targetRot.getRadians())) {
+        pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
+        targetMeasurements.remove(index);
+      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
+        targetMeasurements.remove(index);
+      }
+    }
+    Logger.recordOutput("RotateToTranslation/PIDLatency", pidLatency);
+
     drive.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
 
-    rotVelCorrection =
-        Math.hypot(xVel, yVel)
-            * Math.cos(
-                targetGamepiece.get().targetYaw.getRadians()
-                    - new Rotation2d(xVel, yVel).getRadians()
-                    - Math.PI / 2)
-            / targetGamepiece.get().distance;
-
     // TODO: remove most of these once we are happy with the command
-    Logger.recordOutput("RotateToGamepiece/RotationalEffort", rotationalEffort);
-    Logger.recordOutput("ActiveCommands/RotateToGamepiece", true);
+    Logger.recordOutput("RotateToTranslation/RotationalEffort", rotationalEffort);
     Logger.recordOutput(
-        "RotateToGamepiece/rotationalErrorDegrees",
+        "RotateToTranslation/rotationalErrorDegrees",
         Units.radiansToDegrees(rotationController.getPositionError()));
-    Logger.recordOutput("RotateToGamepiece/desiredLinearVelocity", linearVelocity);
-    Logger.recordOutput("RotateToGamepiece/rotationCorrection", rotVelCorrection);
-    Logger.recordOutput("RotateToGamepiece/robotRotationDegrees", drive.getRotation().getDegrees());
-    Logger.recordOutput("RotateToGamepiece/atSetpoint", rotationController.atSetpoint());
+    Logger.recordOutput("RotateToTranslation/desiredLinearVelocity", linearVelocity);
+    Logger.recordOutput("RotateToTranslation/rotationCorrection", rotVelCorrection);
+    Logger.recordOutput(
+        "RotateToTranslation/robotRotationDegrees", drive.getRotation().getDegrees());
+    Logger.recordOutput("RotateToTranslation/targetRotationDegrees", goalRot.getDegrees());
+    Logger.recordOutput(
+        "RotateToTranslation/optimalRotationDegrees",
+        GeometryUtil.getHeading(drive.getPoseEstimatorPose().getTranslation(), target.get())
+            .plus(robotRotationOffset)
+            .getDegrees());
+    Logger.recordOutput("RotateToTranslation/atSetpoint", rotationController.atSetpoint());
 
     if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
       rotationController.setP(rotationKp.get());
@@ -258,12 +302,11 @@ public class RotateToGamepiece extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.runVelocity(new ChassisSpeeds(0, 0, 0));
-    Logger.recordOutput("ActiveCommands/RotateToGamepiece", false);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return gamepieceIntaked.get();
+    return endCondition.get();
   }
 }

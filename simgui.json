@@ -1,6 +1,15 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleArm": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleShooter": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/AUTO/SendableChooser[0]": "String Chooser",
       "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
