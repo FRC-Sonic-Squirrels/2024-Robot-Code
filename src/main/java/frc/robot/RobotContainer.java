@@ -66,9 +66,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
-import frc.robot.subsystems.wrist.Wrist;
-import frc.robot.subsystems.wrist.WristIO;
-import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -87,7 +84,6 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Intake intake;
   private final Shooter shooter;
-  private final Wrist wrist;
   private final EndEffector endEffector;
   private final Limelight limelight;
   private final LED led;
@@ -134,7 +130,6 @@ public class RobotContainer {
       elevator = new Elevator(new ElevatorIO() {});
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
-      wrist = new Wrist(new WristIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
       limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
@@ -182,7 +177,6 @@ public class RobotContainer {
           elevator = new Elevator(new ElevatorIOSim());
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
-          wrist = new Wrist(new WristIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
@@ -202,7 +196,6 @@ public class RobotContainer {
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
-          wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
@@ -237,7 +230,6 @@ public class RobotContainer {
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
-          wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
 
@@ -257,7 +249,6 @@ public class RobotContainer {
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
-          wrist = new Wrist(new WristIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
@@ -299,7 +290,7 @@ public class RobotContainer {
     // flywheel::getCharacterizationVelocity));
 
     shuffleBoardLayouts =
-        new ShuffleBoardLayouts(arm, elevator, wrist, endEffector, intake, shooter, drivetrain);
+        new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
     // Configure the button bindings
     configureButtonBindings();

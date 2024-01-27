@@ -13,13 +13,11 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
-import frc.robot.subsystems.wrist.Wrist;
 import java.util.Map;
 
 public class ShuffleBoardLayouts {
   Arm arm;
   Elevator elevator;
-  Wrist wrist;
   EndEffector endEffector;
   Intake intake;
   Shooter shooter;
@@ -28,14 +26,12 @@ public class ShuffleBoardLayouts {
   public ShuffleBoardLayouts(
       Arm arm,
       Elevator elevator,
-      Wrist wrist,
       EndEffector endEffector,
       Intake intake,
       Shooter shooter,
       Drivetrain drivetrain) {
     this.arm = arm;
     this.elevator = elevator;
-    this.wrist = wrist;
     this.endEffector = endEffector;
     this.intake = intake;
     this.shooter = shooter;
