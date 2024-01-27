@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.swerve;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -69,7 +68,7 @@ public class Drivetrain extends SubsystemBase {
     this.modules[3] = swerveModules[3];
 
     // FIXME: values copied from 6328, learn how to calculate these values
-    poseEstimator = new PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.0002));
+    poseEstimator = new PoseEstimator(0.003, 0.003, 0.0002);
 
     // Configure AutoBuilder for PathPlanner
     // FIXME: pass in custom PID constants? Issue for this use case has been created:
