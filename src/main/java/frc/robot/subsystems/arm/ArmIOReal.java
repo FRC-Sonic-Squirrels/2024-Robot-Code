@@ -30,7 +30,8 @@ public class ArmIOReal implements ArmIO {
     motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID, "CANivore");
 
     TalonFXConfiguration config = new TalonFXConfiguration();
-
+    
+    //FIXME: find true current limits
     config.CurrentLimits.SupplyCurrentLimit = 40;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
