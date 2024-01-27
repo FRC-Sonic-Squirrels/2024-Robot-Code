@@ -5,8 +5,10 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants.ElevatorConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
@@ -65,10 +67,6 @@ public class Elevator extends SubsystemBase {
     io.setVoltage(volts);
   }
 
-  public void setVel(double inchesPerSecond) {
-    io.setVel(inchesPerSecond);
-  }
-
   public void setHeight(double heightInches) {
     io.setHeight(heightInches);
     targetHeightInches = heightInches;
@@ -84,5 +82,15 @@ public class Elevator extends SubsystemBase {
 
   public double getHeightInches() {
     return inputs.heightInches;
+  }
+
+  public double getInchesFromRotations(double rotations) {
+    double inches = 0.0;
+    inches =
+        Units.metersToInches(rotations / ElevatorConstants.ELEVATOR_GEAR_RATIO)
+            * 2
+            * Math.PI
+            * ElevatorConstants.ELEVATOR_WHEEL_RADIUS;
+    return inches;
   }
 }
