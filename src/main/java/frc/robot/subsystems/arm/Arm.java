@@ -26,12 +26,13 @@ public class Arm extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
-      kP.initDefault(0.5);
+      kP.initDefault(56.0);
       kD.initDefault(0);
-      kG.initDefault(0.295);
+      kG.initDefault(0.28);
 
-      closedLoopMaxVelocityConstraint.initDefault(40);
-      closedLoopMaxAccelerationConstraint.initDefault(40);
+      //FIXME: find the theoritical from the JVN docs
+      closedLoopMaxVelocityConstraint.initDefault(80);
+      closedLoopMaxAccelerationConstraint.initDefault(160);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
 
       kP.initDefault(2.5);
