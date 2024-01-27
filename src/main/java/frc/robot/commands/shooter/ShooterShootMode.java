@@ -4,14 +4,10 @@
 
 package frc.robot.commands.shooter;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.ScoringMode;
@@ -19,31 +15,39 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
+  private DoubleSupplier shooterRPM;
 
-  private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp", 10.0);
-  private LoggedTunableNumber ki = new LoggedTunableNumber("ShooterDefaultCommand/pitchKi", 0.0);
-  private LoggedTunableNumber kd = new LoggedTunableNumber("ShooterDefaultCommand/pitchKd", 0.0);
-  private LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("ShooterDefaultCommand/pitchKd", 1.0);
-  private PIDController shooterPitchPID = new PIDController(kp.get(), ki.get(), kd.get());
+  // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
+  // 10.0);
+  // private LoggedTunableNumber ki = new LoggedTunableNumber("ShooterDefaultCommand/pitchKi", 0.0);
+  // private LoggedTunableNumber kd = new LoggedTunableNumber("ShooterDefaultCommand/pitchKd", 0.0);
+  // private LoggedTunableNumber tolerance =
+  //     new LoggedTunableNumber("ShooterDefaultCommand/pitchKd", 1.0);
+  // private PIDController shooterPitchPID = new PIDController(kp.get(), ki.get(), kd.get());
 
-  private Rotation2d speakerHeading;
-  private double shooterPitchVelCorrection = 0.0;
+  // private Rotation2d speakerHeading;
+  // private double shooterPitchVelCorrection = 0.0;
   private BooleanSupplier shootSupplier;
 
   /** Creates a new ShooterDefaultCommand. */
   public ShooterShootMode(
-      Shooter shooter, EndEffector endEffector, Drivetrain drive, BooleanSupplier shootSupplier) {
+      Shooter shooter,
+      EndEffector endEffector,
+      Drivetrain drive,
+      BooleanSupplier shootSupplier,
+      DoubleSupplier shooterRPM) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
     this.shootSupplier = shootSupplier;
+    this.shooterRPM = shooterRPM;
     addRequirements(shooter);
     setName("ShooterShootMode");
   }
@@ -68,18 +72,30 @@ public class ShooterShootMode extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
-
     Pose2d futurePose =
         drive.getFutureEstimatedPose(shooter.getPivotPIDLatency(), "ShooterShootMode");
 
+    double horizDist =
+        Math.hypot(futurePose.getX() - speakerPose.getX(), futurePose.getY() - speakerPose.getY());
+
+    double dist = Math.hypot(horizDist, Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
+
+    double shooterTangentialSpeed =
+        shooterRPM.getAsDouble()
+            * 60.0
+            * Math.PI
+            * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS;
+
+    double shotTime = dist / shooterTangentialSpeed;
+
+    Translation2d virtualSpeakerTranslation =
+        speakerPose.minus(
+            new Translation2d(drive.getFieldRelativeVelocities().getX() * shotTime, 0.0));
+
+    shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+
     Translation2d shooterBaseTranslation =
-        futurePose
-            .transformBy(
-                new Transform2d(
-                    -Constants.ShooterConstants.SHOOTER_OFFSET_METERS, 0.0, new Rotation2d()))
-            .getTranslation();
+        futurePose.transformBy(Constants.ShooterConstants.SHOOTER_OFFSET_METERS).getTranslation();
 
     double distToSpeaker =
         Math.hypot(
@@ -134,9 +150,7 @@ public class ShooterShootMode extends Command {
     Translation2d currentShooterTranslation =
         drive
             .getPoseEstimatorPose()
-            .transformBy(
-                new Transform2d(
-                    -Constants.ShooterConstants.SHOOTER_OFFSET_METERS, 0.0, new Rotation2d()))
+            .transformBy(Constants.ShooterConstants.SHOOTER_OFFSET_METERS)
             .getTranslation();
 
     Logger.recordOutput(

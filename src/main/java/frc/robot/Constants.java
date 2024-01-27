@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -136,9 +137,11 @@ public final class Constants {
   public class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
-    public static final double SHOOTER_OFFSET_METERS = Units.inchesToMeters(12);
     public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
     public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
+
+    public static final Transform2d SHOOTER_OFFSET_METERS =
+        new Transform2d(0, -Units.inchesToMeters(12), new Rotation2d());
 
     public class Pivot {
       public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
@@ -152,7 +155,7 @@ public final class Constants {
         // velocity times derivative of distance to shooting pitch formula to get pitch velocity
         return velMetersPerSecond
             * -FieldConstants.SPEAKER_HEIGHT_METERS
-            / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS, 2)
+            / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
                 + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
       }
 
@@ -169,6 +172,7 @@ public final class Constants {
     public static class Launcher {
       public static final double MOI = 5.0;
       public static final double GEARING = 1.0;
+      public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
     }
   }
 

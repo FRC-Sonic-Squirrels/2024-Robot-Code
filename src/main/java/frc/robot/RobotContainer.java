@@ -34,7 +34,7 @@ import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.drive.RotateToTranslation;
+import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterShootMode;
@@ -363,7 +363,7 @@ public class RobotContainer {
     // driverController
     //     .leftTrigger()
     //     .whileTrue(
-    //         new RotateToTranslation(
+    //         new RotateToSpeaker(
     //             () -> -controller.getLeftY(),
     //             () -> -controller.getLeftX(),
     //             limelight::getClosestGamepiece,
@@ -383,7 +383,7 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.NONE)))
         .whileTrue(
-            new RotateToTranslation(
+            new RotateToSpeaker(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
                 () ->
@@ -397,8 +397,7 @@ public class RobotContainer {
                 drivetrain,
                 () -> false,
                 new Rotation2d(Math.PI),
-                () -> 0.0,
-                0.0));
+                shooter::getRPM));
     ;
   }
 
@@ -444,7 +443,8 @@ public class RobotContainer {
 
   public void updateRobotState() {
     Command shootModeCommand =
-        new ShooterShootMode(shooter, endEffector, drivetrain, driverController.rightTrigger());
+        new ShooterShootMode(
+            shooter, endEffector, drivetrain, driverController.rightTrigger(), shooter::getRPM);
     if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
         && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
       CommandScheduler.getInstance().schedule(shootModeCommand);
