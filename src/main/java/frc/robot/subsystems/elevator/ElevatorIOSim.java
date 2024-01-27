@@ -12,9 +12,6 @@ public class ElevatorIOSim implements ElevatorIO {
   public void setVoltage(double volts) {}
 
   @Override
-  public void setVel(double inchesPerSecond) {}
-
-  @Override
   public void setHeight(double heightInches) {}
 
   @Override

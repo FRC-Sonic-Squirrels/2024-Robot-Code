@@ -1,20 +1,20 @@
 package frc.robot.subsystems.elevator;
 
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
 
 public class ElevatorIOReal implements ElevatorIO {
-  
+
   private final TalonFX lead = new TalonFX(Constants.CanIDs.ELEVATOR_LEAD_CAN_ID);
   private final TalonFX follow = new TalonFX(Constants.CanIDs.ELEVATOR_FOLLOW_CAN_ID);
-  
-  //FIXME: add FOC
-  private final MotionMagicVoltage closedLoopControl = new MotionMagicVoltage(0.0).withEnableFOC(false);
+
+  // FIXME: add FOC
+  private final MotionMagicVoltage closedLoopControl =
+      new MotionMagicVoltage(0.0).withEnableFOC(false);
 
   private double heightInches = 0.0;
 
@@ -46,9 +46,6 @@ public class ElevatorIOReal implements ElevatorIO {
 
     lead.getConfigurator().refresh(pidConfig);
     lead.getConfigurator().refresh(mmConfig);
-
-    follow.getConfigurator().refresh(pidConfig);
-    follow.getConfigurator().refresh(mmConfig);
 
     pidConfig.kP = kP;
     pidConfig.kD = kD;

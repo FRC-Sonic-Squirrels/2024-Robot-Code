@@ -18,8 +18,6 @@ public interface ElevatorIO {
 
   public default void setVoltage(double volts) {}
 
-  public default void setVel(double inchesPerSecond) {}
-
   public default void setHeight(double heightInches) {}
 
   public default void setPIDConstraints(double kP, double kD, double kG, Constraints constraints) {}
