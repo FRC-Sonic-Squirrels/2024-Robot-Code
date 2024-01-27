@@ -2,7 +2,6 @@ package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -110,18 +109,9 @@ public class AutosManager {
         Choreo.choreoSwerveCommand(
             traj,
             drivetrain::getPoseEstimatorPose,
-            new PIDController(
-                config.getAutoTranslationKP().get(),
-                config.getAutoTranslationKI().get(),
-                config.getAutoTranslationKD().get()),
-            new PIDController(
-                config.getAutoTranslationKP().get(),
-                config.getAutoTranslationKI().get(),
-                config.getAutoTranslationKD().get()),
-            new PIDController(
-                config.getAutoThetaKP().get(),
-                config.getAutoThetaKI().get(),
-                config.getAutoThetaKD().get()),
+            config.getAutoTranslationPidController(),
+            config.getAutoTranslationPidController(),
+            config.getAutoThetaPidController(),
             (ChassisSpeeds speeds) -> drivetrain.runVelocity(speeds),
             () -> {
               Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();

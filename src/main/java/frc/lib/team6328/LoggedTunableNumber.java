@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
-/**
+/*
  * Class for a tunable number. Gets value from dashboard in tuning mode, returns default if not or
  * value not in dashboard.
  */
@@ -29,7 +29,8 @@ public class LoggedTunableNumber {
   private boolean hasDefault = false;
   private double defaultValue;
   private LoggedDashboardNumber dashboardNumber;
-  private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
+
+  private final Map<Integer, Double> lastHasChangedValues = new HashMap<>();
 
   /**
    * Create a new LoggedTunableNumber
@@ -62,7 +63,7 @@ public class LoggedTunableNumber {
       this.defaultValue = defaultValue;
 
       // if not on the competition field
-      if (DriverStation.isFMSAttached() != true) {
+      if (!DriverStation.isFMSAttached()) {
         dashboardNumber = new LoggedDashboardNumber(key, defaultValue);
       }
     }

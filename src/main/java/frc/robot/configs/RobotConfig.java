@@ -2,6 +2,7 @@ package frc.robot.configs;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -59,18 +60,10 @@ public abstract class RobotConfig {
   public abstract LoggedTunableNumber getAutoMaxAcceleration();
 
   // auto translation PID
-  public abstract LoggedTunableNumber getAutoTranslationKP();
-
-  public abstract LoggedTunableNumber getAutoTranslationKI();
-
-  public abstract LoggedTunableNumber getAutoTranslationKD();
+  public abstract PIDController getAutoTranslationPidController();
 
   // auto theta PID
-  public abstract LoggedTunableNumber getAutoThetaKP();
-
-  public abstract LoggedTunableNumber getAutoThetaKI();
-
-  public abstract LoggedTunableNumber getAutoThetaKD();
+  public abstract PIDController getAutoThetaPidController();
 
   // ----------------------- ROBOT DIMENSIONS -------------------
 
