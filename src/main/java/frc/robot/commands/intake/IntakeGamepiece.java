@@ -26,6 +26,11 @@ public class IntakeGamepiece extends Command {
       new LoggedTunableNumber("IntakeGamepiece/rumbleIntensityPercent", 0.3);
 
   /** Creates a new IntakeDefaultIdleRPM. */
+  public IntakeGamepiece(Intake intake) {
+    this(intake, null);
+  }
+
+  /** Creates a new IntakeDefaultIdleRPM. */
   public IntakeGamepiece(Intake intake, XboxController controller) {
     this.intake = intake;
     this.controller = controller;
