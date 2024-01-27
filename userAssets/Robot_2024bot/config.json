@@ -1,0 +1,136 @@
+{
+  "name": "2024bot",
+  "sourceUrl": "https://ss2930.sharepoint.com/:u:/s/Engineering/Efvm24JdOHBDgmQiXUikp6MBGHY_FezwOGlR1I0kksZj3Q?e=nDKV3H",
+  "rotations": [
+    {
+      "axis": "z",
+      "degrees": 90
+    },
+    {
+      "axis": "y",
+      "degrees": 90
+    }
+  ],
+  "position": [0,0,0], 
+  "cameras": [
+    {
+    "name": "Front Right Camera",
+    "rotations": [
+      {
+        "axis": "z",
+        "degrees": 43.0
+      }
+    ],
+    "position": [
+      0.189611,
+      0.155194,
+      0.566751724
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "fov": 104.6
+  },
+  {
+    "name": "Front Left Camera",
+    "rotations": [
+      {
+        "axis": "z",
+        "degrees": -43.0
+      }
+    ],
+    "position": [
+      0.189611,
+      -0.155179522,
+      0.566751724
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "fov": 104.6
+  },
+  {
+    "name": "Back Right Camera",
+    "rotations": [
+      {
+        "axis": "z",
+        "degrees": 137.0
+      }
+    ],
+    "position": [
+      -0.255464056,
+      0.215740488,
+      0.564252618
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "fov": 104.6
+  },
+  {
+    "name": "Back Left Camera",
+    "rotations": [
+      {
+        "axis": "z",
+        "degrees": -137.0
+      }
+    ],
+    "position": [
+      -0.255464056,
+      -0.215740488,
+      0.564252618
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "fov": 120
+  },
+  {
+    "name": "Limelight",
+    "rotations": [
+      {
+        "axis": "z",
+        "degrees": 0.0
+      }
+    ],
+    "position": [
+      0.0,
+      -0.005049012,
+      0.4846574
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "fov": 59.6
+  }
+
+],
+  "components": [
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "z",
+          "degrees": 90
+        },
+        {
+          "axis": "y",
+          "degrees": 90
+        }
+      ],
+      "zeroedPosition": [
+        0,
+        0,
+        0
+      ]
+    }
+  ] 
+}
