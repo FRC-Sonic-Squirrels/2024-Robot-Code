@@ -11,6 +11,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.configs.RobotConfig;
 import java.util.EnumSet;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -37,13 +39,15 @@ public class VisionIOSim implements VisionIO {
     this.poseSupplier = poseSupplier;
     this.layout = config.getAprilTagFieldLayout();
 
+    Logger.recordOutput("Vision/configTagAmount", config.getAprilTagFieldLayout().getTags().size());
+
     var cameraProp = new SimCameraProperties();
     // FIXME: get these values for the cameras we use
-    cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
+    cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(128.2));
     cameraProp.setCalibError(0.35, 0.10);
     cameraProp.setFPS(15);
-    cameraProp.setAvgLatencyMs(50);
-    cameraProp.setLatencyStdDevMs(15);
+    cameraProp.setAvgLatencyMs(25);
+    cameraProp.setLatencyStdDevMs(10);
 
     this.camera = new PhotonCamera(networkName);
     this.visionSim = new VisionSystemSim(networkName);
