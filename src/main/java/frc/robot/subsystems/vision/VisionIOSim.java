@@ -11,7 +11,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.configs.RobotConfig;
 import java.util.EnumSet;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;

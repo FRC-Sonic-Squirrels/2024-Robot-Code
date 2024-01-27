@@ -14,7 +14,6 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionModule;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
@@ -80,44 +79,42 @@ public class SimulatorRobotConfig extends RobotConfig {
       new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_THETA_KD", 0.0);
 
   // ---- VISION CAMERA TRANSFORM3d's -------
+  public static final Transform3d SHOOTER_SIDE_LEFT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-0.62273),
+              Units.inchesToMeters(9.625919),
+              Units.inchesToMeters(22.21467)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(225.0)));
 
-  // public so that robot container can access
-  // SIM is a special case because we need to access drivetrain.getPose()
-  // this is not possible in robot configs so we must construct the vision modules in robot
-  // container
-  // public static final Transform3d FRONT_LEFT_ROBOT_TO_CAMERA =
-  //     new Transform3d(
-  //         new Translation3d(
-  //             Units.inchesToMeters(-0.51), Units.inchesToMeters(10.2), Units.inchesToMeters(22.8)),
-  //         new Rotation3d(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(30.0)));
+  public static final Transform3d SHOOTER_SIDE_RIGHT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-0.62273),
+              Units.inchesToMeters(-9.625919),
+              Units.inchesToMeters(22.21467)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(135.0)));
 
-  // public static final Transform3d FRONT_RIGHT_ROBOT_TO_CAMERA =
-  //     new Transform3d(
-  //         new Translation3d(
-  //             Units.inchesToMeters(-0.51), Units.inchesToMeters(-10.2), Units.inchesToMeters(22.8)),
-  //         new Rotation3d(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-30.0)));
+  public static final Transform3d INTAKE_SIDE_LEFT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(0.64738),
+              Units.inchesToMeters(13.14840),
+              Units.inchesToMeters(22.31306)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(45.0)));
 
-  // public static final Transform3d BACK_ROBOT_TO_CAMERA =
-  //     new Transform3d(
-  //         new Translation3d(
-  //             Units.inchesToMeters(-2.7), Units.inchesToMeters(0.0), Units.inchesToMeters(33.42)),
-  //         new Rotation3d(Math.toRadians(0.0), Math.toRadians(10.0), Math.toRadians(180.0)));
+  public static final Transform3d INTAKE_SIDE_RIGHT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(0.64738),
+              Units.inchesToMeters(-13.14840),
+              Units.inchesToMeters(22.31306)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
 
-  public static final Transform3d SHOOTER_SIDE_LEFT = new Transform3d(new Translation3d(
-    -0.62273, 9.625919, 22.21467), new Rotation3d(0.0, 0.0, 225.0));
-
-    public static final Transform3d SHOOTER_SIDE_RIGHT = new Transform3d(new Translation3d(
-    -0.62273, -9.625919, 22.21467), new Rotation3d(0.0, 0.0, 135.0));
-
-    public static final Transform3d INTAKE_SIDE_LEFT = new Transform3d(new Translation3d(0.64738, 13.14840, 22.31306), new Rotation3d(0.0, 0.0, 45.0));
-
-    public static final Transform3d INTAKE_SIDE_RIGHT = new Transform3d(new Translation3d(0.64738, -13.14840, 22.31306), new Rotation3d(0.0, 0.0, -45.0));
-
-
-    public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "INTAKE_SIDE_LEFT";
-    public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "INTAKE_SIDE_RIGHT";
-    public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "SHOOTER_SIDE_LEFT";
-    public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "SHOOTER_SIDE_RIGHT";
+  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "INTAKE_SIDE_LEFT";
+  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "INTAKE_SIDE_RIGHT";
+  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "SHOOTER_SIDE_LEFT";
+  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "SHOOTER_SIDE_RIGHT";
   // public static final String FRONT_LEFT_CAMERA_NAME = "LeftCamera";
   // public static final String FRONT_RIGHT_CAMERA_NAME = "RightCamera";
   // public static final String BACK_CAMERA_NAME = "BackCamera";
@@ -166,30 +163,33 @@ public class SimulatorRobotConfig extends RobotConfig {
     // does not work for SIM because we need to give VisionIOSim a pose supplier which can only be
     // obtained from the drivetrain
     throw new RuntimeException("Unsupported action for SIM BOT");
-    // VisionModule frontLeft =
-    //     new VisionModule(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    // VisionModule frontRight =
-    //     new VisionModule(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-    // VisionModule back = new VisionModule(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
-
-    // return new VisionModule[] {frontLeft, frontRight, back};
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    // VisionModuleConfiguration frontLeft =
-    //     new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    // VisionModuleConfiguration frontRight =
-    //     new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-    // VisionModuleConfiguration back =
-    //     new VisionModuleConfiguration(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration intakeLeft =
+        new VisionModuleConfiguration(
+            new VisionIO() {}, SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT);
 
-    // VisionModuleConfiguration intakeRight = new VisionModuleConfiguration(new, LOGGED_TUNABLE_DASHBOARD_KEY, INTAKE_SIDE_LEFT)
+    VisionModuleConfiguration intakeRight =
+        new VisionModuleConfiguration(
+            new VisionIO() {},
+            SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
+            INTAKE_SIDE_RIGHT);
 
-    // return new VisionModuleConfiguration[] {frontLeft, frontRight, back};
+    VisionModuleConfiguration shooterLeft =
+        new VisionModuleConfiguration(
+            new VisionIO() {},
+            SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
+            SHOOTER_SIDE_LEFT);
 
-    // FIXME: THIS IS BROKEN FOR 2024 fix later
-    return null;
+    VisionModuleConfiguration shooterRight =
+        new VisionModuleConfiguration(
+            new VisionIO() {},
+            SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
+            SHOOTER_SIDE_RIGHT);
+
+    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
   }
 
   @Override
