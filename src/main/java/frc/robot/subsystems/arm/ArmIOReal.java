@@ -84,7 +84,7 @@ public class ArmIOReal implements ArmIO {
     pidConfig.kD = kD;
     pidConfig.kG = kG;
 
-    mmConfig.MotionMagicCruiseVelocity = maxProfiledAcceleration;
+    mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
     motor.getConfigurator().apply(pidConfig);
