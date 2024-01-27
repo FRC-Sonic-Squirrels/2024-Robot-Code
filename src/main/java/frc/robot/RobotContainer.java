@@ -64,9 +64,7 @@ import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.subsystems.vision.VisionModule;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -151,31 +149,30 @@ public class RobotContainer {
                     SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME),
                 SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME,
                 SimulatorRobotConfig.INTAKE_SIDE_LEFT),
-            // new VisionModuleConfiguration(
-            //     new VisionIOSim(
-            //         config,
-            //         drivetrain::getPoseEstimatorPose,
-            //         SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
-            //         SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME),
-            //     SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-            //     SimulatorRobotConfig.INTAKE_SIDE_RIGHT),
-            // new VisionModuleConfiguration(
-            //     new VisionIOSim(
-            //         config,
-            //         drivetrain::getPoseEstimatorPose,
-            //         SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
-            //         SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME),
-            //     SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
-            //     SimulatorRobotConfig.SHOOTER_SIDE_LEFT),
-
-            //     new VisionModuleConfiguration(
-            //     new VisionIOSim(
-            //         config,
-            //         drivetrain::getPoseEstimatorPose,
-            //         SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
-            //         SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME),
-            //     SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-            //     SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
+            new VisionModuleConfiguration(
+                new VisionIOSim(
+                    config,
+                    drivetrain::getPoseEstimatorPose,
+                    SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
+                    SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME),
+                SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
+                SimulatorRobotConfig.INTAKE_SIDE_RIGHT),
+            new VisionModuleConfiguration(
+                new VisionIOSim(
+                    config,
+                    drivetrain::getPoseEstimatorPose,
+                    SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
+                    SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME),
+                SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
+                SimulatorRobotConfig.SHOOTER_SIDE_LEFT),
+            new VisionModuleConfiguration(
+                new VisionIOSim(
+                    config,
+                    drivetrain::getPoseEstimatorPose,
+                    SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
+                    SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME),
+                SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
+                SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
           };
 
           vision =
