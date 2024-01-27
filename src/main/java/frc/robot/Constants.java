@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -83,6 +83,8 @@ public final class Constants {
       SIM
     }
   }
+
+  public static double MAX_VOLTAGE = 12.0;
 
   public class FieldConstants {
     // FIXME: double check this number
@@ -186,7 +188,7 @@ public final class Constants {
     public static final int INTAKE_CAN_ID = 0;
     public static final int SHOOTER_LEAD_CAN_ID = 1;
     public static final int SHOOTER_FOLLOW_CAN_ID = 2;
-    public static final int ARM_CAN_ID = 3;
+    public static final int ARM_CAN_ID = 40;
     public static final int ELEVATOR_LEAD_CAN_ID = 4;
     public static final int ELEVATOR_FOLLOW_CAN_ID = 5;
     public static final int END_EFFECTOR_CAN_ID = 6;
@@ -205,5 +207,11 @@ public final class Constants {
     VOLTAGE
   }
 
-  public static final double MAX_VOLTAGE = 12.0;
+  public class ArmConstants {
+    public static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
+
+    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
+    public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
+    public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+  }
 }

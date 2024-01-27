@@ -48,22 +48,17 @@ import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
-import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.limelight.Limelight;
 import frc.robot.subsystems.limelight.LimelightIO;
-import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -73,7 +68,6 @@ import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIO;
-import frc.robot.subsystems.wrist.WristIOReal;
 import frc.robot.subsystems.wrist.WristIOSim;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -100,6 +94,8 @@ public class RobotContainer {
 
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
+
+  private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
@@ -213,22 +209,38 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
+          // FIXME:
+          // drivetrain =
+          //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+
+          // vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          // arm = new Arm(new ArmIOReal());
+          // elevator = new Elevator(new ElevatorIOReal());
+          // intake = new Intake(new IntakeIOReal());
+          // shooter = new Shooter(new ShooterIOReal());
+          // wrist = new Wrist(new WristIOReal());
+          // endEffector = new EndEffector(new EndEffectorIOReal());
+          // limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+
+          DriverStation.silenceJoystickConnectionWarning(true);
+
           drivetrain =
-              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+              new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
           vision =
               new Vision(
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
                   drivetrain::addVisionEstimate,
-                  config.getVisionModuleObjects());
+                  config.getReplayVisionModules());
           arm = new Arm(new ArmIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
-          intake = new Intake(new IntakeIOReal());
-          shooter = new Shooter(new ShooterIOReal());
-          wrist = new Wrist(new WristIOReal());
-          endEffector = new EndEffector(new EndEffectorIOReal());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
+          elevator = new Elevator(new ElevatorIO() {});
+          intake = new Intake(new IntakeIO() {});
+          shooter = new Shooter(new ShooterIO() {});
+          wrist = new Wrist(new WristIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+
           led = new LED();
           break;
 
@@ -285,6 +297,9 @@ public class RobotContainer {
     //     new FeedForwardCharacterization(
     //         flywheel, flywheel::runCharacterizationVolts,
     // flywheel::getCharacterizationVelocity));
+
+    shuffleBoardLayouts =
+        new ShuffleBoardLayouts(arm, elevator, wrist, endEffector, intake, shooter, drivetrain);
 
     // Configure the button bindings
     configureButtonBindings();
