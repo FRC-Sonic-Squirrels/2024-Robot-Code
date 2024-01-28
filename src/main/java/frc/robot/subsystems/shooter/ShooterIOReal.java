@@ -7,7 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.math.controller.PIDController;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
@@ -16,31 +16,29 @@ public class ShooterIOReal implements ShooterIO {
   TalonFX follow = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
 
-  public Rotation2d pitch = new Rotation2d();
-  public StatusSignal<Double> pivotTargetVoltage;
-  public StatusSignal<Double> pivotTargetVelocity;
-  public StatusSignal<Double> RPM;
-  public StatusSignal<Double> launcherLeadTempCelsius;
-  public StatusSignal<Double> launcherFollowTempCelsius;
-  public StatusSignal<Double> launcherVoltage;
 
-  private PIDController pivotController = new PIDController(0.01, 0, 0);
-  Slot0Configs pidConfig = new Slot0Configs();
+  TalonFXConfiguration config = new TalonFXConfiguration();
+
+
+  public Rotation2d pitch = new Rotation2d();
+  private final StatusSignal<Double> pivotVoltage;
+  // private final StatusSignal<Double> RPM;
+  private final StatusSignal<Double> launcherLeadTempCelsius;
+  private final StatusSignal<Double> launcherFollowTempCelsius;
+  private final StatusSignal<Double> launcherVoltage;
+
   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
   public ShooterIOReal() {
-    pidConfig.kP = 0;
-    pidConfig.kD = 0;
-    pidConfig.kG = 0;
-    pidConfig.kI = 0;
-    lead.getConfigurator().apply(pidConfig);
-    follow.getConfigurator().apply(pidConfig);
-    pivot.getConfigurator().apply(pidConfig);
 
+    // FIXME: get true current limits
+    config.CurrentLimits.SupplyCurrentLimit = 40;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    
+    // does this work for the getConfigurator() method?
     follow.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
-    pivotTargetVoltage = pivot.getMotorVoltage();
-    pivotTargetVelocity = pivot.getVelocity();
+    pivotVoltage = pivot.getMotorVoltage();
     launcherLeadTempCelsius = lead.getDeviceTemp();
     launcherFollowTempCelsius = follow.getDeviceTemp();
     launcherVoltage = lead.getMotorVoltage();
@@ -48,28 +46,23 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // FIXME: add other variables: pivotTargetVoltage, pivotTargetVelocity, RPM
+    // FIXME: add other variables: pivotVoltage, pivotVelocity, RPM
     BaseStatusSignal.refreshAll(
-        pivotTargetVoltage,
-        pivotTargetVelocity,
+        pivotVoltage,
         launcherLeadTempCelsius,
         launcherFollowTempCelsius,
         launcherVoltage);
-    // FIXME: get actual arm code
-    inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
-    // inputs.pivotTargetVoltage = pivotTargetVoltage.getValue();
-    // inputs.pivotTargetVelocity = pivotTargetVelocity.getValue();
+    
+    // FIXME: figure out what to put as the argument
+    inputs.pitch = new Rotation2d();
+
+    inputs.pivotVoltage = pivotVoltage.getValue();
     inputs.launcherLeadTempCelsius = launcherLeadTempCelsius.getValueAsDouble();
     inputs.launcherFollowTempCelsius = launcherFollowTempCelsius.getValueAsDouble();
     inputs.launcherVoltage = launcherVoltage.getValueAsDouble();
   }
 
   // PIVOT
-
-  @Override
-  public void setPivotVel(double radPerSec) {
-    pivot.set(radPerSec);
-  }
 
   @Override
   public void setPivotPosition(Rotation2d rot) {
@@ -79,12 +72,21 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setPivotClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
+    Slot0Configs pidConfig = new Slot0Configs();
+    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+    
+    pivot.getConfigurator().refresh(pidConfig);
+    pivot.getConfigurator().refresh(mmConfig);
+
     pidConfig.kP = kP;
     pidConfig.kD = kD;
     pidConfig.kG = kG;
-    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+
     mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
+
+    pivot.getConfigurator().apply(pidConfig);
+    pivot.getConfigurator().apply(mmConfig);
   }
 
   @Override
@@ -105,12 +107,22 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setLauncherRPM(double rpm) {
-    lead.setControl(request.withVelocity(rpm));
-  }
+  public void setLauncherClosedLoopConstants(
+      double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
+    Slot0Configs pidConfig = new Slot0Configs();
+    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-  @Override
-  public void setLauncherClosedLoopConstants(double kP, double kI, double kD) {
-    pivotController.setPID(kP, kI, kD);
+    lead.getConfigurator().refresh(pidConfig);
+    lead.getConfigurator().refresh(mmConfig);
+
+    pidConfig.kP = kP;
+    pidConfig.kD = kD;
+    pidConfig.kG = kG;
+
+    mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
+    mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
+
+    lead.getConfigurator().apply(pidConfig);
+    lead.getConfigurator().apply(mmConfig);
   }
 }

@@ -80,10 +80,6 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
   }
 
-  public void setPitchAngularVel(double radiansPerSecond) {
-    io.setPivotVel(radiansPerSecond);
-  }
-
   public Rotation2d getPitch() {
     return inputs.pitch;
   }
