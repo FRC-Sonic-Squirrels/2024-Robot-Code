@@ -49,6 +49,7 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotControlEffort = 0.0;
   private double pivotOpenLoopVolts = 0.0;
   private double pivotKg = 0.0;
+  private double kickerVolts = 0.0;
 
   private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Shooter/beamBreak", false);
 
@@ -98,6 +99,7 @@ public class ShooterIOSim implements ShooterIO {
     launcherMotorSim.setInputVoltage(launcherOpenLoopVolts);
 
     pivot.setInputVoltage(MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
+    kickerMotorSim.setInputVoltage(MathUtil.clamp(kickerVolts, -12.0, 12.0));
     Logger.recordOutput("Shooter/outputVoltage", MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
 
     Logger.recordOutput("Shooter/targetVelRadPerSec", pivotTargetVelRadPerSec);
@@ -139,5 +141,10 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setLauncherPercentOut(double percent) {
     launcherOpenLoopVolts = percent * 12.0;
+  }
+
+  @Override
+  public void setKickerVoltage(double volts) {
+    kickerVolts = volts;
   }
 }
