@@ -448,7 +448,7 @@ public class RobotContainer {
   }
 
   public void updateRobotState() {
-    Command shootModeCommand = new ShooterShootMode(shooter, drivetrain, shooter::getRPM);
+    Command shootModeCommand = new ShooterShootMode(shooter, drivetrain);
     if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
         && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
       CommandScheduler.getInstance().schedule(shootModeCommand);

@@ -13,16 +13,12 @@ import frc.robot.RobotState;
 import frc.robot.RobotState.ScoringMode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
-  private DoubleSupplier shooterRPM;
-  private Supplier<Pose2d> staticRobotPose;
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
   // 10.0);
@@ -36,11 +32,10 @@ public class ShooterShootMode extends Command {
   // private double shooterPitchVelCorrection = 0.0;
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterShootMode(Shooter shooter, Drivetrain drive, DoubleSupplier shooterRPM) {
+  public ShooterShootMode(Shooter shooter, Drivetrain drive) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
-    this.shooterRPM = shooterRPM;
     addRequirements(shooter);
     setName("ShooterShootMode");
   }
@@ -73,7 +68,7 @@ public class ShooterShootMode extends Command {
     double dist = Math.hypot(horizDist, Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
 
     double shooterTangentialSpeed =
-        shooterRPM.getAsDouble()
+        shooter.getRPM()
             * 60.0
             * Math.PI
             * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS;

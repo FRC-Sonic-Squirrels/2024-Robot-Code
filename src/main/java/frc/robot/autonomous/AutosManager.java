@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -348,5 +349,9 @@ public class AutosManager {
     FOLLOW_PATH,
     ROTATE_TO_GAMEPIECE,
     ROTATE_TO_SPEAKER
+  }
+
+  private Command addShooting(Command command) {
+    return command.deadlineWith(new ShooterShootMode(shooter, drivetrain));
   }
 }
