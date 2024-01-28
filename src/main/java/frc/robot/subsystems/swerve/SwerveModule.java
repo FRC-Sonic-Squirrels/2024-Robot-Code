@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.team2930.ArrayUtil;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
 import org.littletonrobotics.junction.Logger;
@@ -90,66 +91,68 @@ public class SwerveModule {
   }
 
   public void periodic() {
-    Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+    try (var ignored = new ExecutionTiming("SwerveModule" + Integer.toString(index))) {
+      Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
-    // update Tuneable PID and FF values
-    int hc = hashCode();
-    if (driveKS.hasChanged(hc)
-        || driveKV.hasChanged(hc)
-        || driveKA.hasChanged(hc)
-        || driveKP.hasChanged(hc)
-        || driveKD.hasChanged(hc)
-        || angleKP.hasChanged(hc)
-        || angleKD.hasChanged(hc)) {
-      driveFeedforward = new SimpleMotorFeedforward(driveKS.get(), driveKV.get());
+      // update Tuneable PID and FF values
+      int hc = hashCode();
+      if (driveKS.hasChanged(hc)
+          || driveKV.hasChanged(hc)
+          || driveKA.hasChanged(hc)
+          || driveKP.hasChanged(hc)
+          || driveKD.hasChanged(hc)
+          || angleKP.hasChanged(hc)
+          || angleKD.hasChanged(hc)) {
+        driveFeedforward = new SimpleMotorFeedforward(driveKS.get(), driveKV.get());
 
-      driveFeedback.setPID(driveKP.get(), 0.0, driveKD.get());
-      turnFeedback.setPID(angleKP.get(), 0.0, angleKD.get());
-    }
-
-    // On first cycle, reset relative turn encoder
-    // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (turnRelativeOffset == null && inputs.turnAbsolutePosition.getRadians() != 0.0) {
-      turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
-    }
-
-    // Run closed loop turn control
-    if (angleSetpoint != null) {
-      io.setTurnVoltage(
-          turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
-
-      // Run closed loop drive control
-      // Only allowed if closed loop turn control is running
-      if (speedSetpoint != null) {
-        // Scale velocity based on turn error
-        //
-        // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
-        // towards the setpoint, its velocity should increase. This is achieved by
-        // taking the component of the velocity in the direction of the setpoint.
-        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
-
-        // Run drive controller
-        double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        io.setDriveVoltage(
-            driveFeedforward.calculate(velocityRadPerSec)
-                + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+        driveFeedback.setPID(driveKP.get(), 0.0, driveKD.get());
+        turnFeedback.setPID(angleKP.get(), 0.0, angleKD.get());
       }
-    }
 
-    // Calculate position deltas for odometry
-    int deltaCount =
-        Math.min(inputs.odometryDrivePositionsRad.length, inputs.odometryTurnPositions.length);
-    positionDeltas = new SwerveModulePosition[deltaCount];
-    for (int i = 0; i < deltaCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
-      Rotation2d angle =
-          inputs.odometryTurnPositions[i].plus(
-              turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
-      positionDeltas[i] = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
-      lastPositionMeters = positionMeters;
+      // On first cycle, reset relative turn encoder
+      // Wait until absolute angle is nonzero in case it wasn't initialized yet
+      if (turnRelativeOffset == null && inputs.turnAbsolutePosition.getRadians() != 0.0) {
+        turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
+      }
 
-      odometryTimestamps = new double[deltaCount];
-      System.arraycopy(inputs.odometryTimestamps, 0, odometryTimestamps, 0, deltaCount);
+      // Run closed loop turn control
+      if (angleSetpoint != null) {
+        io.setTurnVoltage(
+            turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
+
+        // Run closed loop drive control
+        // Only allowed if closed loop turn control is running
+        if (speedSetpoint != null) {
+          // Scale velocity based on turn error
+          //
+          // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
+          // towards the setpoint, its velocity should increase. This is achieved by
+          // taking the component of the velocity in the direction of the setpoint.
+          double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
+
+          // Run drive controller
+          double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+          io.setDriveVoltage(
+              driveFeedforward.calculate(velocityRadPerSec)
+                  + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+        }
+      }
+
+      // Calculate position deltas for odometry
+      int deltaCount =
+          Math.min(inputs.odometryDrivePositionsRad.length, inputs.odometryTurnPositions.length);
+      positionDeltas = new SwerveModulePosition[deltaCount];
+      for (int i = 0; i < deltaCount; i++) {
+        double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+        Rotation2d angle =
+            inputs.odometryTurnPositions[i].plus(
+                turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
+        positionDeltas[i] = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
+        lastPositionMeters = positionMeters;
+
+        odometryTimestamps = new double[deltaCount];
+        System.arraycopy(inputs.odometryTimestamps, 0, odometryTimestamps, 0, deltaCount);
+      }
     }
   }
 

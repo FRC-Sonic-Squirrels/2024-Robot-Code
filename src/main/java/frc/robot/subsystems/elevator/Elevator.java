@@ -7,6 +7,7 @@ package frc.robot.subsystems.elevator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.ElevatorConstants;
 import org.littletonrobotics.junction.Logger;
@@ -44,22 +45,24 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Elevator", inputs);
+    try (var ignored = new ExecutionTiming("Elevator")) {
+      io.updateInputs(inputs);
+      Logger.processInputs("Elevator", inputs);
 
-    // ---- UPDATE TUNABLE NUMBERS
-    var hc = hashCode();
-    if (kP.hasChanged(hc)
-        || kD.hasChanged(hc)
-        || kG.hasChanged(hc)
-        || closedLoopMaxVelocityConstraint.hasChanged(hc)
-        || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
-      io.setPIDConstraints(
-          kP.get(),
-          kP.get(),
-          kG.get(),
-          new Constraints(
-              closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
+      // ---- UPDATE TUNABLE NUMBERS
+      var hc = hashCode();
+      if (kP.hasChanged(hc)
+          || kD.hasChanged(hc)
+          || kG.hasChanged(hc)
+          || closedLoopMaxVelocityConstraint.hasChanged(hc)
+          || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setPIDConstraints(
+            kP.get(),
+            kP.get(),
+            kG.get(),
+            new Constraints(
+                closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
+      }
     }
   }
 

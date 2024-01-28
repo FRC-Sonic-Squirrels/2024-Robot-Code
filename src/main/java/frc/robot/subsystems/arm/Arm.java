@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ControlMode;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
@@ -70,26 +71,29 @@ public class Arm extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Arm", inputs);
+    try (var ignored = new ExecutionTiming("Arm")) {
+      io.updateInputs(inputs);
+      Logger.processInputs("Arm", inputs);
 
-    Logger.recordOutput("Arm/PositionDegrees", inputs.armPosition.getDegrees() % 360);
-    Logger.recordOutput("Arm/ControlMode", currentControlMode);
-    Logger.recordOutput("Arm/targetClosedLoopSetpointDegrees", closedLoopTargetAngle.getDegrees());
+      Logger.recordOutput("Arm/PositionDegrees", inputs.armPosition.getDegrees() % 360);
+      Logger.recordOutput("Arm/ControlMode", currentControlMode);
+      Logger.recordOutput(
+          "Arm/targetClosedLoopSetpointDegrees", closedLoopTargetAngle.getDegrees());
 
-    // ---- UPDATE TUNABLE NUMBERS
-    var hc = hashCode();
-    if (kP.hasChanged(hc)
-        || kD.hasChanged(hc)
-        || kG.hasChanged(hc)
-        || closedLoopMaxVelocityConstraint.hasChanged(hc)
-        || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
-      io.setClosedLoopConstants(
-          kP.get(),
-          kD.get(),
-          kG.get(),
-          closedLoopMaxVelocityConstraint.get(),
-          closedLoopMaxAccelerationConstraint.get());
+      // ---- UPDATE TUNABLE NUMBERS
+      var hc = hashCode();
+      if (kP.hasChanged(hc)
+          || kD.hasChanged(hc)
+          || kG.hasChanged(hc)
+          || closedLoopMaxVelocityConstraint.hasChanged(hc)
+          || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setClosedLoopConstants(
+            kP.get(),
+            kD.get(),
+            kG.get(),
+            closedLoopMaxVelocityConstraint.get(),
+            closedLoopMaxAccelerationConstraint.get());
+      }
     }
   }
 

@@ -5,6 +5,7 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ExecutionTiming;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,9 +20,11 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    try (var ignored = new ExecutionTiming("Intake")) {
+      // This method will be called once per scheduler run
+      io.updateInputs(inputs);
+      Logger.processInputs("Intake", inputs);
+    }
   }
 
   public double getCurrentDraw() {

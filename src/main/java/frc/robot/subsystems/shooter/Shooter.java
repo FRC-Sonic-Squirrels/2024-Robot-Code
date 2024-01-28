@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
 import java.util.ArrayList;
@@ -45,37 +46,39 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
+    try (var ignored = new ExecutionTiming("Shooter")) {
+      io.updateInputs(inputs);
 
-    Logger.processInputs(ROOT_TABLE, inputs);
-    Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pitch.getDegrees());
+      Logger.processInputs(ROOT_TABLE, inputs);
+      Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pitch.getDegrees());
 
-    io.setPivotClosedLoopConstants(
-        kP.get(),
-        kD.get(),
-        kG.get(),
-        closedLoopMaxVelocityConstraint.get(),
-        closedLoopMaxAccelerationConstraint.get());
+      io.setPivotClosedLoopConstants(
+          kP.get(),
+          kD.get(),
+          kG.get(),
+          closedLoopMaxVelocityConstraint.get(),
+          closedLoopMaxAccelerationConstraint.get());
 
-    pivotTargetMeasurements.add(
-        new PIDTargetMeasurement(
-            Timer.getFPGATimestamp(),
-            currentTarget,
-            inputs.pitch.getRadians() <= currentTarget.getRadians()));
-    for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
-      PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
-      if ((measurement.upDirection
-              && inputs.pitch.getRadians() >= measurement.targetRot.getRadians())
-          || (!measurement.upDirection
-              && inputs.pitch.getRadians() <= measurement.targetRot.getRadians())) {
-        pivotPidLatency =
-            pivotPidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
-        pivotTargetMeasurements.remove(index);
-      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
-        pivotTargetMeasurements.remove(index);
+      pivotTargetMeasurements.add(
+          new PIDTargetMeasurement(
+              Timer.getFPGATimestamp(),
+              currentTarget,
+              inputs.pitch.getRadians() <= currentTarget.getRadians()));
+      for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
+        PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
+        if ((measurement.upDirection
+                && inputs.pitch.getRadians() >= measurement.targetRot.getRadians())
+            || (!measurement.upDirection
+                && inputs.pitch.getRadians() <= measurement.targetRot.getRadians())) {
+          pivotPidLatency =
+              pivotPidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
+          pivotTargetMeasurements.remove(index);
+        } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
+          pivotTargetMeasurements.remove(index);
+        }
       }
+      Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
     }
-    Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
   }
 
   public void setPitchAngularVel(double radiansPerSecond) {
