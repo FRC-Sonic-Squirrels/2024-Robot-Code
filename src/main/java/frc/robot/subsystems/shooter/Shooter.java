@@ -83,10 +83,6 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public void setPitchAngularVel(double radiansPerSecond) {
-    io.setPivotVel(radiansPerSecond);
-  }
-
   public Rotation2d getPitch() {
     return inputs.pitch;
   }

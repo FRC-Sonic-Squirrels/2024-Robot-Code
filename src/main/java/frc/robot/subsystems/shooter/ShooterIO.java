@@ -22,8 +22,6 @@ public interface ShooterIO {
 
   // PIVOT
 
-  public default void setPivotVel(double radPerSec) {}
-
   public default void setPivotPosition(Rotation2d rot) {}
 
   public default void setPivotClosedLoopConstants(
@@ -40,4 +38,11 @@ public interface ShooterIO {
   public default void setLauncherVoltage(double volts) {}
 
   public default void setLauncherPercentOut(double percent) {}
+
+  public default void setLauncherClosedLoopConstants(
+      double kP,
+      double kD,
+      double kG,
+      double maxProfiledVelocity,
+      double maxProfiledAcceleration) {}
 }
