@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
@@ -16,17 +17,14 @@ public class ShooterIOReal implements ShooterIO {
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
 
   public Rotation2d pitch = new Rotation2d();
-  public double pivotVoltage = 0.0;
-  public double pivotTempCelsius = 0.0;
-  public double pivotVelocity = 0.0;
-
-  public double RPM = 0.0;
+  public StatusSignal<Double> pivotTargetVoltage;
+  public StatusSignal<Double> pivotTargetVelocity;
+  public StatusSignal<Double> RPM;
   public StatusSignal<Double> launcherLeadTempCelsius;
   public StatusSignal<Double> launcherFollowTempCelsius;
-  public double launcherVoltage = 0.0;
+  public StatusSignal<Double> launcherVoltage;
 
   private PIDController pivotController = new PIDController(0.01, 0, 0);
-
   Slot0Configs pidConfig = new Slot0Configs();
   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
@@ -39,18 +37,31 @@ public class ShooterIOReal implements ShooterIO {
     follow.getConfigurator().apply(pidConfig);
     pivot.getConfigurator().apply(pidConfig);
 
+    follow.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
+
+    pivotTargetVoltage = pivot.getMotorVoltage();
+    pivotTargetVelocity = pivot.getVelocity();
     launcherLeadTempCelsius = lead.getDeviceTemp();
     launcherFollowTempCelsius = follow.getDeviceTemp();
+    launcherVoltage = lead.getMotorVoltage();
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // FIXME: add other variables
-    BaseStatusSignal.refreshAll(launcherLeadTempCelsius, launcherFollowTempCelsius);
+    // FIXME: add other variables: pivotTargetVoltage, pivotTargetVelocity, RPM
+    BaseStatusSignal.refreshAll(
+        pivotTargetVoltage,
+        pivotTargetVelocity,
+        launcherLeadTempCelsius,
+        launcherFollowTempCelsius,
+        launcherVoltage);
     // FIXME: get actual arm code
     inputs.pitch = new Rotation2d(/*arm.getAngle()*/ );
+    // inputs.pivotTargetVoltage = pivotTargetVoltage.getValue();
+    // inputs.pivotTargetVelocity = pivotTargetVelocity.getValue();
     inputs.launcherLeadTempCelsius = launcherLeadTempCelsius.getValueAsDouble();
     inputs.launcherFollowTempCelsius = launcherFollowTempCelsius.getValueAsDouble();
+    inputs.launcherVoltage = launcherVoltage.getValueAsDouble();
   }
 
   // PIVOT
@@ -78,7 +89,6 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setPivotVoltage(double volts) {
-    pivotVoltage = volts;
     pivot.setVoltage(volts);
   }
 
@@ -86,22 +96,17 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setLauncherVoltage(double volts) {
-    launcherVoltage = volts;
     lead.setVoltage(volts);
-    follow.setVoltage(volts);
   }
 
   @Override
   public void setLauncherPercentOut(double percent) {
     lead.set(percent);
-    follow.set(percent);
   }
 
   @Override
   public void setLauncherRPM(double rpm) {
-    RPM = rpm;
     lead.setControl(request.withVelocity(rpm));
-    follow.setControl(request.withVelocity(rpm));
   }
 
   @Override
