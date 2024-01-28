@@ -24,7 +24,7 @@ public class ShooterShootMode extends Command {
   private Translation2d speakerPose;
   private BooleanSupplier shootGamepiece = () -> false;
   private Double[] shootTimestamps = new Double[] {};
-  private ArrayList<Double> shootTimestampsList;
+  private ArrayList<Double> shootTimestampsList = new ArrayList<>();
   private Timer runTime = new Timer();
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
@@ -143,12 +143,18 @@ public class ShooterShootMode extends Command {
 
     boolean shoot = shootGamepiece.getAsBoolean();
 
-    for (Double timestamp : shootTimestamps) {
-      if (timestamp <= runTime.get()) shoot = true;
+    for (Double timestamp : shootTimestampsList) {
+      if (timestamp <= runTime.get()) {
+        shoot = true;
+        if (!shooter.getBeamBreak() && runTime.get() - timestamp >= 0.5)
+          shootTimestampsList.remove(timestamp);
+      }
     }
 
     if (shoot) {
-      // run kicker
+      shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+    } else {
+      shooter.setKickerPercentOut(0.0);
     }
   }
 

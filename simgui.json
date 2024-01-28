@@ -12,6 +12,10 @@
       "/AdvantageKit/RealOutputs/Mechanism/SimpleShooter": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/AUTO/SendableChooser[0]": "String Chooser",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ARM STOP": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ArmSetAngle": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ConsumeSuppliedValue": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/resetSensorToHomePosition": "Command",
       "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/Auto Routine": "String Chooser",
       "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
@@ -27,5 +31,5 @@
   },
   "NetworkTables Info": {
     "visible": true
-    }
+  }
 }

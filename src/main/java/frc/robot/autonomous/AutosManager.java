@@ -113,15 +113,21 @@ public class AutosManager {
   private AutoCommand middle5Piece() {
     return new AutoCommand(
         "middle5Piece",
-        generateFollowPathCommand(
-            "middleAuto.1",
-            true,
-            new AutoRotationState[] {
-              new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 0.0),
-              new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 0.48),
-              new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 1.05),
-              new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 4.35)
-            }),
+        addShooting(
+            generateFollowPathCommand(
+                "middleAuto.1",
+                true,
+                new AutoRotationState[] {
+                  new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 0.0),
+                  new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 0.48),
+                  new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 1.05),
+                  new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 4.35)
+                }),
+            0.0,
+            1.66,
+            3.04,
+            3.70,
+            6.0),
         Choreo.getTrajectory("middleAuto.1").getInitialPose());
   }
 

@@ -17,7 +17,6 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -392,14 +391,6 @@ public class RobotContainer {
             new RotateToSpeaker(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
-                () ->
-                    DriverStation.getAlliance().isPresent()
-                        ? new Translation2d(
-                            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                                ? 0.03950466960668564
-                                : 16.281435012817383,
-                            5.498747638702393)
-                        : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
                 new Rotation2d(Math.PI),

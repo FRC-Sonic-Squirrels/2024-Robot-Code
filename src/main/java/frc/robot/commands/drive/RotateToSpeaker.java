@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class RotateToSpeaker extends Command {
-  private Supplier<Translation2d> target;
   private Drivetrain drive;
   private Supplier<Boolean> endCondition;
 
@@ -78,7 +77,6 @@ public class RotateToSpeaker extends Command {
   public RotateToSpeaker(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Supplier<Translation2d> target,
       Drivetrain drive,
       Supplier<Boolean> endCondition,
       Rotation2d robotRotationOffset,
@@ -86,7 +84,6 @@ public class RotateToSpeaker extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
-    this.target = target;
     this.drive = drive;
     this.endCondition = endCondition;
     this.robotRotationOffset = robotRotationOffset;
