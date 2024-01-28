@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class ShooterIOSim implements ShooterIO {
 
@@ -49,6 +50,8 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotOpenLoopVolts = 0.0;
   private double pivotKg = 0.0;
 
+  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Shooter/beamBreak", false);
+
   private double launcherOpenLoopVolts = 0.0;
 
   public ShooterIOSim() {}
@@ -65,6 +68,8 @@ public class ShooterIOSim implements ShooterIO {
     inputs.pitch = new Rotation2d(pivot.getAngleRads());
     inputs.RPM = launcherMotorSim.getAngularVelocityRPM();
     inputs.kickerRPM = kickerMotorSim.getAngularVelocityRPM();
+
+    inputs.beamBreak = beamBreak.get();
 
     // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
     double ff = 0.0;

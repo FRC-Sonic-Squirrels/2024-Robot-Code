@@ -19,6 +19,8 @@ public interface ShooterIO {
     public double kickerVoltage = 0.0;
     public double kickerRPM = 0.0;
     public double kickerTempCelsius = 0.0;
+
+    public boolean beamBreak = false;
   }
 
   /** Updates the set of loggable inputs. */
