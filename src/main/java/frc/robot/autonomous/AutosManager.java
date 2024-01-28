@@ -30,6 +30,9 @@ public class AutosManager {
   private LoggedDashboardChooser<Supplier<AutoCommand>> chooser;
 
   // FIXME: add all other subssystems
+
+  // FIXME: IMPORTANT!!!!!!!!!!! full auto traj files are currently BROKEN due to bug with choreo.
+  // issue has been submitted
   public AutosManager(
       Drivetrain drivetrain,
       Shooter shooter,
@@ -53,7 +56,18 @@ public class AutosManager {
 
     list.add(this::doNothing);
     list.add(this::testAuto);
-    list.add(this::middleAuto);
+    list.add(this::middle5Piece);
+    list.add(this::middle6Piece);
+    list.add(this::middle8Piece);
+    list.add(this::amp2Piece);
+    list.add(this::amp3Piece);
+    list.add(this::amp5Piece);
+    list.add(this::amp6Piece);
+    list.add(this::source2Piece);
+    list.add(this::source3Piece);
+    list.add(this::source4Piece);
+    list.add(this::source5Piece);
+    list.add(this::source6Piece);
     list.add(this::testFlipping);
 
     return list;
@@ -88,11 +102,116 @@ public class AutosManager {
 
   // TODO: decide on better names for autos
 
-  private AutoCommand middleAuto() {
+  private AutoCommand middle5Piece() {
     return new AutoCommand(
-        "middleAuto",
-        generateFollowPathCommand("middleAuto", true),
+        "middle4Piece",
+        generateFollowPathCommand("middleAuto.1", true),
+        Choreo.getTrajectory("middleAuto.1").getInitialPose());
+  }
+
+  private AutoCommand middle6Piece() {
+    return new AutoCommand(
+        "middle5Piece",
+        Commands.sequence(
+            generateFollowPathCommand("middleAuto.1", true),
+            generateFollowPathCommand("middleAuto.2", true)),
+        Choreo.getTrajectory("middleAuto.1").getInitialPose());
+  }
+
+  private AutoCommand middle8Piece() {
+    return new AutoCommand(
+        "middle8Piece",
+        Commands.sequence(
+            generateFollowPathCommand("middleAuto.1", true),
+            generateFollowPathCommand("middleAuto.2", true),
+            generateFollowPathCommand("middleAuto.3", true)),
         Choreo.getTrajectory("middleAuto").getInitialPose());
+  }
+
+  private AutoCommand amp2Piece() {
+    return new AutoCommand(
+        "amp2Piece",
+        generateFollowPathCommand("ampAuto.1", true),
+        Choreo.getTrajectory("ampAuto.1").getInitialPose());
+  }
+
+  private AutoCommand amp3Piece() {
+    return new AutoCommand(
+        "amp3Piece",
+        Commands.sequence(
+            generateFollowPathCommand("ampAuto.1", true),
+            generateFollowPathCommand("ampAuto.2", true)),
+        Choreo.getTrajectory("ampAuto.1").getInitialPose());
+  }
+
+  private AutoCommand amp5Piece() {
+    return new AutoCommand(
+        "amp5Piece",
+        Commands.sequence(
+            generateFollowPathCommand("ampAuto.1", true),
+            generateFollowPathCommand("ampAuto.2", true),
+            generateFollowPathCommand("ampAuto.3", true)),
+        Choreo.getTrajectory("ampAuto.1").getInitialPose());
+  }
+
+  private AutoCommand amp6Piece() {
+    return new AutoCommand(
+        "amp6Piece",
+        Commands.sequence(
+            generateFollowPathCommand("ampAuto.1", true),
+            generateFollowPathCommand("ampAuto.2", true),
+            generateFollowPathCommand("ampAuto.3", true),
+            generateFollowPathCommand("ampAuto.4", true)),
+        Choreo.getTrajectory("ampAuto.1").getInitialPose());
+  }
+
+  private AutoCommand source2Piece() {
+    return new AutoCommand(
+        "source2Piece",
+        generateFollowPathCommand("sourceAuto.1", true),
+        Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private AutoCommand source3Piece() {
+    return new AutoCommand(
+        "source3Piece",
+        Commands.sequence(
+            generateFollowPathCommand("sourceAuto.1", true),
+            generateFollowPathCommand("sourceAuto.2", true)),
+        Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private AutoCommand source4Piece() {
+    return new AutoCommand(
+        "source4Piece",
+        Commands.sequence(
+            generateFollowPathCommand("sourceAuto.1", true),
+            generateFollowPathCommand("sourceAuto.2", true),
+            generateFollowPathCommand("sourceAuto.3", true)),
+        Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private AutoCommand source5Piece() {
+    return new AutoCommand(
+        "source5Piece",
+        Commands.sequence(
+            generateFollowPathCommand("sourceAuto.1", true),
+            generateFollowPathCommand("sourceAuto.2", true),
+            generateFollowPathCommand("sourceAuto.3", true),
+            generateFollowPathCommand("sourceAuto.4", true)),
+        Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private AutoCommand source6Piece() {
+    return new AutoCommand(
+        "source6Piece",
+        Commands.sequence(
+            generateFollowPathCommand("sourceAuto.1", true),
+            generateFollowPathCommand("sourceAuto.2", true),
+            generateFollowPathCommand("sourceAuto.3", true),
+            generateFollowPathCommand("sourceAuto.4", true),
+            generateFollowPathCommand("sourceAuto.5", true)),
+        Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   }
 
   public AutoCommand testFlipping() {
