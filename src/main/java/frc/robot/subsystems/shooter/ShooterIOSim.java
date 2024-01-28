@@ -32,6 +32,12 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Launcher.GEARING,
           Constants.ShooterConstants.Launcher.MOI);
 
+  private DCMotorSim kickerMotorSim =
+      new DCMotorSim(
+          DCMotor.getFalcon500Foc(1),
+          Constants.ShooterConstants.Kicker.GEARING,
+          Constants.ShooterConstants.Kicker.MOI);
+
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 
@@ -52,6 +58,7 @@ public class ShooterIOSim implements ShooterIO {
 
     pivot.update(0.02);
     launcherMotorSim.update(0.02);
+    kickerMotorSim.update(0.02);
 
     pivotFeedback.setTolerance(1.0);
 

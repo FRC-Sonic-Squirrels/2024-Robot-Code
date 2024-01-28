@@ -15,6 +15,9 @@ public interface ShooterIO {
     public double launcherLeadTempCelsius = 0.0;
     public double launcherFollowTempCelsius = 0.0;
     public double launcherVoltage = 0.0;
+
+    public double kickerVoltage = 0.0;
+    public double kickerRPM = 0.0;
   }
 
   /** Updates the set of loggable inputs. */
@@ -40,4 +43,8 @@ public interface ShooterIO {
   public default void setLauncherVoltage(double volts) {}
 
   public default void setLauncherPercentOut(double percent) {}
+
+  // KICKER
+
+  public default void setKickerVoltage(double volts) {}
 }

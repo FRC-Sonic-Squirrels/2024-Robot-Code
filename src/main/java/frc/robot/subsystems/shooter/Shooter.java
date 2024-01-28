@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -118,5 +119,9 @@ public class Shooter extends SubsystemBase {
 
   public double getPivotPIDLatency() {
     return pivotPidLatency;
+  }
+
+  public void setKickerPercentOut(double percent) {
+    io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
   }
 }
