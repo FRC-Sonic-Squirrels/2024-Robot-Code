@@ -346,7 +346,8 @@ public class AutosManager {
     ROTATE_TO_SPEAKER
   }
 
-  private Command addShooting(Command command) {
-    return command.deadlineWith(new ShooterShootMode(shooter, drivetrain));
+  private Command addShooting(Command command, Double... shootTimestamps) {
+
+    return command.deadlineWith(new ShooterShootMode(shooter, drivetrain, shootTimestamps));
   }
 }
