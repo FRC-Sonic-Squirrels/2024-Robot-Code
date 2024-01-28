@@ -131,4 +131,8 @@ public class Shooter extends SubsystemBase {
   public double getPivotPIDLatency() {
     return pivotPidLatency;
   }
+
+  public void setKickerPercentOut(double percent) {
+    io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
+  }
 }

@@ -222,6 +222,11 @@ public final class Constants {
       public static final double GEARING = 1.0;
       public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
     }
+
+    public static class Kicker {
+      public static final double MOI = 5.0;
+      public static final double GEARING = 1.0;
+    }
   }
 
   public class CanIDs {
