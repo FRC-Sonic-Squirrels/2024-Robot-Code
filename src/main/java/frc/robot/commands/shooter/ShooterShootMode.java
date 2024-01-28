@@ -7,18 +7,25 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.RobotState.ScoringMode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
+import java.util.ArrayList;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
+  private BooleanSupplier shootGamepiece = () -> false;
+  private Double[] shootTimestamps = new Double[] {};
+  private ArrayList<Double> shootTimestampsList;
+  private Timer runTime = new Timer();
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
   // 10.0);
@@ -32,10 +39,20 @@ public class ShooterShootMode extends Command {
   // private double shooterPitchVelCorrection = 0.0;
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterShootMode(Shooter shooter, Drivetrain drive) {
+  public ShooterShootMode(Shooter shooter, Drivetrain drive, BooleanSupplier shootGamepiece) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
+    this.shootGamepiece = shootGamepiece;
+    addRequirements(shooter);
+    setName("ShooterShootMode");
+  }
+
+  public ShooterShootMode(Shooter shooter, Drivetrain drive, Double... shootTimestamps) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    this.shooter = shooter;
+    this.drive = drive;
+    this.shootTimestamps = shootTimestamps;
     addRequirements(shooter);
     setName("ShooterShootMode");
   }
@@ -52,6 +69,11 @@ public class ShooterShootMode extends Command {
               5.498747638702393);
     } else {
       speakerPose = new Translation2d(0.23826955258846283, 5.498747638702393);
+    }
+    runTime.start();
+
+    for (Double timestamp : shootTimestamps) {
+      shootTimestampsList.add(timestamp);
     }
   }
 
@@ -97,37 +119,6 @@ public class ShooterShootMode extends Command {
         "ShooterShootMode/futureShooterBasePose",
         new Pose2d(shooterBaseTranslation, usedRobotPose.getRotation()));
 
-    // VELOCITY CONTROL
-
-    // shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
-
-    // if (shootSupplier.getAsBoolean()) {
-    //
-    //   // if (shooter.launcherIsAtTargetVel()) {
-    //   // TODO: logic for end effector running. Also check if arm is in correct position
-    //   // }
-    // speakerHeading =
-    //     new Rotation2d(
-    //         drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
-    //         drive.getPoseEstimatorPose().getY() - speakerPose.getY());
-    // double linearVelSpeaker =
-    //     new Translation2d(
-    //             drive.getFieldRelativeVelocities().getX(),
-    //             drive.getFieldRelativeVelocities().getY())
-    //         .rotateBy(speakerHeading)
-    //         .getX();
-    // shooterPitchVelCorrection =
-    //     Constants.ShooterConstants.Pivot.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
-
-    // double targetAngle =
-    //     Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
-    // double vel =
-    //     shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
-    //         + shooterPitchVelCorrection;
-    // shooter.setPitchAngularVel(vel);
-
-    // POSITIONAL CONTROL
-
     shooter.setPivotPosition(
         Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker));
 
@@ -149,6 +140,16 @@ public class ShooterShootMode extends Command {
                     currentShooterTranslation.getX() - speakerPose.getX(),
                     currentShooterTranslation.getY() - speakerPose.getY()))
             .getDegrees());
+
+    boolean shoot = shootGamepiece.getAsBoolean();
+
+    for (Double timestamp : shootTimestamps) {
+      if (timestamp <= runTime.get()) shoot = true;
+    }
+
+    if (shoot) {
+      // run kicker
+    }
   }
 
   // Called once the command ends or is interrupted.
