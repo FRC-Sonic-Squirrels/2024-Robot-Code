@@ -131,16 +131,13 @@ public final class Constants {
     public static final double MOI = 5.0;
   }
 
-  public class WristConstants {
-    public static final Rotation2d MAX_WRIST_ANGLE = Rotation2d.fromDegrees(90);
-    public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
-    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
-    ;
-  }
-
   public class ElevatorConstants {
-    public static final double ELEVATOR_GEAR_RATIO = 25.93;
-    public static final double ELEVATOR_WHEEL_RADIUS = 1.118;
+    // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
+    public static final double GEAR_RATIO = 25.93;
+    public static final double WHEEL_RADIUS = 1.118;
+    public static final double CARRIAGE_MASS = 10.0; // arbitrary
+    public static final double MAX_HEIGHT = Units.inchesToMeters(25.0); // arbitrary
+    public static final boolean FOLLOW_INVERTED = false;
   }
 
   public class ShooterConstants {

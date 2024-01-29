@@ -1,8 +1,12 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
@@ -16,27 +20,38 @@ public class ElevatorIOReal implements ElevatorIO {
   private final MotionMagicVoltage closedLoopControl =
       new MotionMagicVoltage(0.0).withEnableFOC(false);
 
-  private double heightInches = 0.0;
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
-  public ElevatorIOReal() {}
+  private StatusSignal<Double> leadTemp;
+  private StatusSignal<Double> followTemp;
+  private StatusSignal<Double> position;
+
+  public ElevatorIOReal() {
+    leadTemp = lead.getDeviceTemp();
+    followTemp = follow.getDeviceTemp();
+    position = lead.getPosition();
+    follow.setControl(
+        new Follower(
+            Constants.CanIDs.ELEVATOR_LEAD_CAN_ID, Constants.ElevatorConstants.FOLLOW_INVERTED));
+  }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    inputs.heightInches = heightInches;
+    BaseStatusSignal.refreshAll(leadTemp, followTemp, position);
+    inputs.heightInches = motorPositionToHeightInches(position.getValueAsDouble());
+    inputs.leadTempCelsius = leadTemp.getValueAsDouble();
+    inputs.followTempCelsius = followTemp.getValueAsDouble();
   }
 
   @Override
   public void setVoltage(double volts) {
-    lead.setVoltage(volts);
-    follow.setVoltage(volts);
+    lead.setControl(openLoopControl.withOutput(volts));
   }
 
   @Override
   public void setHeight(double heightInches) {
     closedLoopControl.withPosition(heightInches);
     lead.setControl(closedLoopControl);
-    follow.setControl(closedLoopControl);
-    this.heightInches = heightInches;
   }
 
   @Override
@@ -56,8 +71,13 @@ public class ElevatorIOReal implements ElevatorIO {
 
     lead.getConfigurator().apply(pidConfig);
     lead.getConfigurator().apply(mmConfig);
+  }
 
-    follow.getConfigurator().apply(pidConfig);
-    follow.getConfigurator().apply(mmConfig);
+  private double motorPositionToHeightInches(double position) {
+    return position
+        * Constants.ElevatorConstants.GEAR_RATIO
+        / Constants.ElevatorConstants.WHEEL_RADIUS
+        * 2.0
+        * Math.PI;
   }
 }

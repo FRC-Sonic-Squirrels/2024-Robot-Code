@@ -10,7 +10,8 @@ public interface ElevatorIO {
     public double heightInches = 0.0;
     public double velInchesPerSecond = 0.0;
     public double voltage = 0.0;
-    public double tempCelsius = 0.0;
+    public double leadTempCelsius = 0.0;
+    public double followTempCelsius = 0.0;
   }
 
   /** Updates the set of loggable inputs. */

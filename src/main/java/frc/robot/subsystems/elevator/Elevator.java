@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -17,9 +18,9 @@ public class Elevator extends SubsystemBase {
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
   private static final String ROOT_TABLE = "Elevator";
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 10.0);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 0.5);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 0.0);
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 1.0);
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 10.0);
@@ -70,6 +71,10 @@ public class Elevator extends SubsystemBase {
     io.setVoltage(volts);
   }
 
+  public void setPercentOut(double percent) {
+    io.setVoltage(percent * Constants.MAX_VOLTAGE);
+  }
+
   public void setHeight(double heightInches) {
     io.setHeight(heightInches);
     targetHeightInches = heightInches;
@@ -90,10 +95,10 @@ public class Elevator extends SubsystemBase {
   public double getInchesFromRotations(double rotations) {
     double inches = 0.0;
     inches =
-        Units.metersToInches(rotations / ElevatorConstants.ELEVATOR_GEAR_RATIO)
+        Units.metersToInches(rotations / ElevatorConstants.GEAR_RATIO)
             * 2
             * Math.PI
-            * ElevatorConstants.ELEVATOR_WHEEL_RADIUS;
+            * ElevatorConstants.WHEEL_RADIUS;
     return inches;
   }
 }

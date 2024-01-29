@@ -35,6 +35,7 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.drive.RotateToSpeaker;
+import frc.robot.commands.elevator.elevatorManualControl;
 import frc.robot.commands.intake.EjectGamepiece;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterShootMode;
@@ -404,7 +405,12 @@ public class RobotContainer {
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-    ;
+
+    // OPERATOR CONTROLS
+
+    operatorController
+        .rightTrigger()
+        .whileTrue(new elevatorManualControl(() -> -operatorController.getRightY(), elevator));
   }
 
   /**
@@ -443,7 +449,8 @@ public class RobotContainer {
                         : Constants.FieldConstants.RED_SPEAKER_TRANSLATION)
                     : Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION),
             Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
-        shooter.getRPM());
+        shooter.getRPM(),
+        elevator.getHeightInches());
     SimpleMechanismVisualization.logMechanism();
   }
 
