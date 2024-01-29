@@ -4,10 +4,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
@@ -16,13 +16,11 @@ public class ShooterIOReal implements ShooterIO {
   TalonFX follow = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
 
-
   TalonFXConfiguration config = new TalonFXConfiguration();
-
 
   public Rotation2d pitch = new Rotation2d();
   private final StatusSignal<Double> pivotVoltage;
-  // private final StatusSignal<Double> RPM;
+  ;
   private final StatusSignal<Double> launcherLeadTempCelsius;
   private final StatusSignal<Double> launcherFollowTempCelsius;
   private final StatusSignal<Double> launcherVoltage;
@@ -34,7 +32,7 @@ public class ShooterIOReal implements ShooterIO {
     // FIXME: get true current limits
     config.CurrentLimits.SupplyCurrentLimit = 40;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    
+
     // does this work for the getConfigurator() method?
     follow.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
@@ -48,13 +46,10 @@ public class ShooterIOReal implements ShooterIO {
   public void updateInputs(ShooterIOInputs inputs) {
     // FIXME: add other variables: pivotVoltage, pivotVelocity, RPM
     BaseStatusSignal.refreshAll(
-        pivotVoltage,
-        launcherLeadTempCelsius,
-        launcherFollowTempCelsius,
-        launcherVoltage);
-    
+        pivotVoltage, launcherLeadTempCelsius, launcherFollowTempCelsius, launcherVoltage);
+
     // FIXME: figure out what to put as the argument
-    inputs.pitch = new Rotation2d();
+    // inputs.pitch = new Rotation2d(pivot.getRotorPosition());
 
     inputs.pivotVoltage = pivotVoltage.getValue();
     inputs.launcherLeadTempCelsius = launcherLeadTempCelsius.getValueAsDouble();
@@ -74,7 +69,7 @@ public class ShooterIOReal implements ShooterIO {
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
-    
+
     pivot.getConfigurator().refresh(pidConfig);
     pivot.getConfigurator().refresh(mmConfig);
 
