@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -65,6 +66,8 @@ public class DrivetrainDefaultTeleopDrive extends Command {
             .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
             .getTranslation();
 
+    var correctedLinearVelocity = AllianceFlipUtil.flipVelocitiesForAlliance(linearVelocity);
+
     Logger.recordOutput("Commands/TeleopDrive/XSupplier", xSupplier.getAsDouble());
     Logger.recordOutput("Commands/TeleopDrive/YSupplier", ySupplier.getAsDouble());
     Logger.recordOutput("Commands/TeleopDrive/OmegaSupplier", omegaSupplier.getAsDouble());
@@ -77,8 +80,8 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     // Convert to field relative speeds & send command
     drivetrain.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            linearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
-            linearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
+            correctedLinearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
+            correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             omega * drivetrain.getMaxAngularSpeedRadPerSec(),
             drivetrain.getRotation()));
   }
