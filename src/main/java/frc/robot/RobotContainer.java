@@ -42,22 +42,17 @@ import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
-import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.limelight.Limelight;
 import frc.robot.subsystems.limelight.LimelightIO;
-import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -65,6 +60,9 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
+import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -86,6 +84,7 @@ public class RobotContainer {
   private final EndEffector endEffector;
   private final Limelight limelight;
   private final LED led;
+  private final VisionGamepiece visionGamepiece;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -132,6 +131,8 @@ public class RobotContainer {
       endEffector = new EndEffector(new EndEffectorIO() {});
       limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
+      visionGamepiece =
+          new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -187,6 +188,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -206,6 +209,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2024:
@@ -218,12 +223,6 @@ public class RobotContainer {
                   drivetrain::addVisionEstimate,
                   config.getVisionModuleObjects());
           arm = new Arm(new ArmIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
-          intake = new Intake(new IntakeIOReal());
-          shooter = new Shooter(new ShooterIOReal());
-          endEffector = new EndEffector(new EndEffectorIOReal());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
-          led = new LED();
 
           // uncomment this if testing an individual subsystem. Make every subsystem except the one
           // you are testing have a blank IO
@@ -244,6 +243,14 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           // led = new LED();
+          elevator = new Elevator(new ElevatorIO() {});
+          intake = new Intake(new IntakeIO() {});
+          shooter = new Shooter(new ShooterIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
+          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         default:
@@ -262,6 +269,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
       }
     }

@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -119,6 +120,9 @@ public final class Constants {
 
     public static Translation3d getSpeakerTranslation3D() {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION_3D : BLUE_SPEAKER_TRANSLATION_3D;
+    public class Gamepieces {
+      public static final double NOTE_INNER_RADIUS_METERS = 0.254;
+      public static final double NOTE_OUTER_RADIUS_METERS = 0.3048;
     }
   }
 
@@ -264,5 +268,10 @@ public final class Constants {
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+  }
+
+  public class VisionGamepieceConstants {
+    public static final Pose3d GAMEPIECE_CAMERA_POSE = new Pose3d();
+    public static final String CAMERA_NAME = "photonvision";
   }
 }
