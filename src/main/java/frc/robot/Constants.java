@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -37,7 +38,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -94,6 +95,11 @@ public final class Constants {
         new Translation2d(0.03950466960668564, 5.508944988250732);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         new Translation2d(16.508594512939453, 5.508944988250732);
+
+    public class Gamepieces {
+      public static final double NOTE_INNER_RADIUS_METERS = 0.254;
+      public static final double NOTE_OUTER_RADIUS_METERS = 0.3048;
+    }
   }
 
   public class MotorConstants {
@@ -215,5 +221,10 @@ public final class Constants {
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+  }
+
+  public class VisionGamepieceConstants {
+    public static final Pose3d GAMEPIECE_CAMERA_POSE = new Pose3d();
+    public static final String CAMERA_NAME = "photonvision";
   }
 }

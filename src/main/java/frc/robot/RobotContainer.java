@@ -66,6 +66,9 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
+import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -87,6 +90,7 @@ public class RobotContainer {
   private final EndEffector endEffector;
   private final Limelight limelight;
   private final LED led;
+  private final VisionGamepiece visionGamepiece;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -133,6 +137,8 @@ public class RobotContainer {
       endEffector = new EndEffector(new EndEffectorIO() {});
       limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
+      visionGamepiece =
+          new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -180,6 +186,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -199,6 +207,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2024:
@@ -232,8 +242,9 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
-
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         default:
@@ -252,6 +263,8 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIO() {});
           limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
       }
     }
