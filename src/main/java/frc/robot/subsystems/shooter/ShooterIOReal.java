@@ -20,7 +20,7 @@ public class ShooterIOReal implements ShooterIO {
 
   public Rotation2d pitch = new Rotation2d();
   private final StatusSignal<Double> pivotVoltage;
-  ;
+  private final StatusSignal<Double> pivotRotations;
   private final StatusSignal<Double> launcherLeadTempCelsius;
   private final StatusSignal<Double> launcherFollowTempCelsius;
   private final StatusSignal<Double> launcherVoltage;
@@ -33,10 +33,10 @@ public class ShooterIOReal implements ShooterIO {
     config.CurrentLimits.SupplyCurrentLimit = 40;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    // does this work for the getConfigurator() method?
     follow.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
     pivotVoltage = pivot.getMotorVoltage();
+    pivotRotations = pivot.getPosition();
     launcherLeadTempCelsius = lead.getDeviceTemp();
     launcherFollowTempCelsius = follow.getDeviceTemp();
     launcherVoltage = lead.getMotorVoltage();
@@ -44,13 +44,15 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // FIXME: add other variables: pivotVoltage, pivotVelocity, RPM
+    // FIXME: add pivotVelocity
     BaseStatusSignal.refreshAll(
-        pivotVoltage, launcherLeadTempCelsius, launcherFollowTempCelsius, launcherVoltage);
+        pivotVoltage,
+        pivotRotations,
+        launcherLeadTempCelsius,
+        launcherFollowTempCelsius,
+        launcherVoltage);
 
-    // FIXME: figure out what to put as the argument
-    // inputs.pitch = new Rotation2d(pivot.getRotorPosition());
-
+    inputs.pitch = Rotation2d.fromRotations(pivotRotations.getValueAsDouble());
     inputs.pivotVoltage = pivotVoltage.getValue();
     inputs.launcherLeadTempCelsius = launcherLeadTempCelsius.getValueAsDouble();
     inputs.launcherFollowTempCelsius = launcherFollowTempCelsius.getValueAsDouble();
