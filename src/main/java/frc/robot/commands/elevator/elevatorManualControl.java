@@ -4,16 +4,16 @@
 
 package frc.robot.commands.elevator;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.elevator.Elevator;
+import java.util.function.DoubleSupplier;
 
-public class elevatorManualControl extends Command {
+public class ElevatorManualControl extends Command {
   private final Elevator elevator;
   private DoubleSupplier percentOut;
+
   /** Creates a new elevatorManualControl. */
-  public elevatorManualControl(DoubleSupplier percentOut, Elevator elevator) {
+  public ElevatorManualControl(DoubleSupplier percentOut, Elevator elevator) {
     this.elevator = elevator;
     this.percentOut = percentOut;
     // Use addRequirements() here to declare subsystem dependencies.
