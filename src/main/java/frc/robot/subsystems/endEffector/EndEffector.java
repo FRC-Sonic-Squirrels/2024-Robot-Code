@@ -5,6 +5,7 @@
 package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ExecutionTiming;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,16 +20,14 @@ public class EndEffector extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("EndEffector", inputs);
+    try (var ignored = new ExecutionTiming("EndEffector")) {
+      io.updateInputs(inputs);
+      Logger.processInputs("EndEffector", inputs);
+    }
   }
 
   public double getRPM() {
     return inputs.RPM;
-  }
-
-  public void setRPM(double target) {
-    io.setRPM(target);
   }
 
   public void setPercentOut(double percent) {

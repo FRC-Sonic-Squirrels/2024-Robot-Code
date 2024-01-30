@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public final class Constants {
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -84,6 +84,8 @@ public final class Constants {
     }
   }
 
+  public static double MAX_VOLTAGE = 12.0;
+
   public class FieldConstants {
     // FIXME: double check this number
     public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
@@ -123,6 +125,8 @@ public final class Constants {
     public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
     public static final double SUPPLY_TIME_THRESHOLD = 2.0;
 
+    public static final double INDEX_PERCENT_OUT = 0.8;
+
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
   }
@@ -132,6 +136,11 @@ public final class Constants {
     public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
     ;
+  }
+
+  public class ElevatorConstants {
+    public static final double ELEVATOR_GEAR_RATIO = 25.93;
+    public static final double ELEVATOR_WHEEL_RADIUS = 1.118;
   }
 
   public class ShooterConstants {
@@ -182,7 +191,7 @@ public final class Constants {
     public static final int SHOOTER_LEAD_CAN_ID = 1;
     public static final int SHOOTER_FOLLOW_CAN_ID = 2;
     public static final int SHOOTER_PIVOT_CAN_ID = 8;
-    public static final int ARM_CAN_ID = 3;
+    public static final int ARM_CAN_ID = 40;
     public static final int ELEVATOR_LEAD_CAN_ID = 4;
     public static final int ELEVATOR_FOLLOW_CAN_ID = 5;
     public static final int END_EFFECTOR_CAN_ID = 6;
@@ -201,5 +210,11 @@ public final class Constants {
     VOLTAGE
   }
 
-  public static final double MAX_VOLTAGE = 12.0;
+  public class ArmConstants {
+    public static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
+
+    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
+    public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
+    public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+  }
 }

@@ -17,12 +17,11 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.ParentDevice;
+import frc.lib.team2930.AutoLock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
@@ -33,8 +32,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * time synchronization.
  */
 public class PhoenixOdometryThread extends Thread {
-  private final Lock signalsLock =
-      new ReentrantLock(); // Prevents conflicts when registering signals
+  private final AutoLock signalsLock =
+      new AutoLock(); // Prevents conflicts when registering signals
+
   private BaseStatusSignal[] signals = new BaseStatusSignal[0];
   private final List<Queue<Double>> queues = new ArrayList<>();
   private final List<Queue<Double>> timestampQueues = new ArrayList<>();
@@ -59,21 +59,18 @@ public class PhoenixOdometryThread extends Thread {
   public Queue<Double> registerSignal(
       ParentDevice device, StatusSignal<Double> signal, String canbusName) {
     Queue<Double> queue = new ArrayBlockingQueue<>(100);
-    signalsLock.lock();
-    Drivetrain.odometryLock.lock();
-    try {
-      isCANFD = com.ctre.phoenix6.CANBus.isNetworkFD(canbusName);
+    try (var ignored = signalsLock.lock()) {
+      try (var ignored2 = Drivetrain.odometryLock.lock()) {
+        isCANFD = com.ctre.phoenix6.CANBus.isNetworkFD(canbusName);
 
-      BaseStatusSignal[] newSignals = new BaseStatusSignal[signals.length + 1];
-      System.arraycopy(signals, 0, newSignals, 0, signals.length);
-      newSignals[signals.length] = signal;
-      signals = newSignals;
-      queues.add(queue);
-    } finally {
-      signalsLock.unlock();
-      Drivetrain.odometryLock.unlock();
+        BaseStatusSignal[] newSignals = new BaseStatusSignal[signals.length + 1];
+        System.arraycopy(signals, 0, newSignals, 0, signals.length);
+        newSignals[signals.length] = signal;
+        signals = newSignals;
+        queues.add(queue);
+        return queue;
+      }
     }
-    return queue;
   }
 
   public Queue<Double> hookForTimestamps() {
@@ -86,9 +83,9 @@ public class PhoenixOdometryThread extends Thread {
   public void run() {
     while (true) {
       double timestamp = -1;
+
       // Wait for updates from all signals
-      signalsLock.lock();
-      try {
+      try (var ignored = signalsLock.lock()) {
         if (isCANFD) {
           BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signals);
 
@@ -111,13 +108,10 @@ public class PhoenixOdometryThread extends Thread {
         }
       } catch (InterruptedException e) {
         e.printStackTrace();
-      } finally {
-        signalsLock.unlock();
       }
 
       // Save new data to queues
-      Drivetrain.odometryLock.lock();
-      try {
+      try (var ignored = Drivetrain.odometryLock.lock()) {
         for (int i = 0; i < signals.length; i++) {
           queues.get(i).offer(signals[i].getValueAsDouble());
         }
@@ -125,8 +119,6 @@ public class PhoenixOdometryThread extends Thread {
         for (Queue<Double> timeStampQueue : timestampQueues) {
           timeStampQueue.offer(timestamp);
         }
-      } finally {
-        Drivetrain.odometryLock.unlock();
       }
     }
   }

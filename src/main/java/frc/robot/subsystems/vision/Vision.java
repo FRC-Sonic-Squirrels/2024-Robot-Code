@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -81,85 +82,87 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // update all inputs
-    for (VisionModule module : visionModules) {
-      module.visionIO.updateInputs(module.visionIOInputs);
-      Logger.processInputs("Vision/" + module.name, module.visionIOInputs);
-    }
+    try (var ignored = new ExecutionTiming("Intake")) {
+      // update all inputs
+      for (VisionModule module : visionModules) {
+        module.visionIO.updateInputs(module.visionIOInputs);
+        Logger.processInputs("Vision/" + module.name, module.visionIOInputs);
+      }
 
-    boolean processVision = true;
-    if (!useVisionForPoseEstimation) {
-      processVision = false;
-      setAllVisionModuleUnsuccessfulStatus(VisionResultStatus.VISION_DISABLED);
-    }
+      boolean processVision = true;
+      if (!useVisionForPoseEstimation) {
+        processVision = false;
+        setAllVisionModuleUnsuccessfulStatus(VisionResultStatus.VISION_DISABLED);
+      }
 
-    // process vision
-    if (processVision) {
+      // process vision
+      if (processVision) {
+        for (VisionModule visionModule : visionModules) {
+          var fieldsToLog = processVision(visionModule);
+          visionModule.loggedFields = fieldsToLog;
+        }
+      }
+
+      // send successful results to pose estimator
+      if (allTimestampedVisionUpdates.size() > 0) {
+        visionEstimatesConsumer.accept(allTimestampedVisionUpdates);
+        allTimestampedVisionUpdates.clear();
+      }
+
+      // log all vision module's logged fields
       for (VisionModule visionModule : visionModules) {
-        var fieldsToLog = processVision(visionModule);
-        visionModule.loggedFields = fieldsToLog;
+        logVisionModule(visionModule);
       }
-    }
 
-    // send successful results to pose estimator
-    if (allTimestampedVisionUpdates.size() > 0) {
-      visionEstimatesConsumer.accept(allTimestampedVisionUpdates);
-      allTimestampedVisionUpdates.clear();
-    }
-
-    // log all vision module's logged fields
-    for (VisionModule visionModule : visionModules) {
-      logVisionModule(visionModule);
-    }
-
-    // activate alerts if camera is not connected
-    for (VisionModule module : visionModules) {
-      module.missingCameraAlert.set(module.visionIOInputs.connected);
-    }
-
-    // log all camera poses
-    for (VisionModule visionModule : visionModules) {
-      var robotPose = new Pose3d(poseEstimatorPoseSupplier.get());
-      var camPose = robotPose.transformBy(visionModule.RobotToCamera);
-
-      Logger.recordOutput("Vision/VisionModules/" + visionModule.name + "/CameraPose", camPose);
-    }
-
-    // logging all visible tags
-    List<Pose3d> allSeenTags = new ArrayList<>();
-    for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
-      if (detectionEntry.getValue() == Timer.getFPGATimestamp()) {
-        var tagPose = aprilTagLayout.getTagPose(detectionEntry.getKey());
-        allSeenTags.add(tagPose.get());
+      // activate alerts if camera is not connected
+      for (VisionModule module : visionModules) {
+        module.missingCameraAlert.set(module.visionIOInputs.connected);
       }
+
+      // log all camera poses
+      for (VisionModule visionModule : visionModules) {
+        var robotPose = new Pose3d(poseEstimatorPoseSupplier.get());
+        var camPose = robotPose.transformBy(visionModule.RobotToCamera);
+
+        Logger.recordOutput("Vision/VisionModules/" + visionModule.name + "/CameraPose", camPose);
+      }
+
+      // logging all visible tags
+      List<Pose3d> allSeenTags = new ArrayList<>();
+      for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
+        if (detectionEntry.getValue() == Timer.getFPGATimestamp()) {
+          var tagPose = aprilTagLayout.getTagPose(detectionEntry.getKey());
+          allSeenTags.add(tagPose.get());
+        }
+      }
+      Logger.recordOutput(
+          "Vision/visibleTags/rawAllVisibleTags",
+          allSeenTags.toArray(new Pose3d[allSeenTags.size()]));
+
+      // logging tags actually used in pose estimation
+      Pose3d[] tagsUsedInPoseEstimationPoses = new Pose3d[tagsUsedInPoseEstimation.size()];
+      for (int i = 0; i < tagsUsedInPoseEstimation.size(); i++) {
+        tagsUsedInPoseEstimationPoses[i] =
+            aprilTagLayout.getTagPose(tagsUsedInPoseEstimation.get(i)).get();
+      }
+      Logger.recordOutput(
+          "Vision/visibleTags/tagsActuallyUsedInPoseEstimation", tagsUsedInPoseEstimationPoses);
+
+      Logger.recordOutput(
+          "Vision/posesFedToPoseEstimator3D",
+          posesFedToPoseEstimator3D.toArray(new Pose3d[posesFedToPoseEstimator3D.size()]));
+      Logger.recordOutput(
+          "Vision/posesFedToPoseEstimator2D",
+          posesFedToPoseEstimator2D.toArray(new Pose2d[posesFedToPoseEstimator2D.size()]));
+
+      tagsUsedInPoseEstimation.clear();
+      posesFedToPoseEstimator3D.clear();
+      posesFedToPoseEstimator2D.clear();
+
+      Logger.recordOutput("Vision/useVision", useVisionForPoseEstimation);
+      Logger.recordOutput(
+          "Vision/useMaxDistanceAwayFromExistingEstimate", useMaxDistanceAwayFromExistingEstimate);
     }
-    Logger.recordOutput(
-        "Vision/visibleTags/rawAllVisibleTags",
-        allSeenTags.toArray(new Pose3d[allSeenTags.size()]));
-
-    // logging tags actually used in pose estimation
-    Pose3d[] tagsUsedInPoseEstimationPoses = new Pose3d[tagsUsedInPoseEstimation.size()];
-    for (int i = 0; i < tagsUsedInPoseEstimation.size(); i++) {
-      tagsUsedInPoseEstimationPoses[i] =
-          aprilTagLayout.getTagPose(tagsUsedInPoseEstimation.get(i)).get();
-    }
-    Logger.recordOutput(
-        "Vision/visibleTags/tagsActuallyUsedInPoseEstimation", tagsUsedInPoseEstimationPoses);
-
-    Logger.recordOutput(
-        "Vision/posesFedToPoseEstimator3D",
-        posesFedToPoseEstimator3D.toArray(new Pose3d[posesFedToPoseEstimator3D.size()]));
-    Logger.recordOutput(
-        "Vision/posesFedToPoseEstimator2D",
-        posesFedToPoseEstimator2D.toArray(new Pose2d[posesFedToPoseEstimator2D.size()]));
-
-    tagsUsedInPoseEstimation.clear();
-    posesFedToPoseEstimator3D.clear();
-    posesFedToPoseEstimator2D.clear();
-
-    Logger.recordOutput("Vision/useVision", useVisionForPoseEstimation);
-    Logger.recordOutput(
-        "Vision/useMaxDistanceAwayFromExistingEstimate", useMaxDistanceAwayFromExistingEstimate);
   }
 
   public VisionResultLoggedFields processVision(VisionModule visionModule) {

@@ -3,6 +3,7 @@ package frc.robot.configs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -261,33 +262,14 @@ public class SimulatorRobotConfig extends RobotConfig {
   }
 
   @Override
-  public LoggedTunableNumber getAutoTranslationKP() {
-    return AUTO_TRANSLATION_KP;
+  public PIDController getAutoTranslationPidController() {
+    return new PIDController(
+        AUTO_TRANSLATION_KP.get(), AUTO_TRANSLATION_KI.get(), AUTO_TRANSLATION_KD.get());
   }
 
   @Override
-  public LoggedTunableNumber getAutoTranslationKI() {
-    return AUTO_TRANSLATION_KI;
-  }
-
-  @Override
-  public LoggedTunableNumber getAutoTranslationKD() {
-    return AUTO_TRANSLATION_KD;
-  }
-
-  @Override
-  public LoggedTunableNumber getAutoThetaKP() {
-    return AUTO_THETA_KP;
-  }
-
-  @Override
-  public LoggedTunableNumber getAutoThetaKI() {
-    return AUTO_THETA_KI;
-  }
-
-  @Override
-  public LoggedTunableNumber getAutoThetaKD() {
-    return AUTO_THETA_KD;
+  public PIDController getAutoThetaPidController() {
+    return new PIDController(AUTO_THETA_KP.get(), AUTO_THETA_KI.get(), AUTO_THETA_KD.get());
   }
 
   @Override

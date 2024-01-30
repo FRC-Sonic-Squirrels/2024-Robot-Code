@@ -27,11 +27,6 @@ public class RobotState {
     this.scoringMode = scoringMode;
   }
 
-  public static enum IntakeMode {
-    INTAKE,
-    STOW;
-  }
-
   public static enum ScoringMode {
     NONE,
     SPEAKER,
