@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
+  private static final double MAX_VOLTAGE = 12;
+
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
@@ -81,16 +83,12 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-  public void setPitchAngularVel(double radiansPerSecond) {
-    io.setPivotVel(radiansPerSecond);
-  }
-
   public Rotation2d getPitch() {
     return inputs.pitch;
   }
 
   public void setPercentOut(double percent) {
-    io.setLauncherPercentOut(percent);
+    io.setLauncherVoltage(percent * MAX_VOLTAGE);
   }
 
   public void setPivotClosedLoopConstants(

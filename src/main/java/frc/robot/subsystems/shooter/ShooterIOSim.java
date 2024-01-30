@@ -97,12 +97,6 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   @Override
-  public void setPivotVel(double radPerSecond) {
-    pivotTargetVelRadPerSec = radPerSecond;
-    pivotControlMode = ControlMode.VELOCITY;
-  }
-
-  @Override
   public void setPivotPosition(Rotation2d rot) {
     pivotClosedLoopTargetAngle = rot;
     pivotControlMode = ControlMode.POSITION;
