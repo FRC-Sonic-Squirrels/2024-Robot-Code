@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
@@ -19,13 +19,15 @@ public class ShooterIOReal implements ShooterIO {
   TalonFXConfiguration config = new TalonFXConfiguration();
 
   public Rotation2d pitch = new Rotation2d();
+
   private final StatusSignal<Double> pivotVoltage;
   private final StatusSignal<Double> pivotRotations;
   private final StatusSignal<Double> launcherLeadTempCelsius;
   private final StatusSignal<Double> launcherFollowTempCelsius;
   private final StatusSignal<Double> launcherVoltage;
 
-  final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
+  private final MotionMagicVoltage closedLoopControl =
+      new MotionMagicVoltage(0).withEnableFOC(false);
 
   public ShooterIOReal() {
 
@@ -44,7 +46,6 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // FIXME: add pivotVelocity
     BaseStatusSignal.refreshAll(
         pivotVoltage,
         pivotRotations,
@@ -63,7 +64,8 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setPivotPosition(Rotation2d rot) {
-    pitch = rot;
+    closedLoopControl.withPosition(rot.getRotations());
+    pivot.setControl(closedLoopControl);
   }
 
   @Override
