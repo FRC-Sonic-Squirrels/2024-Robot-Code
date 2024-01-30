@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -14,7 +13,6 @@ import frc.robot.Constants;
 public class ElevatorIOReal implements ElevatorIO {
 
   private final TalonFX lead = new TalonFX(Constants.CanIDs.ELEVATOR_LEAD_CAN_ID);
-  private final TalonFX follow = new TalonFX(Constants.CanIDs.ELEVATOR_FOLLOW_CAN_ID);
 
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
@@ -23,24 +21,18 @@ public class ElevatorIOReal implements ElevatorIO {
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   private StatusSignal<Double> leadTemp;
-  private StatusSignal<Double> followTemp;
   private StatusSignal<Double> position;
 
   public ElevatorIOReal() {
     leadTemp = lead.getDeviceTemp();
-    followTemp = follow.getDeviceTemp();
     position = lead.getPosition();
-    follow.setControl(
-        new Follower(
-            Constants.CanIDs.ELEVATOR_LEAD_CAN_ID, Constants.ElevatorConstants.FOLLOW_INVERTED));
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(leadTemp, followTemp, position);
+    BaseStatusSignal.refreshAll(leadTemp, position);
     inputs.heightInches = motorPositionToHeightInches(position.getValueAsDouble());
     inputs.leadTempCelsius = leadTemp.getValueAsDouble();
-    inputs.followTempCelsius = followTemp.getValueAsDouble();
   }
 
   @Override
