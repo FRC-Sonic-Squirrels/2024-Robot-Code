@@ -10,7 +10,6 @@ import frc.robot.Constants;
 public class ElevatorIOReal implements ElevatorIO {
 
   private final TalonFX lead = new TalonFX(Constants.CanIDs.ELEVATOR_LEAD_CAN_ID);
-  private final TalonFX follow = new TalonFX(Constants.CanIDs.ELEVATOR_FOLLOW_CAN_ID);
 
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
@@ -28,14 +27,12 @@ public class ElevatorIOReal implements ElevatorIO {
   @Override
   public void setVoltage(double volts) {
     lead.setVoltage(volts);
-    follow.setVoltage(volts);
   }
 
   @Override
   public void setHeight(double heightInches) {
     closedLoopControl.withPosition(heightInches);
     lead.setControl(closedLoopControl);
-    follow.setControl(closedLoopControl);
     this.heightInches = heightInches;
   }
 
@@ -56,8 +53,5 @@ public class ElevatorIOReal implements ElevatorIO {
 
     lead.getConfigurator().apply(pidConfig);
     lead.getConfigurator().apply(mmConfig);
-
-    follow.getConfigurator().apply(pidConfig);
-    follow.getConfigurator().apply(mmConfig);
   }
 }
