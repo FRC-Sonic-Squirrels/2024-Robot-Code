@@ -7,6 +7,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class RobotConfig2024 extends RobotConfig {
@@ -119,16 +121,42 @@ public class RobotConfig2024 extends RobotConfig {
       new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_THETA_KD", 0.0);
 
   // ---- VISION  -------
-  private static final Transform3d FRONT_LEFT_ROBOT_TO_CAMERA =
-      new Transform3d(0, 0, 0, new Rotation3d());
-  private static final Transform3d FRONT_RIGHT_ROBOT_TO_CAMERA =
-      new Transform3d(0, 0, 0, new Rotation3d());
-  private static final Transform3d BACK_ROBOT_TO_CAMERA =
-      new Transform3d(0, 0, 0, new Rotation3d());
+  public static final Transform3d SHOOTER_SIDE_LEFT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-0.62273),
+              Units.inchesToMeters(9.625919),
+              Units.inchesToMeters(22.21467)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(225.0)));
 
-  public static final String LEFT_CAMERA_NAME = "LeftCamera";
-  public static final String RIGHT_CAMERA_NAME = "RightCamera";
-  public static final String BACK_CAMERA_NAME = "Arducam_OV9281_Camera_4";
+  public static final Transform3d SHOOTER_SIDE_RIGHT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-0.62273),
+              Units.inchesToMeters(-9.625919),
+              Units.inchesToMeters(22.21467)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(135.0)));
+
+  public static final Transform3d INTAKE_SIDE_LEFT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(0.64738),
+              Units.inchesToMeters(13.14840),
+              Units.inchesToMeters(22.31306)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(45.0)));
+
+  public static final Transform3d INTAKE_SIDE_RIGHT =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(0.64738),
+              Units.inchesToMeters(-13.14840),
+              Units.inchesToMeters(22.31306)),
+          new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
+
+  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "INTAKE_SIDE_LEFT";
+  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "INTAKE_SIDE_RIGHT";
+  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "SHOOTER_SIDE_LEFT";
+  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "SHOOTER_SIDE_RIGHT";
 
   public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
@@ -174,26 +202,46 @@ public class RobotConfig2024 extends RobotConfig {
   // FIXME: define vision modules here
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration back =
-        new VisionModuleConfiguration(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration intakeLeft =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(INTAKE_SIDE_LEFT_CAMERA_NAME),
+            INTAKE_SIDE_LEFT_CAMERA_NAME,
+            INTAKE_SIDE_LEFT);
+    VisionModuleConfiguration intakeRight =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(INTAKE_SIDE_RIGHT_CAMERA_NAME),
+            INTAKE_SIDE_RIGHT_CAMERA_NAME,
+            INTAKE_SIDE_RIGHT);
+    VisionModuleConfiguration shooterLeft =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(SHOOTER_SIDE_LEFT_CAMERA_NAME),
+            SHOOTER_SIDE_LEFT_CAMERA_NAME,
+            SHOOTER_SIDE_LEFT);
+    VisionModuleConfiguration shooterRight =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(SHOOTER_SIDE_RIGHT_CAMERA_NAME),
+            SHOOTER_SIDE_RIGHT_CAMERA_NAME,
+            SHOOTER_SIDE_RIGHT);
 
-    return new VisionModuleConfiguration[] {frontLeft, frontRight, back};
+    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration back =
-        new VisionModuleConfiguration(new VisionIO() {}, "back", BACK_ROBOT_TO_CAMERA);
+    VisionModuleConfiguration intakeLeft =
+        new VisionModuleConfiguration(
+            new VisionIO() {}, INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT);
+    VisionModuleConfiguration intakeRight =
+        new VisionModuleConfiguration(
+            new VisionIO() {}, INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT);
+    VisionModuleConfiguration shooterLeft =
+        new VisionModuleConfiguration(
+            new VisionIO() {}, SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT);
+    VisionModuleConfiguration shooterRight =
+        new VisionModuleConfiguration(
+            new VisionIO() {}, SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT);
 
-    return new VisionModuleConfiguration[] {frontLeft, frontRight, back};
+    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
   }
 
   @Override
