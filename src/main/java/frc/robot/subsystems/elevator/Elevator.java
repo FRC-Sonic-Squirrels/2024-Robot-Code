@@ -5,30 +5,48 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
-  private final ElevatorIO io;
-  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-
   private static final String ROOT_TABLE = "Elevator";
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 10.0);
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 0.0);
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP");
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD");
+  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG");
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 10.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 10.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint");
 
   private final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Elevator/toleranceInches", 0.5);
+      new LoggedTunableNumber("Elevator/toleranceInches", 0.1);
 
+  static {
+    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
+      kP.initDefault(0.0);
+      kD.initDefault(0.0);
+      kG.initDefault(0.0);
+
+      closedLoopMaxVelocityConstraint.initDefault(0.0);
+      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+
+    } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
+      kP.initDefault(0.0);
+      kD.initDefault(0.0);
+      kG.initDefault(0.0);
+
+      closedLoopMaxVelocityConstraint.initDefault(0.0);
+      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+    }
+  }
+
+  private final ElevatorIO io;
+  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
   private double targetHeightInches = 0.0;
 
   /** Creates a new ElevatorSubsystem. */
@@ -87,13 +105,7 @@ public class Elevator extends SubsystemBase {
     return inputs.heightInches;
   }
 
-  public double getInchesFromRotations(double rotations) {
-    double inches = 0.0;
-    inches =
-        Units.metersToInches(rotations / ElevatorConstants.ELEVATOR_GEAR_RATIO)
-            * 2
-            * Math.PI
-            * ElevatorConstants.ELEVATOR_WHEEL_RADIUS;
-    return inches;
+  public void resetSensorToHomePosition() {
+    io.setSensorPositionInches(0.0);
   }
 }

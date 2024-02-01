@@ -459,7 +459,8 @@ public class RobotContainer {
                         : Constants.FieldConstants.RED_SPEAKER_TRANSLATION)
                     : Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION),
             Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
-        shooter.getRPM());
+        shooter.getRPM(),
+        elevator.getHeightInches());
     SimpleMechanismVisualization.logMechanism();
   }
 

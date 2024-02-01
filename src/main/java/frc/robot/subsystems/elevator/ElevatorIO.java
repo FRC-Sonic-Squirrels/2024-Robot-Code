@@ -8,8 +8,9 @@ public interface ElevatorIO {
   @AutoLog
   public static class ElevatorIOInputs {
     public double heightInches = 0.0;
-    public double velInchesPerSecond = 0.0;
-    public double voltage = 0.0;
+    public double velocityInchesPerSecond = 0.0;
+    public double appliedVolts = 0.0;
+    public double currentAmps = 0.0;
     public double tempCelsius = 0.0;
   }
 
@@ -21,4 +22,6 @@ public interface ElevatorIO {
   public default void setHeight(double heightInches) {}
 
   public default void setPIDConstraints(double kP, double kD, double kG, Constraints constraints) {}
+
+  public default void setSensorPositionInches(double positionInches) {}
 }
