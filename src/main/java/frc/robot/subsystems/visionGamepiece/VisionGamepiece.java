@@ -30,7 +30,7 @@ public class VisionGamepiece extends SubsystemBase {
 
   private static ObjectMapper mapper;
 
-  /** Creates a new Limelight. */
+  /** Creates a new VisionGamepiece. */
   public VisionGamepiece(VisionGamepieceIO io, Supplier<Pose2d> robotPose) {
     this.io = io;
     this.robotPoseSupplier = robotPose;
@@ -84,18 +84,20 @@ public class VisionGamepiece extends SubsystemBase {
             Math.hypot(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
       }
 
-      Logger.recordOutput("Limelight/totalLatencyMs", inputs.totalLatencyMs);
+      Logger.recordOutput("VisionGamepiece/totalLatencyMs", inputs.totalLatencyMs);
 
-      Logger.recordOutput("Limelight/ClosestGamepiece/distance", closestGamepiece.distance);
+      Logger.recordOutput("VisionGamepiece/ClosestGamepiece/distance", closestGamepiece.distance);
       Logger.recordOutput(
-          "Limelight/ClosestGamepiece/targetYawDegrees", closestGamepiece.targetYaw.getDegrees());
+          "VisionGamepiece/ClosestGamepiece/targetYawDegrees",
+          closestGamepiece.targetYaw.getDegrees());
       Logger.recordOutput(
-          "Limelight/ClosestGamepiece/targetPitchDegrees",
+          "VisionGamepiece/ClosestGamepiece/targetPitchDegrees",
           closestGamepiece.targetPitch.getDegrees());
-      Logger.recordOutput("Limelight/ClosestGamepiece/poseRobotCentric", closestGamepiece.pose);
-      Logger.recordOutput("Limelight/ClosestGamepiece/pose", closestGamepiece.globalPose);
       Logger.recordOutput(
-          "Limelight/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
+          "VisionGamepiece/ClosestGamepiece/poseRobotCentric", closestGamepiece.pose);
+      Logger.recordOutput("VisionGamepiece/ClosestGamepiece/pose", closestGamepiece.globalPose);
+      Logger.recordOutput(
+          "VisionGamepiece/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
     }
   }
 
@@ -159,29 +161,29 @@ public class VisionGamepiece extends SubsystemBase {
   private void logGamepieceData(
       RawGamepieceData rawGamepieceData, ProcessedGamepieceData processedGamepieceData, int index) {
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Raw/fiducialID",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/fiducialID",
         rawGamepieceData.fiducialID);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Raw/yaw", rawGamepieceData.yaw);
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/yaw", rawGamepieceData.yaw);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Raw/pitch", rawGamepieceData.pitch);
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/pitch", rawGamepieceData.pitch);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/distance",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/distance",
         processedGamepieceData.distance);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/distanceInches",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/distanceInches",
         Units.metersToInches(processedGamepieceData.distance));
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/targetYaw",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/targetYaw",
         processedGamepieceData.targetYaw);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/targetPitch",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/targetPitch",
         processedGamepieceData.targetPitch);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/pose",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/pose",
         processedGamepieceData.pose);
     Logger.recordOutput(
-        "Limelight/Gamepieces/Gamepiece: " + index + "/Processed/globalPose",
+        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/globalPose",
         processedGamepieceData.globalPose);
   }
 }
