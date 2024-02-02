@@ -18,11 +18,9 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     inputs.isConnected = camera.isConnected();
     inputs.validTarget = results.hasTargets();
     List<PhotonTrackedTarget> targets = results.targets;
-    inputs.id = new int[targets.size()];
     inputs.pitch = new double[targets.size()];
     inputs.yaw = new double[targets.size()];
     for (int index = 0; index < targets.size(); index++) {
-      inputs.id[index] = targets.get(index).getFiducialId();
       inputs.pitch[index] = targets.get(index).getPitch();
       inputs.yaw[index] = targets.get(index).getYaw();
     }

@@ -65,8 +65,7 @@ public class VisionGamepiece extends SubsystemBase {
         processedGamepieceData = new ProcessedGamepieceData[inputs.targetCount];
         for (int index = 0; index < inputs.targetCount; index++) {
           rawGamepieceData[index] =
-              new RawGamepieceData(
-                  inputs.id[index], inputs.yaw[index], inputs.pitch[index], inputs.timestamp);
+              new RawGamepieceData(inputs.yaw[index], inputs.pitch[index], inputs.timestamp);
           processedGamepieceData[index] = processGamepieceData(rawGamepieceData[index]);
           if (index == 0) {
             closestGamepiece = processedGamepieceData[0];
@@ -160,9 +159,6 @@ public class VisionGamepiece extends SubsystemBase {
 
   private void logGamepieceData(
       RawGamepieceData rawGamepieceData, ProcessedGamepieceData processedGamepieceData, int index) {
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/fiducialID",
-        rawGamepieceData.fiducialID);
     Logger.recordOutput(
         "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/yaw", rawGamepieceData.yaw);
     Logger.recordOutput(
