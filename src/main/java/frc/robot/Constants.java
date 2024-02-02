@@ -97,8 +97,8 @@ public final class Constants {
         new Translation2d(16.508594512939453, 5.508944988250732);
 
     public class Gamepieces {
-      public static final double NOTE_INNER_RADIUS_METERS = 0.254;
-      public static final double NOTE_OUTER_RADIUS_METERS = 0.3048;
+      public static final double NOTE_INNER_RADIUS_METERS = 0.127;
+      public static final double NOTE_OUTER_RADIUS_METERS = 0.1778;
     }
   }
 
