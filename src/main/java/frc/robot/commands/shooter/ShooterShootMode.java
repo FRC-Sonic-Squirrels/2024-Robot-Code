@@ -6,7 +6,6 @@ package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotState;
@@ -48,16 +47,7 @@ public class ShooterShootMode extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (DriverStation.getAlliance().isPresent()) {
-      speakerPose =
-          new Translation2d(
-              DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                  ? 0.23826955258846283
-                  : 16.281435012817383,
-              5.498747638702393);
-    } else {
-      speakerPose = new Translation2d(0.23826955258846283, 5.498747638702393);
-    }
+    speakerPose = Constants.FieldConstants.getSpeakerTranslation();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

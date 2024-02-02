@@ -1,34 +1,45 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants;
+import edu.wpi.first.math.geometry.*;
 
 public class ShootingSolver {
-  private static final Translation3d Pspeaker =
-      new Translation3d(
-          DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)
-              ? Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION.getX()
-              : Constants.FieldConstants.RED_SPEAKER_TRANSLATION.getX(),
-          Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION.getY(),
-          Constants.FieldConstants.SPEAKER_HEIGHT_METERS); // this will be constant
-  private static final Translation3d PaxisOfRotationShooter =
-      new Translation3d(-0.05, 0.0, Units.inchesToMeters(5));
-  private static final double shooterSpeed = Units.feetToMeters(30.0);
-  private static final double shootingTime = 0.4;
+  private final Translation3d Pspeaker;
+  private final Translation3d PaxisOfRotationShooter;
+  private final double shooterSpeed;
+  private final double shootingTime;
+  private double startOfShootingTimestamp = Double.NaN;
+
+  public ShootingSolver(
+      Translation3d Pspeaker,
+      Translation3d PaxisOfRotationShooter,
+      double shooterSpeed,
+      double shootingTime) {
+    this.Pspeaker = Pspeaker;
+    this.PaxisOfRotationShooter = PaxisOfRotationShooter;
+    this.shooterSpeed = shooterSpeed;
+    this.shootingTime = shootingTime;
+  }
+
+  public void startShooting(double timestamp) {
+    startOfShootingTimestamp = timestamp;
+  }
+
+  public void endShooting() {
+    startOfShootingTimestamp = Double.NaN;
+  }
 
   /**
    * @return Rotation2d 1: robot theta Rotation2d 2: shooter pitch
    */
-  public static Pair<Rotation2d, Rotation2d> computeAngles(
-      Pose2d robotPose, Translation2d robotVel) {
+  public Pair<Rotation2d, Rotation2d> computeAngles(
+      double currentTime, Pose2d robotPose, Translation2d robotVel) {
+    double timeToShoot;
+    if (Double.isNaN(this.startOfShootingTimestamp)) {
+      timeToShoot = shootingTime;
+    } else {
+      timeToShoot = Math.max(0, shootingTime - (currentTime - startOfShootingTimestamp));
+    }
 
     // 3d position of robot
     var Probot = GeometryUtil.translation2dTo3d(robotPose.getTranslation());
@@ -37,7 +48,7 @@ public class ShootingSolver {
     var Vrobot = GeometryUtil.translation2dTo3d(robotVel);
 
     // position of robot when note leaves shooter
-    var ProbotFuture = Probot.plus(Vrobot.times(shootingTime));
+    var ProbotFuture = Probot.plus(Vrobot.times(timeToShoot));
 
     // vector pointing from axis to speaker at time that note leaves shooter
     var dPspeaker = Pspeaker.minus(ProbotFuture);

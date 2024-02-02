@@ -16,7 +16,9 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
@@ -35,6 +37,11 @@ import java.util.function.Supplier;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  public static boolean isRedAlliance() {
+    var alliance = DriverStation.getAlliance();
+    return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+  }
 
   public class RobotMode {
     private static final RobotType ROBOT = RobotType.ROBOT_2024;
@@ -94,6 +101,25 @@ public final class Constants {
         new Translation2d(0.03950466960668564, 5.508944988250732);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         new Translation2d(16.508594512939453, 5.508944988250732);
+
+    public static final Translation3d BLUE_SPEAKER_TRANSLATION_3D =
+        new Translation3d(
+            BLUE_SPEAKER_TRANSLATION.getX(),
+            BLUE_SPEAKER_TRANSLATION.getY(),
+            Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
+    public static final Translation3d RED_SPEAKER_TRANSLATION_3D =
+        new Translation3d(
+            RED_SPEAKER_TRANSLATION.getX(),
+            RED_SPEAKER_TRANSLATION.getY(),
+            Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
+
+    public static Translation2d getSpeakerTranslation() {
+      return isRedAlliance() ? RED_SPEAKER_TRANSLATION : BLUE_SPEAKER_TRANSLATION;
+    }
+
+    public static Translation3d getSpeakerTranslation3D() {
+      return isRedAlliance() ? RED_SPEAKER_TRANSLATION_3D : BLUE_SPEAKER_TRANSLATION_3D;
+    }
   }
 
   public class MotorConstants {
@@ -154,8 +180,16 @@ public final class Constants {
     public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
     public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
 
+    public static final double SHOOTER_SPEED =
+        Units.feetToMeters(30.0); // TODO: Convert from RPM to speed
+    public static final double SHOOTING_TIME = 0.4;
+
     public static final Transform2d SHOOTER_OFFSET_METERS =
         new Transform2d(0, -Units.inchesToMeters(12), new Rotation2d());
+
+    public static final Translation3d SHOOTER_AXIS_OF_ROTATION =
+        new Translation3d(
+            SHOOTER_OFFSET_METERS.getX(), SHOOTER_OFFSET_METERS.getY(), Units.inchesToMeters(5));
 
     public class Pivot {
       public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {

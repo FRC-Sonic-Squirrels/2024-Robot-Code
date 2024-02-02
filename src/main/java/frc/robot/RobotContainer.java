@@ -18,7 +18,6 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -409,12 +408,8 @@ public class RobotContainer {
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
                 () ->
-                    DriverStation.getAlliance().isPresent()
-                        ? new Translation2d(
-                            DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                                ? 0.03950466960668564
-                                : 16.281435012817383,
-                            5.498747638702393)
+                    Constants.isRedAlliance()
+                        ? new Translation2d(16.281435012817383, 5.498747638702393)
                         : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
@@ -453,11 +448,7 @@ public class RobotContainer {
         Math.hypot(
             GeometryUtil.getDist(
                 drivetrain.getPoseEstimatorPose().getTranslation(),
-                DriverStation.getAlliance().isPresent()
-                    ? (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                        ? Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION
-                        : Constants.FieldConstants.RED_SPEAKER_TRANSLATION)
-                    : Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION),
+                Constants.FieldConstants.getSpeakerTranslation()),
             Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
         shooter.getRPM(),
         elevator.getHeightInches());

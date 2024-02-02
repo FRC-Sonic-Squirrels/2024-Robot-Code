@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
+import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,6 +21,8 @@ public class Shooter extends SubsystemBase {
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+
+  private final ShootingSolver shootingSolver;
 
   private static final String ROOT_TABLE = "Shooter";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
@@ -44,6 +48,13 @@ public class Shooter extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
     this.io = io;
+
+    this.shootingSolver =
+        new ShootingSolver(
+            Constants.FieldConstants.getSpeakerTranslation3D(),
+            Constants.ShooterConstants.SHOOTER_AXIS_OF_ROTATION,
+            Constants.ShooterConstants.SHOOTER_SPEED,
+            Constants.ShooterConstants.SHOOTING_TIME);
   }
 
   @Override

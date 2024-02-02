@@ -3,18 +3,12 @@ package frc.lib.team2930;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 
 public class AllianceFlipUtil {
 
   public static Translation2d flipVelocitiesForAlliance(Translation2d originalVelocity) {
-    if (DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Blue) {
-      return originalVelocity;
-    }
-
-    return originalVelocity.unaryMinus();
+    return Constants.isRedAlliance() ? originalVelocity.unaryMinus() : originalVelocity;
   }
 
   public static Translation2d mirrorTranslation2DOverCenterLine(Translation2d originalTranslation) {

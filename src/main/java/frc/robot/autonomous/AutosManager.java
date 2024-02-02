@@ -4,11 +4,10 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -17,7 +16,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -123,10 +121,7 @@ public class AutosManager {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
             (ChassisSpeeds speeds) -> drivetrain.runVelocity(speeds),
-            () -> {
-              Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
-              return alliance.isPresent() && alliance.get() == Alliance.Red;
-            },
+            Constants::isRedAlliance,
             drivetrain);
     for (AutoEvent autoEvent : events) {
       command =
