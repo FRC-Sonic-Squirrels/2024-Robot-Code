@@ -55,8 +55,6 @@ import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.limelight.Limelight;
-import frc.robot.subsystems.limelight.LimelightIO;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
@@ -88,7 +86,6 @@ public class RobotContainer {
   private final Intake intake;
   private final Shooter shooter;
   private final EndEffector endEffector;
-  private final Limelight limelight;
   private final LED led;
   private final VisionGamepiece visionGamepiece;
 
@@ -135,7 +132,6 @@ public class RobotContainer {
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
       visionGamepiece =
           new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
@@ -185,7 +181,6 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
@@ -205,7 +200,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
@@ -223,7 +217,6 @@ public class RobotContainer {
           // shooter = new Shooter(new ShooterIOReal());
           // wrist = new Wrist(new WristIOReal());
           // endEffector = new EndEffector(new EndEffectorIOReal());
-          // limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
 
           DriverStation.silenceJoystickConnectionWarning(true);
 
@@ -241,7 +234,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
@@ -261,7 +253,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
@@ -363,8 +354,6 @@ public class RobotContainer {
           ----- end command -----
           Vision
             10. check localization vision (preferably with april tag)
-          Limelight
-            11. check limelight (preferably with note)
 
             12. look at LEDs
             13. double check connection from pigeon
@@ -379,21 +368,11 @@ public class RobotContainer {
     */
     // ----------- DRIVER CONTROLS ------------
     driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
-    // driverController
-    //     .leftTrigger()
-    //     .whileTrue(
-    //         new RotateToSpeaker(
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             limelight::getClosestGamepiece,
-    //             drivetrain,
-    //             new Rotation2d(),
-    //             () -> -controller.getRightX(),
-    //             0.3));
     driverController
         .leftTrigger()
         .whileTrue(
-            new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+            new DriveToGamepiece(
+                visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
     driverController
         .rightBumper()
@@ -417,7 +396,6 @@ public class RobotContainer {
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-    ;
   }
 
   /**
