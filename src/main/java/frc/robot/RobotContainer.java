@@ -35,7 +35,6 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
-import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -62,6 +61,8 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.visualization.GamepieceVisualization;
+import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -444,5 +445,12 @@ public class RobotContainer {
         shooter.getRPM(),
         elevator.getHeightInches());
     SimpleMechanismVisualization.logMechanism();
+    GamepieceVisualization.updateVisualization(
+        drivetrain.getPoseEstimatorPose(),
+        drivetrain.getFieldRelativeVelocities().getTranslation(),
+        shooter.getPitch(),
+        shooter.getRPM(),
+        driverController.a().getAsBoolean());
+    GamepieceVisualization.logTraj();
   }
 }

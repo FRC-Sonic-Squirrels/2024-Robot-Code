@@ -67,7 +67,7 @@ public class ShooterIOSim implements ShooterIO {
     pivotFeedback.setTolerance(1.0);
 
     inputs.pitch = new Rotation2d(pivot.getAngleRads());
-    inputs.RPM = launcherMotorSim.getAngularVelocityRPM();
+    inputs.RPM = 5800.0;
     inputs.kickerRPM = kickerMotorSim.getAngularVelocityRPM();
 
     inputs.beamBreak = beamBreak.get();
