@@ -25,7 +25,6 @@ public class EndEffectorIOSim implements EndEffectorIO {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.RPM = motor.getAngularVelocityRPM();
-    inputs.beamBreak = beamBreak.get();
   }
 
   @Override

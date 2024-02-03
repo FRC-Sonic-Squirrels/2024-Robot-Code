@@ -35,6 +35,6 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Boolean getBeamBreak() {
-    return inputs.beamBreak;
+    return true; // temnporary
   }
 }

@@ -54,7 +54,6 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
     inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    // inputs.beamBreak = beamBreak.get();
   }
 
   @Override
