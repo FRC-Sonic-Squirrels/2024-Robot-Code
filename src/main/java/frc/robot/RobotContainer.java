@@ -403,7 +403,6 @@ public class RobotContainer {
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-    ;
   }
 
   /**
