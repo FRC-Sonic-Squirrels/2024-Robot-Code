@@ -63,6 +63,27 @@ public class LED extends SubsystemBase {
     }
   }
 
+  private void setSingleStripBlinking(
+      int redValue1,
+      int redValue2,
+      int greenValue1,
+      int greenValue2,
+      int blueValue1,
+      int blueValue2,
+      int startingLED,
+      int endingLED) {
+
+    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+      for (int i = startingLED; i <= endingLED; i++) {
+        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+      }
+    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+      for (int i = startingLED; i <= endingLED; i++) {
+        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+      }
+    }
+  }
+
   private void setAllBlinking(
       int redValue1,
       int redValue2,
@@ -80,6 +101,16 @@ public class LED extends SubsystemBase {
         ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
       }
     }
+  }
+
+  private void setSingleStripRainbow(int startingLED, int endingLED) {
+    for (var i = startingLED; i <= endingLED; i++) {
+      final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
+      ledBuffer.setHSV(i, hue, 255, 128);
+    }
+
+    rainbowFirstPixelHue += 3;
+    rainbowFirstPixelHue %= 180;
   }
 
   private void setAllRainbow() {
