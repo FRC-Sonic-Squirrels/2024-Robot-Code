@@ -31,15 +31,7 @@ public class Intake extends SubsystemBase {
     return inputs.currentAmps;
   }
 
-  public double getRPM() {
-    return inputs.RPM;
-  }
-
   public void setPercentOut(double percent) {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
-  }
-
-  public Boolean getBeamBreak() {
-    return inputs.beamBreak;
   }
 }

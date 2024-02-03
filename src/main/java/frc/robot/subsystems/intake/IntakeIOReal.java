@@ -17,7 +17,6 @@ public class IntakeIOReal implements IntakeIO {
   DigitalInput beamBreak = new DigitalInput(Constants.DIOPorts.INTAKE_BEAM_BREAK);
 
   private StatusSignal<Double> currentAmps;
-  private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
 
   private double voltage = 0.0;
@@ -41,7 +40,6 @@ public class IntakeIOReal implements IntakeIO {
     motor.getConfigurator().apply(config);
 
     currentAmps = motor.getStatorCurrent();
-    velocityRPS = motor.getVelocity();
     deviceTemp = motor.getDeviceTemp();
   }
 
@@ -53,7 +51,6 @@ public class IntakeIOReal implements IntakeIO {
 
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    inputs.beamBreak = beamBreak.get();
   }
 
   @Override
