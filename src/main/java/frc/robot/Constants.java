@@ -234,6 +234,7 @@ public final class Constants {
     public static final int ELEVATOR_CAN_ID = 4;
     public static final int END_EFFECTOR_CAN_ID = 6;
     public static final int WRIST_CAN_ID = 7;
+    public static final int TOF_CAN_ID = 10;
   }
 
   public class DIOPorts {
