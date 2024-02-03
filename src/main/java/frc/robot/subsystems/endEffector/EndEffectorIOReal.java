@@ -18,6 +18,8 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
+  private StatusSignal<Double> intakeSideTOFDistanceInches;
+  private StatusSignal<Double> shooterSideTOFDistanceInches;
 
   private double voltage = 0.0;
 
@@ -52,7 +54,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
     inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    inputs.beamBreak = beamBreak.get();
+    // inputs.beamBreak = beamBreak.get();
   }
 
   @Override
