@@ -1,5 +1,6 @@
 package frc.robot.subsystems.endEffector;
 
+import com.playingwithfusion.TimeOfFlight;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -7,16 +8,17 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class EndEffectorIOReal implements EndEffectorIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
 
-  private StatusSignal<Double> velocityRPS;
-  private StatusSignal<Double> deviceTemp;
+  TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.INTAKE_TOF_CAN_ID);
+  TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
+
   private StatusSignal<Double> intakeSideTOFDistanceInches;
   private StatusSignal<Double> shooterSideTOFDistanceInches;
+  private StatusSignal<Double> deviceTemp;
 
   private double voltage = 0.0;
 
@@ -39,21 +41,17 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
     motor.getConfigurator().apply(config);
 
-    velocityRPS = motor.getVelocity();
     deviceTemp = motor.getDeviceTemp();
   }
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        velocityRPS, deviceTemp, intakeSideTOFDistanceInches, shooterSideTOFDistanceInches);
+    BaseStatusSignal.refreshAll(deviceTemp);
 
     motor.setControl(new VoltageOut(voltage));
-
-    inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    inputs.intakeSideTOFDistanceInches = intakeSideTOFDistanceInches.getValueAsDouble();
-    inputs.shooterSideTOFDistanceInches = shooterSideTOFDistanceInches.getValueAsDouble();
+    inputs.intakeSideTOFDistanceInches = intake_tof.getRange();
+    inputs.shooterSideTOFDistanceInches = shooter_tof.getRange();
   }
 
   @Override
