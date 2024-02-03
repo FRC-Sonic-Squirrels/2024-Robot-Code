@@ -121,6 +121,8 @@ public final class Constants {
 
     public static Translation3d getSpeakerTranslation3D() {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION_3D : BLUE_SPEAKER_TRANSLATION_3D;
+    }
+
     public class Gamepieces {
       public static final double NOTE_INNER_RADIUS_METERS = 0.127;
       public static final double NOTE_OUTER_RADIUS_METERS = 0.1778;
