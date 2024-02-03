@@ -186,7 +186,7 @@ public final class Constants {
   }
 
   public class LEDConstants {
-    public static final int PWM_PORT = 0;
+    public static final int PWM_PORT = 8;
   }
 
   public class CanIDs {

@@ -15,26 +15,32 @@ public class LED extends SubsystemBase {
   AddressableLED led = new AddressableLED(Constants.LEDConstants.PWM_PORT);
 
   individualLED led1 = new individualLED(0, 25);
-  individualLED led2 = new individualLED(26, 35);
-  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
+  individualLED led2 = new individualLED(26, 60);
+  
+  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength()+led2.getLength());
   int rainbowFirstPixelHue = 0;
-  robotStates robotState;
+  robotStates robotState = robotStates.SHOOTER_LINED_UP;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
-  }
 
+  }
+  
+  
+
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    //setAllRainbow();
     switch (robotState) {
       case SHOOTER_SUCCESS:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(0, 0, 0);
+        setAllSolidColor(255, 0, 0);
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
@@ -46,6 +52,16 @@ public class LED extends SubsystemBase {
         setAllRainbow();
         break;
     }
+    led.setData(ledBuffer);
+  }
+
+  private void setSingleStripSolidColor(
+      int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
+    for (int i = startingLED; i <= endingLED; i++) {
+      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+    }
+
+    
   }
 
   private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
@@ -53,8 +69,9 @@ public class LED extends SubsystemBase {
       ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
 
-    led.setData(ledBuffer);
+    
   }
+
 
   private void setAllBlinking(
       int redValue1,
@@ -74,7 +91,7 @@ public class LED extends SubsystemBase {
       }
     }
 
-    led.setData(ledBuffer);
+    
   }
 
   private void setAllRainbow() {
@@ -93,11 +110,16 @@ public class LED extends SubsystemBase {
 
     public individualLED(int start, int end) {
       this.start = start;
-      this.end = start;
+      this.end = end;
     }
 
     public int getLength() {
-      return Math.abs(end - start);
+      if(start == 0){
+        return Math.abs(end - start);
+      }
+      else{
+        return Math.abs(end - start) + 1;
+      }
     }
   }
 
