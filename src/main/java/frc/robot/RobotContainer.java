@@ -416,6 +416,13 @@ public class RobotContainer {
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
     ;
+    
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new IntakeGamepiece(intake, driverController.getHID()));
+    
+    
   }
 
   /**
