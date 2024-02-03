@@ -44,7 +44,7 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -221,6 +221,12 @@ public final class Constants {
       public static final double MOI = 5.0;
       public static final double GEARING = 1.0;
       public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
+    }
+
+    public static class Kicker {
+      public static final double MOI = 5.0;
+      public static final double GEARING = 1.0;
+      public static final double KICKING_PERCENT_OUT = 0.8;
     }
   }
 

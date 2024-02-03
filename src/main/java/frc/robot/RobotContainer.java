@@ -17,18 +17,13 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.RobotState.ScoringMode;
 import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
@@ -399,18 +394,11 @@ public class RobotContainer {
 
     driverController
         .rightBumper()
-        .onTrue(
-            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)))
-        .onFalse(
-            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.NONE)))
+        .whileTrue(new ShooterShootMode(shooter, drivetrain, driverController.a(), () -> false))
         .whileTrue(
             new RotateToSpeaker(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
-                () ->
-                    Constants.isRedAlliance()
-                        ? new Translation2d(16.281435012817383, 5.498747638702393)
-                        : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
                 new Rotation2d(Math.PI),
@@ -453,12 +441,5 @@ public class RobotContainer {
         shooter.getRPM(),
         elevator.getHeightInches());
     SimpleMechanismVisualization.logMechanism();
-  }
-
-  public void updateRobotState() {
-    Command shootModeCommand = new ShooterShootMode(shooter, drivetrain, shooter::getRPM);
-    if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
-        && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
-      CommandScheduler.getInstance().schedule(shootModeCommand);
   }
 }

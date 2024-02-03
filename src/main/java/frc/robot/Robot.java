@@ -131,8 +131,6 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("TIME/FPGA TIME", Timer.getFPGATimestamp());
     Logger.recordOutput("TIME/REAL FPGA", Logger.getRealTimestamp());
 
-    Logger.recordOutput("RobotState/scoring mode", RobotState.getInstance().getScoringMode());
-
     robotContainer.updateVisualization();
   }
 
@@ -231,9 +229,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-    robotContainer.updateRobotState();
-  }
+  public void teleopPeriodic() {}
 
   /** This function is called once when test mode is enabled. */
   @Override
