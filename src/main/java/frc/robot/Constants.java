@@ -13,7 +13,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -44,7 +46,7 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -119,6 +121,11 @@ public final class Constants {
 
     public static Translation3d getSpeakerTranslation3D() {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION_3D : BLUE_SPEAKER_TRANSLATION_3D;
+    }
+
+    public class Gamepieces {
+      public static final double NOTE_INNER_RADIUS_METERS = 0.127;
+      public static final double NOTE_OUTER_RADIUS_METERS = 0.1778;
     }
   }
 
@@ -264,5 +271,11 @@ public final class Constants {
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+  }
+
+  public class VisionGamepieceConstants {
+    public static final Pose3d GAMEPIECE_CAMERA_POSE =
+        new Pose3d(0.0, 0.0, Units.inchesToMeters(38), new Rotation3d(0.0, 0.0, 0.0));
+    public static final String CAMERA_NAME = "CAM2024_3";
   }
 }
