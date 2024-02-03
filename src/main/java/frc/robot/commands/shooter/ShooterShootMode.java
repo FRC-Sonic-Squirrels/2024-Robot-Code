@@ -13,7 +13,6 @@ import frc.robot.RobotState;
 import frc.robot.RobotState.ScoringMode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
-import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,9 +20,8 @@ public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
-  private BooleanSupplier shootGamepiece = () -> false;
-  private Double[] shootTimestamps = new Double[] {};
-  private ArrayList<Double> shootTimestampsList = new ArrayList<>();
+  private BooleanSupplier shootGamepiece;
+  private BooleanSupplier driveIsAtAngle;
   private Timer runTime = new Timer();
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
@@ -38,20 +36,17 @@ public class ShooterShootMode extends Command {
   // private double shooterPitchVelCorrection = 0.0;
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterShootMode(Shooter shooter, Drivetrain drive, BooleanSupplier shootGamepiece) {
+  public ShooterShootMode(
+      Shooter shooter,
+      Drivetrain drive,
+      BooleanSupplier shootGamepiece,
+      BooleanSupplier driveIsAtAngle) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
     this.shootGamepiece = shootGamepiece;
-    addRequirements(shooter);
-    setName("ShooterShootMode");
-  }
+    this.driveIsAtAngle = driveIsAtAngle;
 
-  public ShooterShootMode(Shooter shooter, Drivetrain drive, Double... shootTimestamps) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    this.shooter = shooter;
-    this.drive = drive;
-    this.shootTimestamps = shootTimestamps;
     addRequirements(shooter);
     setName("ShooterShootMode");
   }
@@ -127,15 +122,9 @@ public class ShooterShootMode extends Command {
                     currentShooterTranslation.getY() - speakerPose.getY()))
             .getDegrees());
 
-    boolean shoot = shootGamepiece.getAsBoolean();
-
-    for (Double timestamp : shootTimestampsList) {
-      if (timestamp <= runTime.get()) {
-        shoot = true;
-        if (!shooter.getBeamBreak() && runTime.get() - timestamp >= 0.5)
-          shootTimestampsList.remove(timestamp);
-      }
-    }
+    boolean shoot =
+        shootGamepiece.getAsBoolean() && shooter.pivotIsAtTarget() && driveIsAtAngle.getAsBoolean();
+    Logger.recordOutput("ShooterShootMode/shooting", shoot);
 
     if (shoot) {
       shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);

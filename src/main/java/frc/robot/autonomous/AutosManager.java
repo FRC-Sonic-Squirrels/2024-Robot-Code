@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
-import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -111,21 +110,15 @@ public class AutosManager {
   private AutoCommand middle5Piece() {
     return new AutoCommand(
         "middle5Piece",
-        addShooting(
-            generateFollowPathCommand(
-                "middleAuto.1",
-                true,
-                new AutoRotationState[] {
-                  new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 0.0),
-                  new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 0.48),
-                  new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 1.05),
-                  new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 4.35)
-                }),
-            0.0,
-            1.66,
-            3.04,
-            3.70,
-            6.0),
+        generateFollowPathCommand(
+            "middleAuto.1",
+            true,
+            new AutoRotationState[] {
+              new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 0.0),
+              new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 0.48),
+              new AutoRotationState(ChoreoRotationMode.ROTATE_TO_GAMEPIECE, 1.05),
+              new AutoRotationState(ChoreoRotationMode.FOLLOW_PATH, 4.35)
+            }),
         Choreo.getTrajectory("middleAuto.1").getInitialPose());
   }
 
@@ -350,10 +343,5 @@ public class AutosManager {
     FOLLOW_PATH,
     ROTATE_TO_GAMEPIECE,
     ROTATE_TO_SPEAKER
-  }
-
-  private Command addShooting(Command command, Double... shootTimestamps) {
-
-    return command.deadlineWith(new ShooterShootMode(shooter, drivetrain, shootTimestamps));
   }
 }
