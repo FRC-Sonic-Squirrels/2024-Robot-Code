@@ -42,7 +42,6 @@ import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.LED.robotStates;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -405,7 +404,6 @@ public class RobotContainer {
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-
   }
 
   /**

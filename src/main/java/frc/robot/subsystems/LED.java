@@ -16,8 +16,8 @@ public class LED extends SubsystemBase {
 
   individualLED led1 = new individualLED(0, 25);
   individualLED led2 = new individualLED(26, 60);
-  
-  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength()+led2.getLength());
+
+  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
   robotStates robotState = robotStates.SHOOTER_LINED_UP;
 
@@ -25,16 +25,11 @@ public class LED extends SubsystemBase {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
-
   }
-  
-  
 
-  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //setAllRainbow();
     switch (robotState) {
       case SHOOTER_SUCCESS:
         // test writing solid color
@@ -60,18 +55,13 @@ public class LED extends SubsystemBase {
     for (int i = startingLED; i <= endingLED; i++) {
       ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
-
-    
   }
 
   private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
-
-    
   }
-
 
   private void setAllBlinking(
       int redValue1,
@@ -90,8 +80,6 @@ public class LED extends SubsystemBase {
         ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
       }
     }
-
-    
   }
 
   private void setAllRainbow() {
@@ -114,10 +102,9 @@ public class LED extends SubsystemBase {
     }
 
     public int getLength() {
-      if(start == 0){
+      if (start == 0) {
         return Math.abs(end - start);
-      }
-      else{
+      } else {
         return Math.abs(end - start) + 1;
       }
     }
