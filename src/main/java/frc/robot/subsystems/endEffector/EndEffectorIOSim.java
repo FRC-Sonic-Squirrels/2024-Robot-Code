@@ -4,7 +4,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class EndEffectorIOSim implements EndEffectorIO {
 
@@ -13,9 +12,6 @@ public class EndEffectorIOSim implements EndEffectorIO {
           DCMotor.getFalcon500(1),
           Constants.EndEffectorConstants.GEARING,
           Constants.EndEffectorConstants.MOI);
-
-  private LoggedDashboardBoolean beamBreak =
-      new LoggedDashboardBoolean("EndEffector/beamBreak", false);
 
   private LoggedTunableNumber shooterTOFInches =
       new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 0);
