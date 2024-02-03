@@ -14,7 +14,6 @@ public class IntakeIOSim implements IntakeIO {
 
   private double voltage = 0.0;
 
-
   public IntakeIOSim() {}
 
   @Override
