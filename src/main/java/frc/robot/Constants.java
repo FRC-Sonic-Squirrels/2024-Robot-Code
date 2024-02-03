@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -155,6 +157,9 @@ public final class Constants {
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
+
+    public static final InvertedValue INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
+    public static final NeutralModeValue NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
   }
 
   public class WristConstants {

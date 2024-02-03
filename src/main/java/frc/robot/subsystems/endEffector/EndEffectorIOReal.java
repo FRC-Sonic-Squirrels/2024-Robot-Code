@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
@@ -18,13 +17,13 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
+  private StatusSignal<Double> appliedVolts;
+  private StatusSignal<Double> currentAmps;
 
   private double voltage = 0.0;
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   public EndEffectorIOReal() {
-
-    motor.setInverted(false);
-    motor.setNeutralMode(NeutralModeValue.Brake);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
@@ -37,26 +36,32 @@ public class EndEffectorIOReal implements EndEffectorIO {
     currentLimitConfig.SupplyTimeThreshold = Constants.EndEffectorConstants.SUPPLY_TIME_THRESHOLD;
 
     config.CurrentLimits = currentLimitConfig;
-
+    config.MotorOutput.Inverted = Constants.EndEffectorConstants.INVERTED_VALUE;
+    config.MotorOutput.NeutralMode = Constants.EndEffectorConstants.NEUTRAL_MODE_VALUE;
     motor.getConfigurator().apply(config);
+
+    BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVolts, velocityRPS);
+    BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
 
     velocityRPS = motor.getVelocity();
     deviceTemp = motor.getDeviceTemp();
+    appliedVolts = motor.getMotorVoltage();
+    currentAmps = motor.getStatorCurrent();
   }
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(velocityRPS, deviceTemp);
+    BaseStatusSignal.refreshAll(velocityRPS, deviceTemp, appliedVolts, currentAmps);
 
-    motor.setControl(new VoltageOut(voltage));
-
-    inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
+    inputs.currentAmps = currentAmps.getValueAsDouble();
+    inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.beamBreak = beamBreak.get();
   }
 
   @Override
   public void setVoltage(double volts) {
-    voltage = volts;
+    motor.setControl(openLoopControl.withOutput(volts));
   }
 }
