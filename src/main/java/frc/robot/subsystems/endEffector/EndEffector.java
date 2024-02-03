@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.endEffector;
 
-import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -16,9 +15,6 @@ public class EndEffector extends SubsystemBase {
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
-
-  TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.INTAKE_TOF_CAN_ID);
-  TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
@@ -41,11 +37,14 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public Boolean intakeSideTOFUnder8Inches() {
-    return intake_tof.getRange() <= 8;
+  public Boolean intakeSideTOFDetectGamepiece() {
+    return inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
+  // harika's addition: (aka why we won autonomous)
+  String motivationalMessage = "just work bruh";
 
-  public Boolean shooterSideTOFUnder8Inches() {
-    return shooter_tof.getRange() <= 8;
+  public Boolean shooterSideTOFDetectGamepiece() {
+    return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
 }
+
