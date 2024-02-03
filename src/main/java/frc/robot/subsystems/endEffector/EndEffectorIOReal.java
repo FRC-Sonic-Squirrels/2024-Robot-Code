@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import frc.robot.Constants;
 
@@ -17,13 +16,13 @@ public class EndEffectorIOReal implements EndEffectorIO {
   TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
   private StatusSignal<Double> deviceTemp;
+  private StatusSignal<Double> appliedVolts;
+  private StatusSignal<Double> currentAmps;
 
   private double voltage = 0.0;
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   public EndEffectorIOReal() {
-
-    motor.setInverted(false);
-    motor.setNeutralMode(NeutralModeValue.Brake);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
     CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
@@ -36,17 +35,25 @@ public class EndEffectorIOReal implements EndEffectorIO {
     currentLimitConfig.SupplyTimeThreshold = Constants.EndEffectorConstants.SUPPLY_TIME_THRESHOLD;
 
     config.CurrentLimits = currentLimitConfig;
-
+    config.MotorOutput.Inverted = Constants.EndEffectorConstants.INVERTED_VALUE;
+    config.MotorOutput.NeutralMode = Constants.EndEffectorConstants.NEUTRAL_MODE_VALUE;
     motor.getConfigurator().apply(config);
 
+    BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVolts);
+    BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
+
     deviceTemp = motor.getDeviceTemp();
+    appliedVolts = motor.getMotorVoltage();
+    currentAmps = motor.getStatorCurrent();
   }
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(deviceTemp);
+    BaseStatusSignal.refreshAll(deviceTemp, appliedVolts, currentAmps);
 
-    motor.setControl(new VoltageOut(voltage));
+    inputs.currentAmps = currentAmps.getValueAsDouble();
+    inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.intakeSideTOFDistanceInches = intake_tof.getRange();
     inputs.shooterSideTOFDistanceInches = shooter_tof.getRange();
@@ -54,6 +61,6 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void setVoltage(double volts) {
-    voltage = volts;
+    motor.setControl(openLoopControl.withOutput(volts));
   }
 }

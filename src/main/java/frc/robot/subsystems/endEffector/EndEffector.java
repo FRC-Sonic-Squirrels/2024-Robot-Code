@@ -29,10 +29,6 @@ public class EndEffector extends SubsystemBase {
     }
   }
 
-  public double getRPM() {
-    return inputs.RPM;
-  }
-
   public void setPercentOut(double percent) {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
