@@ -7,14 +7,10 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class IntakeIOReal implements IntakeIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.INTAKE_CAN_ID);
-
-  // Initializes a DigitalInput on DIO 0
-  DigitalInput beamBreak = new DigitalInput(Constants.DIOPorts.INTAKE_BEAM_BREAK);
 
   private StatusSignal<Double> currentAmps;
   private StatusSignal<Double> velocityRPS;
@@ -54,7 +50,6 @@ public class IntakeIOReal implements IntakeIO {
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    inputs.beamBreak = beamBreak.get();
   }
 
   @Override

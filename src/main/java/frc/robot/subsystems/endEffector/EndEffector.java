@@ -6,12 +6,15 @@ package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
+  public static final LoggedTunableNumber distanceToTriggerNoteDetection =
+      new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
@@ -34,7 +37,14 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public Boolean getBeamBreak() {
-    return inputs.beamBreak;
+  public Boolean intakeSideTOFDetectGamepiece() {
+    return inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
+  }
+
+  // harika's addition: (aka why we won autonomous)
+  String motivationalMessage = "just work bruh";
+
+  public Boolean shooterSideTOFDetectGamepiece() {
+    return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
 }

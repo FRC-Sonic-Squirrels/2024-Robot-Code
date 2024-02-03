@@ -2,8 +2,8 @@ package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class EndEffectorIOSim implements EndEffectorIO {
 
@@ -13,8 +13,11 @@ public class EndEffectorIOSim implements EndEffectorIO {
           Constants.EndEffectorConstants.GEARING,
           Constants.EndEffectorConstants.MOI);
 
-  private LoggedDashboardBoolean beamBreak =
-      new LoggedDashboardBoolean("EndEffector/beamBreak", false);
+  private LoggedTunableNumber shooterTOFInches =
+      new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 18);
+
+  private LoggedTunableNumber intakeTOFInches =
+      new LoggedTunableNumber("sim_EndEffector/intakeTOFInches", 18);
 
   private double voltage = 0.0;
 
@@ -25,7 +28,8 @@ public class EndEffectorIOSim implements EndEffectorIO {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.RPM = motor.getAngularVelocityRPM();
-    inputs.beamBreak = beamBreak.get();
+    inputs.intakeSideTOFDistanceInches = intakeTOFInches.get();
+    inputs.shooterSideTOFDistanceInches = shooterTOFInches.get();
   }
 
   @Override

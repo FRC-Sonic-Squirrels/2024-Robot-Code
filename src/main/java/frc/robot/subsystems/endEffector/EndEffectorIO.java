@@ -9,7 +9,8 @@ public interface EndEffectorIO {
     public double RPM = 0.0;
     public double voltage = 0.0;
     public double tempCelsius = 0.0;
-    public boolean beamBreak = false;
+    public double intakeSideTOFDistanceInches = 0.0;
+    public double shooterSideTOFDistanceInches = 0.0;
   }
 
   /** Updates the set of loggable inputs. */
