@@ -46,7 +46,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(deviceTemp);
+    BaseStatusSignal.refreshAll(intakeSideTOFDistanceInches, shooterSideTOFDistanceInches, deviceTemp);
 
     motor.setControl(new VoltageOut(voltage));
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
