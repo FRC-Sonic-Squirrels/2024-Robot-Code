@@ -1,4 +1,4 @@
-package frc.robot.mechanismVisualization;
+package frc.robot.visualization;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;

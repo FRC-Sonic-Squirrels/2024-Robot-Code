@@ -9,6 +9,7 @@
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Mechanism/SimpleArm": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleElevatorAndArm": "Mechanism2d",
       "/AdvantageKit/RealOutputs/Mechanism/SimpleShooter": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/AUTO/SendableChooser[0]": "String Chooser",
@@ -18,8 +19,12 @@
       "/Shuffleboard/Arm_Debug/ArmCommands/resetSensorToHomePosition": "Command",
       "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/Auto Routine": "String Chooser",
+      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_LEFT/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_RIGHT/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_LEFT/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_RIGHT/Sim Field": "Field2d"
     },
     "windows": {
       "/AdvantageKit/RealOutputs/Mechanism/Simple": {
