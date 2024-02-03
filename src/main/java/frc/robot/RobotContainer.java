@@ -405,15 +405,7 @@ public class RobotContainer {
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-    driverController
-        .a()
-        .onTrue(new InstantCommand(() -> led.setRobotState(robotStates.DRIVING_TO_GAMEPIECE), led));
-    driverController
-        .b()
-        .onTrue(new InstantCommand(() -> led.setRobotState(robotStates.SHOOTER_LINED_UP), led));
-    driverController
-        .x()
-        .onTrue(new InstantCommand(() -> led.setRobotState(robotStates.SHOOTER_SUCCESS), led));
+
   }
 
   /**
