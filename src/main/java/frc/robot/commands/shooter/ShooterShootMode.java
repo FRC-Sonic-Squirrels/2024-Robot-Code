@@ -9,8 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.RobotState;
-import frc.robot.RobotState.ScoringMode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.function.BooleanSupplier;
@@ -140,6 +138,6 @@ public class ShooterShootMode extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER);
+    return false;
   }
 }
