@@ -19,7 +19,6 @@ public class EndEffectorIOReal implements EndEffectorIO {
   private StatusSignal<Double> appliedVolts;
   private StatusSignal<Double> currentAmps;
 
-  private double voltage = 0.0;
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   public EndEffectorIOReal() {
