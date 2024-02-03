@@ -38,6 +38,8 @@ import java.util.function.Supplier;
  */
 public final class Constants {
 
+  // FIXME: REMOVE THIS FIXME
+
   public static boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();
     return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
