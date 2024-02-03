@@ -13,9 +13,6 @@ import frc.robot.Constants;
 public class EndEffectorIOReal implements EndEffectorIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
 
-  // Initializes a DigitalInput on DIO 0
-  DigitalInput beamBreak = new DigitalInput(Constants.DIOPorts.END_EFFECTOR_BEAM_BREAK);
-
   private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
   private StatusSignal<Double> intakeSideTOFDistanceInches;

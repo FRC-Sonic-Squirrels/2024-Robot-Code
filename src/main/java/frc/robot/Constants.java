@@ -240,8 +240,6 @@ public final class Constants {
 
   public class DIOPorts {
     // TODO: get actual DIO ports
-    public static final int INTAKE_BEAM_BREAK = 0;
-    public static final int END_EFFECTOR_BEAM_BREAK = 0;
   }
 
   public enum ControlMode {
