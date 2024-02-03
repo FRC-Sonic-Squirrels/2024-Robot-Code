@@ -47,12 +47,11 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    BaseStatusSignal.refreshAll(currentAmps, velocityRPS, deviceTemp);
+    BaseStatusSignal.refreshAll(currentAmps, deviceTemp);
 
     motor.setControl(new VoltageOut(voltage));
 
     inputs.currentAmps = currentAmps.getValueAsDouble();
-    inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.beamBreak = beamBreak.get();
   }
