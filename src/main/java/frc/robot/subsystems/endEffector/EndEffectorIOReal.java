@@ -1,6 +1,5 @@
 package frc.robot.subsystems.endEffector;
 
-import com.playingwithfusion.TimeOfFlight;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -8,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.playingwithfusion.TimeOfFlight;
 import frc.robot.Constants;
 
 public class EndEffectorIOReal implements EndEffectorIO {
@@ -16,8 +16,6 @@ public class EndEffectorIOReal implements EndEffectorIO {
   TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.INTAKE_TOF_CAN_ID);
   TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
-  private StatusSignal<Double> intakeSideTOFDistanceInches;
-  private StatusSignal<Double> shooterSideTOFDistanceInches;
   private StatusSignal<Double> deviceTemp;
 
   private double voltage = 0.0;
@@ -46,7 +44,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(intakeSideTOFDistanceInches, shooterSideTOFDistanceInches, deviceTemp);
+    BaseStatusSignal.refreshAll(deviceTemp);
 
     motor.setControl(new VoltageOut(voltage));
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
