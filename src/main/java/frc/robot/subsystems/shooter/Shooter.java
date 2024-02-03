@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.PIDTargetMeasurement;
@@ -27,6 +28,9 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 19.0);
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 19.0);
+
+  private static final LoggedTunableNumber toleranceDegrees =
+      new LoggedTunableNumber(ROOT_TABLE + "/toleranceDegrees", 0.5);
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
@@ -119,6 +123,16 @@ public class Shooter extends SubsystemBase {
 
   public double getPivotPIDLatency() {
     return pivotPidLatency;
+  }
+
+  public boolean pivotIsAtTarget() {
+    return Math.abs(inputs.pitch.getRadians() - currentTarget.getRadians())
+        <= Units.degreesToRadians(toleranceDegrees.get());
+  }
+
+  public boolean pivotIsAtTarget(Rotation2d target) {
+    return Math.abs(inputs.pitch.getRadians() - target.getRadians())
+        <= Units.degreesToRadians(toleranceDegrees.get());
   }
 
   public void setKickerPercentOut(double percent) {
