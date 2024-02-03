@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class IntakeIOSim implements IntakeIO {
 
@@ -15,7 +14,6 @@ public class IntakeIOSim implements IntakeIO {
 
   private double voltage = 0.0;
 
-  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Intake/BeamBreak", false);
 
   public IntakeIOSim() {}
 
@@ -24,7 +22,6 @@ public class IntakeIOSim implements IntakeIO {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.currentAmps = motor.getCurrentDrawAmps();
-    inputs.beamBreak = beamBreak.get();
   }
 
   @Override

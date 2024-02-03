@@ -13,7 +13,6 @@ public class IntakeIOReal implements IntakeIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.INTAKE_CAN_ID);
 
   private StatusSignal<Double> currentAmps;
-  private StatusSignal<Double> velocityRPS;
   private StatusSignal<Double> deviceTemp;
 
   private double voltage = 0.0;
@@ -34,7 +33,6 @@ public class IntakeIOReal implements IntakeIO {
     motor.getConfigurator().apply(config);
 
     currentAmps = motor.getStatorCurrent();
-    velocityRPS = motor.getVelocity();
     deviceTemp = motor.getDeviceTemp();
   }
 
