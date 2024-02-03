@@ -57,7 +57,7 @@ public class AutosManager {
     list.add(this::testAuto);
     list.add(this::auto1);
     list.add(this::auto2);
-    list.add(this::testFlipping);
+    // list.add(this::testFlipping);
 
     return list;
   }

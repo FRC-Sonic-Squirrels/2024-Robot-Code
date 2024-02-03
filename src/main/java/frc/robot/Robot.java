@@ -76,7 +76,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.RobotMode.getMode()) {
       case REAL:
         // Running on a real robot, log to a USB stick
-        Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));
+        // Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
