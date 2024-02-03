@@ -48,7 +48,8 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(velocityRPS, deviceTemp, intakeSideTOFDistanceInches, shooterSideTOFDistanceInches);
+    BaseStatusSignal.refreshAll(
+        velocityRPS, deviceTemp, intakeSideTOFDistanceInches, shooterSideTOFDistanceInches);
 
     motor.setControl(new VoltageOut(voltage));
 

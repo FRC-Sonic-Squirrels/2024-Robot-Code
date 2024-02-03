@@ -17,10 +17,10 @@ public class EndEffectorIOSim implements EndEffectorIO {
   private LoggedDashboardBoolean beamBreak =
       new LoggedDashboardBoolean("EndEffector/beamBreak", false);
 
-  private LoggedTunableNumber shooterTOFInches = 
+  private LoggedTunableNumber shooterTOFInches =
       new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 0);
 
-  private LoggedTunableNumber intakeTOFInches = 
+  private LoggedTunableNumber intakeTOFInches =
       new LoggedTunableNumber("sim_EndEffector/intakeTOFInches", 0);
 
   private double voltage = 0.0;

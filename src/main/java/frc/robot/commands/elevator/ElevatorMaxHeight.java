@@ -5,11 +5,12 @@
 package frc.robot.commands.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.Constants;
+import frc.robot.subsystems.elevator.Elevator;
 
 public class ElevatorMaxHeight extends Command {
   Elevator elevator;
+
   /** Creates a new ElevatorMaxHeight. */
   public ElevatorMaxHeight(Elevator elevator) {
     this.elevator = elevator;

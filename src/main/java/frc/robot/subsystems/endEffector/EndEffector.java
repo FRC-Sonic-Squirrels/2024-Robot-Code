@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
-  public static final LoggedTunableNumber distanceToTriggerNoteDetection = 
+  public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
 
   /** Creates a new EndEffectorSubsystem. */
@@ -37,11 +37,11 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public Boolean intakeSideTOF(){
+  public Boolean intakeSideTOF() {
     return false;
   }
 
-  public Boolean shooterSideTOF(){
+  public Boolean shooterSideTOF() {
     return false;
   }
 }
