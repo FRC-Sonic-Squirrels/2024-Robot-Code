@@ -4,17 +4,24 @@
 
 package frc.robot.commands.elevator;
 
+import frc.robot.subsystems.elevator.Elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ElevatorAutoClimb extends Command {
+  Elevator elevator;
+
   /** Creates a new ElevatorAutoClimb. */
-  public ElevatorAutoClimb() {
+  public ElevatorAutoClimb(Elevator elevator) {
+    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(elevator);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
