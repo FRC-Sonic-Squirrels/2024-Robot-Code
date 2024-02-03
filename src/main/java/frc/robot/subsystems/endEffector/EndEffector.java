@@ -42,11 +42,11 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public Boolean intakeSideTOF() {
+  public Boolean intakeSideTOFUnder8Inches() {
     return intake_tof.getRange() <= 8;
   }
 
-  public Boolean shooterSideTOF() {
+  public Boolean shooterSideTOFUnder8Inches() {
     return shooter_tof.getRange() <= 8;
   }
 }
