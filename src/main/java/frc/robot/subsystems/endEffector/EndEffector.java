@@ -15,7 +15,7 @@ public class EndEffector extends SubsystemBase {
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
   public static final LoggedTunableNumber distanceToTriggerNoteDetection = 
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
-      
+
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
@@ -37,15 +37,11 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public Boolean getBeamBreak() {
-    return true; // temnporary
+  public Boolean intakeSideTOF(){
+    return false;
   }
 
-  public void intakeSideTOF(){
-
-  }
-
-  public void shooterSideTOF(){
-    
+  public Boolean shooterSideTOF(){
+    return false;
   }
 }
