@@ -14,10 +14,10 @@ public class EndEffectorIOSim implements EndEffectorIO {
           Constants.EndEffectorConstants.MOI);
 
   private LoggedTunableNumber shooterTOFInches =
-      new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 0);
+      new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 18);
 
   private LoggedTunableNumber intakeTOFInches =
-      new LoggedTunableNumber("sim_EndEffector/intakeTOFInches", 0);
+      new LoggedTunableNumber("sim_EndEffector/intakeTOFInches", 18);
 
   private double voltage = 0.0;
 
@@ -28,6 +28,8 @@ public class EndEffectorIOSim implements EndEffectorIO {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.RPM = motor.getAngularVelocityRPM();
+    inputs.intakeSideTOFDistanceInches = intakeTOFInches.get();
+    inputs.shooterSideTOFDistanceInches = shooterTOFInches.get();
   }
 
   @Override
