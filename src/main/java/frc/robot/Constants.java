@@ -234,6 +234,10 @@ public final class Constants {
     public static final int PWM_PORT = 8;
   }
 
+  public class LEDConstants {
+    public static final int PWM_PORT = 8;
+  }
+
   public class CanIDs {
     // TODO: get actual can ids
     public static final int INTAKE_CAN_ID = 0;
