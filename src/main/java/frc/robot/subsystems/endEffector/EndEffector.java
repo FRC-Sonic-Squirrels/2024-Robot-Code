@@ -6,13 +6,16 @@ package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
-
+  public static final LoggedTunableNumber distanceToTriggerNoteDetection = 
+      new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
+      
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
@@ -36,5 +39,13 @@ public class EndEffector extends SubsystemBase {
 
   public Boolean getBeamBreak() {
     return true; // temnporary
+  }
+
+  public void intakeSideTOF(){
+
+  }
+
+  public void shooterSideTOF(){
+    
   }
 }
