@@ -7,8 +7,7 @@ public interface IntakeIO {
   @AutoLog
   public static class IntakeIOInputs {
     public double currentAmps = 0.0;
-    public double tempCelsius = 0.0;
-    public boolean beamBreak = false;
+    public double tempCelsius = 0.0; 
   }
 
   /** Updates the set of loggable inputs. */
