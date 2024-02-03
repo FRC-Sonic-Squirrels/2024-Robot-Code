@@ -11,7 +11,6 @@ import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
-import com.playingwithfusion.jni.TimeOfFlightJNI;
 
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
@@ -19,7 +18,9 @@ public class EndEffector extends SubsystemBase {
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
 
-  TimeOfFlight tof = new TimeOfFlight(0);
+  TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.INTAKE_TOF_CAN_ID);
+  TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
+  
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
@@ -42,10 +43,10 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Boolean intakeSideTOF() {
-    return false;
+    return intake_tof.getRange() <= 8;
   }
 
   public Boolean shooterSideTOF() {
-    return false;
+    return shooter_tof.getRange() <= 8;
   }
 }
