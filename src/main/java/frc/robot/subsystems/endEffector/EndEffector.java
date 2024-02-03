@@ -40,6 +40,7 @@ public class EndEffector extends SubsystemBase {
   public Boolean intakeSideTOFDetectGamepiece() {
     return inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
+
   // harika's addition: (aka why we won autonomous)
   String motivationalMessage = "just work bruh";
 
@@ -47,4 +48,3 @@ public class EndEffector extends SubsystemBase {
     return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
 }
-
