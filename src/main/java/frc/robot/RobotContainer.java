@@ -17,18 +17,14 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.RobotState.ScoringMode;
 import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
@@ -39,7 +35,6 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
-import frc.robot.mechanismVisualization.SimpleMechanismVisualization;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -47,22 +42,15 @@ import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
-import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.limelight.Limelight;
-import frc.robot.subsystems.limelight.LimelightIO;
-import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -70,6 +58,11 @@ import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
+import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.visualization.GamepieceVisualization;
+import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -89,8 +82,8 @@ public class RobotContainer {
   private final Intake intake;
   private final Shooter shooter;
   private final EndEffector endEffector;
-  private final Limelight limelight;
   private final LED led;
+  private final VisionGamepiece visionGamepiece;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -135,8 +128,9 @@ public class RobotContainer {
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
       led = new LED();
+      visionGamepiece =
+          new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -191,7 +185,8 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -209,11 +204,26 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2024:
+          // FIXME:
+          // drivetrain =
+          //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+
+          // vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
+          // arm = new Arm(new ArmIOReal());
+          // elevator = new Elevator(new ElevatorIOReal());
+          // intake = new Intake(new IntakeIOReal());
+          // shooter = new Shooter(new ShooterIOReal());
+          // wrist = new Wrist(new WristIOReal());
+          // endEffector = new EndEffector(new EndEffectorIOReal());
+
+          DriverStation.silenceJoystickConnectionWarning(true);
+
           drivetrain =
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
           vision =
@@ -223,12 +233,6 @@ public class RobotContainer {
                   drivetrain::addVisionEstimate,
                   config.getVisionModuleObjects());
           arm = new Arm(new ArmIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
-          intake = new Intake(new IntakeIOReal());
-          shooter = new Shooter(new ShooterIOReal());
-          endEffector = new EndEffector(new EndEffectorIOReal());
-          limelight = new Limelight(new LimelightIOReal(), drivetrain::getPoseEstimatorPose);
-          led = new LED();
 
           // uncomment this if testing an individual subsystem. Make every subsystem except the one
           // you are testing have a blank IO
@@ -249,6 +253,13 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           // led = new LED();
+          elevator = new Elevator(new ElevatorIO() {});
+          intake = new Intake(new IntakeIO() {});
+          shooter = new Shooter(new ShooterIO() {});
+          endEffector = new EndEffector(new EndEffectorIO() {});
+          led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         default:
@@ -265,8 +276,9 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
           led = new LED();
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
       }
     }
@@ -365,8 +377,6 @@ public class RobotContainer {
           ----- end command -----
           Vision
             10. check localization vision (preferably with april tag)
-          Limelight
-            11. check limelight (preferably with note)
 
             12. look at LEDs
             13. double check connection from pigeon
@@ -381,45 +391,23 @@ public class RobotContainer {
     */
     // ----------- DRIVER CONTROLS ------------
     driverController.leftBumper().whileTrue(new EjectGamepiece(intake));
-    // driverController
-    //     .leftTrigger()
-    //     .whileTrue(
-    //         new RotateToSpeaker(
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             limelight::getClosestGamepiece,
-    //             drivetrain,
-    //             new Rotation2d(),
-    //             () -> -controller.getRightX(),
-    //             0.3));
     driverController
         .leftTrigger()
         .whileTrue(
-            new DriveToGamepiece(limelight::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+            new DriveToGamepiece(
+                visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
     driverController
         .rightBumper()
-        .onTrue(
-            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.SPEAKER)))
-        .onFalse(
-            new InstantCommand(() -> RobotState.getInstance().setScoringMode(ScoringMode.NONE)))
+        .whileTrue(new ShooterShootMode(shooter, drivetrain, driverController.a(), () -> false))
         .whileTrue(
             new RotateToSpeaker(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
-                () ->
-                    Constants.isRedAlliance()
-                        ? new Translation2d(16.281435012817383, 5.498747638702393)
-                        : new Translation2d(0.03950466960668564, 5.498747638702393),
                 drivetrain,
                 () -> false,
                 new Rotation2d(Math.PI),
                 shooter::getRPM));
-    ;
-
-    driverController
-        .rightTrigger()
-        .whileTrue(new IntakeGamepiece(intake, driverController.getHID()));
   }
 
   /**
@@ -457,12 +445,12 @@ public class RobotContainer {
         shooter.getRPM(),
         elevator.getHeightInches());
     SimpleMechanismVisualization.logMechanism();
-  }
-
-  public void updateRobotState() {
-    Command shootModeCommand = new ShooterShootMode(shooter, drivetrain, shooter::getRPM);
-    if (RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER)
-        && !CommandScheduler.getInstance().isScheduled(shootModeCommand))
-      CommandScheduler.getInstance().schedule(shootModeCommand);
+    GamepieceVisualization.updateVisualization(
+        drivetrain.getPoseEstimatorPose(),
+        drivetrain.getFieldRelativeVelocities().getTranslation(),
+        shooter.getPitch(),
+        shooter.getRPM(),
+        driverController.a().getAsBoolean());
+    GamepieceVisualization.logTraj();
   }
 }

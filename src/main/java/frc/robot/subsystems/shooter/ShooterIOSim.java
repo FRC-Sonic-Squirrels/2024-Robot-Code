@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class ShooterIOSim implements ShooterIO {
 
@@ -32,6 +33,12 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Launcher.GEARING,
           Constants.ShooterConstants.Launcher.MOI);
 
+  private DCMotorSim kickerMotorSim =
+      new DCMotorSim(
+          DCMotor.getFalcon500Foc(1),
+          Constants.ShooterConstants.Kicker.GEARING,
+          Constants.ShooterConstants.Kicker.MOI);
+
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 
@@ -42,6 +49,9 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotControlEffort = 0.0;
   private double pivotOpenLoopVolts = 0.0;
   private double pivotKg = 0.0;
+  private double kickerVolts = 0.0;
+
+  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Shooter/beamBreak", false);
 
   private double launcherOpenLoopVolts = 0.0;
 
@@ -52,11 +62,15 @@ public class ShooterIOSim implements ShooterIO {
 
     pivot.update(0.02);
     launcherMotorSim.update(0.02);
+    kickerMotorSim.update(0.02);
 
     pivotFeedback.setTolerance(1.0);
 
     inputs.pitch = new Rotation2d(pivot.getAngleRads());
-    inputs.RPM = launcherMotorSim.getAngularVelocityRPM();
+    inputs.RPM = 5800.0;
+    inputs.kickerRPM = kickerMotorSim.getAngularVelocityRPM();
+
+    inputs.beamBreak = beamBreak.get();
 
     // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
     double ff = 0.0;
@@ -85,6 +99,7 @@ public class ShooterIOSim implements ShooterIO {
     launcherMotorSim.setInputVoltage(launcherOpenLoopVolts);
 
     pivot.setInputVoltage(MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
+    kickerMotorSim.setInputVoltage(MathUtil.clamp(kickerVolts, -12.0, 12.0));
     Logger.recordOutput("Shooter/outputVoltage", MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
 
     Logger.recordOutput("Shooter/targetVelRadPerSec", pivotTargetVelRadPerSec);
@@ -126,5 +141,10 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setLauncherPercentOut(double percent) {
     launcherOpenLoopVolts = percent * 12.0;
+  }
+
+  @Override
+  public void setKickerVoltage(double volts) {
+    kickerVolts = volts;
   }
 }

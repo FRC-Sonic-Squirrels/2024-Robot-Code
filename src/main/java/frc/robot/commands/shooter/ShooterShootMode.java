@@ -6,22 +6,21 @@ package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.RobotState;
-import frc.robot.RobotState.ScoringMode;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterShootMode extends Command {
   private Shooter shooter;
   private Drivetrain drive;
   private Translation2d speakerPose;
-  private DoubleSupplier shooterRPM;
-  private Supplier<Pose2d> staticRobotPose;
+  private BooleanSupplier shootGamepiece;
+  private BooleanSupplier driveIsAtAngle;
+  private Timer runTime = new Timer();
 
   // private LoggedTunableNumber kp = new LoggedTunableNumber("ShooterDefaultCommand/pitchKp",
   // 10.0);
@@ -35,11 +34,17 @@ public class ShooterShootMode extends Command {
   // private double shooterPitchVelCorrection = 0.0;
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterShootMode(Shooter shooter, Drivetrain drive, DoubleSupplier shooterRPM) {
+  public ShooterShootMode(
+      Shooter shooter,
+      Drivetrain drive,
+      BooleanSupplier shootGamepiece,
+      BooleanSupplier driveIsAtAngle) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
-    this.shooterRPM = shooterRPM;
+    this.shootGamepiece = shootGamepiece;
+    this.driveIsAtAngle = driveIsAtAngle;
+
     addRequirements(shooter);
     setName("ShooterShootMode");
   }
@@ -48,6 +53,7 @@ public class ShooterShootMode extends Command {
   @Override
   public void initialize() {
     speakerPose = Constants.FieldConstants.getSpeakerTranslation();
+    runTime.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -63,7 +69,7 @@ public class ShooterShootMode extends Command {
     double dist = Math.hypot(horizDist, Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
 
     double shooterTangentialSpeed =
-        shooterRPM.getAsDouble()
+        shooter.getRPM()
             * 60.0
             * Math.PI
             * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS;
@@ -92,37 +98,6 @@ public class ShooterShootMode extends Command {
         "ShooterShootMode/futureShooterBasePose",
         new Pose2d(shooterBaseTranslation, usedRobotPose.getRotation()));
 
-    // VELOCITY CONTROL
-
-    // shooterPitchPID.setTolerance(Math.toRadians(tolerance.get()));
-
-    // if (shootSupplier.getAsBoolean()) {
-    //
-    //   // if (shooter.launcherIsAtTargetVel()) {
-    //   // TODO: logic for end effector running. Also check if arm is in correct position
-    //   // }
-    // speakerHeading =
-    //     new Rotation2d(
-    //         drive.getPoseEstimatorPose().getX() - speakerPose.getX(),
-    //         drive.getPoseEstimatorPose().getY() - speakerPose.getY());
-    // double linearVelSpeaker =
-    //     new Translation2d(
-    //             drive.getFieldRelativeVelocities().getX(),
-    //             drive.getFieldRelativeVelocities().getY())
-    //         .rotateBy(speakerHeading)
-    //         .getX();
-    // shooterPitchVelCorrection =
-    //     Constants.ShooterConstants.Pivot.PITCH_VEL_RAD_PER_SEC(linearVelSpeaker, distToSpeaker);
-
-    // double targetAngle =
-    //     Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker).getRadians();
-    // double vel =
-    //     shooterPitchPID.calculate(shooter.getPitch().getRadians(), targetAngle)
-    //         + shooterPitchVelCorrection;
-    // shooter.setPitchAngularVel(vel);
-
-    // POSITIONAL CONTROL
-
     shooter.setPivotPosition(
         Constants.ShooterConstants.Pivot.DISTANCE_TO_SHOOTING_PITCH(distToSpeaker));
 
@@ -144,6 +119,16 @@ public class ShooterShootMode extends Command {
                     currentShooterTranslation.getX() - speakerPose.getX(),
                     currentShooterTranslation.getY() - speakerPose.getY()))
             .getDegrees());
+
+    boolean shoot =
+        shootGamepiece.getAsBoolean() && shooter.pivotIsAtTarget() && driveIsAtAngle.getAsBoolean();
+    Logger.recordOutput("ShooterShootMode/shooting", shoot);
+
+    if (shoot) {
+      shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+    } else {
+      shooter.setKickerPercentOut(0.0);
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -153,6 +138,6 @@ public class ShooterShootMode extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !RobotState.getInstance().getScoringMode().equals(ScoringMode.SPEAKER);
+    return false;
   }
 }
