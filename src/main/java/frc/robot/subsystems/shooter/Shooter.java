@@ -124,10 +124,6 @@ public class Shooter extends SubsystemBase {
     io.setLauncherVoltage(volts);
   }
 
-  public void setLauncherPercentOut(double percent) {
-    io.setLauncherPercentOut(percent);
-  }
-
   public double getRPM() {
     return inputs.launcherRPM;
   }

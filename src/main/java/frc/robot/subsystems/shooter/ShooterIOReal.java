@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -49,14 +50,23 @@ public class ShooterIOReal implements ShooterIO {
   private final MotionMagicVelocityVoltage launcherClosedLoop =
       new MotionMagicVelocityVoltage(0.0).withEnableFOC(false);
 
+  private final VoltageOut launcherOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
+
   public ShooterIOReal() {
+    // --- launcher config ---
     TalonFXConfiguration launcherConfig = new TalonFXConfiguration();
 
     // FIXME: get true current limits
     launcherConfig.CurrentLimits.SupplyCurrentLimit = 40;
     launcherConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    launcherConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
+
+    launcher_lead.getConfigurator().apply(launcherConfig);
+    launcher_follower.getConfigurator().apply(launcherConfig);
     launcher_follower.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
+    // --- pivot config ---
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
 
     pivotConfig.Feedback.SensorToMechanismRatio = Constants.ShooterConstants.Pivot.GEARING;
@@ -128,11 +138,7 @@ public class ShooterIOReal implements ShooterIO {
     inputs.pivotAppliedVotls = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrentAmps.getValueAsDouble();
 
-    inputs.launcherRPM =
-        launcherLeadVelocity.getValueAsDouble()
-            * ShooterConstants.Launcher.GEARING
-            * ShooterConstants.Launcher.WHEEL_DIAMETER_METERS
-            * Math.PI;
+    inputs.launcherRPM = launcherLeadVelocity.getValueAsDouble() * 60; // rps to rpm = mult by 60
     inputs.launcherAppliedVolts =
         new double[] {
           launcherLeadVoltage.getValueAsDouble(), launcherFollowerVoltage.getValueAsDouble()
@@ -168,10 +174,14 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   // LAUNCHER
-
   @Override
   public void setLauncherVoltage(double volts) {
-    launcher_lead.setVoltage(volts);
+    launcher_lead.setControl(launcherOpenLoop.withOutput(volts));
+  }
+
+  @Override
+  public void setLauncherRPM(double rpm) {
+    launcher_lead.setControl(launcherClosedLoop.withVelocity(rpm));
   }
 
   @Override
