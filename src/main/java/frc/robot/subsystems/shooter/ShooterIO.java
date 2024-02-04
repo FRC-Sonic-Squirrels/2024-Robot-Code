@@ -7,18 +7,20 @@ public interface ShooterIO {
   /** Contains all of the input data received from hardware. */
   @AutoLog
   public static class ShooterIOInputs {
-    public Rotation2d pitch = new Rotation2d();
-    public double pivotVoltage = 0.0;
-    public double pivotTempCelsius = 0.0;
+    public Rotation2d pivotPosition = new Rotation2d();
+    public double pivotVelocityRadsPerSec = 0.0;
+    public double pivotAppliedVotls = 0.0;
+    public double pivotCurrentAmps = 0.0;
 
-    public double RPM = 0.0;
-    public double launcherLeadTempCelsius = 0.0;
-    public double launcherFollowTempCelsius = 0.0;
-    public double launcherVoltage = 0.0;
+    public double launcherRPM = 0.0;
+    public double[] launcherAppliedVolts = new double[] {};
+    public double[] launcherCurrentAmps = new double[] {};
 
-    public double kickerVoltage = 0.0;
-    public double kickerRPM = 0.0;
-    public double kickerTempCelsius = 0.0;
+    public double kickerAppliedVolts = 0.0;
+    public double kickerCurrentAmps = 0.0;
+
+    // launcher lead, launcher follower, pivot, kicker
+    public double[] tempsCelcius = new double[] {};
 
     public boolean beamBreak = false;
   }

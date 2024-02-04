@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
   TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
@@ -22,11 +23,24 @@ public class ShooterIOReal implements ShooterIO {
 
   public Rotation2d pitch = new Rotation2d();
 
+  private final StatusSignal<Double> pivotPosition;
+  private final StatusSignal<Double> pivotVelocity;
   private final StatusSignal<Double> pivotVoltage;
-  private final StatusSignal<Double> pivotRotations;
+  private final StatusSignal<Double> pivotCurrentAmps;
+
+  private final StatusSignal<Double> launcherLeadVelocity;
+  private final StatusSignal<Double> launcherLeadVoltage;
+  private final StatusSignal<Double> launcherFollowerVoltage;
+  private final StatusSignal<Double> launcherLeadCurrentAmps;
+  private final StatusSignal<Double> launcherFollowerCurrentAmps;
+
+  private final StatusSignal<Double> kickerAppliedVolts;
+  private final StatusSignal<Double> kickerCurrentAmps;
+
   private final StatusSignal<Double> launcherLeadTempCelsius;
   private final StatusSignal<Double> launcherFollowTempCelsius;
-  private final StatusSignal<Double> launcherVoltage;
+  private final StatusSignal<Double> pivotTempCelsius;
+  private final StatusSignal<Double> kickerTempCelsius;
 
   // FIX: add FOC
   private final MotionMagicVoltage closedLoopControl =
@@ -49,30 +63,95 @@ public class ShooterIOReal implements ShooterIO {
     pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
+    pivotPosition = pivot.getPosition();
+    pivotVelocity = pivot.getVelocity();
     pivotVoltage = pivot.getMotorVoltage();
-    pivotRotations = pivot.getPosition();
+    pivotCurrentAmps = pivot.getStatorCurrent();
+
+    launcherLeadVelocity = launcher_lead.getVelocity();
+
+    launcherLeadVoltage = launcher_lead.getMotorVoltage();
+    launcherFollowerVoltage = launcher_follower.getMotorVoltage();
+    launcherLeadCurrentAmps = launcher_lead.getStatorCurrent();
+    launcherFollowerCurrentAmps = launcher_follower.getStatorCurrent();
+
+    kickerAppliedVolts = kicker.getMotorVoltage();
+    kickerCurrentAmps = kicker.getStatorCurrent();
+
     launcherLeadTempCelsius = launcher_lead.getDeviceTemp();
     launcherFollowTempCelsius = launcher_lead.getDeviceTemp();
-    launcherVoltage = launcher_lead.getMotorVoltage();
+    pivotTempCelsius = pivot.getDeviceTemp();
+    kickerTempCelsius = kicker.getDeviceTemp();
 
     // FIXME: add BaseStatusSignal.setUpdateFrequency()
     // FIXME: optimize bus utilization
+
+    BaseStatusSignal.setUpdateFrequencyForAll(100, pivotPosition, launcherLeadVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        1, launcherLeadTempCelsius, launcherFollowTempCelsius, kickerTempCelsius, pivotTempCelsius);
+
+    launcher_lead.optimizeBusUtilization();
+    launcher_follower.optimizeBusUtilization();
+    pivot.optimizeBusUtilization();
+    kicker.optimizeBusUtilization();
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     BaseStatusSignal.refreshAll(
+        pivotPosition,
+        pivotVelocity,
         pivotVoltage,
-        pivotRotations,
+        pivotCurrentAmps,
+        // --
+        launcherLeadVelocity,
+        launcherLeadVoltage,
+        launcherFollowerVoltage,
+        launcherLeadCurrentAmps,
+        launcherFollowerCurrentAmps,
+        // --
+        kickerAppliedVolts,
+        kickerCurrentAmps,
+        // --
         launcherLeadTempCelsius,
         launcherFollowTempCelsius,
-        launcherVoltage);
+        pivotTempCelsius,
+        kickerTempCelsius);
 
-    inputs.pitch = Rotation2d.fromRotations(pivotRotations.getValueAsDouble());
-    inputs.pivotVoltage = pivotVoltage.getValue();
-    inputs.launcherLeadTempCelsius = launcherLeadTempCelsius.getValueAsDouble();
-    inputs.launcherFollowTempCelsius = launcherFollowTempCelsius.getValueAsDouble();
-    inputs.launcherVoltage = launcherVoltage.getValueAsDouble();
+    inputs.pivotPosition = Rotation2d.fromRotations(pivotPosition.getValueAsDouble());
+    // rotations to rads = mult by 2pi. 1 full rot = 2pi rads
+    inputs.pivotVelocityRadsPerSec = pivotVelocity.getValueAsDouble() * (2 * Math.PI);
+    inputs.pivotAppliedVotls = pivotVoltage.getValueAsDouble();
+    inputs.pivotCurrentAmps = pivotCurrentAmps.getValueAsDouble();
+
+    inputs.launcherRPM =
+        launcherLeadVelocity.getValueAsDouble()
+            * ShooterConstants.Launcher.GEARING
+            * ShooterConstants.Launcher.WHEEL_DIAMETER_METERS
+            * Math.PI;
+    inputs.launcherAppliedVolts =
+        new double[] {
+          launcherLeadVoltage.getValueAsDouble(), launcherFollowerVoltage.getValueAsDouble()
+        };
+    inputs.launcherCurrentAmps =
+        new double[] {
+          launcherLeadCurrentAmps.getValueAsDouble(), launcherFollowerCurrentAmps.getValueAsDouble()
+        };
+
+    inputs.kickerAppliedVolts = kickerAppliedVolts.getValueAsDouble();
+    inputs.kickerCurrentAmps = kickerCurrentAmps.getValueAsDouble();
+
+    inputs.tempsCelcius =
+        new double[] {
+          launcherLeadTempCelsius.getValueAsDouble(),
+          launcherFollowTempCelsius.getValueAsDouble(),
+          pivotTempCelsius.getValueAsDouble(),
+          kickerTempCelsius.getValueAsDouble()
+        };
   }
 
   // PIVOT

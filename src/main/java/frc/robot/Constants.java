@@ -226,7 +226,8 @@ public final class Constants {
 
     public static class Launcher {
       public static final double MOI = 5.0;
-      public static final double GEARING = 1.0;
+      // FIX ME: THIS VALUE HAS TO BE CONFIRMED
+      public static final double GEARING = (30.0 / 18.0);
       public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
     }
 
