@@ -128,7 +128,8 @@ public class ShootingSolver {
 
     double thetaInNewFrame = Math.asin(-robotVelYInNewFrame / VnoteHorizontal);
 
-    if (Double.isNaN(thetaInNewFrame) || (robotVelXInNewFrame + VnoteHorizontal * Math.cos(thetaInNewFrame) <= 0)) {
+    if (Double.isNaN(thetaInNewFrame)
+        || (robotVelXInNewFrame + VnoteHorizontal * Math.cos(thetaInNewFrame) <= 0)) {
       return null;
     }
 
