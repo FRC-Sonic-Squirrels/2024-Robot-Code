@@ -1,6 +1,5 @@
 package frc.lib.team2930;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 
 public class ShootingSolver {
@@ -9,6 +8,8 @@ public class ShootingSolver {
   private final double shooterSpeed;
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
+
+  public record Solution(Rotation2d heading, Rotation2d pitch) {}
 
   public ShootingSolver(
       Translation3d Pspeaker,
@@ -30,10 +31,9 @@ public class ShootingSolver {
   }
 
   /**
-   * @return Rotation2d 1: robot theta Rotation2d 2: shooter pitch
+   * @return robot theta and shooter pitch
    */
-  public Pair<Rotation2d, Rotation2d> computeAngles(
-      double currentTime, Pose2d robotPose, Translation2d robotVel) {
+  public Solution computeAngles(double currentTime, Pose2d robotPose, Translation2d robotVel) {
     double timeToShoot;
     if (Double.isNaN(this.startOfShootingTimestamp)) {
       timeToShoot = shootingTime;
@@ -95,10 +95,10 @@ public class ShootingSolver {
     // -------------- = ------------------------------
     // dPspeakerAxisX   (Vr_x + Vs * cos(targetTheta))
     //
-    double targetTheta;
-
     double robotVelX = robotVel.getX();
     double robotVelY = robotVel.getY();
+
+    double targetTheta;
 
     if (Math.abs(dPspeakerAxisY) < 0.001) {
       //
@@ -109,22 +109,39 @@ public class ShootingSolver {
       // -> -Vr_y / Vs = sin(targetTheta))
       // -> targetTheta = arcsin(-Vr_y / Vs)
       //
+      if (VnoteHorizontal < Math.abs(robotVelY)) {
+        // Note is slower than robot, it won't be possible to overcome drift.
+        return null;
+      }
+
       targetTheta = Math.asin(-robotVelY / VnoteHorizontal);
     } else {
+      // Archit's math for solving theta
       var a = -dPspeakerAxisX / dPspeakerAxisY;
 
       var b =
           (dPspeakerAxisX * robotVelY - dPspeakerAxisY * robotVelX)
               / (VnoteHorizontal * dPspeakerAxisY);
 
-      // Archit's math for solving theta
-      targetTheta = Math.acos(b / Math.sqrt(1.0 + a * a)) + Math.atan(a);
+      var c = b / Math.sqrt(1.0 + a * a);
 
-      if (dPspeakerAxisY >= 0) {
-        targetTheta += Math.PI;
+      if (Math.abs(c) > 1) {
+        // Note is slower than robot, it won't be possible to overcome drift.
+        return null;
       }
+
+      targetTheta = Math.acos(c) + Math.atan2(-dPspeakerAxisX, dPspeakerAxisY);
     }
 
-    return new Pair<>(new Rotation2d(targetTheta), new Rotation2d(pitchNote));
+    double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
+    double noteX = robotVelX + VnoteHorizontal * Math.cos(targetTheta);
+    double noteY = robotVelY + VnoteHorizontal * Math.sin(targetTheta);
+    double nodeHeading = Math.atan2(noteY, noteX);
+    if (speakerHeading * nodeHeading < 0) {
+      // Robot too fast to take the shot.
+      return null;
+    }
+
+    return new Solution(new Rotation2d(targetTheta), new Rotation2d(pitchNote));
   }
 }
