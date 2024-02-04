@@ -3,6 +3,8 @@ package frc.lib.team2930;
 import edu.wpi.first.math.geometry.*;
 
 public class ShootingSolver {
+  public static boolean DebugSpew;
+
   private final Translation3d Pspeaker;
   private final Translation3d PaxisOfRotationShooter;
   private final double shooterSpeed;
@@ -47,34 +49,41 @@ public class ShootingSolver {
     // 3d velocity vector of robot
     var Vrobot = GeometryUtil.translation2dTo3d(robotVel);
 
-    // position of robot when note leaves shooter
+    // Position of robot when note leaves shooter
     var ProbotFuture = Probot.plus(Vrobot.times(timeToShoot));
+    if (DebugSpew) {
+      System.out.printf("ProbotFuture: %s\n", ProbotFuture);
+    }
 
-    // vector pointing from axis to speaker at time that note leaves shooter
+    // Vector pointing from robot to speaker at time that note leaves shooter
     var dPspeaker = Pspeaker.minus(ProbotFuture);
 
-    // velocity theta of gamepiece
+    // Velocity theta of gamepiece
     var thetaNote = Math.atan2(dPspeaker.getY(), dPspeaker.getX());
 
-    // current heading of robot
-    Rotation3d heading = new Rotation3d(0.0, 0.0, thetaNote);
+    // Robot relative translation of axis of rotation of shooter
+    var Paxis = PaxisOfRotationShooter.rotateBy(new Rotation3d(0.0, 0.0, thetaNote));
 
-    // robot relative translation of axis of rotation of shooter
-    var Paxis = PaxisOfRotationShooter.rotateBy(heading);
-
-    // position of axis when note leaves shooter
+    // Position of axis when note leaves shooter
     var PaxisFuture = ProbotFuture.plus(Paxis);
 
+    // Vector from the note to the speaker. We need to align with this vector to score.
     var dPspeakerAxis = Pspeaker.minus(PaxisFuture);
 
-    // horizontal dist to speaker
     double dPspeakerAxisX = dPspeakerAxis.getX();
     double dPspeakerAxisY = dPspeakerAxis.getY();
 
+    // Horizontal dist to speaker
     var xyDistToSpeaker = Math.hypot(dPspeakerAxisX, dPspeakerAxisY);
+    if (DebugSpew) {
+      System.out.printf("xyDistToSpeaker: %s\n", xyDistToSpeaker);
+    }
 
-    // desired shooter pivot pitch
+    // Desired shooter pivot pitch
     var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+
+    // Direction to the speaker from the note.
+    double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
 
     var VnoteHorizontal = shooterSpeed * Math.cos(pitchNote);
 
@@ -84,62 +93,64 @@ public class ShootingSolver {
     // Vn_x = (Vr_x + Vs * cos(targetTheta))
     // Vn_y = (Vr_y + Vs * sin(targetTheta))
     //
-    // The Vn vector has to be aligned with dPspeaker vector, so
+    // The Vn vector has to be aligned with dPspeakerAxis vector, so
     //
     // Vn_x = c * dPspeakerAxisX
     // Vn_y = c * dPspeakerAxisY
     //
-    // Substituting in the system of equations and dividing to get rid of 'c':
+    // To make it easier, we rotate the reference frame such that the Y velocity will be zero:
     //
-    // dPspeakerAxisY   (Vr_y + Vs * sin(targetTheta))
-    // -------------- = ------------------------------
-    // dPspeakerAxisX   (Vr_x + Vs * cos(targetTheta))
+    // Vn_y = 0
+    // ->  Vr_y + Vs * sin(targetTheta) = 0
+    // -> -Vr_y / Vs = sin(targetTheta))
+    // -> targetTheta = arcsin(-Vr_y / Vs)
     //
-    double robotVelX = robotVel.getX();
-    double robotVelY = robotVel.getY();
+    // To verify that the condition is physically possible, we check that the note moves towards the
+    // speaker:
+    //
+    // Vn_x = (Vr_x + Vs * cos(targetTheta)) > 0
+    //
+    var noteRelativeVel = new Translation2d(VnoteHorizontal, 0);
 
-    double targetTheta;
+    Rotation2d frameRotation = Rotation2d.fromRadians(-speakerHeading);
+    var robotVelInNewFrame = robotVel.rotateBy(frameRotation);
+    var noteRelativeVelInNewFrame = noteRelativeVel.rotateBy(frameRotation);
 
-    if (Math.abs(dPspeakerAxisY) < 0.001) {
-      //
-      // Speaker right in front of robot
-      //
-      // -> Vn_y = 0
-      // ->  (Vr_y + Vs * sin(targetTheta))
-      // -> -Vr_y / Vs = sin(targetTheta))
-      // -> targetTheta = arcsin(-Vr_y / Vs)
-      //
-      if (VnoteHorizontal < Math.abs(robotVelY)) {
-        // Note is slower than robot, it won't be possible to overcome drift.
-        return null;
-      }
+    double robotVelXInNewFrame = robotVelInNewFrame.getX();
+    double robotVelYInNewFrame = robotVelInNewFrame.getY();
+    double noteVelYInNewFrame = noteRelativeVelInNewFrame.getY();
 
-      targetTheta = Math.asin(-robotVelY / VnoteHorizontal);
-    } else {
-      // Archit's math for solving theta
-      var a = -dPspeakerAxisX / dPspeakerAxisY;
-
-      var b =
-          (dPspeakerAxisX * robotVelY - dPspeakerAxisY * robotVelX)
-              / (VnoteHorizontal * dPspeakerAxisY);
-
-      var c = b / Math.sqrt(1.0 + a * a);
-
-      if (Math.abs(c) > 1) {
-        // Note is slower than robot, it won't be possible to overcome drift.
-        return null;
-      }
-
-      targetTheta = Math.acos(c) + Math.atan2(-dPspeakerAxisX, dPspeakerAxisY);
+    if (DebugSpew) {
+      System.out.printf(
+          "robotVelYInNewFrame: %s  noteVelYInNewFrame:%s\n",
+          robotVelYInNewFrame, noteVelYInNewFrame);
     }
 
-    double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
-    double noteX = robotVelX + VnoteHorizontal * Math.cos(targetTheta);
-    double noteY = robotVelY + VnoteHorizontal * Math.sin(targetTheta);
-    double nodeHeading = Math.atan2(noteY, noteX);
-    if (speakerHeading * nodeHeading < 0) {
-      // Robot too fast to take the shot.
+    double thetaInNewFrame = Math.asin(-robotVelYInNewFrame / VnoteHorizontal);
+
+    if (Double.isNaN(thetaInNewFrame) || (robotVelXInNewFrame + VnoteHorizontal * Math.cos(thetaInNewFrame) <= 0)) {
       return null;
+    }
+
+    double targetTheta = speakerHeading + thetaInNewFrame;
+
+    if (DebugSpew) {
+      double robotVelX = robotVel.getX();
+      double robotVelY = robotVel.getY();
+
+      System.out.printf("robotVelX:%s robotVelY:%s\n", robotVelX, robotVelY);
+      System.out.printf(
+          "VnoteHorizontal:%s targetTheta:%s\n", VnoteHorizontal, Math.toDegrees(targetTheta));
+
+      System.out.printf(
+          "speaker: Heading:%s  dx:%s dy:%s\n",
+          Math.toDegrees(speakerHeading), dPspeakerAxisX, dPspeakerAxisY);
+
+      double noteX = robotVelX + VnoteHorizontal * Math.cos(targetTheta);
+      double noteY = robotVelY + VnoteHorizontal * Math.sin(targetTheta);
+      double nodeHeading = Math.atan2(noteY, noteX);
+      System.out.printf(
+          "nodeHeading: %s  noteX:%s noteY:%s\n", Math.toDegrees(nodeHeading), noteX, noteY);
     }
 
     return new Solution(new Rotation2d(targetTheta), new Rotation2d(pitchNote));

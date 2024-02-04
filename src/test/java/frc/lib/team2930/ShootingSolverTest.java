@@ -1,14 +1,60 @@
 package frc.lib.team2930;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import org.junit.jupiter.api.Test;
 
-class ShootingSolverTest {
+public class ShootingSolverTest {
   @Test()
-  void testOrbit() {
+  public void testOrbit() {
+    Translation3d Pspeaker = new Translation3d(0, 0, 10);
+    Translation3d PaxisOfRotationShooter = new Translation3d(0, 0, 0);
+    double shootingTime = 1;
+
+    var robotVel = new Translation2d(10, 0);
+    var robotPos = new Translation2d(0, 10);
+
+    //
+    // Create a trajectory tangential to the speaker, rotating it around the speaker,
+    // testing different shooter speeds.
+    //
+    for (double shooterSpeed = 10; shooterSpeed < 50; shooterSpeed += 10) {
+
+      var solver = new ShootingSolver(Pspeaker, PaxisOfRotationShooter, shooterSpeed, shootingTime);
+      for (double angle = 0; angle < 360; angle += 45) {
+        var rot = Rotation2d.fromDegrees(angle);
+
+        var robotPosRotated = robotPos.rotateBy(rot);
+        var robotVelRotated = robotVel.rotateBy(rot);
+
+        var robotPosRotatedAndTranslated = robotPosRotated.minus(robotVelRotated);
+        var robotPose = new Pose2d(robotPosRotatedAndTranslated, new Rotation2d());
+
+        var res = solver.computeAngles(0, robotPose, robotVelRotated);
+        double VnoteHorizontal = shooterSpeed * Math.cos(Math.toRadians(45));
+        if (VnoteHorizontal < 10) {
+          assertNull(res);
+        } else {
+
+          assertNotNull(res);
+          assertEquals(45.0, res.pitch().getDegrees(), 0.0001);
+
+          var angleDiff = angle - res.heading().getDegrees();
+          if (angleDiff > 360) {
+            angleDiff -= 360;
+          }
+
+          assertEquals(180 - Math.toDegrees(Math.acos(10 / VnoteHorizontal)), angleDiff, 0.0001);
+        }
+      }
+    }
+  }
+
+  public void printSpeedSweep() {
     Translation3d Pspeaker = new Translation3d(0, 0, 10);
     Translation3d PaxisOfRotationShooter = new Translation3d(0, 0, 0);
     double shootingTime = 1;
