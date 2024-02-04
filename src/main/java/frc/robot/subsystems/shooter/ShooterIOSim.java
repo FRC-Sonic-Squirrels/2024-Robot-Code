@@ -138,11 +138,6 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   @Override
-  public void setLauncherPercentOut(double percent) {
-    launcherOpenLoopVolts = percent * 12.0;
-  }
-
-  @Override
   public void setKickerVoltage(double volts) {
     kickerVolts = volts;
   }

@@ -29,8 +29,9 @@ public interface ShooterIO {
   public default void updateInputs(ShooterIOInputs inputs) {}
 
   // PIVOT
-
   public default void setPivotPosition(Rotation2d rot) {}
+
+  public default void setPivotVoltage(double volts) {}
 
   public default void setPivotClosedLoopConstants(
       double kP,
@@ -39,18 +40,14 @@ public interface ShooterIO {
       double maxProfiledVelocity,
       double maxProfiledAcceleration) {}
 
-  public default void setPivotVoltage(double volts) {}
-
   // LAUNCHER
-
   public default void setLauncherVoltage(double volts) {}
 
-  public default void setLauncherPercentOut(double percent) {}
+  public default void setLauncherRPM(double rpm) {}
 
   public default void setLauncherClosedLoopConstants(
       double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {}
 
   // KICKER
-
   public default void setKickerVoltage(double volts) {}
 }
