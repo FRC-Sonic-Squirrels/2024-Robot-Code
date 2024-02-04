@@ -33,13 +33,13 @@ public class ShootingSolver {
     this.shootingTime = shootingTime;
   }
 
-  public void startShooting(double timestamp) {
-    startOfShootingTimestamp = timestamp;
-  }
+  // public void startShooting(double timestamp) {
+  //   startOfShootingTimestamp = timestamp;
+  // }
 
-  public void endShooting() {
-    startOfShootingTimestamp = Double.NaN;
-  }
+  // public void endShooting() {
+  //   startOfShootingTimestamp = Double.NaN;
+  // }
 
   /**
    * @return First: target robot theta Second: target robot rotational velocity
@@ -72,6 +72,7 @@ public class ShootingSolver {
 
     // Translation2d futureVel = robotVel.plus(robotAcceleration.times(time));
 
+    Logger.recordOutput("ShootingSolver/dPSpeakerAxis", dPSpeakerAxis);
     //
     // The system of equations to solve is:
     //
