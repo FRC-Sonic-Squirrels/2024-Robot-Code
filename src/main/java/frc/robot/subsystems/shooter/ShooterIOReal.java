@@ -6,17 +6,19 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
 public class ShooterIOReal implements ShooterIO {
-  TalonFX lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
-  TalonFX follow = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
+  TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
+  TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
-
-  TalonFXConfiguration config = new TalonFXConfiguration();
+  TalonFX kicker = new TalonFX(Constants.CanIDs.SHOOTER_KICKER_CAN_ID);
 
   public Rotation2d pitch = new Rotation2d();
 
@@ -26,22 +28,35 @@ public class ShooterIOReal implements ShooterIO {
   private final StatusSignal<Double> launcherFollowTempCelsius;
   private final StatusSignal<Double> launcherVoltage;
 
+  // FIX: add FOC
   private final MotionMagicVoltage closedLoopControl =
       new MotionMagicVoltage(0).withEnableFOC(false);
 
+  private final MotionMagicVelocityVoltage launcherClosedLoop =
+      new MotionMagicVelocityVoltage(0.0).withEnableFOC(false);
+
   public ShooterIOReal() {
+    TalonFXConfiguration launcherConfig = new TalonFXConfiguration();
 
     // FIXME: get true current limits
-    config.CurrentLimits.SupplyCurrentLimit = 40;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    launcherConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    launcherConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    launcher_follower.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
-    follow.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
+    TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
+
+    pivotConfig.Feedback.SensorToMechanismRatio = Constants.ShooterConstants.Pivot.GEARING;
+    pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     pivotVoltage = pivot.getMotorVoltage();
     pivotRotations = pivot.getPosition();
-    launcherLeadTempCelsius = lead.getDeviceTemp();
-    launcherFollowTempCelsius = follow.getDeviceTemp();
-    launcherVoltage = lead.getMotorVoltage();
+    launcherLeadTempCelsius = launcher_lead.getDeviceTemp();
+    launcherFollowTempCelsius = launcher_lead.getDeviceTemp();
+    launcherVoltage = launcher_lead.getMotorVoltage();
+
+    // FIXME: add BaseStatusSignal.setUpdateFrequency()
+    // FIXME: optimize bus utilization
   }
 
   @Override
@@ -69,6 +84,18 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
+  public void setPivotVoltage(double volts) {
+    pivot.setVoltage(volts);
+  }
+
+  // LAUNCHER
+
+  @Override
+  public void setLauncherVoltage(double volts) {
+    launcher_lead.setVoltage(volts);
+  }
+
+  @Override
   public void setPivotClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
@@ -89,39 +116,21 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setPivotVoltage(double volts) {
-    pivot.setVoltage(volts);
-  }
-
-  // LAUNCHER
-
-  @Override
-  public void setLauncherVoltage(double volts) {
-    lead.setVoltage(volts);
-  }
-
-  @Override
-  public void setLauncherPercentOut(double percent) {
-    lead.set(percent);
-  }
-
-  @Override
   public void setLauncherClosedLoopConstants(
-      double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
+      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-    lead.getConfigurator().refresh(pidConfig);
-    lead.getConfigurator().refresh(mmConfig);
+    launcher_lead.getConfigurator().refresh(pidConfig);
+    launcher_lead.getConfigurator().refresh(mmConfig);
 
     pidConfig.kP = kP;
     pidConfig.kD = kD;
-    pidConfig.kG = kG;
 
     mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
-    lead.getConfigurator().apply(pidConfig);
-    lead.getConfigurator().apply(mmConfig);
+    launcher_lead.getConfigurator().apply(pidConfig);
+    launcher_lead.getConfigurator().apply(mmConfig);
   }
 }
