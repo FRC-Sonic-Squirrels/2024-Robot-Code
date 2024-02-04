@@ -6,7 +6,8 @@ public interface EndEffectorIO {
   /** Contains all of the input data received from hardware. */
   @AutoLog
   public static class EndEffectorIOInputs {
-    public double RPM = 0.0;
+    public double appliedVolts;
+    public double currentAmps;
     public double voltage = 0.0;
     public double tempCelsius = 0.0;
     public double intakeSideTOFDistanceInches = 0.0;
