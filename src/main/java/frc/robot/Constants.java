@@ -46,7 +46,7 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);

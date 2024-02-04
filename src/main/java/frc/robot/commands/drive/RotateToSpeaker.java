@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
+import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.Drivetrain;
@@ -55,6 +57,10 @@ public class RotateToSpeaker extends Command {
       new ArrayList<PIDTargetMeasurement>();
 
   private double pidLatency = 0.0;
+
+  private ShootingSolver solver =
+      new ShootingSolver(
+          Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
   // a bit
   // TODO: behavior is decent but pid needs to be tuned
@@ -125,17 +131,26 @@ public class RotateToSpeaker extends Command {
 
     var currentRot = drive.getRotation();
 
-    var goalRot =
-        calculateTargetRot(
-            robotRotationOffset,
-            shooterRPM.getAsDouble(),
-            futurePose,
-            drive.getPoseEstimatorPose(),
-            drive.getFieldRelativeVelocities().getY());
+    // var goalRot =
+    //     calculateTargetRot(
+    //         robotRotationOffset,
+    //         shooterRPM.getAsDouble(),
+    //         futurePose,
+    //         drive.getPoseEstimatorPose(),
+    //         drive.getFieldRelativeVelocities().getY());
+
+    var result =
+        solver.computeRobotYaw(
+            () -> pidLatency,
+            drive.getPoseEstimatorPose().getTranslation(),
+            drive.getFieldRelativeVelocities().getTranslation(),
+            drive.getFieldRelativeAccelerations());
+
+    solver.logTime(pidLatency);
 
     var rotationalEffort =
-        (rotationController.calculate(currentRot.getRadians(), goalRot.getRadians())
-            + rotVelCorrection);
+        (rotationController.calculate(currentRot.getRadians(), result.getFirst().getRadians())
+            + result.getSecond().getRadians());
 
     rotationalEffort =
         Math.copySign(
@@ -145,14 +160,14 @@ public class RotateToSpeaker extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
-    rotVelCorrection =
-        calculateRotVelRadPerSec(yVel, yVel, goalRot, futurePose, shooterRPM.getAsDouble());
+    // rotVelCorrection =
+    //     calculateRotVelRadPerSec(yVel, yVel, result, futurePose, shooterRPM.getAsDouble());
 
     targetMeasurements.add(
         new PIDTargetMeasurement(
             Timer.getFPGATimestamp(),
-            goalRot,
-            drive.getRotation().getRadians() <= goalRot.getRadians()));
+            result.getFirst().getRadians(),
+            drive.getRotation().getRadians() <= result.getFirst().getRadians()));
     for (int index = 0; index < targetMeasurements.size(); index++) {
       PIDTargetMeasurement measurement = targetMeasurements.get(index);
       if ((measurement.upDirection
@@ -166,13 +181,20 @@ public class RotateToSpeaker extends Command {
       }
     }
 
-    Logger.recordOutput(
-        "RotateToSpeaker/optimalRotationDegrees",
-        GeometryUtil.getHeading(
-                drive.getPoseEstimatorPose().getTranslation(),
-                calculateVirtualSpeakerTranslation(futurePose, shooterRPM.getAsDouble(), yVel))
-            .plus(robotRotationOffset)
-            .getDegrees());
+    // Rotation2d optimalAngle =
+    //     solver
+    //         .computeRobotYaw(
+    //             0.0,
+    //             drive.getPoseEstimatorPose().getTranslation(),
+    //             drive.getFieldRelativeVelocities().getTranslation(),
+    //             drive.getFieldRelativeAccelerations())
+    //         .getFirst();
+
+    // Logger.recordOutput("RotateToSpeaker/optimalRotationDegrees", optimalAngle.getDegrees());
+
+    // Logger.recordOutput(
+    //     "RotateToSpeaker/optimalPose",
+    //     new Pose2d(drive.getPoseEstimatorPose().getTranslation(), optimalAngle));
 
     Logger.recordOutput("RotateToSpeaker/PIDLatency", pidLatency);
 
@@ -185,9 +207,9 @@ public class RotateToSpeaker extends Command {
         "RotateToSpeaker/rotationalErrorDegrees",
         Units.radiansToDegrees(rotationController.getPositionError()));
     Logger.recordOutput("RotateToSpeaker/desiredLinearVelocity", linearVelocity);
-    Logger.recordOutput("RotateToSpeaker/rotationCorrection", rotVelCorrection);
+    Logger.recordOutput("RotateToSpeaker/feedForward", result.getSecond());
     Logger.recordOutput("RotateToSpeaker/robotRotationDegrees", drive.getRotation().getDegrees());
-    Logger.recordOutput("RotateToSpeaker/targetRotationDegrees", goalRot.getDegrees());
+    Logger.recordOutput("RotateToSpeaker/targetRotationDegrees", result.getFirst().getDegrees());
     Logger.recordOutput("RotateToSpeaker/atSetpoint", rotationController.atSetpoint());
 
     if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
