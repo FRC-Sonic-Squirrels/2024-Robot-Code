@@ -46,11 +46,7 @@ public interface ShooterIO {
   public default void setLauncherPercentOut(double percent) {}
 
   public default void setLauncherClosedLoopConstants(
-      double kP,
-      double kD,
-      double kG,
-      double maxProfiledVelocity,
-      double maxProfiledAcceleration) {}
+      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {}
 
   // KICKER
 
