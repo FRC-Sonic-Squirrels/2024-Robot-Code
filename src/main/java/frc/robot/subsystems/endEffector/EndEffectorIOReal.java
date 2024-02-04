@@ -38,13 +38,15 @@ public class EndEffectorIOReal implements EndEffectorIO {
     config.MotorOutput.NeutralMode = Constants.EndEffectorConstants.NEUTRAL_MODE_VALUE;
     motor.getConfigurator().apply(config);
 
+    deviceTemp = motor.getDeviceTemp();
+    appliedVolts = motor.getMotorVoltage();
+    currentAmps = motor.getStatorCurrent();
+
     BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVolts);
     BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
 
-    deviceTemp = motor.getDeviceTemp();
-    appliedVolts = motor.getMotorVoltage();
-    currentAmps = motor.getStatorCurrent();
+    motor.optimizeBusUtilization();
   }
 
   @Override
