@@ -54,14 +54,10 @@ public class ScoreSpeaker extends Command {
 
   private ShootingSolver solver =
       new ShootingSolver(
-          Constants.FieldConstants.getSpeakerTranslation3D(),
-          new Translation3d(),
-          shooter.getRPM(),
-          Constants.ShooterConstants.SHOOTING_TIME);
+          Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
-  private BooleanSupplier shootGamepiece;
-
-  private boolean shooting;
+  // a bit
+  // TODO: behavior is decent but pid needs to be tuned
 
   /**
    * Creates a new RotateToSpeaker.
@@ -120,46 +116,26 @@ public class ScoreSpeaker extends Command {
 
     var currentRot = drive.getRotation();
 
+    // var goalRot =
+    //     calculateTargetRot(
+    //         robotRotationOffset,
+    //         shooterRPM.getAsDouble(),
+    //         futurePose,
+    //         drive.getPoseEstimatorPose(),
+    //         drive.getFieldRelativeVelocities().getY());
+
     var result =
         solver.computeRobotYaw(
+            () -> pidLatency,
             drive.getPoseEstimatorPose().getTranslation(),
             drive.getFieldRelativeVelocities().getTranslation(),
             drive.getFieldRelativeAccelerations());
 
-    Rotation2d targetRotation;
-    Rotation2d targetAngularSpeed;
-
-    if (result == null) {
-      targetRotation = drive.getPoseEstimatorPose().getRotation();
-      targetAngularSpeed = new Rotation2d(0.0);
-    } else {
-      targetRotation = result.heading();
-      targetAngularSpeed = result.angularVel();
-    }
-
-    targetMeasurements.add(
-        new PIDTargetMeasurement(
-            Timer.getFPGATimestamp(),
-            targetRotation.getRadians(),
-            drive.getRotation().getRadians() <= targetRotation.getRadians()));
-    for (int index = 0; index < targetMeasurements.size(); index++) {
-      PIDTargetMeasurement measurement = targetMeasurements.get(index);
-      if ((measurement.upDirection
-              && drive.getRotation().getRadians() >= measurement.targetRot.getRadians())
-          || (!measurement.upDirection
-              && drive.getRotation().getRadians() <= measurement.targetRot.getRadians())) {
-        pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
-        targetMeasurements.remove(index);
-      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 3.0) {
-        targetMeasurements.remove(index);
-      }
-    }
-
-    Logger.recordOutput("RotateToSpeaker/PIDLatency", pidLatency);
+    solver.logTime(pidLatency);
 
     var rotationalEffort =
-        (rotationController.calculate(currentRot.getRadians(), targetRotation.getRadians())
-            - targetAngularSpeed.getRadians());
+        (rotationController.calculate(currentRot.getRadians(), result.getFirst().getRadians())
+            + result.getSecond().getRadians());
 
     rotationalEffort =
         Math.copySign(
@@ -169,19 +145,41 @@ public class ScoreSpeaker extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
-    Rotation2d optimalAngle =
-        solver
-            .computeRobotYaw(
-                drive.getPoseEstimatorPose().getTranslation(),
-                drive.getFieldRelativeVelocities().getTranslation(),
-                drive.getFieldRelativeAccelerations())
-            .heading();
+    // rotVelCorrection =
+    //     calculateRotVelRadPerSec(yVel, yVel, result, futurePose, shooterRPM.getAsDouble());
 
-    Logger.recordOutput("RotateToSpeaker/optimalRotationDegrees", optimalAngle.getDegrees());
+    targetMeasurements.add(
+        new PIDTargetMeasurement(
+            Timer.getFPGATimestamp(),
+            result.getFirst().getRadians(),
+            drive.getRotation().getRadians() <= result.getFirst().getRadians()));
+    for (int index = 0; index < targetMeasurements.size(); index++) {
+      PIDTargetMeasurement measurement = targetMeasurements.get(index);
+      if ((measurement.upDirection
+              && drive.getRotation().getRadians() >= measurement.targetRot.getRadians())
+          || (!measurement.upDirection
+              && drive.getRotation().getRadians() <= measurement.targetRot.getRadians())) {
+        pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
+        targetMeasurements.remove(index);
+      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
+        targetMeasurements.remove(index);
+      }
+    }
 
-    Logger.recordOutput(
-        "RotateToSpeaker/optimalPose",
-        new Pose2d(drive.getPoseEstimatorPose().getTranslation(), optimalAngle));
+    // Rotation2d optimalAngle =
+    //     solver
+    //         .computeRobotYaw(
+    //             0.0,
+    //             drive.getPoseEstimatorPose().getTranslation(),
+    //             drive.getFieldRelativeVelocities().getTranslation(),
+    //             drive.getFieldRelativeAccelerations())
+    //         .getFirst();
+
+    // Logger.recordOutput("RotateToSpeaker/optimalRotationDegrees", optimalAngle.getDegrees());
+
+    // Logger.recordOutput(
+    //     "RotateToSpeaker/optimalPose",
+    //     new Pose2d(drive.getPoseEstimatorPose().getTranslation(), optimalAngle));
 
     drive.runVelocityPrioritizeRotation(
         ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
@@ -192,9 +190,9 @@ public class ScoreSpeaker extends Command {
         "RotateToSpeaker/rotationalErrorDegrees",
         Units.radiansToDegrees(rotationController.getPositionError()));
     Logger.recordOutput("RotateToSpeaker/desiredLinearVelocity", linearVelocity);
-    Logger.recordOutput("RotateToSpeaker/feedForward", -targetAngularSpeed.getRadians());
+    Logger.recordOutput("RotateToSpeaker/feedForward", result.getSecond());
     Logger.recordOutput("RotateToSpeaker/robotRotationDegrees", drive.getRotation().getDegrees());
-    Logger.recordOutput("RotateToSpeaker/targetRotationDegrees", targetRotation.getDegrees());
+    Logger.recordOutput("RotateToSpeaker/targetRotationDegrees", result.getFirst().getDegrees());
     Logger.recordOutput("RotateToSpeaker/atSetpoint", rotationController.atSetpoint());
 
     if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
