@@ -60,7 +60,10 @@ public class ShooterIOReal implements ShooterIO {
 
     // FIXME: get true current limits
     launcherConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    launcherConfig.CurrentLimits.SupplyCurrentThreshold = 60.0;
+    launcherConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
     launcherConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
     launcherConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
 
@@ -71,9 +74,26 @@ public class ShooterIOReal implements ShooterIO {
     // --- pivot config ---
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
 
+    pivotConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    pivotConfig.CurrentLimits.SupplyCurrentThreshold = 60.0;
+    pivotConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
+    pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
     pivotConfig.Feedback.SensorToMechanismRatio = Constants.ShooterConstants.Pivot.GEARING;
     pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    pivot.getConfigurator().apply(pivotConfig);
+
+    // -- kicker config --
+    TalonFXConfiguration kickerConfig = new TalonFXConfiguration();
+
+    kickerConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    kicker.getConfigurator().apply(pivotConfig);
 
     pivotPosition = pivot.getPosition();
     pivotVelocity = pivot.getVelocity();
@@ -94,9 +114,6 @@ public class ShooterIOReal implements ShooterIO {
     launcherFollowTempCelsius = launcher_lead.getDeviceTemp();
     pivotTempCelsius = pivot.getDeviceTemp();
     kickerTempCelsius = kicker.getDeviceTemp();
-
-    // FIXME: add BaseStatusSignal.setUpdateFrequency()
-    // FIXME: optimize bus utilization
 
     BaseStatusSignal.setUpdateFrequencyForAll(100, pivotPosition, launcherLeadVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
