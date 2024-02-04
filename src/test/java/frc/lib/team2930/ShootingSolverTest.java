@@ -68,7 +68,7 @@ public class ShootingSolverTest {
         System.out.printf(
             "%3.1f: ROR:%3.1f heading:%3.1f pitch:%3.1f shooter:%2.1f\n",
             i,
-            res != null ? res.rotationSpeed() : Double.NaN,
+            res != null ? res.angularVel() : Double.NaN,
             res != null ? res.heading().getDegrees() : Double.NaN,
             res != null ? res.pitch().getDegrees() : Double.NaN,
             shooterSpeed);
