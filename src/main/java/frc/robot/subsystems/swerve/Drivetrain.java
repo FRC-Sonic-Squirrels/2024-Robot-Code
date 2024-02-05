@@ -223,7 +223,7 @@ public class Drivetrain extends SubsystemBase {
       /*
 
       linear cannot exceed the leftover amount after rotation
-      Vmax - abs(Vr) = hypot(Vx, Vy)
+      Vmax - Vr = hypot(Vx, Vy)
 
       preserve xy ratio
       Vyprev      Vy
@@ -231,36 +231,26 @@ public class Drivetrain extends SubsystemBase {
       Vxprev      Vx
 
       solve system of equations for Vx and Vy
-
-      Vx = Vxprev / hypot(Vxprev, Vyprev) * abs(max(0.0, Vmax - abs(Vr)))
+                  (Vmax - Vr)
+      Vx = -----------------------
+            sqrt(1+(Vyprev/Vxprev)^2)
 
       Vy = Vyprev * Vx / Vxprev
 
       */
 
       double vxMetersPerSecond =
-          (speeds.vxMetersPerSecond
-                  / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond))
-              * Math.abs(
-                  Math.max(
-                      0.0,
-                      config.getRobotMaxLinearVelocity()
-                          - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)));
-
-      // double vxMetersPerSecond =
-      //     Math.copySign(
-      //         Math.abs(
-      //                 Math.max(
-      //                     0.0,
-      //                     config.getRobotMaxLinearVelocity()
-      //                         - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
-      //             / Math.sqrt(
-      //                 (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond,
-      // 2.0))),
-      //         speeds.vxMetersPerSecond);
+          Math.copySign(
+              Math.abs(
+                      Math.max(
+                          0.0,
+                          config.getRobotMaxLinearVelocity()
+                              - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
+                  / Math.sqrt(
+                      (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond, 2.0))),
+              speeds.vxMetersPerSecond);
       double vyMetersPerSecond =
           speeds.vyMetersPerSecond * vxMetersPerSecond / speeds.vxMetersPerSecond;
-
       newSpeeds =
           new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
       Logger.recordOutput(
@@ -273,7 +263,20 @@ public class Drivetrain extends SubsystemBase {
     Logger.recordOutput("Drivetrain/speedsX", newSpeeds.vxMetersPerSecond);
     Logger.recordOutput("Drivetrain/speedsY", newSpeeds.vyMetersPerSecond);
     Logger.recordOutput("Drivetrain/speedsRot", newSpeeds.omegaRadiansPerSecond);
-    runVelocity(newSpeeds);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(newSpeeds, 0.02);
+    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, config.getRobotMaxLinearVelocity());
+
+    // Send setpoints to modules
+    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+    for (int i = 0; i < 4; i++) {
+      // The module returns the optimized state, useful for logging
+      optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
+    }
+
+    // Log setpoint states
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
 
   /** Stops the drive. */

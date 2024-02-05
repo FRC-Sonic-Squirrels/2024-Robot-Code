@@ -78,7 +78,7 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     Logger.recordOutput("Commands/TeleopDrive/LinearVelocity", linearVelocity);
 
     // Convert to field relative speeds & send command
-    drivetrain.runVelocity(
+    drivetrain.runVelocityPrioritizeRotation(
         ChassisSpeeds.fromFieldRelativeSpeeds(
             correctedLinearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
