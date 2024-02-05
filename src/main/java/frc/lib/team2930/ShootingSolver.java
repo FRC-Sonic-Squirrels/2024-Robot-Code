@@ -3,7 +3,6 @@ package frc.lib.team2930;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 import frc.robot.Constants;
-import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
@@ -39,7 +38,7 @@ public class ShootingSolver {
    * @return First: target robot theta Second: target robot rotational velocity
    */
   public Pair<Rotation2d, Rotation2d> computeRobotYaw(
-      DoubleSupplier time,
+      double time,
       Translation2d robotPos,
       Translation2d robotVel,
       Translation2d robotAcceleration) {
@@ -101,22 +100,20 @@ public class ShootingSolver {
     //   targetTheta = Math.acos(b / Math.sqrt(1.0 + a * a)) + Math.atan(a);
     // }
 
-    Translation2d futurePos =
+    Translation2d futureSpeakerOffset =
         dPSpeakerAxis
             .toTranslation2d()
-            .plus(
-                robotVelSpeaker
-                    .plus(robotAccelerationSpeaker.times(time.getAsDouble() * 0.5))
-                    .times(time.getAsDouble()));
+            .plus(robotVelSpeaker.plus(robotAccelerationSpeaker.times(time * 0.5)).times(time));
 
-    Logger.recordOutput("ShootingSolver/time", time.getAsDouble());
+    Logger.recordOutput("ShootingSolver/time", time);
 
-    Logger.recordOutput("ShootingSolver/futurePos", new Pose2d(futurePos, new Rotation2d(0.0)));
+    Logger.recordOutput(
+        "ShootingSolver/futurePos", new Pose2d(futureSpeakerOffset, new Rotation2d(0.0)));
     Logger.recordOutput(
         "ShootingSolver/currentPos",
         new Pose2d(dPSpeakerAxis.toTranslation2d(), new Rotation2d(0.0)));
 
-    Translation2d futureVel = robotVel.plus(robotAcceleration.times(time.getAsDouble()));
+    Translation2d futureVel = robotVel.plus(robotAcceleration.times(time));
 
     // Archit's math for solving theta
     // double targetTheta =
@@ -133,75 +130,72 @@ public class ShootingSolver {
 
     double targetTheta =
         Math.acos(
-                (((futurePos.getX() * futureVel.getY()) - (futurePos.getY() * futureVel.getX()))
-                        * Math.hypot(futurePos.getX(), futurePos.getY()))
+                (((futureSpeakerOffset.getX() * futureVel.getY())
+                            - (futureSpeakerOffset.getY() * futureVel.getX()))
+                        * Math.hypot(futureSpeakerOffset.getX(), futureSpeakerOffset.getY()))
                     / (VnoteHorizontal
-                        * (futurePos.getX() * futurePos.getX()
-                            + futurePos.getY() * futurePos.getY())))
-            + Math.atan(-futurePos.getX() / futurePos.getY());
+                        * (futureSpeakerOffset.getX() * futureSpeakerOffset.getX()
+                            + futureSpeakerOffset.getY() * futureSpeakerOffset.getY())))
+            + Math.atan(-futureSpeakerOffset.getX() / futureSpeakerOffset.getY());
 
-    Translation2d finalRobotVelSpeaker =
-        robotVelSpeaker.plus(robotAccelerationSpeaker.times(time.getAsDouble()));
+    Translation2d finalRobotVelSpeaker = robotVelSpeaker.plus(robotAccelerationSpeaker.times(time));
 
     double targetRotVel =
-        -(((robotAcceleration.getY() * futurePos.getX()) / (VnoteHorizontal * futurePos.getY())
+        -(((robotAcceleration.getY() * futureSpeakerOffset.getX())
+                                / (VnoteHorizontal * futureSpeakerOffset.getY())
                             + (finalRobotVelSpeaker.getX() * futureVel.getY())
-                                / (VnoteHorizontal * futurePos.getY())
-                            - (finalRobotVelSpeaker.getY() * futureVel.getY() * futurePos.getX())
-                                / (VnoteHorizontal * futurePos.getY() * futurePos.getY())
+                                / (VnoteHorizontal * futureSpeakerOffset.getY())
+                            - (finalRobotVelSpeaker.getY()
+                                    * futureVel.getY()
+                                    * futureSpeakerOffset.getX())
+                                / (VnoteHorizontal
+                                    * futureSpeakerOffset.getY()
+                                    * futureSpeakerOffset.getY())
                             - robotAcceleration.getX() / VnoteHorizontal)
                         / Math.sqrt(
-                            futurePos.getX()
-                                    * futurePos.getX()
-                                    / (futurePos.getY() * futurePos.getY())
+                            futureSpeakerOffset.getX()
+                                    * futureSpeakerOffset.getX()
+                                    / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
                                 + 1.0)
-                    - (((2.0 * finalRobotVelSpeaker.getX() * futurePos.getX())
-                                    / (futurePos.getY() * futurePos.getY())
+                    - (((2.0 * finalRobotVelSpeaker.getX() * futureSpeakerOffset.getX())
+                                    / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
                                 - (2.0
                                         * finalRobotVelSpeaker.getY()
-                                        * futurePos.getX()
-                                        * futurePos.getX())
-                                    / (futurePos.getY() * futurePos.getY() * futurePos.getY()))
-                            * ((futureVel.getY() * futurePos.getX())
-                                    / (VnoteHorizontal * futurePos.getY())
+                                        * futureSpeakerOffset.getX()
+                                        * futureSpeakerOffset.getX())
+                                    / (futureSpeakerOffset.getY()
+                                        * futureSpeakerOffset.getY()
+                                        * futureSpeakerOffset.getY()))
+                            * ((futureVel.getY() * futureSpeakerOffset.getX())
+                                    / (VnoteHorizontal * futureSpeakerOffset.getY())
                                 - futureVel.getX() / VnoteHorizontal))
                         / (2.0
                             * Math.pow(
-                                (futurePos.getX()
-                                        * futurePos.getX()
-                                        / (futurePos.getY() * futurePos.getY())
+                                (futureSpeakerOffset.getX()
+                                        * futureSpeakerOffset.getX()
+                                        / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
                                     + 1.0),
                                 (3.0 / 2.0))))
                 / Math.sqrt(
                     1.0
                         - Math.pow(
-                                ((futureVel.getY() * futurePos.getX())
-                                        / (VnoteHorizontal * futurePos.getY())
+                                ((futureVel.getY() * futureSpeakerOffset.getX())
+                                        / (VnoteHorizontal * futureSpeakerOffset.getY())
                                     - futureVel.getX() / VnoteHorizontal),
                                 2.0)
-                            / (futurePos.getX()
-                                    * futurePos.getX()
-                                    / (futurePos.getY() * futurePos.getY())
+                            / (futureSpeakerOffset.getX()
+                                    * futureSpeakerOffset.getX()
+                                    / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
                                 + 1.0))
-            - (futurePos.getX() / futurePos.getY()
-                    - (finalRobotVelSpeaker.getY() * futurePos.getX())
-                        / (futurePos.getY() * futurePos.getY()))
-                / (futurePos.getX() * futurePos.getX() / (futurePos.getY() * futurePos.getY())
+            - (futureSpeakerOffset.getX() / futureSpeakerOffset.getY()
+                    - (finalRobotVelSpeaker.getY() * futureSpeakerOffset.getX())
+                        / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY()))
+                / (futureSpeakerOffset.getX()
+                        * futureSpeakerOffset.getX()
+                        / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
                     + 1.0);
 
-    Logger.recordOutput(
-        "ShootingSolver/w",
-        Math.acos(
-            (((futurePos.getX() * futureVel.getY()) - (futurePos.getY() * futureVel.getX()))
-                    * Math.hypot(futurePos.getX(), futurePos.getY()))
-                / (VnoteHorizontal
-                    * (futurePos.getX() * futurePos.getX()
-                        + futurePos.getY() * futurePos.getY()))));
-
-    Logger.recordOutput("ShootingSolver/v", Math.atan(-futurePos.getX() / futurePos.getY()));
-    Logger.recordOutput("ShootingSolver/vInside", -futurePos.getX() / futurePos.getY());
-
-    if (futurePos.getY() >= 0) {
+    if (futureSpeakerOffset.getY() >= 0) {
       targetTheta += Math.PI;
     }
 
@@ -245,7 +239,7 @@ public class ShootingSolver {
     return Pspeaker.minus(Paxis);
   }
 
-  public void logTime(double time) {
+  public static void logTime(double time) {
     Logger.recordOutput("ShootingSolver/loggedTime", time);
   }
 }
