@@ -1,77 +1,163 @@
 package frc.lib.team2930;
 
-public class StateMachine
-{
-    public enum Status
-    {
-        Running,
-        Done,
-        Stopped
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+public class StateMachine {
+  public enum Status {
+    Running,
+    Done,
+    Stopped
+  }
+
+  @Retention(RUNTIME)
+  @Target(METHOD)
+  public @interface TimerEvent {
+    double after();
+  }
+
+  @FunctionalInterface
+  public interface StateHandler {
+    StateHandler advance();
+  }
+
+  @FunctionalInterface
+  public interface ResumeStateHandler {
+    StateHandler advance(StateMachine subStateMachine);
+  }
+
+  @FunctionalInterface
+  public interface ResumeStateHandlerFromCommand {
+    StateHandler advance(Command command);
+  }
+
+  static class EventState {
+    EventState next;
+    Method md;
+    double trigger;
+
+    EventState(Method md, TimerEvent anno) {
+      this.md = md;
+      this.trigger = anno.after();
+    }
+  }
+
+  private Status status;
+  private StateHandler currentState;
+  private double startTime;
+  private EventState nextEvent;
+
+  protected StateMachine() {
+    var events = new ArrayList<EventState>();
+
+    for (Method md : this.getClass().getDeclaredMethods()) {
+      var anno = md.getAnnotation(TimerEvent.class);
+      if (anno != null) {
+        events.add(new EventState(md, anno));
+      }
     }
 
-    @FunctionalInterface
-    public interface StateHandler
-    {
-        StateHandler advance();
+    // Sort in increasing time.
+    events.sort(Comparator.comparing((v) -> v.trigger));
+
+    // Chain them in time order, to make it easier to process them.
+    EventState previous = null;
+
+    for (var event : events) {
+      if (previous == null) {
+        nextEvent = event;
+      } else {
+        previous.next = event;
+      }
+
+      previous = event;
     }
+  }
 
-    @FunctionalInterface
-    public interface ResumeStateHandler
-    {
-        StateHandler advance(StateMachine subStateMachine);
+  protected void setInitialState(StateHandler initialState) {
+    this.currentState = initialState;
+    this.status = Status.Running;
+    this.startTime = Timer.getFPGATimestamp();
+  }
+
+  public void advance() {
+    while (isRunning()) {
+      processEvents();
+
+      var nextState = currentState.advance();
+      if (nextState == null) break;
+
+      currentState = nextState;
     }
+  }
 
-    private Status       status;
-    private StateHandler currentState;
+  private void processEvents() {
+    var elapsedTime = timeFromStart();
 
-    protected void setInitialState(StateHandler initialState)
-    {
-        this.currentState = initialState;
-        this.status = Status.Running;
-    }
+    for (var event = nextEvent; event != null; event = event.next) {
+      if (event.trigger > elapsedTime) {
+        nextEvent = event;
+        break;
+      }
 
-    public void advance()
-    {
-        while (isRunning())
-        {
-            var nextState = currentState.advance();
-            if (nextState == null) break;
-
-            currentState = nextState;
+      try {
+        var nextState = (StateHandler) event.md.invoke(this);
+        if (nextState != null) {
+          this.currentState = nextState;
         }
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
     }
+  }
 
-    public boolean isRunning()
-    {
-        return status == Status.Running;
-    }
+  public double timeFromStart() {
+    return Timer.getFPGATimestamp() - startTime;
+  }
 
-    public boolean wasStopped()
-    {
-        return status == Status.Stopped;
-    }
+  public boolean isRunning() {
+    return status == Status.Running;
+  }
 
-    protected StateHandler setDone()
-    {
-        status = Status.Done;
-        return null;
-    }
+  public boolean wasStopped() {
+    return status == Status.Stopped;
+  }
 
-    protected StateHandler setStopped()
-    {
-        status = Status.Stopped;
-        return null;
-    }
+  protected StateHandler setDone() {
+    status = Status.Done;
+    return null;
+  }
 
-    protected StateHandler suspendForSubStateMachine(StateMachine subStateMachine,
-                                                     ResumeStateHandler handler)
-    {
-        return () ->
-        {
-            subStateMachine.advance();
-            if (subStateMachine.isRunning()) return null;
+  protected StateHandler setStopped() {
+    status = Status.Stopped;
+    return null;
+  }
 
-            return handler.advance(subStateMachine);
-        };
-    }
+  protected StateHandler suspendForSubStateMachine(
+      StateMachine subStateMachine, ResumeStateHandler handler) {
+    return () -> {
+      subStateMachine.advance();
+      if (subStateMachine.isRunning()) return null;
+
+      return handler.advance(subStateMachine);
+    };
+  }
+
+  protected StateHandler suspendForCommand(Command command, ResumeStateHandlerFromCommand handler) {
+    command.schedule();
+
+    return () -> {
+      if (!command.isFinished()) return null;
+
+      return handler.advance(command);
+    };
+  }
 }
