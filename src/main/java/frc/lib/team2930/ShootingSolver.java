@@ -44,10 +44,7 @@ public class ShootingSolver {
    * @return First: target robot theta Second: target robot rotational velocity
    */
   public Solution computeRobotYaw(
-      Translation2d robotPos,
-      Translation2d robotVel,
-      Translation2d robotAcceleration,
-      double PIDlatency) {
+      Translation2d robotPos, Translation2d robotVel, Translation2d robotAcceleration) {
 
     Logger.recordOutput("ShootingSolver/time", shootingTime);
 
