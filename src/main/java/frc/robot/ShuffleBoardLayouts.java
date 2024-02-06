@@ -49,6 +49,9 @@ public class ShuffleBoardLayouts {
 
   private void loadAllNonFMSLayouts() {
     armDebugLayout();
+    intakeDebugLayout();
+    endEffectorDebugLayout();
+    elevatorDebugLayout();
   }
 
   private void armDebugLayout() {
@@ -86,7 +89,7 @@ public class ShuffleBoardLayouts {
     var intakeCommandsLayout =
         intakeTab
             .getLayout("IntakeCommands", BuiltInLayouts.kList)
-            .withPosition(2, 0)
+            .withPosition(0, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
@@ -108,12 +111,12 @@ public class ShuffleBoardLayouts {
     var endEffectorCommandsLayout =
         endEffectorTab
             .getLayout("EndEffectorCommands", BuiltInLayouts.kList)
-            .withPosition(4, 0)
+            .withPosition(0, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        endEffectorTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+        endEffectorTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
 
     endEffectorCommandsLayout.add(
         new ConsumeSuppliedValue(
@@ -130,15 +133,15 @@ public class ShuffleBoardLayouts {
     var elevatorCommandsLayout =
         elevatorTab
             .getLayout("ElevatorCommands", BuiltInLayouts.kList)
-            .withPosition(6, 0)
+            .withPosition(0, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        elevatorTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+        elevatorTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
 
     var tunableHeight =
-        elevatorTab.add("tunableHeight", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+        elevatorTab.add("tunableHeight", 0.0).withPosition(5, 3).withSize(2, 1).getEntry();
 
     // elevatorCommandsLayout.add(
     //     new ConsumeSuppliedValue(
@@ -164,12 +167,12 @@ public class ShuffleBoardLayouts {
     var shooterCommandsLayout =
         shooterTab
             .getLayout("ShooterCommands", BuiltInLayouts.kList)
-            .withPosition(4, 0)
+            .withPosition(0, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        shooterTab.add("tunableVoltage", 0.0).withPosition(9, 5).withSize(2, 1).getEntry();
+        shooterTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
 
     shooterCommandsLayout.add(
         new ConsumeSuppliedValue(
