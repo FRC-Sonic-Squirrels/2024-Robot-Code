@@ -66,8 +66,9 @@ public class ShootingSolverTest {
             solver.computeAngles(0, new Pose2d(-i, 10, new Rotation2d(0)), new Translation2d(i, 0));
 
         System.out.printf(
-            "%3.1f: heading:%3.1f pitch:%3.1f shooter:%2.1f\n",
+            "%3.1f: ROR:%3.1f heading:%3.1f pitch:%3.1f shooter:%2.1f\n",
             i,
+            res != null ? res.rotationSpeed() : Double.NaN,
             res != null ? res.heading().getDegrees() : Double.NaN,
             res != null ? res.pitch().getDegrees() : Double.NaN,
             shooterSpeed);
