@@ -170,6 +170,16 @@ public class ShootingSolver {
     //   targetTheta = Math.asin(-robotVelY / VnoteHorizontal);
     // } else {
     //   var a = -dPspeakerAxisX / dPspeakerAxisY;
+    // rotation velocity calculated from online derivative calculator:
+    // https://www.derivative-calculator.net/#expr=asin%28-%28%28b%2Bcx%29%2Asin%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%2B%28f%2Bgx%29%2Acos%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%29%2Fh%29&simplify=1
+
+    Translation2d futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
+    double futureRobotVelX = futureRobotVel.getX();
+    double futureRobotVelY = futureRobotVel.getY();
+
+    Translation2d futureSpeakerVel = futureRobotVel.times(-1.0);
+    double futureSpeakerVelX = futureSpeakerVel.getX();
+    double futureSpeakerVelY = futureSpeakerVel.getY();
 
     Translation2d futureSpeakerOffset =
         dPspeakerAxis
@@ -187,100 +197,6 @@ public class ShootingSolver {
             robotPos.plus(
                 robotVel.plus(robotAcceleration.times(0.5 * timeToShoot)).times(timeToShoot)),
             new Rotation2d(targetTheta)));
-
-    // Translation2d futureSpeakerOffset =
-    //     dPspeakerAxis
-    //         .toTranslation2d()
-    //         .plus(robotVelSpeaker.plus(robotAccelerationSpeaker.times(time * 0.5)).times(time));
-
-    // if (DebugSpew) {
-    //   System.out.printf("ProbotFuture: %s\n", futurePos);
-    // }
-
-    // Logger.recordOutput(
-    //     "ShootingSolver/futurePos", new Pose2d(futureSpeakerOffset, new Rotation2d(0.0)));
-
-    // Archit's math for solving theta
-
-    // double targetTheta =
-    //     Math.acos(
-    //             (((futureSpeakerOffset.getX() * futureVel.getY())
-    //                         - (futureSpeakerOffset.getY() * futureVel.getX()))
-    //                     * Math.hypot(futureSpeakerOffset.getX(), futureSpeakerOffset.getY()))
-    //                 / (VnoteHorizontal
-    //                     * (futureSpeakerOffset.getX() * futureSpeakerOffset.getX()
-    //                         + futureSpeakerOffset.getY() * futureSpeakerOffset.getY())))
-    //         + Math.atan(-futureSpeakerOffset.getX() / futureSpeakerOffset.getY());
-
-    // Translation2d finalRobotVelSpeaker =
-    // robotVelSpeaker.plus(robotAccelerationSpeaker.times(time));
-
-    // double targetRotVel =
-    //     -(((robotAcceleration.getY() * futureSpeakerOffset.getX())
-    //                             / (VnoteHorizontal * futureSpeakerOffset.getY())
-    //                         + (finalRobotVelSpeaker.getX() * futureVel.getY())
-    //                             / (VnoteHorizontal * futureSpeakerOffset.getY())
-    //                         - (finalRobotVelSpeaker.getY()
-    //                                 * futureVel.getY()
-    //                                 * futureSpeakerOffset.getX())
-    //                             / (VnoteHorizontal
-    //                                 * futureSpeakerOffset.getY()
-    //                                 * futureSpeakerOffset.getY())
-    //                         - robotAcceleration.getX() / VnoteHorizontal)
-    //                     / Math.sqrt(
-    //                         futureSpeakerOffset.getX()
-    //                                 * futureSpeakerOffset.getX()
-    //                                 / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
-    //                             + 1.0)
-    //                 - (((2.0 * finalRobotVelSpeaker.getX() * futureSpeakerOffset.getX())
-    //                                 / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
-    //                             - (2.0
-    //                                     * finalRobotVelSpeaker.getY()
-    //                                     * futureSpeakerOffset.getX()
-    //                                     * futureSpeakerOffset.getX())
-    //                                 / (futureSpeakerOffset.getY()
-    //                                     * futureSpeakerOffset.getY()
-    //                                     * futureSpeakerOffset.getY()))
-    //                         * ((futureVel.getY() * futureSpeakerOffset.getX())
-    //                                 / (VnoteHorizontal * futureSpeakerOffset.getY())
-    //                             - futureVel.getX() / VnoteHorizontal))
-    //                     / (2.0
-    //                         * Math.pow(
-    //                             (futureSpeakerOffset.getX()
-    //                                     * futureSpeakerOffset.getX()
-    //                                     / (futureSpeakerOffset.getY() *
-    // futureSpeakerOffset.getY())
-    //                                 + 1.0),
-    //                             (3.0 / 2.0))))
-    //             / Math.sqrt(
-    //                 1.0
-    //                     - Math.pow(
-    //                             ((futureVel.getY() * futureSpeakerOffset.getX())
-    //                                     / (VnoteHorizontal * futureSpeakerOffset.getY())
-    //                                 - futureVel.getX() / VnoteHorizontal),
-    //                             2.0)
-    //                         / (futureSpeakerOffset.getX()
-    //                                 * futureSpeakerOffset.getX()
-    //                                 / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
-    //                             + 1.0))
-    //         - (futureSpeakerOffset.getX() / futureSpeakerOffset.getY()
-    //                 - (finalRobotVelSpeaker.getY() * futureSpeakerOffset.getX())
-    //                     / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY()))
-    //             / (futureSpeakerOffset.getX()
-    //                     * futureSpeakerOffset.getX()
-    //                     / (futureSpeakerOffset.getY() * futureSpeakerOffset.getY())
-    //                 + 1.0);
-
-    // if (futureSpeakerOffset.getY() >= 0) {
-    //   targetTheta += Math.PI;
-    // }
-
-    // if (targetTheta >= Math.PI) {
-    //   targetTheta -= Math.PI * 2.0;
-    // }
-
-    // return new Solution(new Rotation2d(targetTheta), new Rotation2d(-targetRotVel));
-  }
 
   private double getNoteHorizVel(double vel, Translation2d robotPos) {
 
