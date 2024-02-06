@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.team2930.commands.ConsumeSuppliedValue;
 import frc.robot.commands.arm.ArmSetAngle;
+import frc.robot.commands.elevator.ElevatorManualControl;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -136,9 +137,19 @@ public class ShuffleBoardLayouts {
     var tunableVoltage =
         elevatorTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
 
+    var tunableHeight =
+        elevatorTab.add("tunableHeight", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+
+    // elevatorCommandsLayout.add(
+    //     new ConsumeSuppliedValue(
+    //         elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
+
+    elevatorCommandsLayout.add(
+        new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0)));
+
     elevatorCommandsLayout.add(
         new ConsumeSuppliedValue(
-            elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
+            elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
 
     var stopCommand = Commands.runOnce(() -> elevator.setVoltage(0.0), elevator);
     stopCommand.runsWhenDisabled();
