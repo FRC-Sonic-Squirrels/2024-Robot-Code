@@ -79,4 +79,14 @@ public class ShuffleBoardLayouts {
     resetSensorPositionHome.setName("resetSensorToHomePosition");
     armCommandsLayout.add(resetSensorPositionHome);
   }
+
+  public void intakeDebugLayout(){
+    var intakeTab = Shuffleboard.getTab("Intake_Debug");
+    var intakeCommandsLayout =
+        intakeTab
+            .getLayout("IntakeCommands", BuiltInLayouts.kList)
+            .withPosition(2, 0)
+            .withSize(2, 4)
+            .withProperties(Map.of("Label position", "HIDDEN"));
+  }
 }
