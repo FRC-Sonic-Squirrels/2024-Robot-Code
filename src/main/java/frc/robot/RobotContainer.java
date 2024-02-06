@@ -29,9 +29,8 @@ import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.drive.RotateToSpeaker;
+import frc.robot.commands.drive.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
-import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -398,15 +397,13 @@ public class RobotContainer {
 
     driverController
         .rightBumper()
-        .whileTrue(new ShooterShootMode(shooter, drivetrain, driverController.a(), () -> false))
         .whileTrue(
-            new RotateToSpeaker(
+            new ScoreSpeaker(
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
                 drivetrain,
-                () -> false,
-                new Rotation2d(Math.PI),
-                shooter::getRPM));
+                shooter,
+                driverController.a()));
   }
 
   /**
