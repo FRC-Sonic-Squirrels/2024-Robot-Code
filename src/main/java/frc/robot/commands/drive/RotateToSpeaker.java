@@ -20,17 +20,16 @@ import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.ArrayList;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class RotateToSpeaker extends Command {
   private Drivetrain drive;
-  private Supplier<Boolean> endCondition;
-
-  private Rotation2d robotRotationOffset;
+  private Shooter shooter;
 
   private final LoggedTunableNumber rotationKp =
       new LoggedTunableNumber("RotateToSpeaker/rotationKp", 4.9);
@@ -41,9 +40,6 @@ public class RotateToSpeaker extends Command {
 
   private final DoubleSupplier translationXSupplier;
   private final DoubleSupplier translationYSupplier;
-  private final DoubleSupplier shooterRPM;
-
-  private double rotVelCorrection = 0;
 
   public static final double DEADBAND = 0.1;
 
@@ -60,6 +56,10 @@ public class RotateToSpeaker extends Command {
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
+  private BooleanSupplier shootGamepiece;
+
+  private boolean shooting;
+
   /**
    * Creates a new RotateToSpeaker.
    *
@@ -68,23 +68,20 @@ public class RotateToSpeaker extends Command {
    * @param targetPose pose to target
    * @param drive drivetrain subsystem
    * @param endCondition when this command should end
-   * @param robotRotationOffset rotation of robot you want facing target
    * @return Command to lock rotation in direction of target
    */
   public RotateToSpeaker(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
       Drivetrain drive,
-      Supplier<Boolean> endCondition,
-      Rotation2d robotRotationOffset,
-      DoubleSupplier shooterRPM) {
+      Shooter shooter,
+      BooleanSupplier shootGamepiece) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.translationXSupplier = translationXSupplier;
     this.translationYSupplier = translationYSupplier;
     this.drive = drive;
-    this.endCondition = endCondition;
-    this.robotRotationOffset = robotRotationOffset;
-    this.shooterRPM = shooterRPM;
+    this.shooter = shooter;
+    this.shootGamepiece = shootGamepiece;
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     addRequirements(drive);
@@ -135,7 +132,7 @@ public class RotateToSpeaker extends Command {
       targetAngularSpeed = new Rotation2d(0.0);
     } else {
       targetRotation = result.heading();
-      targetAngularSpeed = result.pitch();
+      targetAngularSpeed = result.angularVel();
     }
 
     targetMeasurements.add(
@@ -156,7 +153,6 @@ public class RotateToSpeaker extends Command {
       }
     }
 
-    ShootingSolver.logTime(pidLatency);
     Logger.recordOutput("RotateToSpeaker/PIDLatency", pidLatency);
 
     var rotationalEffort =
@@ -204,6 +200,23 @@ public class RotateToSpeaker extends Command {
       rotationController.setP(rotationKp.get());
       rotationController.setD(rotationKd.get());
     }
+
+    shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_RPM);
+
+    // shooter.setPivotPosition();
+
+    shooting =
+        shootGamepiece.getAsBoolean()
+            && shooter.pivotIsAtTarget()
+            && rotationController.atSetpoint();
+
+    Logger.recordOutput("ShooterShootMode/shooting", shooting);
+
+    if (shooting) {
+      shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+    } else {
+      shooter.setKickerPercentOut(0.0);
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -215,6 +228,10 @@ public class RotateToSpeaker extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return endCondition.get();
+    return false;
+  }
+
+  public boolean isShooting() {
+    return shooting;
   }
 }
