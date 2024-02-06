@@ -98,8 +98,6 @@ public class ScoreSpeaker extends Command {
   @Override
   public void execute() {
 
-    // Pose2d futurePose = drive.getFutureEstimatedPose(pidLatency, "RotateToSpeaker");
-
     double linearMagnitude =
         MathUtil.applyDeadband(
             Math.hypot(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble()),
@@ -117,14 +115,6 @@ public class ScoreSpeaker extends Command {
             .getTranslation();
 
     var currentRot = drive.getRotation();
-
-    // var goalRot =
-    //     calculateTargetRot(
-    //         robotRotationOffset,
-    //         shooterRPM.getAsDouble(),
-    //         futurePose,
-    //         drive.getPoseEstimatorPose(),
-    //         drive.getFieldRelativeVelocities().getY());
 
     var result =
         solver.computeRobotYaw(
@@ -176,9 +166,6 @@ public class ScoreSpeaker extends Command {
 
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
-
-    // rotVelCorrection =
-    //     calculateRotVelRadPerSec(yVel, yVel, result, futurePose, shooterRPM.getAsDouble());
 
     Rotation2d optimalAngle =
         solver
@@ -242,9 +229,5 @@ public class ScoreSpeaker extends Command {
   @Override
   public boolean isFinished() {
     return false;
-  }
-
-  public boolean isShooting() {
-    return shooting;
   }
 }
