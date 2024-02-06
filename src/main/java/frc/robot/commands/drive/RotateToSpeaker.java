@@ -60,13 +60,6 @@ public class RotateToSpeaker extends Command {
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
-  // a bit
-  // TODO: behavior is decent but pid needs to be tuned
-
-  // TODO: maybe we want to instead make a driveAndRotateCommand(Supplier<Rotation2d>
-  // targetRotation)
-  // that way it is generic and not tied just to limelight?
-  //
   /**
    * Creates a new RotateToSpeaker.
    *
