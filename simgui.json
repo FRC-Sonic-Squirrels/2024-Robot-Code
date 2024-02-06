@@ -9,13 +9,29 @@
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Mechanism/SimpleArm": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/SimpleElevatorAndArm": "Mechanism2d",
       "/AdvantageKit/RealOutputs/Mechanism/SimpleShooter": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/AUTO/SendableChooser[0]": "String Chooser",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ARM STOP": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ArmSetAngle": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/ConsumeSuppliedValue": "Command",
+      "/Shuffleboard/Arm_Debug/ArmCommands/resetSensorToHomePosition": "Command",
+      "/Shuffleboard/Elevator_Debug/ElevatorCommands/ConsumeSuppliedValue": "Command",
+      "/Shuffleboard/Elevator_Debug/ElevatorCommands/ELEVATOR STOP": "Command",
+      "/Shuffleboard/Elevator_Debug/ElevatorCommands/ElevatorManualControl": "Command",
+      "/Shuffleboard/End_Effector_Debug/EndEffectorCommands/ConsumeSuppliedValue": "Command",
+      "/Shuffleboard/End_Effector_Debug/EndEffectorCommands/END EFFECTOR STOP": "Command",
+      "/Shuffleboard/Intake_Debug/IntakeCommands/ConsumeSuppliedValue": "Command",
+      "/Shuffleboard/Intake_Debug/IntakeCommands/INTAKE STOP": "Command",
       "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/Auto Routine": "String Chooser",
+      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_LEFT/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_RIGHT/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-LeftCamera/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-RightCamera/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_LEFT/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_RIGHT/Sim Field": "Field2d"
     },
     "windows": {
       "/AdvantageKit/RealOutputs/Mechanism/Simple": {
@@ -27,5 +43,5 @@
   },
   "NetworkTables Info": {
     "visible": true
-    }
+  }
 }
