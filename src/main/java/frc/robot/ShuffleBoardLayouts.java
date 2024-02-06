@@ -88,5 +88,16 @@ public class ShuffleBoardLayouts {
             .withPosition(2, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
+    
+    var tunableVoltage =
+        intakeTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+    
+    intakeCommandsLayout.add(
+        new ConsumeSuppliedValue(intake, () -> tunableVoltage.getDouble(0.0), intake::setPercentOut));
+
+    var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake);
+    stopCommand.runsWhenDisabled();
+    stopCommand.setName("INTAKE STOP");
+    intakeCommandsLayout.add(stopCommand);
   }
 }
