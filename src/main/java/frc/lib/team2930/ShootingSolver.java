@@ -45,7 +45,7 @@ public class ShootingSolver {
    * @return First: target robot theta Second: target robot rotational velocity
    */
   public Solution computeRobotYaw(
-      Translation2d robotPos, Translation2d robotVel, Translation2d robotAcceleration) {
+      Pose2d robotPose, Translation2d robotVel, Translation2d robotAcceleration) {
 
     Logger.recordOutput("ShootingSolver/time", shootingTime);
 
@@ -60,9 +60,42 @@ public class ShootingSolver {
     var shooterSpeed =
         shooterRPM / 60.0 * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS * Math.PI;
 
-    var VnoteHorizontal = getNoteHorizVel(shooterSpeed, robotPos);
+    var VnoteHorizontal = getNoteHorizVel(shooterSpeed, robotPose.getTranslation());
 
-    var dPspeakerAxis = getAxisRelativePosition(robotPos);
+    var dPspeakerAxis = getAxisRelativePosition(robotPose.getTranslation());
+
+    // if (Math.abs(dPspeakerAxisY) < 0.001) {
+    //   //
+    //   // Speaker right in front of robot
+    //   //
+    //   // -> Vn_y = 0
+    //   // ->  (Vr_y + Vs * sin(targetTheta))
+    //   // -> -Vr_y / Vs = sin(targetTheta))
+    //   // -> targetTheta = arcsin(-Vr_y / Vs)
+    //   //
+    //   targetTheta = Math.asin(-robotVelY / VnoteHorizontal);
+    // } else {
+    //   var a = -dPspeakerAxisX / dPspeakerAxisY;
+    // rotation velocity calculated from online derivative calculator:
+    // https://www.derivative-calculator.net/#expr=asin%28-%28%28b%2Bcx%29%2Asin%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%2B%28f%2Bgx%29%2Acos%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%29%2Fh%29&simplify=1
+
+    Translation2d futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
+    double futureRobotVelX = futureRobotVel.getX();
+    double futureRobotVelY = futureRobotVel.getY();
+
+    Translation2d futureSpeakerVel = futureRobotVel.times(-1.0);
+    double futureSpeakerVelX = futureSpeakerVel.getX();
+    double futureSpeakerVelY = futureSpeakerVel.getY();
+
+    Translation2d futureSpeakerOffset =
+        dPspeakerAxis
+            .toTranslation2d()
+            .plus(
+                robotVel
+                    .plus(robotAcceleration.times(0.5 * timeToShoot))
+                    .times(-1.0 * timeToShoot));
+    double futureSpeakerOffsetX = futureSpeakerOffset.getX();
+    double futureSpeakerOffsetY = futureSpeakerOffset.getY();
 
     Logger.recordOutput("ShootingSolver/dPSpeakerAxis", dPspeakerAxis);
 
@@ -132,6 +165,14 @@ public class ShootingSolver {
     // add PI to point back of robot to speaker
     double targetTheta = speakerHeading + thetaInNewFrame + Math.PI;
 
+    Logger.recordOutput(
+        "ShootingSolver/estimatedFuturePose",
+        new Pose2d(
+            robotPose
+                .getTranslation()
+                .plus(robotVel.plus(robotAcceleration.times(0.5 * timeToShoot)).times(timeToShoot)),
+            new Rotation2d(targetTheta)));
+
     if (DebugSpew) {
       double robotVelX = robotVel.getX();
       double robotVelY = robotVel.getY();
@@ -155,48 +196,8 @@ public class ShootingSolver {
     var rateOfRotation = (targetTheta - currentHeading) / Math.max(0.01, timeToShoot);
 
     return new Solution(
-        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(pitchNote));
-    return new Solution(new Rotation2d(targetTheta), new Rotation2d(0.0));
-
-    // if (Math.abs(dPspeakerAxisY) < 0.001) {
-    //   //
-    //   // Speaker right in front of robot
-    //   //
-    //   // -> Vn_y = 0
-    //   // ->  (Vr_y + Vs * sin(targetTheta))
-    //   // -> -Vr_y / Vs = sin(targetTheta))
-    //   // -> targetTheta = arcsin(-Vr_y / Vs)
-    //   //
-    //   targetTheta = Math.asin(-robotVelY / VnoteHorizontal);
-    // } else {
-    //   var a = -dPspeakerAxisX / dPspeakerAxisY;
-    // rotation velocity calculated from online derivative calculator:
-    // https://www.derivative-calculator.net/#expr=asin%28-%28%28b%2Bcx%29%2Asin%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%2B%28f%2Bgx%29%2Acos%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%29%2Fh%29&simplify=1
-
-    Translation2d futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
-    double futureRobotVelX = futureRobotVel.getX();
-    double futureRobotVelY = futureRobotVel.getY();
-
-    Translation2d futureSpeakerVel = futureRobotVel.times(-1.0);
-    double futureSpeakerVelX = futureSpeakerVel.getX();
-    double futureSpeakerVelY = futureSpeakerVel.getY();
-
-    Translation2d futureSpeakerOffset =
-        dPspeakerAxis
-            .toTranslation2d()
-            .plus(
-                robotVel
-                    .plus(robotAcceleration.times(0.5 * timeToShoot))
-                    .times(-1.0 * timeToShoot));
-    double futureSpeakerOffsetX = futureSpeakerOffset.getX();
-    double futureSpeakerOffsetY = futureSpeakerOffset.getY();
-
-    Logger.recordOutput(
-        "ShootingSolver/estimatedFuturePose",
-        new Pose2d(
-            robotPos.plus(
-                robotVel.plus(robotAcceleration.times(0.5 * timeToShoot)).times(timeToShoot)),
-            new Rotation2d(targetTheta)));
+        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(0.0));
+  }
 
   private double getNoteHorizVel(double vel, Translation2d robotPos) {
 
