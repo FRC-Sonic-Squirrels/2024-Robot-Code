@@ -102,8 +102,54 @@ public class ShuffleBoardLayouts {
     intakeCommandsLayout.add(stopCommand);
   }
 
+  public void endEffectorDebugLayout() {
+    var endEffectorTab = Shuffleboard.getTab("End_Effector_Debug");
+    var endEffectorCommandsLayout =
+        endEffectorTab
+            .getLayout("EndEffectorCommands", BuiltInLayouts.kList)
+            .withPosition(4, 0)
+            .withSize(2, 4)
+            .withProperties(Map.of("Label position", "HIDDEN"));
+
+    var tunableVoltage =
+        endEffectorTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+
+    endEffectorCommandsLayout.add(
+        new ConsumeSuppliedValue(
+            endEffector, () -> tunableVoltage.getDouble(0.0), endEffector::setPercentOut));
+
+    var stopCommand = Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector);
+    stopCommand.runsWhenDisabled();
+    stopCommand.setName("END EFFECTOR STOP");
+    endEffectorCommandsLayout.add(stopCommand);
+  }
+
+  public void elevatorDebugLayout() {
+    var elevatorTab = Shuffleboard.getTab("Elevator_Debug");
+    var elevatorCommandsLayout =
+        elevatorTab
+            .getLayout("ElevatorCommands", BuiltInLayouts.kList)
+            .withPosition(6, 0)
+            .withSize(2, 4)
+            .withProperties(Map.of("Label position", "HIDDEN"));
+
+    var tunableVoltage =
+        elevatorTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+
+    elevatorCommandsLayout.add(
+        new ConsumeSuppliedValue(
+            elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
+
+    var stopCommand = Commands.runOnce(() -> elevator.setVoltage(0.0), elevator);
+    stopCommand.runsWhenDisabled();
+    stopCommand.setName("ELEVATOR STOP");
+    elevatorCommandsLayout.add(stopCommand);
+  }
+
+  // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
     var shooterTab = Shuffleboard.getTab("Shooter_Debug");
+    // FIXME: change layout position
     var shooterCommandsLayout =
         shooterTab
             .getLayout("ShooterCommands", BuiltInLayouts.kList)
