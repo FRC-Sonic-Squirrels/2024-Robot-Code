@@ -80,7 +80,7 @@ public class ShuffleBoardLayouts {
     armCommandsLayout.add(resetSensorPositionHome);
   }
 
-  public void intakeDebugLayout(){
+  public void intakeDebugLayout() {
     var intakeTab = Shuffleboard.getTab("Intake_Debug");
     var intakeCommandsLayout =
         intakeTab
@@ -88,16 +88,39 @@ public class ShuffleBoardLayouts {
             .withPosition(2, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
-    
+
     var tunableVoltage =
         intakeTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
-    
+
     intakeCommandsLayout.add(
-        new ConsumeSuppliedValue(intake, () -> tunableVoltage.getDouble(0.0), intake::setPercentOut));
+        new ConsumeSuppliedValue(
+            intake, () -> tunableVoltage.getDouble(0.0), intake::setPercentOut));
 
     var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake);
     stopCommand.runsWhenDisabled();
     stopCommand.setName("INTAKE STOP");
     intakeCommandsLayout.add(stopCommand);
+  }
+
+  public void shooterDebugLayout() {
+    var shooterTab = Shuffleboard.getTab("Shooter_Debug");
+    var shooterCommandsLayout =
+        shooterTab
+            .getLayout("ShooterCommands", BuiltInLayouts.kList)
+            .withPosition(4, 0)
+            .withSize(2, 4)
+            .withProperties(Map.of("Label position", "HIDDEN"));
+
+    var tunableVoltage =
+        shooterTab.add("tunableVoltage", 0.0).withPosition(9, 5).withSize(2, 1).getEntry();
+
+    shooterCommandsLayout.add(
+        new ConsumeSuppliedValue(
+            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
+
+    var stopCommand = Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter);
+    stopCommand.runsWhenDisabled();
+    stopCommand.setName("SHOOTER STOP");
+    shooterCommandsLayout.add(stopCommand);
   }
 }
