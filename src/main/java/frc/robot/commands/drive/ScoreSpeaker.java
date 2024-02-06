@@ -27,7 +27,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class RotateToSpeaker extends Command {
+public class ScoreSpeaker extends Command {
   private Drivetrain drive;
   private Shooter shooter;
 
@@ -70,7 +70,7 @@ public class RotateToSpeaker extends Command {
    * @param endCondition when this command should end
    * @return Command to lock rotation in direction of target
    */
-  public RotateToSpeaker(
+  public ScoreSpeaker(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
       Drivetrain drive,
