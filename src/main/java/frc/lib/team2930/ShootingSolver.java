@@ -20,7 +20,7 @@ public class ShootingSolver {
   private double startOfShootingTimestamp = Double.NaN;
 
   public record Solution(
-      double timeToShoot, Rotation2d heading, double angularVel, Rotation2d pitch) {}
+      double timeToShoot, Rotation2d heading, Rotation2d angularVel, Rotation2d pitch) {}
 
   public ShootingSolver(
       Translation3d Pspeaker,
@@ -193,10 +193,10 @@ public class ShootingSolver {
     }
 
     var currentHeading = robotPose.getRotation().getRadians();
-    var rateOfRotation = (targetTheta - currentHeading) / Math.max(0.01, timeToShoot);
+    var angularVel = (targetTheta - currentHeading) / Math.max(0.01, timeToShoot);
 
     return new Solution(
-        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(0.0));
+        timeToShoot, new Rotation2d(targetTheta), new Rotation2d(angularVel), new Rotation2d(0.0));
   }
 
   private double getNoteHorizVel(double vel, Translation2d robotPos) {
