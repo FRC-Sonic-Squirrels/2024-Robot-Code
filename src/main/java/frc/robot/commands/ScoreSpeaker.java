@@ -45,7 +45,7 @@ public class ScoreSpeaker extends Command {
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
-  private LinearFilter pidLatencyfilter = LinearFilter.movingAverage(5);
+  private LinearFilter pidLatencyfilter = LinearFilter.movingAverage(10);
 
   private ArrayList<PIDTargetMeasurement> targetMeasurements =
       new ArrayList<PIDTargetMeasurement>();
@@ -54,7 +54,10 @@ public class ScoreSpeaker extends Command {
 
   private ShootingSolver solver =
       new ShootingSolver(
-          Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
+          Constants.FieldConstants.getSpeakerTranslation3D(),
+          new Translation3d(),
+          shooter.getRPM(),
+          Constants.ShooterConstants.SHOOTING_TIME);
 
   private BooleanSupplier shootGamepiece;
 
@@ -119,10 +122,10 @@ public class ScoreSpeaker extends Command {
 
     var result =
         solver.computeRobotYaw(
-            pidLatency,
             drive.getPoseEstimatorPose().getTranslation(),
             drive.getFieldRelativeVelocities().getTranslation(),
-            drive.getFieldRelativeAccelerations());
+            drive.getFieldRelativeAccelerations(),
+            pidLatency);
 
     Rotation2d targetRotation;
     Rotation2d targetAngularSpeed;
@@ -170,10 +173,10 @@ public class ScoreSpeaker extends Command {
     Rotation2d optimalAngle =
         solver
             .computeRobotYaw(
-                0.0,
                 drive.getPoseEstimatorPose().getTranslation(),
                 drive.getFieldRelativeVelocities().getTranslation(),
-                drive.getFieldRelativeAccelerations())
+                drive.getFieldRelativeAccelerations(),
+                0.0)
             .heading();
 
     Logger.recordOutput("RotateToSpeaker/optimalRotationDegrees", optimalAngle.getDegrees());
