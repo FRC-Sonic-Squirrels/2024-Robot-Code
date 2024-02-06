@@ -14,10 +14,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -111,8 +109,6 @@ public class RotateToSpeaker extends Command {
   @Override
   public void execute() {
 
-    // Pose2d futurePose = drive.getFutureEstimatedPose(pidLatency, "RotateToSpeaker");
-
     double linearMagnitude =
         MathUtil.applyDeadband(
             Math.hypot(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble()),
@@ -130,14 +126,6 @@ public class RotateToSpeaker extends Command {
             .getTranslation();
 
     var currentRot = drive.getRotation();
-
-    // var goalRot =
-    //     calculateTargetRot(
-    //         robotRotationOffset,
-    //         shooterRPM.getAsDouble(),
-    //         futurePose,
-    //         drive.getPoseEstimatorPose(),
-    //         drive.getFieldRelativeVelocities().getY());
 
     var result =
         solver.computeRobotYaw(
@@ -190,9 +178,6 @@ public class RotateToSpeaker extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
-    // rotVelCorrection =
-    //     calculateRotVelRadPerSec(yVel, yVel, result, futurePose, shooterRPM.getAsDouble());
-
     Rotation2d optimalAngle =
         solver
             .computeRobotYaw(
@@ -238,67 +223,5 @@ public class RotateToSpeaker extends Command {
   @Override
   public boolean isFinished() {
     return endCondition.get();
-  }
-
-  public static Rotation2d calculateTargetRot(
-      Rotation2d robotRotationOffset,
-      double shooterRPM,
-      Pose2d futurePose,
-      Pose2d currentPose,
-      double yVel) {
-
-    // TODO: add some kind of controller utilizties to make this easier and not have to copy code
-    // from
-    // DrivetrainDeafultTeleopDrive
-
-    Translation2d virtualSpeakerTranslation =
-        calculateVirtualSpeakerTranslation(currentPose, shooterRPM, yVel);
-
-    Rotation2d heading =
-        GeometryUtil.getHeading(futurePose.getTranslation(), virtualSpeakerTranslation);
-
-    var goalRot = heading.plus(robotRotationOffset);
-
-    return goalRot;
-  }
-
-  public static double calculateRotVelRadPerSec(
-      double xVel, double yVel, Rotation2d speakerRotation, Pose2d robotPose, double shooterRPM) {
-
-    Translation2d virtualSpeakerTranslation =
-        calculateVirtualSpeakerTranslation(robotPose, shooterRPM, yVel);
-
-    Rotation2d heading =
-        GeometryUtil.getHeading(robotPose.getTranslation(), virtualSpeakerTranslation);
-
-    return Math.hypot(xVel, yVel)
-        * Math.cos(heading.getRadians() - new Rotation2d(xVel, yVel).getRadians() - Math.PI / 2)
-        / Math.hypot(
-            robotPose.getX() - virtualSpeakerTranslation.getX(),
-            robotPose.getY() - virtualSpeakerTranslation.getY());
-  }
-
-  private static Translation2d calculateVirtualSpeakerTranslation(
-      Pose2d pose, double shooterRPM, double yVel) {
-
-    Translation2d target =
-        DriverStation.getAlliance().isPresent()
-            ? new Translation2d(
-                DriverStation.getAlliance().get().equals(DriverStation.Alliance.Blue)
-                    ? 0.03950466960668564
-                    : 16.281435012817383,
-                5.498747638702393)
-            : new Translation2d(0.03950466960668564, 5.498747638702393);
-
-    double horizDist = Math.hypot(pose.getX() - target.getX(), pose.getY() - target.getY());
-
-    double dist = Math.hypot(horizDist, Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
-
-    double shooterTangentialSpeed =
-        shooterRPM * 60.0 * Math.PI * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS;
-
-    double shotTime = dist / shooterTangentialSpeed;
-
-    return target.minus(new Translation2d(0.0, yVel * shotTime));
   }
 }
