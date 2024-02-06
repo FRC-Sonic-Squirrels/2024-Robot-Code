@@ -305,8 +305,4 @@ public class ShootingSolver {
 
     return Pspeaker.minus(Paxis);
   }
-
-  public static void logTime(double time) {
-    Logger.recordOutput("ShootingSolver/loggedTime", time);
-  }
 }
