@@ -34,7 +34,7 @@ public class ShootingSolverTest {
         var robotPosRotatedAndTranslated = robotPosRotated.minus(robotVelRotated);
         var robotPose = new Pose2d(robotPosRotatedAndTranslated, new Rotation2d());
 
-        var res = solver.computeRobotYaw(robotPose.getTranslation(), robotVel, new Translation2d());
+        var res = solver.computeRobotYaw(robotPose, robotVel, new Translation2d());
         double VnoteHorizontal = shooterSpeed * Math.cos(Math.toRadians(45));
         if (VnoteHorizontal < 10) {
           assertNull(res);
@@ -64,7 +64,7 @@ public class ShootingSolverTest {
       for (double i = -10; i <= 10; i += 0.1) {
         var res =
             solver.computeRobotYaw(
-                new Translation2d(),
+                new Pose2d(),
                 new Pose2d(-i, 10, new Rotation2d(0)).getTranslation(),
                 new Translation2d(i, 0));
 

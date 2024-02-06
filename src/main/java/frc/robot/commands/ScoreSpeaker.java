@@ -122,7 +122,7 @@ public class ScoreSpeaker extends Command {
 
     var result =
         solver.computeRobotYaw(
-            drive.getPoseEstimatorPose().getTranslation(),
+            drive.getPoseEstimatorPose(),
             drive.getFieldRelativeVelocities().getTranslation(),
             drive.getFieldRelativeAccelerations());
 
@@ -172,7 +172,7 @@ public class ScoreSpeaker extends Command {
     Rotation2d optimalAngle =
         solver
             .computeRobotYaw(
-                drive.getPoseEstimatorPose().getTranslation(),
+                drive.getPoseEstimatorPose(),
                 drive.getFieldRelativeVelocities().getTranslation(),
                 drive.getFieldRelativeAccelerations())
             .heading();
