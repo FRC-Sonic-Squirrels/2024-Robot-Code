@@ -56,7 +56,7 @@ public class ScoreSpeaker extends Command {
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
           new Translation3d(),
-          shooter.getRPM(),
+          Constants.ShooterConstants.SHOOTER_SPEED,
           Constants.ShooterConstants.SHOOTING_TIME);
 
   private BooleanSupplier shootGamepiece;
@@ -124,7 +124,8 @@ public class ScoreSpeaker extends Command {
         solver.computeRobotYaw(
             drive.getPoseEstimatorPose(),
             drive.getFieldRelativeVelocities().getTranslation(),
-            drive.getFieldRelativeAccelerations());
+            drive.getFieldRelativeAccelerations(),
+            0.0);
 
     Rotation2d targetRotation;
     Rotation2d targetAngularSpeed;
@@ -169,13 +170,18 @@ public class ScoreSpeaker extends Command {
     var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
     var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
 
-    Rotation2d optimalAngle =
-        solver
-            .computeRobotYaw(
-                drive.getPoseEstimatorPose(),
-                drive.getFieldRelativeVelocities().getTranslation(),
-                drive.getFieldRelativeAccelerations())
-            .heading();
+    var optimalResult =
+        solver.computeRobotYaw(
+            drive.getPoseEstimatorPose(),
+            drive.getFieldRelativeVelocities().getTranslation(),
+            drive.getFieldRelativeAccelerations(),
+            0.0);
+    Rotation2d optimalAngle;
+    if (optimalResult != null) {
+      optimalAngle = optimalResult.heading();
+    } else {
+      optimalAngle = drive.getPoseEstimatorPose().getRotation();
+    }
 
     Logger.recordOutput("RotateToSpeaker/optimalRotationDegrees", optimalAngle.getDegrees());
 
