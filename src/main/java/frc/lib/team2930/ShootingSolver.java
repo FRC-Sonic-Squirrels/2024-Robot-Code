@@ -5,8 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
@@ -14,7 +12,7 @@ public class ShootingSolver {
 
   private final Translation3d Pspeaker;
   private final Translation3d PaxisOfRotationShooter;
-  private final double shooterRPM;
+  private final double shooterTangentialSpeed;
 
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
@@ -25,11 +23,11 @@ public class ShootingSolver {
   public ShootingSolver(
       Translation3d Pspeaker,
       Translation3d PaxisOfRotationShooter,
-      double shooterRPM,
+      double shooterTangentialSpeed,
       double shootingTime) {
     this.Pspeaker = Pspeaker;
     this.PaxisOfRotationShooter = PaxisOfRotationShooter;
-    this.shooterRPM = shooterRPM;
+    this.shooterTangentialSpeed = shooterTangentialSpeed;
     this.shootingTime = shootingTime;
   }
 
@@ -45,7 +43,10 @@ public class ShootingSolver {
    * @return First: target robot theta Second: target robot rotational velocity
    */
   public Solution computeRobotYaw(
-      Pose2d robotPose, Translation2d robotVel, Translation2d robotAcceleration) {
+      Pose2d robotPose,
+      Translation2d robotVel,
+      Translation2d robotAcceleration,
+      double currentTime) {
 
     Logger.recordOutput("ShootingSolver/time", shootingTime);
 
@@ -53,14 +54,10 @@ public class ShootingSolver {
     if (Double.isNaN(this.startOfShootingTimestamp)) {
       timeToShoot = shootingTime;
     } else {
-      timeToShoot =
-          Math.max(0, shootingTime - (Timer.getFPGATimestamp() - startOfShootingTimestamp));
+      timeToShoot = Math.max(0, shootingTime - (currentTime - startOfShootingTimestamp));
     }
 
-    var shooterSpeed =
-        shooterRPM / 60.0 * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS * Math.PI;
-
-    var VnoteHorizontal = getNoteHorizVel(shooterSpeed, robotPose.getTranslation());
+    var VnoteHorizontal = getNoteHorizVel(shooterTangentialSpeed, robotPose.getTranslation());
 
     var dPspeakerAxis = getAxisRelativePosition(robotPose.getTranslation());
 
@@ -80,12 +77,6 @@ public class ShootingSolver {
     // https://www.derivative-calculator.net/#expr=asin%28-%28%28b%2Bcx%29%2Asin%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%2B%28f%2Bgx%29%2Acos%28-atan%28%28d-fx-%281%2F2%29gx%5E2%29%2F%28a-bx-%281%2F2%29cx%5E2%29%29%29%29%2Fh%29&simplify=1
 
     Translation2d futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
-    double futureRobotVelX = futureRobotVel.getX();
-    double futureRobotVelY = futureRobotVel.getY();
-
-    Translation2d futureSpeakerVel = futureRobotVel.times(-1.0);
-    double futureSpeakerVelX = futureSpeakerVel.getX();
-    double futureSpeakerVelY = futureSpeakerVel.getY();
 
     Translation2d futureSpeakerOffset =
         dPspeakerAxis
@@ -94,8 +85,6 @@ public class ShootingSolver {
                 robotVel
                     .plus(robotAcceleration.times(0.5 * timeToShoot))
                     .times(-1.0 * timeToShoot));
-    double futureSpeakerOffsetX = futureSpeakerOffset.getX();
-    double futureSpeakerOffsetY = futureSpeakerOffset.getY();
 
     Logger.recordOutput("ShootingSolver/dPSpeakerAxis", dPspeakerAxis);
 
