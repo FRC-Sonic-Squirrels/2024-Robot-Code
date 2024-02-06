@@ -53,7 +53,6 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
     motor.setControl(new VoltageOut(voltage));
 
-    inputs.RPM = velocityRPS.getValueAsDouble() / 60.0;
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.intakeSideTOFDistanceInches = intakeSideTOFDistanceInches.getValueAsDouble();
     inputs.shooterSideTOFDistanceInches = shooterSideTOFDistanceInches.getValueAsDouble();

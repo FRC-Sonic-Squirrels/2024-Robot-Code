@@ -16,7 +16,7 @@ public class IntakeIOReal implements IntakeIO {
   private StatusSignal<Double> deviceTemp;
   private StatusSignal<Double> appliedVolts;
 
-  private double voltage = 0.0;
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
   public IntakeIOReal() {
 
@@ -45,7 +45,6 @@ public class IntakeIOReal implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     BaseStatusSignal.refreshAll(currentAmps, deviceTemp, appliedVolts);
 
-    motor.setControl(new VoltageOut(voltage));
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
@@ -53,6 +52,6 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setVoltage(double volts) {
-    voltage = volts;
+    motor.setControl(openLoopControl.withOutput(volts));
   }
 }
