@@ -56,6 +56,10 @@ public class ScoreSpeaker extends Command {
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
+  private BooleanSupplier shootGamepiece;
+
+  private boolean shooting;
+
   /**
    * Creates a new RotateToSpeaker.
    *
@@ -128,7 +132,7 @@ public class ScoreSpeaker extends Command {
       targetAngularSpeed = new Rotation2d(0.0);
     } else {
       targetRotation = result.heading();
-      targetAngularSpeed = result.pitch();
+      targetAngularSpeed = result.angularVel();
     }
 
     targetMeasurements.add(
@@ -149,7 +153,6 @@ public class ScoreSpeaker extends Command {
       }
     }
 
-    ShootingSolver.logTime(pidLatency);
     Logger.recordOutput("RotateToSpeaker/PIDLatency", pidLatency);
 
     var rotationalEffort =
@@ -226,5 +229,9 @@ public class ScoreSpeaker extends Command {
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  public boolean isShooting() {
+    return shooting;
   }
 }
