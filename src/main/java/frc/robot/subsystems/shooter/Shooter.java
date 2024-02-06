@@ -66,7 +66,7 @@ public class Shooter extends SubsystemBase {
       io.updateInputs(inputs);
 
       Logger.processInputs(ROOT_TABLE, inputs);
-      Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pitch.getDegrees());
+      Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pivotPosition.getDegrees());
 
       io.setPivotClosedLoopConstants(
           kP.get(),
@@ -79,13 +79,13 @@ public class Shooter extends SubsystemBase {
           new PIDTargetMeasurement(
               Timer.getFPGATimestamp(),
               currentTarget,
-              inputs.pitch.getRadians() <= currentTarget.getRadians()));
+              inputs.pivotPosition.getRadians() <= currentTarget.getRadians()));
       for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
         PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
         if ((measurement.upDirection
-                && inputs.pitch.getRadians() >= measurement.targetRot.getRadians())
+                && inputs.pivotPosition.getRadians() >= measurement.targetRot.getRadians())
             || (!measurement.upDirection
-                && inputs.pitch.getRadians() <= measurement.targetRot.getRadians())) {
+                && inputs.pivotPosition.getRadians() <= measurement.targetRot.getRadians())) {
           pivotPidLatency =
               pivotPidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
           pivotTargetMeasurements.remove(index);
@@ -98,7 +98,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Rotation2d getPitch() {
-    return inputs.pitch;
+    return inputs.pivotPosition;
   }
 
   public void setPercentOut(double percent) {
@@ -123,12 +123,8 @@ public class Shooter extends SubsystemBase {
     io.setLauncherVoltage(volts);
   }
 
-  public void setLauncherPercentOut(double percent) {
-    io.setLauncherPercentOut(percent);
-  }
-
   public double getRPM() {
-    return inputs.RPM;
+    return inputs.launcherRPM;
   }
 
   public double getPivotPIDLatency() {
@@ -136,12 +132,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean pivotIsAtTarget() {
-    return Math.abs(inputs.pitch.getRadians() - currentTarget.getRadians())
+    return Math.abs(inputs.pivotPosition.getRadians() - currentTarget.getRadians())
         <= Units.degreesToRadians(toleranceDegrees.get());
   }
 
   public boolean pivotIsAtTarget(Rotation2d target) {
-    return Math.abs(inputs.pitch.getRadians() - target.getRadians())
+    return Math.abs(inputs.pivotPosition.getRadians() - target.getRadians())
         <= Units.degreesToRadians(toleranceDegrees.get());
   }
 

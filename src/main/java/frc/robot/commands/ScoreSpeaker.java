@@ -124,9 +124,7 @@ public class ScoreSpeaker extends Command {
 
     var result =
         solver.computeAngles(
-            currentTime,
-            poseEstimatorPose,
-            drive.getFieldRelativeVelocities().getTranslation());
+            currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
 
     double targetRotation;
     double targetAngularSpeed;
@@ -141,14 +139,11 @@ public class ScoreSpeaker extends Command {
 
     targetMeasurements.add(
         new PIDTargetMeasurement(
-            currentTime,
-            targetRotation,
-            currentRot.getRadians() <= targetRotation));
+            currentTime, targetRotation, currentRot.getRadians() <= targetRotation));
 
     for (int index = 0; index < targetMeasurements.size(); index++) {
       PIDTargetMeasurement measurement = targetMeasurements.get(index);
-      if ((measurement.upDirection
-              && currentRot.getRadians() >= measurement.targetRot.getRadians())
+      if ((measurement.upDirection && currentRot.getRadians() >= measurement.targetRot.getRadians())
           || (!measurement.upDirection
               && currentRot.getRadians() <= measurement.targetRot.getRadians())) {
         pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
@@ -160,7 +155,9 @@ public class ScoreSpeaker extends Command {
 
     Logger.recordOutput("RotateToSpeaker/PIDLatency", pidLatency);
 
-    var rotationalEffort =        (rotationController.calculate(currentRot.getRadians(), targetRotation)            - targetAngularSpeed);
+    var rotationalEffort =
+        (rotationController.calculate(currentRot.getRadians(), targetRotation)
+            - targetAngularSpeed);
 
     rotationalEffort =
         Math.copySign(

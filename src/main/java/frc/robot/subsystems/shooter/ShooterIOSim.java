@@ -66,9 +66,8 @@ public class ShooterIOSim implements ShooterIO {
 
     pivotFeedback.setTolerance(1.0);
 
-    inputs.pitch = new Rotation2d(pivot.getAngleRads());
-    inputs.RPM = 5800.0;
-    inputs.kickerRPM = kickerMotorSim.getAngularVelocityRPM();
+    inputs.pivotPosition = new Rotation2d(pivot.getAngleRads());
+    inputs.launcherRPM = 5800.0;
 
     inputs.beamBreak = beamBreak.get();
 
@@ -79,7 +78,7 @@ public class ShooterIOSim implements ShooterIO {
 
       pivotControlEffort =
           pivotFeedback.calculate(
-                  inputs.pitch.getRadians(), pivotClosedLoopTargetAngle.getRadians())
+                  inputs.pivotPosition.getRadians(), pivotClosedLoopTargetAngle.getRadians())
               + ff;
 
       Logger.recordOutput("Shooter/error", pivotFeedback.getPositionError());
@@ -136,11 +135,6 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setLauncherVoltage(double volts) {
     launcherOpenLoopVolts = volts;
-  }
-
-  @Override
-  public void setLauncherPercentOut(double percent) {
-    launcherOpenLoopVolts = percent * 12.0;
   }
 
   @Override

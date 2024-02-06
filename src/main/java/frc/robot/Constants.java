@@ -221,7 +221,7 @@ public final class Constants {
 
       public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
 
-      public static final double GEARING = 90.0;
+      public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
 
       public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
       public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
@@ -231,7 +231,8 @@ public final class Constants {
 
     public static class Launcher {
       public static final double MOI = 5.0;
-      public static final double GEARING = 1.0;
+      // FIX ME: THIS VALUE HAS TO BE CONFIRMED
+      public static final double GEARING = (30.0 / 18.0);
       public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
     }
 
@@ -252,6 +253,7 @@ public final class Constants {
     public static final int SHOOTER_LEAD_CAN_ID = 1;
     public static final int SHOOTER_FOLLOW_CAN_ID = 2;
     public static final int SHOOTER_PIVOT_CAN_ID = 8;
+    public static final int SHOOTER_KICKER_CAN_ID = 9;
     public static final int ARM_CAN_ID = 40;
     public static final int ELEVATOR_CAN_ID = 4;
     public static final int END_EFFECTOR_CAN_ID = 6;
