@@ -56,9 +56,6 @@ public class ScoreSpeaker extends Command {
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(), new Translation3d(), 5800.0);
 
-  // a bit
-  // TODO: behavior is decent but pid needs to be tuned
-
   /**
    * Creates a new RotateToSpeaker.
    *
