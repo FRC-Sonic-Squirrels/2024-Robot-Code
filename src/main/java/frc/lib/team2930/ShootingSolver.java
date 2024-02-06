@@ -129,19 +129,11 @@ public class ShootingSolver {
     //
     var noteRelativeVel = new Translation2d(VnoteHorizontal, 0);
 
-    Translation2d dPspeakreAxisFuture =
-        dPspeakerAxis
-            .toTranslation2d()
-            .plus(
-                robotVel
-                    .plus(robotAcceleration.times(0.5 * timeToShoot))
-                    .times(timeToShoot * -1.0));
-
     // Direction to the speaker from the note.
-    double speakerHeading = Math.atan2(dPspeakreAxisFuture.getY(), dPspeakreAxisFuture.getX());
+    double speakerHeading = Math.atan2(futureSpeakerOffset.getY(), futureSpeakerOffset.getX());
 
     Rotation2d frameRotation = Rotation2d.fromRadians(-speakerHeading);
-    var robotVelInNewFrame = robotVel.rotateBy(frameRotation);
+    var robotVelInNewFrame = futureRobotVel.rotateBy(frameRotation);
     var noteRelativeVelInNewFrame = noteRelativeVel.rotateBy(frameRotation);
 
     double robotVelXInNewFrame = robotVelInNewFrame.getX();
