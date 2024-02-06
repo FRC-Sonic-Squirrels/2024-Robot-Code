@@ -34,7 +34,7 @@ public class ShootingSolverTest {
         var robotPosRotatedAndTranslated = robotPosRotated.minus(robotVelRotated);
         var robotPose = new Pose2d(robotPosRotatedAndTranslated, new Rotation2d());
 
-        var res = solver.computeAngles(0, robotPose, robotVelRotated);
+        var res = solver.computeRobotYaw(robotPose.getTranslation(), robotVel, new Translation2d());
         double VnoteHorizontal = shooterSpeed * Math.cos(Math.toRadians(45));
         if (VnoteHorizontal < 10) {
           assertNull(res);
@@ -63,7 +63,10 @@ public class ShootingSolverTest {
       var solver = new ShootingSolver(Pspeaker, PaxisOfRotationShooter, shooterSpeed, shootingTime);
       for (double i = -10; i <= 10; i += 0.1) {
         var res =
-            solver.computeAngles(0, new Pose2d(-i, 10, new Rotation2d(0)), new Translation2d(i, 0));
+            solver.computeRobotYaw(
+                new Translation2d(),
+                new Pose2d(-i, 10, new Rotation2d(0)).getTranslation(),
+                new Translation2d(i, 0));
 
         System.out.printf(
             "%3.1f: heading:%3.1f pitch:%3.1f shooter:%2.1f\n",
