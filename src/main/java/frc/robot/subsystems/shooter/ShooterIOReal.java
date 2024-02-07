@@ -37,6 +37,7 @@ public class ShooterIOReal implements ShooterIO {
 
   private final StatusSignal<Double> kickerAppliedVolts;
   private final StatusSignal<Double> kickerCurrentAmps;
+  private final StatusSignal<Double> kickerRPS;
 
   private final StatusSignal<Double> launcherLeadTempCelsius;
   private final StatusSignal<Double> launcherFollowTempCelsius;
@@ -109,6 +110,7 @@ public class ShooterIOReal implements ShooterIO {
 
     kickerAppliedVolts = kicker.getMotorVoltage();
     kickerCurrentAmps = kicker.getStatorCurrent();
+    kickerRPS = kicker.getRotorVelocity();
 
     launcherLeadTempCelsius = launcher_lead.getDeviceTemp();
     launcherFollowTempCelsius = launcher_lead.getDeviceTemp();
@@ -145,6 +147,7 @@ public class ShooterIOReal implements ShooterIO {
         // --
         kickerAppliedVolts,
         kickerCurrentAmps,
+        kickerRPS,
         // --
         launcherLeadTempCelsius,
         launcherFollowTempCelsius,
@@ -169,6 +172,7 @@ public class ShooterIOReal implements ShooterIO {
 
     inputs.kickerAppliedVolts = kickerAppliedVolts.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrentAmps.getValueAsDouble();
+    inputs.kickerRPM = kickerRPS.getValueAsDouble() * 60.0;
 
     inputs.tempsCelcius =
         new double[] {
