@@ -35,7 +35,10 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 19.0);
 
   private static final LoggedTunableNumber toleranceDegrees =
-      new LoggedTunableNumber(ROOT_TABLE + "/toleranceDegrees", 0.5);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
+
+  private static final LoggedTunableNumber launcherToleranceRPM =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
@@ -127,6 +130,11 @@ public class Shooter extends SubsystemBase {
     return inputs.launcherRPM;
   }
 
+  public boolean isAtShootingRPM() {
+    return inputs.launcherRPM
+        >= Constants.ShooterConstants.SHOOTING_RPM - launcherToleranceRPM.get();
+  }
+
   public double getPivotPIDLatency() {
     return pivotPidLatency;
   }
@@ -143,6 +151,10 @@ public class Shooter extends SubsystemBase {
 
   public void setKickerPercentOut(double percent) {
     io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
+  }
+
+  public double getKickerRPM() {
+    return inputs.kickerRPM;
   }
 
   public boolean getBeamBreak() {
