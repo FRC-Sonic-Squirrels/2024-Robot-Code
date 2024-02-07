@@ -183,4 +183,14 @@ public class ShuffleBoardLayouts {
     stopCommand.setName("SHOOTER STOP");
     shooterCommandsLayout.add(stopCommand);
   }
+
+  public void systemsCheck() {
+    var systemsCheckTab = Shuffleboard.getTab("Systems_Check");
+    var systemsCheckCommandsLayout =
+        systemsCheckTab
+            .getLayout("SystemsChecks", BuiltInLayouts.kList)
+            .withPosition(0, 0)
+            .withSize(2, 4)
+            .withProperties(Map.of("Label position", "HIDDEN"));
+  }
 }
