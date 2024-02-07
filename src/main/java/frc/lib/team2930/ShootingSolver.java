@@ -155,7 +155,15 @@ public class ShootingSolver {
     }
 
     var currentHeading = robotPose.getRotation().getRadians();
-    var rateOfRotation = (targetTheta - currentHeading) / Math.max(0.01, timeToShoot);
+
+    var flippedTargetTheta = targetTheta - Math.PI;
+    if (flippedTargetTheta <= -Math.PI) flippedTargetTheta += Math.PI * 2;
+
+    if (flippedTargetTheta >= Math.PI) flippedTargetTheta -= Math.PI * 2;
+
+    var deltaAngle = flippedTargetTheta - currentHeading;
+
+    var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 
     return new Solution(
         timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(pitchNote));

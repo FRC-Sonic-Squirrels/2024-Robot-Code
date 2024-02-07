@@ -189,12 +189,14 @@ public final class Constants {
   public class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
+    public static final double SHOOTING_PERCENT_OUT = 0.95;
     public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
     public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
 
-    public static final double SHOOTER_SPEED =
-        Units.feetToMeters(30.0); // TODO: Convert from RPM to speed
-    public static final double SHOOTING_TIME = 0.4;
+    public static final double SHOOTING_SPEED =
+        SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER_METERS * Math.PI;
+
+    public static final double SHOOTING_TIME = 0.2;
 
     public static final Transform2d SHOOTER_OFFSET_METERS =
         new Transform2d(0, -Units.inchesToMeters(12), new Rotation2d());
@@ -204,20 +206,22 @@ public final class Constants {
             SHOOTER_OFFSET_METERS.getX(), SHOOTER_OFFSET_METERS.getY(), Units.inchesToMeters(5));
 
     public class Pivot {
-      public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
-        return new Rotation2d(
-            Math.atan2(
-                FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS, distanceMeters));
-      }
+      // Old Calculations:
+      // public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
+      //   return new Rotation2d(
+      //       Math.atan2(
+      //           FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS,
+      // distanceMeters));
+      // }
 
-      public static final double PITCH_VEL_RAD_PER_SEC(
-          double velMetersPerSecond, double distanceMeters) {
-        // velocity times derivative of distance to shooting pitch formula to get pitch velocity
-        return velMetersPerSecond
-            * -FieldConstants.SPEAKER_HEIGHT_METERS
-            / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
-                + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
-      }
+      // public static final double PITCH_VEL_RAD_PER_SEC(
+      //     double velMetersPerSecond, double distanceMeters) {
+      //   // velocity times derivative of distance to shooting pitch formula to get pitch velocity
+      //   return velMetersPerSecond
+      //       * -FieldConstants.SPEAKER_HEIGHT_METERS
+      //       / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
+      //           + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
+      // }
 
       public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
 

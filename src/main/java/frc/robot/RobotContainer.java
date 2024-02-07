@@ -322,6 +322,8 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  private boolean isShooting = false;
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -396,15 +398,15 @@ public class RobotContainer {
             new DriveToGamepiece(
                 visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
-    driverController
-        .rightBumper()
-        .whileTrue(
-            new ScoreSpeaker(
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                drivetrain,
-                shooter,
-                driverController.a()));
+    ScoreSpeaker scoreSpeaker =
+        new ScoreSpeaker(
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            drivetrain,
+            shooter,
+            driverController.a());
+
+    driverController.rightBumper().whileTrue(scoreSpeaker);
   }
 
   /**
@@ -430,6 +432,8 @@ public class RobotContainer {
     return current;
   }
 
+  boolean prevIsShooting = false;
+
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(
         new Rotation2d(),
@@ -441,13 +445,24 @@ public class RobotContainer {
             Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
         shooter.getRPM(),
         elevator.getHeightInches());
+
     SimpleMechanismVisualization.logMechanism();
+
+    boolean isShooting = shooter.getKickerRPM() >= 100.0;
+
+    boolean visualizeTraj = false;
+
+    visualizeTraj = isShooting && !prevIsShooting;
+
     GamepieceVisualization.updateVisualization(
         drivetrain.getPoseEstimatorPose(),
         drivetrain.getFieldRelativeVelocities().getTranslation(),
         shooter.getPitch(),
         shooter.getRPM(),
-        driverController.a().getAsBoolean());
+        visualizeTraj);
+
+    prevIsShooting = isShooting;
+
     GamepieceVisualization.logTraj();
   }
 }
