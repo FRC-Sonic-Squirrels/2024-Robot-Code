@@ -443,6 +443,10 @@ public class RobotContainer {
 
   Timer shootingTimer = new Timer();
 
+  Pose2d robotPoseOfShot = new Pose2d();
+
+  private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
+
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(
         new Rotation2d(),
@@ -459,7 +463,10 @@ public class RobotContainer {
 
     boolean isShooting = shooter.getKickerRPM() >= 100.0;
 
-    if (!isShooting) shootingTimer.stop();
+    if (!isShooting) {
+      shootingTimer.stop();
+      shootingTimer.reset();
+    }
 
     boolean shootingStart = false;
 
@@ -467,21 +474,18 @@ public class RobotContainer {
 
     if (shootingStart) shootingTimer.start();
 
-    isShot = shootingTimer.get() >= Constants.ShooterConstants.SHOOTING_TIME;
-
-    shotStart = isShot && !isShotPrev;
-
-    GamepieceVisualization.updateVisualization(
+    gamepieceVisualizer.updateVisualization(
         drivetrain.getPoseEstimatorPose(),
         drivetrain.getFieldRelativeVelocities().getTranslation(),
         shooter.getPitch(),
         shooter.getRPM(),
-        shootingStart);
+        isShooting,
+        shootingTimer.get());
 
     prevIsShooting = isShooting;
 
-    isShotPrev = isShot;
+    gamepieceVisualizer.logTraj();
 
-    GamepieceVisualization.logTraj();
+    Logger.recordOutput("Visualization/Note", new Pose2d(1, 1, new Rotation2d()));
   }
 }
