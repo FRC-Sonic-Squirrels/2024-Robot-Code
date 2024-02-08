@@ -22,8 +22,6 @@ public class ShooterIOReal implements ShooterIO {
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
   TalonFX kicker = new TalonFX(Constants.CanIDs.SHOOTER_KICKER_CAN_ID);
 
-  public Rotation2d pitch = new Rotation2d();
-
   private final StatusSignal<Double> pivotPosition;
   private final StatusSignal<Double> pivotVelocity;
   private final StatusSignal<Double> pivotVoltage;
@@ -31,8 +29,8 @@ public class ShooterIOReal implements ShooterIO {
 
   private final StatusSignal<Double> launcherLeadVelocity;
   private final StatusSignal<Double> launcherLeadVoltage;
-  private final StatusSignal<Double> launcherFollowerVoltage;
   private final StatusSignal<Double> launcherLeadCurrentAmps;
+  private final StatusSignal<Double> launcherFollowerVoltage;
   private final StatusSignal<Double> launcherFollowerCurrentAmps;
 
   private final StatusSignal<Double> kickerAppliedVolts;
@@ -124,7 +122,7 @@ public class ShooterIOReal implements ShooterIO {
         1, launcherLeadTempCelsius, launcherFollowTempCelsius, kickerTempCelsius, pivotTempCelsius);
 
     launcher_lead.optimizeBusUtilization();
-    launcher_follower.optimizeBusUtilization();
+    // launcher_follower.optimizeBusUtilization();
     pivot.optimizeBusUtilization();
     kicker.optimizeBusUtilization();
   }
@@ -139,8 +137,8 @@ public class ShooterIOReal implements ShooterIO {
         // --
         launcherLeadVelocity,
         launcherLeadVoltage,
-        launcherFollowerVoltage,
         launcherLeadCurrentAmps,
+        launcherFollowerVoltage,
         launcherFollowerCurrentAmps,
         // --
         kickerAppliedVolts,
@@ -200,7 +198,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setLauncherRPM(double rpm) {
-    launcher_lead.setControl(launcherClosedLoop.withVelocity(rpm));
+    launcher_lead.setControl(launcherClosedLoop.withVelocity(rpm / 60));
   }
 
   @Override
@@ -229,8 +227,7 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setLauncherClosedLoopConstants(
-      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {
+  public void setLauncherClosedLoopConstants(double kP, double kV, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
@@ -238,9 +235,8 @@ public class ShooterIOReal implements ShooterIO {
     launcher_lead.getConfigurator().refresh(mmConfig);
 
     pidConfig.kP = kP;
-    pidConfig.kD = kD;
+    pidConfig.kV = kV;
 
-    mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
     launcher_lead.getConfigurator().apply(pidConfig);
