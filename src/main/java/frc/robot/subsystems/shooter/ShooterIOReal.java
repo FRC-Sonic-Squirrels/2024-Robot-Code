@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -16,12 +17,10 @@ import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
-  TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, "CANivore");
-  // TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
-  TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID, "CANivore");
-  TalonFX kicker = new TalonFX(Constants.CanIDs.SHOOTER_KICKER_CAN_ID, "CANivore");
-
-  public Rotation2d pitch = new Rotation2d();
+  TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
+  TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
+  TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
+  TalonFX kicker = new TalonFX(Constants.CanIDs.SHOOTER_KICKER_CAN_ID);
 
   private final StatusSignal<Double> pivotPosition;
   private final StatusSignal<Double> pivotVelocity;
@@ -30,9 +29,9 @@ public class ShooterIOReal implements ShooterIO {
 
   private final StatusSignal<Double> launcherLeadVelocity;
   private final StatusSignal<Double> launcherLeadVoltage;
-  // private final StatusSignal<Double> launcherFollowerVoltage;
   private final StatusSignal<Double> launcherLeadCurrentAmps;
-  // private final StatusSignal<Double> launcherFollowerCurrentAmps;
+  private final StatusSignal<Double> launcherFollowerVoltage;
+  private final StatusSignal<Double> launcherFollowerCurrentAmps;
 
   private final StatusSignal<Double> kickerAppliedVolts;
   private final StatusSignal<Double> kickerCurrentAmps;
@@ -67,8 +66,8 @@ public class ShooterIOReal implements ShooterIO {
     launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
 
     launcher_lead.getConfigurator().apply(launcherConfig);
-    // launcher_follower.getConfigurator().apply(launcherConfig);
-    // launcher_follower.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
+    launcher_follower.getConfigurator().apply(launcherConfig);
+    launcher_follower.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
     // --- pivot config ---
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -102,9 +101,9 @@ public class ShooterIOReal implements ShooterIO {
     launcherLeadVelocity = launcher_lead.getVelocity();
 
     launcherLeadVoltage = launcher_lead.getMotorVoltage();
-    // launcherFollowerVoltage = launcher_follower.getMotorVoltage();
+    launcherFollowerVoltage = launcher_follower.getMotorVoltage();
     launcherLeadCurrentAmps = launcher_lead.getStatorCurrent();
-    // launcherFollowerCurrentAmps = launcher_follower.getStatorCurrent();
+    launcherFollowerCurrentAmps = launcher_follower.getStatorCurrent();
 
     kickerAppliedVolts = kicker.getMotorVoltage();
     kickerCurrentAmps = kicker.getStatorCurrent();
@@ -117,8 +116,8 @@ public class ShooterIOReal implements ShooterIO {
     BaseStatusSignal.setUpdateFrequencyForAll(100, pivotPosition, launcherLeadVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps);
-    // BaseStatusSignal.setUpdateFrequencyForAll(
-    //     10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(
         1, launcherLeadTempCelsius, launcherFollowTempCelsius, kickerTempCelsius, pivotTempCelsius);
 
@@ -138,9 +137,9 @@ public class ShooterIOReal implements ShooterIO {
         // --
         launcherLeadVelocity,
         launcherLeadVoltage,
-        // launcherFollowerVoltage,
         launcherLeadCurrentAmps,
-        // launcherFollowerCurrentAmps,
+        launcherFollowerVoltage,
+        launcherFollowerCurrentAmps,
         // --
         kickerAppliedVolts,
         kickerCurrentAmps,
@@ -159,12 +158,11 @@ public class ShooterIOReal implements ShooterIO {
     inputs.launcherRPM = launcherLeadVelocity.getValueAsDouble() * 60; // rps to rpm = mult by 60
     inputs.launcherAppliedVolts =
         new double[] {
-          launcherLeadVoltage.getValueAsDouble(), // *launcherFollowerVoltage.getValueAsDouble() */
+          launcherLeadVoltage.getValueAsDouble(), launcherFollowerVoltage.getValueAsDouble()
         };
     inputs.launcherCurrentAmps =
         new double[] {
-          launcherLeadCurrentAmps
-              .getValueAsDouble(), // * launcherFollowerCurrentAmps.getValueAsDouble() */
+          launcherLeadCurrentAmps.getValueAsDouble(), launcherFollowerCurrentAmps.getValueAsDouble()
         };
 
     inputs.kickerAppliedVolts = kickerAppliedVolts.getValueAsDouble();
