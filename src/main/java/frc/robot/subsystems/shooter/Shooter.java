@@ -32,12 +32,6 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint", 5.0);
 
-  private static final LoggedTunableNumber toleranceDegrees =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
-
-  private static final LoggedTunableNumber launcherToleranceRPM =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
-
   private static final LoggedTunableNumber launcherkP =
       new LoggedTunableNumber(ROOT_TABLE + "/launcherkP");
   private static final LoggedTunableNumber launcherkV =
@@ -68,6 +62,12 @@ public class Shooter extends SubsystemBase {
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
     }
   }
+
+  private static final LoggedTunableNumber pivotToleranceDegrees =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
+
+  private static final LoggedTunableNumber launcherToleranceRPM =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
