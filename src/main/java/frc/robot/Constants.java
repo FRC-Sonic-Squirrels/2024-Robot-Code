@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -145,35 +143,15 @@ public final class Constants {
   public class IntakeConstants {
     public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
-    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
-    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
-    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
-    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
-
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
   }
 
   public class EndEffectorConstants {
-    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
-    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
-    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
-    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
-
     public static final double INDEX_PERCENT_OUT = 0.8;
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
-
-    public static final InvertedValue INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
-    public static final NeutralModeValue NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
-  }
-
-  public class WristConstants {
-    public static final Rotation2d MAX_WRIST_ANGLE = Rotation2d.fromDegrees(90);
-    public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
-    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
-    ;
   }
 
   public class ElevatorConstants {
@@ -182,8 +160,6 @@ public final class Constants {
     public static final double WHEEL_RADIUS = 1.118;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
     public static final double MAX_HEIGHT = Units.inchesToMeters(25.0); //
-
-    public static final double SUPPLY_CURRENT_LIMIT = 40.0;
   }
 
   public class ShooterConstants {

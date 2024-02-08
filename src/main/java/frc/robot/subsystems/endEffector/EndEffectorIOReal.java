@@ -6,6 +6,8 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import frc.robot.Constants;
 
@@ -26,16 +28,12 @@ public class EndEffectorIOReal implements EndEffectorIO {
     TalonFXConfiguration config = new TalonFXConfiguration();
     CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
-    currentLimitConfig.SupplyCurrentLimitEnable =
-        Constants.EndEffectorConstants.SUPPLY_CURRENT_LIMIT_ENABLE;
-    currentLimitConfig.SupplyCurrentThreshold =
-        Constants.EndEffectorConstants.SUPPLY_CURRENT_THRESHOLD;
-    currentLimitConfig.SupplyCurrentLimit = Constants.EndEffectorConstants.SUPPLY_CURRENT_LIMIT;
-    currentLimitConfig.SupplyTimeThreshold = Constants.EndEffectorConstants.SUPPLY_TIME_THRESHOLD;
+    currentLimitConfig.SupplyCurrentLimit = 30.0;
+    currentLimitConfig.SupplyCurrentLimitEnable = true;
 
     config.CurrentLimits = currentLimitConfig;
-    config.MotorOutput.Inverted = Constants.EndEffectorConstants.INVERTED_VALUE;
-    config.MotorOutput.NeutralMode = Constants.EndEffectorConstants.NEUTRAL_MODE_VALUE;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motor.getConfigurator().apply(config);
 
     deviceTemp = motor.getDeviceTemp();
