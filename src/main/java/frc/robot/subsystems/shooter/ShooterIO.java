@@ -46,7 +46,7 @@ public interface ShooterIO {
   public default void setLauncherRPM(double rpm) {}
 
   public default void setLauncherClosedLoopConstants(
-      double kP, double kD, double maxProfiledVelocity, double maxProfiledAcceleration) {}
+      double kP, double kV, double maxProfiledAcceleration) {}
 
   // KICKER
   public default void setKickerVoltage(double volts) {}

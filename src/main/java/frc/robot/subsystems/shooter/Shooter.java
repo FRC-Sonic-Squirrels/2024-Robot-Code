@@ -17,28 +17,35 @@ import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
+  private static final String ROOT_TABLE = "Shooter";
   private static final double MAX_VOLTAGE = 12;
 
-  private final ShooterIO io;
-  private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
-
-  // private final ShootingSolver shootingSolver;
-
-  private static final String ROOT_TABLE = "Shooter";
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD", 1.0);
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG", 0.0);
-
-  private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint", 19.0);
-  private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 19.0);
+  private static final LoggedTunableNumber pivotkP =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkP", 20.0);
+  private static final LoggedTunableNumber pivotkD =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkD", 1.0);
+  private static final LoggedTunableNumber pivotkG =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkG", 0.0);
+  private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxVelocityConstraint", 5.0);
+  private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint", 5.0);
 
   private static final LoggedTunableNumber toleranceDegrees =
       new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
 
   private static final LoggedTunableNumber launcherToleranceRPM =
       new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
+
+  private static final LoggedTunableNumber launcherkP =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherkP", 0.5);
+  private static final LoggedTunableNumber launcherkV =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherkV", 0.13);
+  private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherClosedLoopMaxAccelerationConstraint", 10.0);
+
+  private final ShooterIO io;
+  private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
@@ -55,12 +62,15 @@ public class Shooter extends SubsystemBase {
   public Shooter(ShooterIO io) {
     this.io = io;
 
-    // this.shootingSolver =
-    //     new ShootingSolver(
-    //         Constants.FieldConstants.getSpeakerTranslation3D(),
-    //         Constants.ShooterConstants.SHOOTER_AXIS_OF_ROTATION,
-    //         Constants.ShooterConstants.SHOOTER_SPEED,
-    //         Constants.ShooterConstants.SHOOTING_TIME);
+    io.setLauncherClosedLoopConstants(
+        launcherkP.get(), launcherkV.get(), launcherClosedLoopMaxAccelerationConstraint.get());
+
+    io.setPivotClosedLoopConstants(
+        pivotkP.get(),
+        pivotkD.get(),
+        pivotkG.get(),
+        pivotClosedLoopMaxVelocityConstraint.get(),
+        pivotClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -70,13 +80,6 @@ public class Shooter extends SubsystemBase {
 
       Logger.processInputs(ROOT_TABLE, inputs);
       Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pivotPosition.getDegrees());
-
-      io.setPivotClosedLoopConstants(
-          kP.get(),
-          kD.get(),
-          kG.get(),
-          closedLoopMaxVelocityConstraint.get(),
-          closedLoopMaxAccelerationConstraint.get());
 
       pivotTargetMeasurements.add(
           new PIDTargetMeasurement(
@@ -97,6 +100,28 @@ public class Shooter extends SubsystemBase {
         }
       }
       Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
+
+      var hc = hashCode();
+      if (launcherkP.hasChanged(hc)
+          || launcherkV.hasChanged(hc)
+          || launcherClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setLauncherClosedLoopConstants(
+            launcherkP.get(), launcherkV.get(), launcherClosedLoopMaxAccelerationConstraint.get());
+      }
+
+      if (pivotkP.hasChanged(hc)
+          || pivotkD.hasChanged(hc)
+          || pivotkG.hasChanged(hc)
+          || pivotClosedLoopMaxVelocityConstraint.hasChanged(hc)
+          || pivotClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+
+        io.setPivotClosedLoopConstants(
+            pivotkP.get(),
+            pivotkD.get(),
+            pivotkG.get(),
+            pivotClosedLoopMaxVelocityConstraint.get(),
+            pivotClosedLoopMaxAccelerationConstraint.get());
+      }
     }
   }
 
@@ -124,6 +149,10 @@ public class Shooter extends SubsystemBase {
 
   public void setLauncherVoltage(double volts) {
     io.setLauncherVoltage(volts);
+  }
+
+  public void setLauncherRPM(double rpm) {
+    io.setLauncherRPM(rpm);
   }
 
   public double getRPM() {
