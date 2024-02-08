@@ -26,9 +26,8 @@ public class ArmSetAngle extends Command {
     addRequirements(arm);
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
+  public void execute() {
     arm.setAngle(angleSupplier.get());
   }
 
