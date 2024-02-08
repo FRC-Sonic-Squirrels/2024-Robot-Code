@@ -94,7 +94,7 @@ public class GamepieceVisualization {
                 Timer.getFPGATimestamp()));
       } else {
         if (showPath)
-          for (int i = 0; i < (int) (dist / gamepieceSpacing); i++) {
+          for (int i = 0; i < (int) (dist / gamepieceSpacing) + 3; i++) {
             poses.add(
                 new Pair<Pose3d, Double>(
                     new Pose3d(
