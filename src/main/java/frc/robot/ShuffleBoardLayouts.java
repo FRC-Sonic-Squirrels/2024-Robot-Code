@@ -48,10 +48,11 @@ public class ShuffleBoardLayouts {
   private void loadAllCompetitionLayouts() {}
 
   private void loadAllNonFMSLayouts() {
-    armDebugLayout();
-    intakeDebugLayout();
-    endEffectorDebugLayout();
-    elevatorDebugLayout();
+    // armDebugLayout();
+    // intakeDebugLayout();
+    // endEffectorDebugLayout();
+    // elevatorDebugLayout();
+    systemsCheck();
   }
 
   private void armDebugLayout() {
@@ -94,7 +95,7 @@ public class ShuffleBoardLayouts {
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        intakeTab.add("tunableVoltage", 0.0).withPosition(9, 3).withSize(2, 1).getEntry();
+        intakeTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
     intakeCommandsLayout.add(
         new ConsumeSuppliedValue(
@@ -116,7 +117,7 @@ public class ShuffleBoardLayouts {
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        endEffectorTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
+        endEffectorTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
     endEffectorCommandsLayout.add(
         new ConsumeSuppliedValue(
@@ -138,10 +139,10 @@ public class ShuffleBoardLayouts {
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        elevatorTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
+        elevatorTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
     var tunableHeight =
-        elevatorTab.add("tunableHeight", 0.0).withPosition(5, 3).withSize(2, 1).getEntry();
+        elevatorTab.add("tunableHeight", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
     // elevatorCommandsLayout.add(
     //     new ConsumeSuppliedValue(
@@ -205,5 +206,15 @@ public class ShuffleBoardLayouts {
     var checkIntake =
         Commands.runOnce(
             () -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT), intake);
+
+    checkElevator.setName("Check Elevator Height");
+    checkArm.setName("Check Arm Angle");
+    checkEndEffector.setName("Check End Effector");
+    checkIntake.setName("Check Intake");
+
+    systemsCheckCommandsLayout.add(checkElevator);
+    systemsCheckCommandsLayout.add(checkArm);
+    systemsCheckCommandsLayout.add(checkEndEffector);
+    systemsCheckCommandsLayout.add(checkIntake);
   }
 }
