@@ -69,7 +69,7 @@ public class ShooterIOSim implements ShooterIO {
     inputs.pivotPosition = new Rotation2d(pivot.getAngleRads());
     inputs.launcherRPM = launcherOpenLoopVolts / 12.0 * 5800.0;
 
-    inputs.kickerRPM = kickerVolts / 12.0 * 5000.0;
+    inputs.kickerAppliedVolts = kickerVolts;
 
     inputs.beamBreak = beamBreak.get();
 

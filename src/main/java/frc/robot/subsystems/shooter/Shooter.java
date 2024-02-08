@@ -153,8 +153,8 @@ public class Shooter extends SubsystemBase {
     io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
-  public double getKickerRPM() {
-    return inputs.kickerRPM;
+  public double getKickerPercentOut() {
+    return inputs.kickerAppliedVolts / Constants.MAX_VOLTAGE;
   }
 
   public boolean getBeamBreak() {

@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
@@ -31,7 +30,6 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.drive.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
@@ -61,7 +59,6 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
-import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -93,6 +90,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
   private final AutosManager autoManager;
+
+  ScoreSpeaker scoreSpeaker;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -319,11 +318,17 @@ public class RobotContainer {
     shuffleBoardLayouts =
         new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
+    scoreSpeaker =
+        new ScoreSpeaker(
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            drivetrain,
+            shooter,
+            driverController.a());
+
     // Configure the button bindings
     configureButtonBindings();
   }
-
-  private boolean isShooting = false;
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -399,14 +404,6 @@ public class RobotContainer {
             new DriveToGamepiece(
                 visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
-    ScoreSpeaker scoreSpeaker =
-        new ScoreSpeaker(
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            drivetrain,
-            shooter,
-            driverController.a());
-
     driverController.rightBumper().whileTrue(scoreSpeaker);
   }
 
@@ -433,20 +430,6 @@ public class RobotContainer {
     return current;
   }
 
-  boolean prevIsShooting = false;
-
-  boolean isShot = false;
-
-  boolean isShotPrev = false;
-
-  boolean shotStart = false;
-
-  Timer shootingTimer = new Timer();
-
-  Pose2d robotPoseOfShot = new Pose2d();
-
-  private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
-
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(
         new Rotation2d(),
@@ -461,31 +444,6 @@ public class RobotContainer {
 
     SimpleMechanismVisualization.logMechanism();
 
-    boolean isShooting = shooter.getKickerRPM() >= 100.0;
-
-    if (!isShooting) {
-      shootingTimer.stop();
-      shootingTimer.reset();
-    }
-
-    boolean shootingStart = false;
-
-    shootingStart = isShooting && !prevIsShooting;
-
-    if (shootingStart) shootingTimer.start();
-
-    gamepieceVisualizer.updateVisualization(
-        drivetrain.getPoseEstimatorPose(),
-        drivetrain.getFieldRelativeVelocities().getTranslation(),
-        shooter.getPitch(),
-        shooter.getRPM(),
-        isShooting,
-        shootingTimer.get());
-
-    prevIsShooting = isShooting;
-
-    gamepieceVisualizer.logTraj();
-
-    Logger.recordOutput("Visualization/Note", new Pose2d(1, 1, new Rotation2d()));
+    scoreSpeaker.updateVisualization();
   }
 }

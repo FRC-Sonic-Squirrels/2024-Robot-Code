@@ -22,6 +22,7 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
+import frc.robot.visualization.GamepieceVisualization;
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -65,14 +66,16 @@ public class ScoreSpeaker extends Command {
 
   private boolean prevShooting;
 
+  private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
+
   /**
    * Creates a new RotateToSpeaker.
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetPose pose to target
    * @param drive drivetrain subsystem
-   * @param endCondition when this command should end
+   * @param shooter shooter subsystem
+   * @param shootGamepiece when this command should end
    * @return Command to lock rotation in direction of target
    */
   public ScoreSpeaker(
@@ -243,7 +246,42 @@ public class ScoreSpeaker extends Command {
     return false;
   }
 
-  public boolean isShooting() {
-    return shooting;
+  boolean prevIsShooting = false;
+
+  boolean isShot = false;
+
+  boolean isShotPrev = false;
+
+  boolean shotStart = false;
+
+  Timer shootingTimer = new Timer();
+
+  Pose2d robotPoseOfShot = new Pose2d();
+
+  public void updateVisualization() {
+    boolean isShooting = shooting;
+
+    if (!isShooting) {
+      shootingTimer.stop();
+      shootingTimer.reset();
+    }
+
+    boolean shootingStart = false;
+
+    shootingStart = isShooting && !prevIsShooting;
+
+    if (shootingStart) shootingTimer.start();
+
+    gamepieceVisualizer.updateVisualization(
+        drive.getPoseEstimatorPose(),
+        drive.getFieldRelativeVelocities().getTranslation(),
+        shooter.getPitch(),
+        shooter.getRPM(),
+        isShooting,
+        shootingTimer.get());
+
+    prevIsShooting = isShooting;
+
+    gamepieceVisualizer.logTraj();
   }
 }
