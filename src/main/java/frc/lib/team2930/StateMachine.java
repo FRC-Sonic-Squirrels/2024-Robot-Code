@@ -88,6 +88,24 @@ public class StateMachine {
     this.startTime = Timer.getFPGATimestamp();
   }
 
+  public Command asCommand() {
+    return new Command() {
+      @Override
+      public void initialize() {
+        StateMachine.this.startTime = Timer.getFPGATimestamp();
+      }
+
+      @Override
+      public void execute() {
+        advance();
+      }
+
+      public boolean isFinished() {
+        return !isRunning();
+      }
+    };
+  }
+
   public void advance() {
     while (isRunning()) {
       processEvents();
@@ -159,5 +177,19 @@ public class StateMachine {
 
       return handler.advance(command);
     };
+  }
+
+  protected void spawnCommand(Command command, ResumeStateHandlerFromCommand handler) {
+    command.andThen(
+        () -> {
+          if (!isRunning()) return;
+
+          var nextState = handler.advance(command);
+          if (nextState != null) {
+            this.currentState = nextState;
+          }
+        });
+
+    command.schedule();
   }
 }
