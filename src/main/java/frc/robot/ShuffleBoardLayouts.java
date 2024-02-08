@@ -184,6 +184,7 @@ public class ShuffleBoardLayouts {
     shooterCommandsLayout.add(stopCommand);
   }
 
+  // FIXME: add drive and turn commands
   public void systemsCheck() {
     var systemsCheckTab = Shuffleboard.getTab("Systems_Check");
     var systemsCheckCommandsLayout =
@@ -192,5 +193,17 @@ public class ShuffleBoardLayouts {
             .withPosition(0, 0)
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
+
+    var checkElevator =
+        Commands.runOnce(
+            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator);
+    var checkArm = Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm);
+    var checkEndEffector =
+        Commands.runOnce(
+            () -> endEffector.setPercentOut(Constants.EndEffectorConstants.INDEX_PERCENT_OUT),
+            endEffector);
+    var checkIntake =
+        Commands.runOnce(
+            () -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT), intake);
   }
 }
