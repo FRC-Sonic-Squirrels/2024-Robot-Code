@@ -5,10 +5,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.intake.Intake;
 
 public class IntakeIntoEndEffector extends Command {
   /** Creates a new IntakeIntoEndEffector. */
-  public IntakeIntoEndEffector() {
+  public IntakeIntoEndEffector(Intake intake, EndEffector endEffector) {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 

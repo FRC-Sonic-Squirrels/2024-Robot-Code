@@ -5,10 +5,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.shooter.Shooter;
 
 public class ShooterLoadFromEndEffector extends Command {
   /** Creates a new ShooterLoadFromEndEffector. */
-  public ShooterLoadFromEndEffector() {
+  public ShooterLoadFromEndEffector(Shooter shooter, EndEffector endEffector) {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 

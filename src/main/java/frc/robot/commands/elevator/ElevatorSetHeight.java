@@ -5,11 +5,17 @@
 package frc.robot.commands.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.elevator.Elevator;
+import java.util.function.DoubleSupplier;
 
 public class ElevatorSetHeight extends Command {
   /** Creates a new ElevatorSetHeight. */
-  public ElevatorSetHeight() {
+  public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
+  }
+
+  public ElevatorSetHeight(Elevator elevator, double height) {
+    this(elevator, () -> height);
   }
 
   // Called when the command is initially scheduled.
