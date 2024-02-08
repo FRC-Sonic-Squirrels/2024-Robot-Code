@@ -13,6 +13,9 @@ import frc.robot.Constants;
 import frc.robot.subsystems.intake.Intake;
 
 public class IntakeGamepiece extends Command {
+  // FIXME: NOT PLANNING ON USING THIS CODE. NOT DELETING FOR NOW SO IT CAN BE USED AS A REFERENCE
+  // DELETE THIS COMMAND LATER
+
   private Intake intake;
   private XboxController controller;
   private Timer timeSinceLastGamepiece = new Timer();

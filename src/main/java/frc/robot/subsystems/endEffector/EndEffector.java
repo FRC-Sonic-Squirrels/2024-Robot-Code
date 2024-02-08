@@ -43,4 +43,12 @@ public class EndEffector extends SubsystemBase {
   public Boolean shooterSideTOFDetectGamepiece() {
     return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
+
+  public double intakeSideTOFDistanceInches() {
+    return inputs.intakeSideTOFDistanceInches;
+  }
+
+  public double shooterSideTOFDistanceInches() {
+    return inputs.shooterSideTOFDistanceInches;
+  }
 }
