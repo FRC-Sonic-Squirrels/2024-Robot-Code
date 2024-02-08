@@ -13,6 +13,7 @@ import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotMode.RobotType;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,13 +22,13 @@ public class Shooter extends SubsystemBase {
   private static final double MAX_VOLTAGE = 12;
 
   private static final LoggedTunableNumber pivotkP =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkP", 20.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkP");
   private static final LoggedTunableNumber pivotkD =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkD", 1.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkD");
   private static final LoggedTunableNumber pivotkG =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkG", 0.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotkG");
   private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxVelocityConstraint", 5.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint", 5.0);
 
@@ -38,11 +39,35 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
 
   private static final LoggedTunableNumber launcherkP =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherkP", 0.5);
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherkP");
   private static final LoggedTunableNumber launcherkV =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherkV", 0.13);
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherkV");
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherClosedLoopMaxAccelerationConstraint", 10.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherClosedLoopMaxAccelerationConstraint");
+
+  static {
+    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
+      pivotkP.initDefault(1.0);
+      pivotkD.initDefault(0.0);
+      pivotkG.initDefault(0.0);
+      pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
+      pivotClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+
+      launcherkP.initDefault(0.5);
+      launcherkV.initDefault(0.13);
+      launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+    } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
+      pivotkP.initDefault(1.0);
+      pivotkD.initDefault(0.0);
+      pivotkG.initDefault(0.0);
+      pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
+      pivotClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+
+      launcherkP.initDefault(0.5);
+      launcherkV.initDefault(0.13);
+      launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+    }
+  }
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
