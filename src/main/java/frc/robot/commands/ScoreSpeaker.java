@@ -214,9 +214,9 @@ public class ScoreSpeaker extends Command {
 
     shooting =
         shootGamepiece.getAsBoolean()
-            && shooter.pivotIsAtTarget()
+            && shooter.isPivotIsAtTarget()
             && rotationController.atSetpoint()
-            && shooter.isAtShootingRPM();
+            && shooter.isAtTargetRPM();
 
     Logger.recordOutput("ScoreSpeaker/shooting", shooting);
 

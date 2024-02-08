@@ -167,6 +167,8 @@ public final class Constants {
 
     public static final InvertedValue INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     public static final NeutralModeValue NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
+
+    public static final double SHOOTING_PERCENT_OUT = 0.8;
   }
 
   public class WristConstants {
