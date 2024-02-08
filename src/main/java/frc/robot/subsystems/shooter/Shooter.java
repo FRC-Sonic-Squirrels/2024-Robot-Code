@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
-import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-  private final ShootingSolver shootingSolver;
+  // private final ShootingSolver shootingSolver;
 
   private static final String ROOT_TABLE = "Shooter";
   private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP", 20.0);
@@ -36,7 +35,10 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint", 19.0);
 
   private static final LoggedTunableNumber toleranceDegrees =
-      new LoggedTunableNumber(ROOT_TABLE + "/toleranceDegrees", 0.5);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
+
+  private static final LoggedTunableNumber launcherToleranceRPM =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
@@ -53,12 +55,12 @@ public class Shooter extends SubsystemBase {
   public Shooter(ShooterIO io) {
     this.io = io;
 
-    this.shootingSolver =
-        new ShootingSolver(
-            Constants.FieldConstants.getSpeakerTranslation3D(),
-            Constants.ShooterConstants.SHOOTER_AXIS_OF_ROTATION,
-            Constants.ShooterConstants.SHOOTER_SPEED,
-            Constants.ShooterConstants.SHOOTING_TIME);
+    // this.shootingSolver =
+    //     new ShootingSolver(
+    //         Constants.FieldConstants.getSpeakerTranslation3D(),
+    //         Constants.ShooterConstants.SHOOTER_AXIS_OF_ROTATION,
+    //         Constants.ShooterConstants.SHOOTER_SPEED,
+    //         Constants.ShooterConstants.SHOOTING_TIME);
   }
 
   @Override
@@ -128,6 +130,11 @@ public class Shooter extends SubsystemBase {
     return inputs.launcherRPM;
   }
 
+  public boolean isAtShootingRPM() {
+    return inputs.launcherRPM
+        >= Constants.ShooterConstants.SHOOTING_RPM - launcherToleranceRPM.get();
+  }
+
   public double getPivotPIDLatency() {
     return pivotPidLatency;
   }
@@ -144,6 +151,10 @@ public class Shooter extends SubsystemBase {
 
   public void setKickerPercentOut(double percent) {
     io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
+  }
+
+  public double getKickerPercentOut() {
+    return inputs.kickerAppliedVolts / Constants.MAX_VOLTAGE;
   }
 
   public boolean getBeamBreak() {

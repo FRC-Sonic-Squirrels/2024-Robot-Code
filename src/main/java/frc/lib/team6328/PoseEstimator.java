@@ -109,7 +109,9 @@ public class PoseEstimator {
       var visionUpdate =
           new VisionUpdate(timestampedVisionUpdate.pose, timestampedVisionUpdate.stdDevs);
 
-      var existingPoseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
+      // TEMP: create blank variable to avoid crashes
+      var existingPoseUpdateAfter = new PoseUpdate(0.0, new Twist2d());
+      existingPoseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
       if (existingPoseUpdateAfter.timestamp == timestamp) {
         // There was already an update at this timestamp, add to it
         var oldVisionUpdates = existingPoseUpdateAfter.visionUpdates;

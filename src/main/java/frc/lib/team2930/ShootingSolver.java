@@ -94,17 +94,16 @@ public class ShootingSolver {
     // Vn_x = (Vr_x + Vs * cos(targetTheta))
     // Vn_y = (Vr_y + Vs * sin(targetTheta))
     //
-    // The Vn vector has to be aligned with dPspeakerAxis vector, so
+    // The Vn vector has to be aligned with dPspeaker vector, so
     //
     // Vn_x = c * dPspeakerAxisX
     // Vn_y = c * dPspeakerAxisY
     //
-    // To make it easier, we rotate the reference frame such that the Y velocity will be zero:
+    // Substituting in the system of equations and dividing to get rid of 'c':
     //
-    // Vn_y = 0
-    // ->  Vr_y + Vs * sin(targetTheta) = 0
-    // -> -Vr_y / Vs = sin(targetTheta))
-    // -> targetTheta = arcsin(-Vr_y / Vs)
+    // dPspeakerAxisY   (Vr_y + Vs * sin(targetTheta))
+    // -------------- = ------------------------------
+    // dPspeakerAxisX   (Vr_x + Vs * cos(targetTheta))
     //
     // To verify that the condition is physically possible, we check that the note moves towards the
     // speaker:
@@ -156,7 +155,15 @@ public class ShootingSolver {
     }
 
     var currentHeading = robotPose.getRotation().getRadians();
-    var rateOfRotation = (targetTheta - currentHeading) / Math.max(0.01, timeToShoot);
+
+    var flippedTargetTheta = targetTheta - Math.PI;
+    if (flippedTargetTheta <= -Math.PI) flippedTargetTheta += Math.PI * 2;
+
+    if (flippedTargetTheta >= Math.PI) flippedTargetTheta -= Math.PI * 2;
+
+    var deltaAngle = flippedTargetTheta - currentHeading;
+
+    var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 
     return new Solution(
         timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(pitchNote));

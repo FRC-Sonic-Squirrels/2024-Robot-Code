@@ -27,11 +27,10 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
+import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
-import frc.robot.commands.shooter.ShooterShootMode;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -60,7 +59,6 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
-import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -92,6 +90,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
   private final AutosManager autoManager;
+
+  ScoreSpeaker scoreSpeaker;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -318,6 +318,14 @@ public class RobotContainer {
     shuffleBoardLayouts =
         new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
+    scoreSpeaker =
+        new ScoreSpeaker(
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            drivetrain,
+            shooter,
+            driverController.a());
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -396,17 +404,7 @@ public class RobotContainer {
             new DriveToGamepiece(
                 visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
 
-    driverController
-        .rightBumper()
-        .whileTrue(new ShooterShootMode(shooter, drivetrain, driverController.a(), () -> false))
-        .whileTrue(
-            new RotateToSpeaker(
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                drivetrain,
-                () -> false,
-                new Rotation2d(Math.PI),
-                shooter::getRPM));
+    driverController.rightBumper().whileTrue(scoreSpeaker);
   }
 
   /**
@@ -443,13 +441,9 @@ public class RobotContainer {
             Constants.FieldConstants.SPEAKER_HEIGHT_METERS),
         shooter.getRPM(),
         elevator.getHeightInches());
+
     SimpleMechanismVisualization.logMechanism();
-    GamepieceVisualization.updateVisualization(
-        drivetrain.getPoseEstimatorPose(),
-        drivetrain.getFieldRelativeVelocities().getTranslation(),
-        shooter.getPitch(),
-        shooter.getRPM(),
-        driverController.a().getAsBoolean());
-    GamepieceVisualization.logTraj();
+
+    scoreSpeaker.updateVisualization();
   }
 }

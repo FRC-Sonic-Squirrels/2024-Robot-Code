@@ -5,13 +5,11 @@ import com.choreo.lib.ChoreoControlFunction;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
-import frc.robot.commands.drive.RotateToSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -315,13 +313,8 @@ public class AutosManager {
           rotationFF = referenceState.angularVelocity;
           break;
         case ROTATE_TO_SPEAKER:
-          targetHeading =
-              RotateToSpeaker.calculateTargetRot(
-                      new Rotation2d(Math.PI), shooterRPM.get(), pose, pose, yVel)
-                  .getRadians();
-          rotationFF =
-              RotateToSpeaker.calculateRotVelRadPerSec(
-                  xVel, yVel, new Rotation2d(targetHeading), pose, shooterRPM.get());
+          targetHeading = referenceState.heading;
+          rotationFF = referenceState.angularVelocity;
           break;
         default:
           targetHeading = referenceState.heading;

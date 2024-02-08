@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,6 +29,7 @@ import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
+import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -99,6 +101,9 @@ public class Drivetrain extends SubsystemBase {
     //     });
   }
 
+  private Translation2d simulatedAcceleration = new Translation2d();
+  private Translation2d lastVel = new Translation2d();
+
   public void periodic() {
     try (var ignored = new ExecutionTiming("Drivetrain")) {
       try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
@@ -161,6 +166,17 @@ public class Drivetrain extends SubsystemBase {
       }
 
       Logger.recordOutput("SwerveStates/Measured", getModuleStates());
+
+      simulatedAcceleration =
+          new Translation2d(
+              accelerationFilterX.calculate(
+                  (getFieldRelativeVelocities().getTranslation().getX() - lastVel.getX()) / 0.02),
+              accelerationFilterY.calculate(
+                  (getFieldRelativeVelocities().getTranslation().getY() - lastVel.getY()) / 0.02));
+
+      Logger.recordOutput("Drivetrain/simualedAcceleration", simulatedAcceleration);
+
+      lastVel = getFieldRelativeVelocities().getTranslation();
     }
   }
 
@@ -185,6 +201,79 @@ public class Drivetrain extends SubsystemBase {
     // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+  }
+
+  /**
+   * Runs the drive at the desired velocity, Rotation is prioritized over translation.
+   *
+   * @param speeds Speeds in meters/sec
+   */
+  public void runVelocityPrioritizeRotation(ChassisSpeeds speeds) {
+    // Calculate module setpoints
+
+    SwerveModuleState[] justRotationSetpointStates =
+        kinematics.toSwerveModuleStates(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond));
+    SwerveModuleState[] calculatedSetpointStates = kinematics.toSwerveModuleStates(speeds);
+    ChassisSpeeds newSpeeds;
+    double realMaxSpeed = 0;
+    for (SwerveModuleState moduleState : calculatedSetpointStates) {
+      realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
+    }
+    if (realMaxSpeed > config.getRobotMaxLinearVelocity()) {
+      /*
+
+      linear cannot exceed the leftover amount after rotation
+      Vmax - abs(Vr) = hypot(Vx, Vy)
+
+      preserve xy ratio
+      Vyprev      Vy
+      -------- = ----
+      Vxprev      Vx
+
+      solve system of equations for Vx and Vy
+
+      Vx = Vxprev / hypot(Vxprev, Vyprev) * abs(max(0.0, Vmax - abs(Vr)))
+
+      Vy = Vyprev * Vx / Vxprev
+
+      */
+
+      double vxMetersPerSecond =
+          (speeds.vxMetersPerSecond
+                  / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond))
+              * Math.abs(
+                  Math.max(
+                      0.0,
+                      config.getRobotMaxLinearVelocity()
+                          - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)));
+
+      // double vxMetersPerSecond =
+      //     Math.copySign(
+      //         Math.abs(
+      //                 Math.max(
+      //                     0.0,
+      //                     config.getRobotMaxLinearVelocity()
+      //                         - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
+      //             / Math.sqrt(
+      //                 (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond,
+      // 2.0))),
+      //         speeds.vxMetersPerSecond);
+      double vyMetersPerSecond =
+          speeds.vyMetersPerSecond * vxMetersPerSecond / speeds.vxMetersPerSecond;
+
+      newSpeeds =
+          new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+      Logger.recordOutput(
+          "Drivetrain/leftoverVelocity",
+          config.getRobotMaxLinearVelocity() - justRotationSetpointStates[0].speedMetersPerSecond);
+    } else {
+      newSpeeds = speeds;
+      Logger.recordOutput("Drivetrain/leftoverVelocity", Double.NaN);
+    }
+    Logger.recordOutput("Drivetrain/speedsX", newSpeeds.vxMetersPerSecond);
+    Logger.recordOutput("Drivetrain/speedsY", newSpeeds.vyMetersPerSecond);
+    Logger.recordOutput("Drivetrain/speedsRot", newSpeeds.omegaRadiansPerSecond);
+    runVelocity(newSpeeds);
   }
 
   /** Stops the drive. */
@@ -246,10 +335,17 @@ public class Drivetrain extends SubsystemBase {
     return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
   }
 
+  private LinearFilter accelerationFilterX = LinearFilter.movingAverage(3);
+  private LinearFilter accelerationFilterY = LinearFilter.movingAverage(3);
+
   @AutoLogOutput(key = "Robot/FieldRelativeAcceleration")
   public Translation2d getFieldRelativeAccelerations() {
-    return new Translation2d(gyroInputs.xAcceleration, gyroInputs.yAcceleration)
-        .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
+    if (Robot.isReal()) {
+      return new Translation2d(gyroInputs.xAcceleration, gyroInputs.yAcceleration)
+          .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
+    } else {
+      return simulatedAcceleration;
+    }
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
