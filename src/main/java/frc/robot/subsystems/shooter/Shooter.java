@@ -195,13 +195,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean pivotIsAtTarget() {
-    return Math.abs(inputs.pivotPosition.getRadians() - currentTarget.getRadians())
-        <= Units.degreesToRadians(toleranceDegrees.get());
+    return pivotIsAtTarget(currentTarget);
   }
 
   public boolean pivotIsAtTarget(Rotation2d target) {
     return Math.abs(inputs.pivotPosition.getRadians() - target.getRadians())
-        <= Units.degreesToRadians(toleranceDegrees.get());
+        <= Units.degreesToRadians(pivotToleranceDegrees.get());
   }
 
   public void setKickerPercentOut(double percent) {
