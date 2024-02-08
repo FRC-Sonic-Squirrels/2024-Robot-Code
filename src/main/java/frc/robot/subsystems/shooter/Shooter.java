@@ -30,7 +30,7 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint", 5.0);
+      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint");
 
   private static final LoggedTunableNumber launcherkP =
       new LoggedTunableNumber(ROOT_TABLE + "/launcherkP");
