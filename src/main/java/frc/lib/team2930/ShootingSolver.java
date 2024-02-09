@@ -94,16 +94,17 @@ public class ShootingSolver {
     // Vn_x = (Vr_x + Vs * cos(targetTheta))
     // Vn_y = (Vr_y + Vs * sin(targetTheta))
     //
-    // The Vn vector has to be aligned with dPspeaker vector, so
+    // The Vn vector has to be aligned with dPspeakerAxis vector, so
     //
     // Vn_x = c * dPspeakerAxisX
     // Vn_y = c * dPspeakerAxisY
     //
-    // Substituting in the system of equations and dividing to get rid of 'c':
+    // To make it easier, we rotate the reference frame such that the Y velocity will be zero:
     //
-    // dPspeakerAxisY   (Vr_y + Vs * sin(targetTheta))
-    // -------------- = ------------------------------
-    // dPspeakerAxisX   (Vr_x + Vs * cos(targetTheta))
+    //     Vn_y = 0
+    // ->  Vr_y + Vs * sin(targetTheta) = 0
+    // -> -Vr_y / Vs = sin(targetTheta))
+    // ->  targetTheta = arcsin(-Vr_y / Vs)
     //
     // To verify that the condition is physically possible, we check that the note moves towards the
     // speaker:
