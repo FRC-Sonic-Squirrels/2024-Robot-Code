@@ -180,16 +180,17 @@ public class StateMachine {
   }
 
   protected void spawnCommand(Command command, ResumeStateHandlerFromCommand handler) {
-    command.andThen(
-        () -> {
-          if (!isRunning()) return;
+    var sequence =
+        command.andThen(
+            () -> {
+              if (!isRunning()) return;
 
-          var nextState = handler.advance(command);
-          if (nextState != null) {
-            this.currentState = nextState;
-          }
-        });
+              var nextState = handler.advance(command);
+              if (nextState != null) {
+                this.currentState = nextState;
+              }
+            });
 
-    command.schedule();
+    sequence.schedule();
   }
 }
