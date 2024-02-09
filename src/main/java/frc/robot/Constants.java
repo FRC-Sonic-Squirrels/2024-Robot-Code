@@ -181,7 +181,7 @@ public final class Constants {
     public static final double GEAR_RATIO = 25.93;
     public static final double WHEEL_RADIUS = 1.118;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final double MAX_HEIGHT = Units.inchesToMeters(25.0); //
+    public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
   }
