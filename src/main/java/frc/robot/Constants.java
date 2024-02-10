@@ -233,18 +233,28 @@ public final class Constants {
   }
 
   public class CanIDs {
+    // READ ME: CAN ID's THAT ARE NOT VALID TO USE
+    // 1, 11, 21, 31
+    // 2, 12, 22, 32
+    // 3, 13, 23, 33
+    // 4, 14, 24, 34
+    // all these CAN ID's are reserved for the Drivetrain
+
     // TODO: get actual can ids
-    public static final int INTAKE_CAN_ID = 0;
-    public static final int SHOOTER_LEAD_CAN_ID = 1;
-    public static final int SHOOTER_FOLLOW_CAN_ID = 2;
-    public static final int SHOOTER_PIVOT_CAN_ID = 8;
-    public static final int SHOOTER_KICKER_CAN_ID = 9;
-    public static final int ARM_CAN_ID = 40;
-    public static final int ELEVATOR_CAN_ID = 4;
-    public static final int END_EFFECTOR_CAN_ID = 6;
-    public static final int WRIST_CAN_ID = 7;
-    public static final int INTAKE_TOF_CAN_ID = 10;
-    public static final int SHOOTER_TOF_CAN_ID = 11;
+    public static final int INTAKE_CAN_ID = 15;
+
+    public static final int SHOOTER_LEAD_CAN_ID = 25;
+    public static final int SHOOTER_FOLLOW_CAN_ID = 26;
+    public static final int SHOOTER_PIVOT_CAN_ID = 27;
+    public static final int SHOOTER_KICKER_CAN_ID = 28;
+
+    public static final int ARM_CAN_ID = 17;
+
+    public static final int ELEVATOR_CAN_ID = 16;
+
+    public static final int END_EFFECTOR_CAN_ID = 18;
+    public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 35;
+    public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 36;
   }
 
   public class DIOPorts {
