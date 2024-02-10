@@ -20,6 +20,7 @@ public class LED extends SubsystemBase {
   individualLED led2 = new individualLED(26, 60);
 
   Color color1;
+  Color color2;
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
@@ -42,13 +43,20 @@ public class LED extends SubsystemBase {
         for (int i = 0; i < ledBuffer.getLength(); i++) {
           ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
         }
-        
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(0, 255, 0, 255, 0, 255);
+        if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+          for (int i = 0; i < ledBuffer.getLength(); i++) {
+            ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+          }
+        } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+          for (int i = 0; i < ledBuffer.getLength(); i++) {
+            ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+          }
+        }
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
@@ -105,25 +113,6 @@ public class LED extends SubsystemBase {
       }
     } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
       for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
-      }
-    }
-  }
-
-  private void setAllBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2) {
-
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
-      for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
-      }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
-      for (int i = 0; i < ledBuffer.getLength(); i++) {
         ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
       }
     }
