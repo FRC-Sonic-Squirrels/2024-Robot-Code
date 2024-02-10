@@ -93,4 +93,8 @@ public class DrivetrainWrapper {
   public Rotation2d getRotation() {
     return drivetrain.getRotation();
   }
+
+  public Pose2d getFieldRelativeVelocities() {
+    return drivetrain.getFieldRelativeVelocities();
+  }
 }
