@@ -79,9 +79,10 @@ public class Shooter extends SubsystemBase {
   private ArrayList<PIDTargetMeasurement> pivotTargetMeasurements =
       new ArrayList<PIDTargetMeasurement>();
 
-  private Rotation2d currentTarget = new Rotation2d();
-
   private double pivotPidLatency = 0.0;
+
+  private Rotation2d targetPivotPosition = new Rotation2d();
+  private double targetLauncherRPM = 0.0;
 
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
@@ -109,8 +110,8 @@ public class Shooter extends SubsystemBase {
       pivotTargetMeasurements.add(
           new PIDTargetMeasurement(
               Timer.getFPGATimestamp(),
-              currentTarget,
-              inputs.pivotPosition.getRadians() <= currentTarget.getRadians()));
+              targetPivotPosition,
+              inputs.pivotPosition.getRadians() <= targetPivotPosition.getRadians()));
       for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
         PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
         if ((measurement.upDirection
@@ -169,7 +170,7 @@ public class Shooter extends SubsystemBase {
 
   public void setPivotPosition(Rotation2d rot) {
     io.setPivotPosition(rot);
-    currentTarget = rot;
+    targetPivotPosition = rot;
   }
 
   public void setLauncherVoltage(double volts) {
@@ -178,26 +179,30 @@ public class Shooter extends SubsystemBase {
 
   public void setLauncherRPM(double rpm) {
     io.setLauncherRPM(rpm);
+    targetLauncherRPM = rpm;
   }
 
   public double getRPM() {
     return inputs.launcherRPM;
   }
 
-  public boolean isAtShootingRPM() {
-    return inputs.launcherRPM
-        >= Constants.ShooterConstants.SHOOTING_RPM - launcherToleranceRPM.get();
+  public boolean isAtTargetRPM() {
+    return isAtTargetRPM(targetLauncherRPM);
+  }
+
+  public boolean isAtTargetRPM(double rpm) {
+    return Math.abs(inputs.launcherRPM - rpm) <= launcherToleranceRPM.get();
   }
 
   public double getPivotPIDLatency() {
     return pivotPidLatency;
   }
 
-  public boolean pivotIsAtTarget() {
-    return pivotIsAtTarget(currentTarget);
+  public boolean isPivotIsAtTarget() {
+    return isPivotIsAtTarget(targetPivotPosition);
   }
 
-  public boolean pivotIsAtTarget(Rotation2d target) {
+  public boolean isPivotIsAtTarget(Rotation2d target) {
     return Math.abs(inputs.pivotPosition.getRadians() - target.getRadians())
         <= Units.degreesToRadians(pivotToleranceDegrees.get());
   }
