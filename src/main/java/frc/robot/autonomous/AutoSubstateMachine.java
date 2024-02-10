@@ -4,38 +4,69 @@
 
 package frc.robot.autonomous;
 
-import com.choreo.lib.ChoreoTrajectory;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.team2930.StateMachine;
 import frc.robot.DrivetrainWrapper;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.swerve.Drivetrain;
+import java.util.function.DoubleSupplier;
 
 public class AutoSubstateMachine extends StateMachine {
-  private Drivetrain drive;
+  private DrivetrainWrapper drive;
   private Shooter shooter;
   private EndEffector endEffector;
   private Intake intake;
   private ChoreoHelper choreoHelper;
-  private DrivetrainWrapper driveWrapper;
   private RobotConfig config;
-  private ChoreoTrajectory traj;
+  private String trajToGP;
+  private String trajToShoot;
+  private Timer runTime = new Timer();
+  private double distToIntakeGP = 1.5;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachine(
-      Drivetrain drive,
+      DrivetrainWrapper drive,
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
       RobotConfig config,
-      ChoreoTrajectory traj) {
+      String trajToGP,
+      String trajToShoot,
+      DoubleSupplier distToGamepiece) {
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
     this.config = config;
-    this.traj = traj;
+    this.trajToGP = trajToGP;
+    this.trajToShoot = trajToShoot;
+
+    setInitialState(followGPpathInit());
   }
+
+  private StateHandler followGPpathInit() {
+    choreoHelper =
+        new ChoreoHelper(
+            trajToGP,
+            config.getAutoTranslationPidController(),
+            config.getAutoThetaPidController(),
+            drive.getPoseEstimatorPose());
+    runTime.start();
+    return this.followGPpath();
+  }
+
+  private StateHandler followGPpath() {
+    drive.setVelocity(
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()));
+
+    return null;
+    // return distance.get()<=distToIntakeGP ? :null;
+  }
+
+  // private StateHandler intakeGamepiece(){
+  //   drive.setVelocity(null);
+  // }
+
 }
