@@ -31,9 +31,11 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.led.LedSetState;
 import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.robotStates;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -409,6 +411,9 @@ public class RobotContainer {
                 visionGamepiece::getClosestGamepiece, drivetrainWrapper, intake::getBeamBreak));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
+
+    // temporary binding
+    driverController.x().onTrue(new LedSetState(robotStates.SHOOTER_SUCCESS, led));
   }
 
   /**
