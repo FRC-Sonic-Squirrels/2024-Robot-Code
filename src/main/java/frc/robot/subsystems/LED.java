@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.awt.Color;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,6 +18,8 @@ public class LED extends SubsystemBase {
 
   individualLED led1 = new individualLED(0, 25);
   individualLED led2 = new individualLED(26, 60);
+
+  Color color1;
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
@@ -36,7 +39,10 @@ public class LED extends SubsystemBase {
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(255, 0, 0);
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+          ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+        }
+        
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
@@ -79,12 +85,6 @@ public class LED extends SubsystemBase {
   private void setSingleStripSolidColor(
       int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
-    }
-  }
-
-  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
   }
