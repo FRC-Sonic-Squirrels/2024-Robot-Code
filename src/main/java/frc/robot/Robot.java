@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.autonomous.AutoCommand;
+import frc.robot.autonomous.Auto;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -42,8 +42,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
-  private LoggedDashboardChooser<Supplier<AutoCommand>> autonomousChooser = null;
-  private AutoCommand lastAutoCommand = null;
+  private LoggedDashboardChooser<Supplier<Auto>> autonomousChooser = null;
+  private Auto lastAuto = null;
   private String lastAutoName = null;
   private Alliance lastAlliance = null;
   private boolean hasEnteredTeleAtSomePoint = false;
@@ -167,7 +167,7 @@ public class Robot extends LoggedRobot {
     if (shouldUpdateAutonomousCommand) {
       // b/c chooser returns a supplier when we call get() on the supplier we get a update
       // trajectory & initial position for if our alliance has changed
-      lastAutoCommand = autonomousChooser.get().get();
+      lastAuto = autonomousChooser.get().get();
       lastAutoName = currentChooserSelectedName;
       lastAlliance = currentAlliance;
 
@@ -185,18 +185,18 @@ public class Robot extends LoggedRobot {
       if (shouldResetPose) {
         var pose =
             lastAlliance == Alliance.Blue
-                ? lastAutoCommand.initPose
+                ? lastAuto.initPose
                 : new Pose2d(
-                    Constants.FieldConstants.FIELD_LENGTH - lastAutoCommand.initPose.getX(),
-                    lastAutoCommand.initPose.getY(),
+                    Constants.FieldConstants.FIELD_LENGTH - lastAuto.initPose.getX(),
+                    lastAuto.initPose.getY(),
                     new Rotation2d(
-                        -lastAutoCommand.initPose.getRotation().getCos(),
-                        lastAutoCommand.initPose.getRotation().getSin()));
+                        -lastAuto.initPose.getRotation().getCos(),
+                        lastAuto.initPose.getRotation().getSin()));
 
         robotContainer.setPose(pose);
       }
 
-      Logger.recordOutput("Auto/SelectedAuto", lastAutoCommand.name);
+      Logger.recordOutput("Auto/SelectedAuto", lastAuto.name);
       Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);
     }
   }
@@ -206,8 +206,8 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
 
     // schedule the autonomous command (example)
-    if (lastAutoCommand != null) {
-      lastAutoCommand.command.schedule();
+    if (lastAuto != null) {
+      lastAuto.command.schedule();
     }
   }
 
@@ -222,8 +222,8 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (lastAutoCommand != null) {
-      lastAutoCommand.command.cancel();
+    if (lastAuto != null) {
+      lastAuto.command.cancel();
     }
 
     hasEnteredTeleAtSomePoint = true;
