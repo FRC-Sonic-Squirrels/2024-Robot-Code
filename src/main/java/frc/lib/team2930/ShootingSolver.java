@@ -7,6 +7,7 @@ public class ShootingSolver {
 
   private final Translation3d Pspeaker;
   private final Translation3d PaxisOfRotationShooter;
+  private final Translation3d PfrontOfShooter;
   private final double shooterSpeed;
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
@@ -17,10 +18,12 @@ public class ShootingSolver {
   public ShootingSolver(
       Translation3d Pspeaker,
       Translation3d PaxisOfRotationShooter,
+      Translation3d PfrontOfShooter,
       double shooterSpeed,
       double shootingTime) {
     this.Pspeaker = Pspeaker;
     this.PaxisOfRotationShooter = PaxisOfRotationShooter;
+    this.PfrontOfShooter = PfrontOfShooter;
     this.shooterSpeed = shooterSpeed;
     this.shootingTime = shootingTime;
   }
@@ -59,7 +62,7 @@ public class ShootingSolver {
     // Vector pointing from robot to speaker at time that note leaves shooter
     var dPspeaker = Pspeaker.minus(ProbotFuture);
 
-    // Velocity theta of gamepiece
+    // Direction of the note to face the speaker.
     var thetaNote = Math.atan2(dPspeaker.getY(), dPspeaker.getX());
 
     // Robot relative translation of axis of rotation of shooter
@@ -155,14 +158,21 @@ public class ShootingSolver {
           "nodeHeading: %s  noteX:%s noteY:%s\n", Math.toDegrees(nodeHeading), noteX, noteY);
     }
 
+    var PaxisFinal = PaxisOfRotationShooter.rotateBy(new Rotation3d(0.0, 0.0, targetTheta));
+    var PfrontFinal = PfrontOfShooter.rotateBy(new Rotation3d(0.0, 0.0, targetTheta));
+
+    double axisDistance = Pspeaker.getDistance(ProbotFuture.plus(PaxisFinal));
+    double frontDistance = Pspeaker.getDistance(ProbotFuture.plus(PfrontFinal));
+
+    if (frontDistance > axisDistance) {
+      targetTheta += Math.PI;
+    }
+
     var currentHeading = robotPose.getRotation().getRadians();
 
-    var flippedTargetTheta = targetTheta - Math.PI;
-    if (flippedTargetTheta <= -Math.PI) flippedTargetTheta += Math.PI * 2;
-
-    if (flippedTargetTheta >= Math.PI) flippedTargetTheta -= Math.PI * 2;
-
-    var deltaAngle = flippedTargetTheta - currentHeading;
+    var deltaAngle = targetTheta - currentHeading;
+    while (deltaAngle <= -Math.PI) deltaAngle += Math.PI * 2;
+    while (deltaAngle >= Math.PI) deltaAngle -= Math.PI * 2;
 
     var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 

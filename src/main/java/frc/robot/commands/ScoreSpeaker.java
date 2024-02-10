@@ -56,7 +56,8 @@ public class ScoreSpeaker extends Command {
   private ShootingSolver solver =
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
-          new Translation3d(),
+          new Translation3d(0, 0, 0),
+          new Translation3d(0, -10, 0),
           Constants.ShooterConstants.SHOOTING_SPEED,
           Constants.ShooterConstants.SHOOTING_TIME);
 
