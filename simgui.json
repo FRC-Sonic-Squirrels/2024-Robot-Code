@@ -22,6 +22,7 @@
       "/Shuffleboard/End_Effector_Debug/EndEffectorCommands/END EFFECTOR STOP": "Command",
       "/Shuffleboard/Intake_Debug/IntakeCommands/ConsumeSuppliedValue": "Command",
       "/Shuffleboard/Intake_Debug/IntakeCommands/INTAKE STOP": "Command",
+      "/Shuffleboard/MAIN/SendableChooser[0]": "String Chooser",
       "/Shuffleboard/Systems_Check/SystemsChecks/Check Arm Angle": "Command",
       "/Shuffleboard/Systems_Check/SystemsChecks/Check Elevator Height": "Command",
       "/Shuffleboard/Systems_Check/SystemsChecks/Check End Effector": "Command",
