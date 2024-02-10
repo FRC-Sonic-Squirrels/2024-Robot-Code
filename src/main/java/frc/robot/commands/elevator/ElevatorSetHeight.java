@@ -10,17 +10,25 @@ import java.util.function.DoubleSupplier;
 
 public class ElevatorSetHeight extends Command {
   /** Creates a new ElevatorSetHeight. */
+  Elevator elevator;
+  DoubleSupplier heightSupplier;
+  double height;
   public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
+    this.heightSupplier = heightSupplier;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(elevator);
   }
 
   public ElevatorSetHeight(Elevator elevator, double height) {
     this(elevator, () -> height);
+    addRequirements(elevator);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    elevator.setHeight(height);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
