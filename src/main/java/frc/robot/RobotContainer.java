@@ -73,6 +73,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   private final Drivetrain drivetrain;
+  private final DrivetrainWrapper drivetrainWrapper;
   private final Vision vision;
   private final Arm arm;
   private final Elevator elevator;
@@ -284,6 +285,8 @@ public class RobotContainer {
 
     autoManager = new AutosManager(drivetrain, shooter, intake, endEffector, config, autoChooser);
 
+    drivetrainWrapper = new DrivetrainWrapper(drivetrain);
+
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
             drivetrain,
@@ -402,7 +405,7 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(
-                visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+                visionGamepiece::getClosestGamepiece, drivetrainWrapper, intake::getBeamBreak));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
   }
@@ -428,6 +431,10 @@ public class RobotContainer {
 
     current = ArrayUtil.concatWithArrayCopy(current, drivetrain.getCurrentDrawAmps());
     return current;
+  }
+
+  public void applyToDrivetrain() {
+    drivetrainWrapper.apply();
   }
 
   public void updateVisualization() {

@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.swerve.Drivetrain;
+import frc.robot.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -19,7 +19,7 @@ public class DriveToGamepiece extends Command {
   /** Creates a new DriveToGamepiece. */
   private Supplier<ProcessedGamepieceData> targetGamepiece;
 
-  private final Drivetrain drive;
+  private final DrivetrainWrapper drive;
 
   private Supplier<Boolean> gamepieceIntaked;
 
@@ -59,14 +59,13 @@ public class DriveToGamepiece extends Command {
   /** Drives robot to gamepiece, intended for ground gamepieces only */
   public DriveToGamepiece(
       Supplier<ProcessedGamepieceData> targetGamepiece,
-      Drivetrain drive,
+      DrivetrainWrapper drive,
       Supplier<Boolean> gamepieceIntaked) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.targetGamepiece = targetGamepiece;
     this.drive = drive;
     this.gamepieceIntaked = gamepieceIntaked;
 
-    addRequirements(drive);
     setName("DriveToGamepiece");
   }
 
@@ -146,7 +145,7 @@ public class DriveToGamepiece extends Command {
     }
 
     // TODO: ---------------change to estimated pose if using this IRL------------------
-    drive.runVelocity(
+    drive.setVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotVel, poseEstimatorPose.getRotation()));
 
     Logger.recordOutput("DriveToGamepiece/rotationalErrorDegrees", rotationalErrorDegrees);
@@ -160,7 +159,7 @@ public class DriveToGamepiece extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0));
+    drive.setVelocity(new ChassisSpeeds(0, 0, 0));
     Logger.recordOutput("ActiveCommands/DriveToGamepiece", false);
   }
 
