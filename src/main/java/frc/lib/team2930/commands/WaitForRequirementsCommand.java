@@ -43,8 +43,7 @@ public class WaitForRequirementsCommand extends Command {
   }
 
   @Override
-  public boolean runsWhenDisabled()
-  {
+  public boolean runsWhenDisabled() {
     return true;
   }
 }
