@@ -11,7 +11,6 @@ import java.util.function.DoubleSupplier;
 public class EndEffectorPercentOut extends Command {
   EndEffector endEffector;
   DoubleSupplier percentSupplier;
-  double percent;
 
   /** Creates a new EndEffectorPercentOut. */
   public EndEffectorPercentOut(EndEffector endEffector, DoubleSupplier percentSupplier) {
@@ -29,7 +28,7 @@ public class EndEffectorPercentOut extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    endEffector.setPercentOut(percent);
+    endEffector.setPercentOut(percentSupplier.getAsDouble());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
