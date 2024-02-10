@@ -71,7 +71,6 @@ public class AutosManager {
     list.add(this::source4Piece);
     list.add(this::source5Piece);
     list.add(this::source6Piece);
-    list.add(this::testFlipping);
 
     return list;
   }
@@ -213,13 +212,6 @@ public class AutosManager {
             source5Piece().command,
             generateFollowPathCommand("sourceAuto.5", true, new AutoRotationState[] {})),
         Choreo.getTrajectory("sourceAuto.1").getInitialPose());
-  }
-
-  public AutoCommand testFlipping() {
-    return new AutoCommand(
-        "testFlipping",
-        generateFollowPathCommand("TestFlipping", false, new AutoRotationState[] {}),
-        Choreo.getTrajectory("testFlipping").getInitialPose());
   }
 
   private Command generateFollowPathCommand(
