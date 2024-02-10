@@ -26,11 +26,8 @@ public class IntakeIOReal implements IntakeIO {
     TalonFXConfiguration config = new TalonFXConfiguration();
     CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
-    currentLimitConfig.SupplyCurrentLimitEnable =
-        Constants.IntakeConstants.SUPPLY_CURRENT_LIMIT_ENABLE;
-    currentLimitConfig.SupplyCurrentThreshold = Constants.IntakeConstants.SUPPLY_CURRENT_THRESHOLD;
-    currentLimitConfig.SupplyCurrentLimit = Constants.IntakeConstants.SUPPLY_CURRENT_LIMIT;
-    currentLimitConfig.SupplyTimeThreshold = Constants.IntakeConstants.SUPPLY_TIME_THRESHOLD;
+    currentLimitConfig.SupplyCurrentThreshold = 40.0;
+    currentLimitConfig.SupplyCurrentLimitEnable = true;
 
     config.CurrentLimits = currentLimitConfig;
 
