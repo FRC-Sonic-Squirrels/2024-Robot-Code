@@ -103,6 +103,12 @@ public class LED extends SubsystemBase {
     }
   }
 
+  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+    }
+  }
+
   private void setSingleStripBlinking(
       int redValue1,
       int redValue2,
