@@ -27,7 +27,7 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
-import frc.robot.autonomous.AutoCommand;
+import frc.robot.autonomous.Auto;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
@@ -92,8 +92,8 @@ public class RobotContainer {
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
-  private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
-      new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
+  private final LoggedDashboardChooser<Supplier<Auto>> autoChooser =
+      new LoggedDashboardChooser<Supplier<Auto>>("Auto Routine");
   private final AutosManager autoManager;
 
   private final LoggedTunableNumber tunablePivotPitch =
@@ -491,7 +491,7 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public LoggedDashboardChooser<Supplier<AutoCommand>> getAutonomousChooser() {
+  public LoggedDashboardChooser<Supplier<Auto>> getAutonomousChooser() {
     return autoChooser;
   }
 

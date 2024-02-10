@@ -20,7 +20,7 @@ public class AutosManager {
 
   private RobotConfig config;
 
-  private LoggedDashboardChooser<Supplier<AutoCommand>> chooser;
+  private LoggedDashboardChooser<Supplier<Auto>> chooser;
 
   // FIXME: add all other subssystems
 
@@ -32,7 +32,7 @@ public class AutosManager {
       Intake intake,
       EndEffector endEffector,
       RobotConfig config,
-      LoggedDashboardChooser<Supplier<AutoCommand>> chooser) {
+      LoggedDashboardChooser<Supplier<Auto>> chooser) {
     this.drivetrain = drivetrain;
     this.shooter = shooter;
     this.endEffector = endEffector;
@@ -44,8 +44,8 @@ public class AutosManager {
     fillChooser();
   }
 
-  private List<Supplier<AutoCommand>> allCompetitionAutos() {
-    var list = new ArrayList<Supplier<AutoCommand>>();
+  private List<Supplier<Auto>> allCompetitionAutos() {
+    var list = new ArrayList<Supplier<Auto>>();
 
     list.add(this::doNothing);
     // list.add(this::testAuto);
@@ -81,19 +81,25 @@ public class AutosManager {
     }
   }
 
-  private AutoCommand doNothing() {
-    return new AutoCommand("doNothing", new InstantCommand(), new Pose2d());
+  private Auto doNothing() {
+    return new Auto("doNothing", new InstantCommand(), new Pose2d());
   }
 
-  // private AutoCommand testAuto() {
-  //   return new AutoCommand(
+  // private Auto sourceAuto(int gamepieces){
+  //   return new Auto("source" + gamepieces + "piece",
+
+  //   , null);
+  // }
+
+  // private Auto testAuto() {
+  //   return new Auto(
   //       "testAuto",
   //       generateFollowPathCommand("TestAuto", false, new AutoRotationState[] {}),
   //       Choreo.getTrajectory("TestAuto").getInitialPose());
   // }
 
-  // private AutoCommand middle5Piece() {
-  //   return new AutoCommand(
+  // private Auto middle5Piece() {
+  //   return new Auto(
   //       "middle5Piece",
   //       generateFollowPathCommand(
   //           "middleAuto.1",
@@ -107,8 +113,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("middleAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand middle6Piece() {
-  //   return new AutoCommand(
+  // private Auto middle6Piece() {
+  //   return new Auto(
   //       "middle6Piece",
   //       Commands.sequence(
   //           middle5Piece().command,
@@ -116,8 +122,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("middleAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand middle8Piece() {
-  //   return new AutoCommand(
+  // private Auto middle8Piece() {
+  //   return new Auto(
   //       "middle8Piece",
   //       Commands.sequence(
   //           middle6Piece().command,
@@ -125,15 +131,15 @@ public class AutosManager {
   //       Choreo.getTrajectory("middleAuto").getInitialPose());
   // }
 
-  // private AutoCommand amp2Piece() {
-  //   return new AutoCommand(
+  // private Auto amp2Piece() {
+  //   return new Auto(
   //       "amp2Piece",
   //       generateFollowPathCommand("ampAuto.1", true, new AutoRotationState[] {}),
   //       Choreo.getTrajectory("ampAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand amp3Piece() {
-  //   return new AutoCommand(
+  // private Auto amp3Piece() {
+  //   return new Auto(
   //       "amp3Piece",
   //       Commands.sequence(
   //           amp2Piece().command,
@@ -141,8 +147,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("ampAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand amp5Piece() {
-  //   return new AutoCommand(
+  // private Auto amp5Piece() {
+  //   return new Auto(
   //       "amp5Piece",
   //       Commands.sequence(
   //           amp3Piece().command,
@@ -150,8 +156,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("ampAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand amp6Piece() {
-  //   return new AutoCommand(
+  // private Auto amp6Piece() {
+  //   return new Auto(
   //       "amp6Piece",
   //       Commands.sequence(
   //           amp5Piece().command,
@@ -159,15 +165,15 @@ public class AutosManager {
   //       Choreo.getTrajectory("ampAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand source2Piece() {
-  //   return new AutoCommand(
+  // private Auto source2Piece() {
+  //   return new Auto(
   //       "source2Piece",
   //       generateFollowPathCommand("sourceAuto.1", true, new AutoRotationState[] {}),
   //       Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand source3Piece() {
-  //   return new AutoCommand(
+  // private Auto source3Piece() {
+  //   return new Auto(
   //       "source3Piece",
   //       Commands.sequence(
   //           source2Piece().command,
@@ -175,8 +181,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand source4Piece() {
-  //   return new AutoCommand(
+  // private Auto source4Piece() {
+  //   return new Auto(
   //       "source4Piece",
   //       Commands.sequence(
   //           source3Piece().command,
@@ -184,8 +190,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand source5Piece() {
-  //   return new AutoCommand(
+  // private Auto source5Piece() {
+  //   return new Auto(
   //       "source5Piece",
   //       Commands.sequence(
   //           source4Piece().command,
@@ -193,8 +199,8 @@ public class AutosManager {
   //       Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   // }
 
-  // private AutoCommand source6Piece() {
-  //   return new AutoCommand(
+  // private Auto source6Piece() {
+  //   return new Auto(
   //       "source6Piece",
   //       Commands.sequence(
   //           source5Piece().command,
