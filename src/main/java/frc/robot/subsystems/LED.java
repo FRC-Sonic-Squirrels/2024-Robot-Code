@@ -28,7 +28,7 @@ public class LED extends SubsystemBase {
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.CLIMB_MODE;
+  robotStates robotState = robotStates.GAMEPIECE_IN_ROBOT;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -44,9 +44,7 @@ public class LED extends SubsystemBase {
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          ledBuffer.setRGB(i, Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
-        }
+          setAllSolidColor(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
         break;
       case SHOOTER_LINING_UP:
         // test of writing blinking
@@ -54,16 +52,16 @@ public class LED extends SubsystemBase {
         // values we want to use
         if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
           for (int i = 0; i < ledBuffer.getLength(); i++) {
-            ledBuffer.setRGB(i, Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
+            setAllSolidColor(Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
           }
         } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
           for (int i = 0; i < ledBuffer.getLength(); i++) {
-            ledBuffer.setRGB(i, Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue());
+            setAllSolidColor(Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue());
           }
         }
         break;
       case AMP_READY_TO_SCORE:
-        
+        setAllSolidColor(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
@@ -91,10 +89,7 @@ public class LED extends SubsystemBase {
           setAllBlinking(
               Color.yellow.getRed(), 0, Color.yellow.getGreen(), 0, Color.yellow.getBlue(), 0);
       case GAMEPIECE_IN_ROBOT:
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          ledBuffer.setRGB(
-              i, Color.ORANGE.getRed(), Color.ORANGE.getBlue(), Color.ORANGE.getBlue());
-        }
+        setAllSolidColor(Color.ORANGE.getRed(), Color.ORANGE.getGreen()/2, Color.ORANGE.getBlue());
         break;
       case CLIMB_MODE:
         startLength = 20;
@@ -113,6 +108,12 @@ public class LED extends SubsystemBase {
   private void setSingleStripSolidColor(
       int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
+      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+    }
+  }
+
+  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
   }
