@@ -20,6 +20,7 @@ public class LED extends SubsystemBase {
   individualLED led2 = new individualLED(26, 60);
 
   Color color1;
+  Color color2;
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int snakeShade = 0;
