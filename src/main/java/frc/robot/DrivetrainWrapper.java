@@ -7,7 +7,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainWrapper {
   private final Drivetrain drivetrain;
-  private ChassisSpeeds chassisSpeedsBase;
+  private ChassisSpeeds chassisSpeedsBase = new ChassisSpeeds();
   private ChassisSpeeds chassisSpeedsOverride;
   private double omegaOverride = Double.NaN;
 
@@ -16,6 +16,7 @@ public class DrivetrainWrapper {
   }
 
   public void setVelocity(ChassisSpeeds chassisSpeeds) {
+    if (chassisSpeeds == null) chassisSpeeds = new ChassisSpeeds();
     chassisSpeedsBase = chassisSpeeds;
   }
 
@@ -36,8 +37,12 @@ public class DrivetrainWrapper {
   }
 
   public void apply() {
-    Logger.recordOutput("DrivetrainWrapper/chassisSpeedsBase", chassisSpeedsBase);
-    Logger.recordOutput("DrivetrainWrapper/chassisSpeedsOverride", chassisSpeedsOverride);
+    if (chassisSpeedsBase != null) {
+      Logger.recordOutput("DrivetrainWrapper/chassisSpeedsBase", chassisSpeedsBase);
+    }
+    if (chassisSpeedsOverride != null) {
+      Logger.recordOutput("DrivetrainWrapper/chassisSpeedsOverride", chassisSpeedsOverride);
+    }
     Logger.recordOutput("DrivetrainWrapper/omegaOverride", omegaOverride);
 
     ChassisSpeeds chassisSpeeds;
@@ -48,19 +53,25 @@ public class DrivetrainWrapper {
       chassisSpeeds = chassisSpeedsBase;
     }
 
+    boolean prioritizeRotation;
+
     if (Double.isFinite(omegaOverride)) {
+      prioritizeRotation = true;
       chassisSpeeds =
           new ChassisSpeeds(
               chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, omegaOverride);
+    } else {
+      prioritizeRotation = false;
     }
-
     // Convert to field relative speeds & send command
-    drivetrain.runVelocity(
+    ChassisSpeeds robotChassisSpeed =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             chassisSpeeds.vxMetersPerSecond,
             chassisSpeeds.vyMetersPerSecond,
             omegaOverride,
-            drivetrain.getRotation()));
+            drivetrain.getRotation());
+
+    drivetrain.runVelocity(robotChassisSpeed, prioritizeRotation);
   }
 
   public Pose2d getPoseEstimatorPose() {

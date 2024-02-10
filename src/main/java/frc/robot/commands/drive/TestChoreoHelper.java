@@ -5,22 +5,19 @@
 package frc.robot.commands.drive;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.DrivetrainWrapper;
 import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.subsystems.swerve.Drivetrain;
 
 public class TestChoreoHelper extends Command {
   private Timer runTime = new Timer();
-  private Drivetrain drive;
+  private DrivetrainWrapper drive;
   private ChoreoHelper helper;
 
   /** Creates a new TestChoreoHelper. */
-  public TestChoreoHelper(Drivetrain drive) {
+  public TestChoreoHelper(DrivetrainWrapper drive) {
     this.drive = drive;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive);
   }
 
   // Called when the command is initially scheduled.
@@ -38,10 +35,7 @@ public class TestChoreoHelper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            helper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()),
-            drive.getPoseEstimatorPose().getRotation()));
+    drive.setVelocity(helper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()));
   }
 
   // Called once the command ends or is interrupted.

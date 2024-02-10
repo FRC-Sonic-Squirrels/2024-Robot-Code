@@ -227,7 +227,7 @@ public class AutosManager {
                 config.getAutoThetaPidController(),
                 shooter::getRPM,
                 rotationStates),
-            (ChassisSpeeds speeds) -> drivetrain.runVelocity(speeds),
+            (ChassisSpeeds speeds) -> drivetrain.runVelocity(speeds, false),
             Constants::isRedAlliance,
             drivetrain);
     for (AutoEvent autoEvent : events) {

@@ -78,12 +78,14 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     Logger.recordOutput("Commands/TeleopDrive/LinearVelocity", linearVelocity);
 
     // Convert to field relative speeds & send command
-    drivetrain.runVelocity(
+    ChassisSpeeds robotChassisSpeeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             correctedLinearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             omega * drivetrain.getMaxAngularSpeedRadPerSec(),
-            drivetrain.getRotation()));
+            drivetrain.getRotation());
+
+    drivetrain.runVelocity(robotChassisSpeeds, false);
   }
 
   // Called once the command ends or is interrupted.

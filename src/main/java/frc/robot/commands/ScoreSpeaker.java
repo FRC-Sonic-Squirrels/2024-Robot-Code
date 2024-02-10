@@ -180,8 +180,9 @@ public class ScoreSpeaker extends Command {
         "ScoreSpeaker/targetPose",
         new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
 
-    drive.runVelocityPrioritizeRotation(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
+    drive.runVelocity(
+        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()),
+        true);
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
@@ -237,7 +238,7 @@ public class ScoreSpeaker extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0));
+    drive.runVelocity(new ChassisSpeeds(0, 0, 0), false);
   }
 
   // Returns true when the command should end.
