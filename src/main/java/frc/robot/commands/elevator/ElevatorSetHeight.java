@@ -32,7 +32,11 @@ public class ElevatorSetHeight extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    if (! elevator.isAtTarget(elevator.getHeightInches())){
+      elevator.setHeight(height);
+    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
