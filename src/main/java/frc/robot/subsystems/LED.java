@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.awt.Color;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,6 +18,8 @@ public class LED extends SubsystemBase {
 
   individualLED led1 = new individualLED(0, 25);
   individualLED led2 = new individualLED(26, 60);
+
+  Color color1;
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int snakeShade = 0;
