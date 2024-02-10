@@ -1,6 +1,5 @@
 package frc.robot.autonomous;
 
-import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;
 import edu.wpi.first.math.controller.PIDController;
@@ -30,11 +29,11 @@ public class ChoreoHelper {
    * @param rotationalFeedback pid for angular velocity
    */
   public ChoreoHelper(
-      String pathName,
+      ChoreoTrajectory traj,
       PIDController translationalFeedback,
       PIDController rotationalFeedback,
       Pose2d initPose) {
-    traj = Choreo.getTrajectory(pathName);
+    this.traj = traj;
     this.xFeedback = translationalFeedback;
     this.yFeedback = translationalFeedback;
     this.rotationalFeedback = rotationalFeedback;

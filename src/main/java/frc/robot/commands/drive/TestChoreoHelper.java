@@ -4,6 +4,7 @@
 
 package frc.robot.commands.drive;
 
+import com.choreo.lib.Choreo;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,7 +26,7 @@ public class TestChoreoHelper extends Command {
   public void initialize() {
     helper =
         new ChoreoHelper(
-            "TestFlipping",
+            Choreo.getTrajectory("TestFlipping"),
             new PIDController(6.0, 0, 0),
             new PIDController(4.9, 0, 0),
             drive.getPoseEstimatorPose());

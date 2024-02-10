@@ -20,8 +20,8 @@ import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.DrivetrainWrapper;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.visualization.GamepieceVisualization;
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
@@ -29,7 +29,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ScoreSpeaker extends Command {
-  private Drivetrain drive;
+  private DrivetrainWrapper drive;
   private Shooter shooter;
 
   private final LoggedTunableNumber rotationKp =
@@ -82,7 +82,7 @@ public class ScoreSpeaker extends Command {
   public ScoreSpeaker(
       DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier,
-      Drivetrain drive,
+      DrivetrainWrapper drive,
       Shooter shooter,
       BooleanSupplier shootGamepiece) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -93,7 +93,6 @@ public class ScoreSpeaker extends Command {
     this.shootGamepiece = shootGamepiece;
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
-    addRequirements(drive);
     setName("ScoreSpeaker");
   }
 
@@ -125,7 +124,7 @@ public class ScoreSpeaker extends Command {
 
     var currentTime = Timer.getFPGATimestamp();
     var poseEstimatorPose = drive.getPoseEstimatorPose();
-    var currentRot = drive.getRotation();
+    var currentRot = drive.getPoseEstimatorPose().getRotation();
 
     var result =
         solver.computeAngles(
@@ -239,7 +238,7 @@ public class ScoreSpeaker extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0), false);
+    drive.setVelocity(new ChassisSpeeds(0, 0, 0), false);
   }
 
   // Returns true when the command should end.

@@ -4,14 +4,20 @@
 
 package frc.robot.autonomous;
 
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.team2930.StateMachine;
 import frc.robot.DrivetrainWrapper;
+import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import java.util.function.DoubleSupplier;
+import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
+import java.util.function.Supplier;
 
 public class AutoSubstateMachine extends StateMachine {
   private DrivetrainWrapper drive;
@@ -20,10 +26,11 @@ public class AutoSubstateMachine extends StateMachine {
   private Intake intake;
   private ChoreoHelper choreoHelper;
   private RobotConfig config;
-  private String trajToGP;
-  private String trajToShoot;
+  private ChoreoTrajectory trajToGP;
+  private ChoreoTrajectory trajToShoot;
   private Timer runTime = new Timer();
-  private double distToIntakeGP = 1.5;
+  private double distToIntakeGP = 1.0;
+  private Supplier<ProcessedGamepieceData> closestGamepiece;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachine(
@@ -34,14 +41,15 @@ public class AutoSubstateMachine extends StateMachine {
       RobotConfig config,
       String trajToGP,
       String trajToShoot,
-      DoubleSupplier distToGamepiece) {
+      Supplier<ProcessedGamepieceData> closestGamepiece) {
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
     this.config = config;
-    this.trajToGP = trajToGP;
-    this.trajToShoot = trajToShoot;
+    this.trajToGP = Choreo.getTrajectory(trajToGP);
+    this.trajToShoot = Choreo.getTrajectory(trajToShoot);
+    this.closestGamepiece = closestGamepiece;
 
     setInitialState(followGPpathInit());
   }
@@ -54,19 +62,36 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoThetaPidController(),
             drive.getPoseEstimatorPose());
     runTime.start();
-    return this.followGPpath();
+    return followGPpath();
   }
 
   private StateHandler followGPpath() {
     drive.setVelocity(
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()));
 
-    return null;
-    // return distance.get()<=distToIntakeGP ? :null;
+    if (runTime.get() >= trajToGP.getTotalTime() + 1.0) return setStopped();
+
+    if (closestGamepiece.get().distance <= distToIntakeGP)
+      CommandScheduler.getInstance().schedule(new IntakeGamepiece(intake));
+
+    return intake.getBeamBreak() ? followShootPathInit() : null;
   }
 
-  // private StateHandler intakeGamepiece(){
-  //   drive.setVelocity(null);
-  // }
+  private StateHandler followShootPathInit() {
+    runTime.reset();
+    choreoHelper =
+        new ChoreoHelper(
+            trajToShoot,
+            config.getAutoTranslationPidController(),
+            config.getAutoThetaPidController(),
+            drive.getPoseEstimatorPose());
+    return followShootPath();
+  }
 
+  private StateHandler followShootPath() {
+    drive.setVelocity(
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()));
+    CommandScheduler.getInstance().schedule(new ScoreSpeaker(null, null, null, shooter, null));
+    return null;
+  }
 }
