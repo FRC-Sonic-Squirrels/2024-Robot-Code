@@ -249,6 +249,7 @@ public final class Constants {
 
   public class LEDConstants {
     public static final int PWM_PORT = 8;
+    public static final int MAX_LED_LENGTH = 60;
   }
 
   public class CanIDs {
@@ -289,4 +290,5 @@ public final class Constants {
         new Pose3d(0.0, 0.0, Units.inchesToMeters(38), new Rotation3d(0.0, 0.0, 0.0));
     public static final String CAMERA_NAME = "CAM2024_3";
   }
+
 }
