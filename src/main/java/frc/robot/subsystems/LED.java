@@ -21,6 +21,7 @@ public class LED extends SubsystemBase {
   int startLength;
   int endLength;
 
+  // FIXME: these are unused but they might come in handy later
   Color color1 = Color.RED; // (255, 0, 0)
   Color color2 = Color.GREEN; // (0, 255, 0)
   Color color3 = Color.BLUE; // (0, 0 255)
@@ -40,13 +41,13 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
-      case SHOOTER_SUCCESS:
+      case SHOOTER_LINED_UP:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
         setAllSolidColor(Color.GREEN);
         break;
-      case SHOOTER_LINED_UP:
+      case SHOOTER_LINING_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
