@@ -28,16 +28,12 @@ public class ElevatorSetHeight extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    elevator.setHeight(height);
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (!elevator.isAtTarget(elevator.getHeightInches())) {
-      elevator.setHeight(height);
-    }
+    elevator.setHeight(height);
   }
 
   // Called once the command ends or is interrupted.
@@ -47,6 +43,6 @@ public class ElevatorSetHeight extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return elevator.isAtTarget();
   }
 }
