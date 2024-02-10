@@ -290,7 +290,7 @@ public class RobotContainer {
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
-            drivetrain,
+            drivetrainWrapper,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));

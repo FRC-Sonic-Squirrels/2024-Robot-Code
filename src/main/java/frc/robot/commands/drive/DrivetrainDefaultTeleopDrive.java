@@ -12,22 +12,22 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
-import frc.robot.subsystems.swerve.Drivetrain;
+import frc.robot.DrivetrainWrapper;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainDefaultTeleopDrive extends Command {
   /** Creates a new DrivetrainDefaultTeleopDrive. */
-  Drivetrain drivetrain;
+  private final DrivetrainWrapper drivetrain;
 
-  private DoubleSupplier xSupplier;
-  private DoubleSupplier ySupplier;
-  private DoubleSupplier omegaSupplier;
+  private final DoubleSupplier xSupplier;
+  private final DoubleSupplier ySupplier;
+  private final DoubleSupplier omegaSupplier;
 
   private double DEADBAND = 0.1;
 
   public DrivetrainDefaultTeleopDrive(
-      Drivetrain drivetrain,
+      DrivetrainWrapper drivetrain,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
@@ -38,7 +38,7 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     this.ySupplier = ySupplier;
     this.omegaSupplier = omegaSupplier;
 
-    addRequirements(drivetrain);
+    addRequirements(drivetrain.getRequirements());
     setName("DrivetrainDefaultTeleopDrive");
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -78,14 +78,13 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     Logger.recordOutput("Commands/TeleopDrive/LinearVelocity", linearVelocity);
 
     // Convert to field relative speeds & send command
-    ChassisSpeeds robotChassisSpeeds =
-        ChassisSpeeds.fromFieldRelativeSpeeds(
+    ChassisSpeeds chassisSpeeds =
+        new ChassisSpeeds(
             correctedLinearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
-            omega * drivetrain.getMaxAngularSpeedRadPerSec(),
-            drivetrain.getRotation());
+            omega * drivetrain.getMaxAngularSpeedRadPerSec());
 
-    drivetrain.runVelocity(robotChassisSpeeds, false);
+    drivetrain.setVelocity(chassisSpeeds);
   }
 
   // Called once the command ends or is interrupted.

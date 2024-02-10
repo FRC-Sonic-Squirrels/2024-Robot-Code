@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.swerve.Drivetrain;
 import org.littletonrobotics.junction.Logger;
 
@@ -74,7 +75,19 @@ public class DrivetrainWrapper {
     drivetrain.runVelocity(robotChassisSpeed, prioritizeRotation);
   }
 
+  public Subsystem getRequirements() {
+    return drivetrain;
+  }
+
   public Pose2d getPoseEstimatorPose() {
     return drivetrain.getPoseEstimatorPose();
+  }
+
+  public double getMaxLinearSpeedMetersPerSec() {
+    return drivetrain.getMaxLinearSpeedMetersPerSec();
+  }
+
+  public double getMaxAngularSpeedRadPerSec() {
+    return drivetrain.getMaxAngularSpeedRadPerSec();
   }
 }
