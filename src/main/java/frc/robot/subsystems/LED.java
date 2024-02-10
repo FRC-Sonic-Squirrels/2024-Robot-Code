@@ -49,7 +49,7 @@ public class LED extends SubsystemBase {
         break;
       case AUTO_MODE:
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-          ledBuffer.setRGB(i, 255, 255, 255);
+          ledBuffer.setRGB(i, Color.white.getRed(), Color.white.getGreen(), Color.white.getBlue());
         }
         break;
       case NOTHING:
