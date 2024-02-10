@@ -9,18 +9,27 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import java.util.function.DoubleSupplier;
 
 public class EndEffectorPercentOut extends Command {
+  EndEffector endEffector;
+  DoubleSupplier percentSupplier;
+  double percent;
+
   /** Creates a new EndEffectorPercentOut. */
   public EndEffectorPercentOut(EndEffector endEffector, DoubleSupplier percentSupplier) {
+    this.percentSupplier = percentSupplier;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(endEffector);
   }
 
   public EndEffectorPercentOut(EndEffector endEffector, double percent) {
     this(endEffector, () -> percent);
+    addRequirements(endEffector);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    endEffector.setPercentOut(percent);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
