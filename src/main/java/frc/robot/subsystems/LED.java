@@ -21,6 +21,7 @@ public class LED extends SubsystemBase {
   int startLength;
   int endLength;
 
+  // FIXME: these are unused but they might come in handy later
   Color color1 = Color.RED; // (255, 0, 0)
   Color color2 = Color.GREEN; // (0, 255, 0)
   Color color3 = Color.BLUE; // (0, 0 255)
@@ -39,7 +40,7 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
-      case SHOOTER_SUCCESS:
+      case SHOOTER_LINED_UP:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
@@ -47,7 +48,7 @@ public class LED extends SubsystemBase {
           ledBuffer.setRGB(i, Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
         }
         break;
-      case SHOOTER_LINED_UP:
+      case SHOOTER_LINING_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
@@ -60,6 +61,9 @@ public class LED extends SubsystemBase {
             ledBuffer.setRGB(i, Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue());
           }
         }
+        break;
+      case AMP_READY_TO_SCORE:
+        
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
@@ -93,6 +97,7 @@ public class LED extends SubsystemBase {
         }
         break;
       case CLIMB_MODE:
+        startLength = 20;
         endLength = 40;
         for (int i = 0; i < ledBuffer.getLength(); i++) {
           setSingleStripSolidColor(
@@ -179,6 +184,8 @@ public class LED extends SubsystemBase {
     NOTHING(), //
     TWENTY_SECOND_WARTING(), //
     AMP_LINING_UP(),
+    SHOOTER_LINING_UP(),
+    AMP_READY_TO_SCORE(),
     GAMEPIECE_IN_ROBOT(),
     CLIMB_MODE()
   }
