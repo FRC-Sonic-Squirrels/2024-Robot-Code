@@ -329,4 +329,18 @@ public class AutosManager {
     ROTATE_TO_GAMEPIECE,
     ROTATE_TO_SPEAKER
   }
+
+  /*
+   * Poses (xMeters, yMeters, rotRad):
+   * Gamepieces (8.273, yMeters, 0.0):
+   * G1: yMeters = 7.474
+   * G2: yMeters = 5.792
+   * G3: yMeters = 4.11
+   * G4: yMeters = 2.428
+   * G5: yMeters = 0.742
+   * Scoring Locations:
+   * S1: (5.645289421081543, 6.458367347717285, 0.18100366192345307)
+   * S2: (4.60924768447876, 4.741092681884766, -0.1594733550343424)
+   * S3: (5.801405429840088, 1.6471593379974365, -0.49934669492999156)
+   */
 }
