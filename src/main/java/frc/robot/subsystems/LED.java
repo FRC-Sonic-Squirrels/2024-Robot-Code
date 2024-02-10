@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import java.awt.Color;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
@@ -46,7 +47,31 @@ public class LED extends SubsystemBase {
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
         break;
+      case AUTO_MODE:
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+          ledBuffer.setRGB(i, 255, 255, 255);
+        }
+        break;
+      case NOTHING:
+        // when the case of the robot is nothing it will be set to red
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+          ledBuffer.setRGB(i, Color.red.getRed(), 0, 0);
+        }
+        break;
+      case TWENTY_SECOND_WARTING:
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+          setAllBlinking(
+              Color.magenta.getRed(), 0, Color.magenta.getGreen(), 0, Color.magenta.getBlue(), 0);
+        }
+        break;
+      case AMP_LINING_UP:
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+          setAllBlinking(
+              Color.yellow.getRed(), 0, Color.yellow.getGreen(), 0, Color.yellow.getBlue(), 0);
+        }
+        break;
     }
+
     led.setData(ledBuffer);
   }
 
@@ -144,7 +169,11 @@ public class LED extends SubsystemBase {
   public enum robotStates {
     SHOOTER_SUCCESS(), //
     SHOOTER_LINED_UP(), //
-    DRIVING_TO_GAMEPIECE(); //
+    DRIVING_TO_GAMEPIECE(), //
+    AUTO_MODE(), //
+    NOTHING(), //
+    TWENTY_SECOND_WARTING(), //
+    AMP_LINING_UP(); //
   }
 
   public void setRobotState(robotStates robotState) {
