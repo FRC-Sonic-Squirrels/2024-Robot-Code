@@ -1,12 +1,15 @@
 package frc.robot.autonomous;
 
+import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.DrivetrainWrapper;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Drivetrain;
+import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -17,6 +20,7 @@ public class AutosManager {
   private Shooter shooter;
   private EndEffector endEffector;
   private Intake intake;
+  private VisionGamepiece visionGamepiece;
 
   private RobotConfig config;
 
@@ -31,12 +35,14 @@ public class AutosManager {
       Shooter shooter,
       Intake intake,
       EndEffector endEffector,
+      VisionGamepiece visionGamepiece,
       RobotConfig config,
       LoggedDashboardChooser<Supplier<Auto>> chooser) {
     this.drivetrain = drivetrain;
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
+    this.visionGamepiece = visionGamepiece;
 
     this.config = config;
 
@@ -48,6 +54,7 @@ public class AutosManager {
     var list = new ArrayList<Supplier<Auto>>();
 
     list.add(this::doNothing);
+    list.add(this::sourceAuto);
     // list.add(this::testAuto);
     // list.add(this::middle5Piece);
     // list.add(this::middle6Piece);
@@ -85,11 +92,21 @@ public class AutosManager {
     return new Auto("doNothing", new InstantCommand(), new Pose2d());
   }
 
-  // private Auto sourceAuto(int gamepieces){
-  //   return new Auto("source" + gamepieces + "piece",
-
-  //   , null);
-  // }
+  private Auto sourceAuto() {
+    DrivetrainWrapper drivetrainWrapper = new DrivetrainWrapper(drivetrain);
+    AutoSubstateMachine substate =
+        new AutoSubstateMachine(
+            drivetrainWrapper,
+            shooter,
+            endEffector,
+            intake,
+            config,
+            "sourceAuto.1",
+            "G5S3",
+            visionGamepiece::getClosestGamepiece);
+    return new Auto(
+        "sourceAuto", substate.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
 
   // private Auto testAuto() {
   //   return new Auto(
