@@ -8,7 +8,6 @@ import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
-  private Drivetrain drivetrain;
+  private DrivetrainWrapper drivetrain;
   private Shooter shooter;
   private EndEffector endEffector;
   private Intake intake;
@@ -31,7 +30,7 @@ public class AutosManager {
   // FIXME: IMPORTANT!!!!!!!!!!! full auto traj files are currently BROKEN due to bug with choreo.
   // issue has been submitted
   public AutosManager(
-      Drivetrain drivetrain,
+      DrivetrainWrapper drivetrain,
       Shooter shooter,
       Intake intake,
       EndEffector endEffector,
@@ -93,10 +92,9 @@ public class AutosManager {
   }
 
   private Auto sourceAuto() {
-    DrivetrainWrapper drivetrainWrapper = new DrivetrainWrapper(drivetrain);
     AutoSubstateMachine substate =
         new AutoSubstateMachine(
-            drivetrainWrapper,
+            drivetrain,
             shooter,
             endEffector,
             intake,
