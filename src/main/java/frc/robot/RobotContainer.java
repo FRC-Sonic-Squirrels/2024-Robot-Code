@@ -304,7 +304,9 @@ public class RobotContainer {
       }
     }
 
-    autoManager = new AutosManager(drivetrain, shooter, intake, endEffector, config, autoChooser);
+    autoManager =
+        new AutosManager(
+            drivetrain, shooter, intake, endEffector, visionGamepiece, config, autoChooser);
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
