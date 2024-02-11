@@ -62,6 +62,8 @@ public class ScoreSpeaker extends Command {
 
   private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
 
+  private Timer timeSinceShot = new Timer();
+
   /**
    * Creates a new RotateToSpeaker.
    *
@@ -189,6 +191,7 @@ public class ScoreSpeaker extends Command {
 
     if (shooting) {
       shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+      timeSinceShot.start();
     } else {
       shooter.setKickerPercentOut(0.0);
       solver.endShooting();
@@ -210,7 +213,7 @@ public class ScoreSpeaker extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return timeSinceShot.get() >= Constants.ShooterConstants.SHOOTING_TIME;
   }
 
   boolean prevIsShooting = false;

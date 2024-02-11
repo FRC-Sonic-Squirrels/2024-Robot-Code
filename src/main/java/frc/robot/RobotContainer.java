@@ -304,11 +304,11 @@ public class RobotContainer {
       }
     }
 
+    drivetrainWrapper = new DrivetrainWrapper(drivetrain);
+
     autoManager =
         new AutosManager(
-            drivetrain, shooter, intake, endEffector, visionGamepiece, config, autoChooser);
-
-    drivetrainWrapper = new DrivetrainWrapper(drivetrain);
+            drivetrainWrapper, shooter, intake, endEffector, visionGamepiece, config, autoChooser);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
