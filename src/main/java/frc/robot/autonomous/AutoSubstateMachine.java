@@ -91,7 +91,9 @@ public class AutoSubstateMachine extends StateMachine {
   private StateHandler followShootPath() {
     drive.setVelocity(
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), runTime.get()));
-    CommandScheduler.getInstance().schedule(new ScoreSpeaker(null, null, null, shooter, null));
+    ScoreSpeaker scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
+    CommandScheduler.getInstance().schedule(scoreSpeaker);
+    if (scoreSpeaker.isFinished()) return setDone();
     return null;
   }
 }
