@@ -19,16 +19,17 @@ public class ChoreoHelper {
   private PIDController rotationalFeedback;
   private List<ChoreoTrajectoryState> states;
   private double initialTime;
-  private Pose2d closestPose;
+  private double timeOffset;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
-   * @param pathName name of path
+   * @param traj trajectory to follow
    * @param translationalFeedback pid in x and y directions
    * @param rotationalFeedback pid for angular velocity
    */
   public ChoreoHelper(
+      double initialTime,
       ChoreoTrajectory traj,
       PIDController translationalFeedback,
       PIDController rotationalFeedback,
@@ -38,14 +39,16 @@ public class ChoreoHelper {
     this.yFeedback = translationalFeedback;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
-    states = getStates();
+    this.states = getStates();
     ChoreoTrajectoryState closestState = null;
     for (int i = 0; i < traj.getPoses().length; i++) {
-      closestState = calculateNewClosestState(closestState, states.get(i), initPose);
+      closestState = calculateNewClosestState(closestState, this.states.get(i), initPose);
     }
-    closestPose = closestState.getPose();
-    initialTime = closestState.timestamp;
-    Logger.recordOutput("Autonomous/closestPose", closestPose);
+    if (closestState != null) {
+      this.timeOffset = closestState.timestamp;
+      Logger.recordOutput("Autonomous/closestPose", closestState.getPose());
+    }
+    this.initialTime = initialTime;
   }
 
   /**
@@ -55,13 +58,21 @@ public class ChoreoHelper {
    * @param timestamp time of path
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
-    ChoreoTrajectoryState state = traj.sample(timestamp + initialTime, Constants.isRedAlliance());
+    timestamp -= initialTime;
+    timestamp += timeOffset;
+    if (timestamp >= traj.getTotalTime()) {
+      return null;
+    }
 
-    double xVel = state.velocityX + xFeedback.calculate(robotPose.getX(), state.x);
-    double yVel = state.velocityY + yFeedback.calculate(robotPose.getY(), state.y);
-    double omegaVel =
-        state.angularVelocity
-            + rotationalFeedback.calculate(robotPose.getRotation().getRadians(), state.heading);
+    ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
+
+    double x = robotPose.getX();
+    double y = robotPose.getY();
+    double theta = robotPose.getRotation().getRadians();
+
+    double xVel = state.velocityX + xFeedback.calculate(x, state.x);
+    double yVel = state.velocityY + yFeedback.calculate(y, state.y);
+    double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
     Logger.recordOutput("Autonomous/optimalPose", state.getPose());
     Logger.recordOutput(
@@ -87,8 +98,8 @@ public class ChoreoHelper {
     try {
       var f = traj.getClass().getDeclaredField("samples");
       f.setAccessible(true);
-      var samples = (List<ChoreoTrajectoryState>) f.get(traj);
-      return samples;
+      //noinspection unchecked
+      return (List<ChoreoTrajectoryState>) f.get(traj);
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
