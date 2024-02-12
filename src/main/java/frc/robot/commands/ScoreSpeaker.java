@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.PIDTargetMeasurement;
@@ -184,13 +185,15 @@ public class ScoreSpeaker extends Command {
         shootGamepiece.getAsBoolean()
             && shooter.isPivotIsAtTarget()
             && rotationController.atSetpoint()
-            && shooter.isAtTargetRPM();
+            && shooter.isAtTargetRPM()
+            && shootingPosition();
 
-    Logger.recordOutput("ScoreSpeaker/shootingIsAtTargetRPM", shooter.isAtTargetRPM());
+    Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
     Logger.recordOutput(
-        "ScoreSpeaker/shootingRotationControllerAtSetpoint", rotationController.atSetpoint());
-    Logger.recordOutput("ScoreSpeaker/shootingPivotAtTarget", shooter.isPivotIsAtTarget());
-    Logger.recordOutput("ScoreSpeaker/shootingShootGamepiece", shootGamepiece.getAsBoolean());
+        "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
+    Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
+    Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
+    Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
     Logger.recordOutput("ScoreSpeaker/shooting", shooting);
 
     if (shooting) {
@@ -215,6 +218,7 @@ public class ScoreSpeaker extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    drive.resetVelocityOverride();
     drive.resetRotationOverride();
   }
 
@@ -222,6 +226,48 @@ public class ScoreSpeaker extends Command {
   @Override
   public boolean isFinished() {
     return timeSinceShot.get() >= Constants.ShooterConstants.SHOOTING_TIME;
+  }
+
+  private boolean shootingPosition() {
+    // look at constraints: https://www.desmos.com/calculator/2znzk4zokz
+    if (Constants.isRedAlliance()) {
+      // check if shot is legal
+      if ((DriverStation.isAutonomous()
+              && drive.getPoseEstimatorPose().getX() <= 10.257804870605469)
+          || drive.getPoseEstimatorPose().getX() <= 6.2697529792785645) {
+        return false;
+      }
+      // y <= -0.603x + 11.959
+      // y >= 0.695x -4.923
+      // y <= 6.103558540344238
+      // check if stage is blocking
+      if (drive.getPoseEstimatorPose().getY()
+              <= -0.603 * drive.getPoseEstimatorPose().getX() + 11.959
+          && drive.getPoseEstimatorPose().getY()
+              >= 0.695 * drive.getPoseEstimatorPose().getX() - 4.923
+          && drive.getPoseEstimatorPose().getY() <= 6.103558540344238) {
+        return false;
+      }
+      return true;
+    } else {
+      // check if shot is legal
+      if ((DriverStation.isAutonomous()
+              && drive.getPoseEstimatorPose().getX() >= 6.2697529792785645)
+          || drive.getPoseEstimatorPose().getX() >= 10.257804870605469) {
+        return false;
+      }
+      // y <= 0.808x + 0.793
+      // y >= -0.682x + 6.922
+      // y <= 6.103558540344238
+      // check if stage is blocking
+      if (drive.getPoseEstimatorPose().getY() <= 0.808 * drive.getPoseEstimatorPose().getX() + 0.793
+          && drive.getPoseEstimatorPose().getY()
+              >= -0.682 * drive.getPoseEstimatorPose().getX() + 6.922
+          && drive.getPoseEstimatorPose().getY() <= 6.103558540344238) {
+        return false;
+      }
+      return true;
+    }
   }
 
   boolean prevIsShooting = false;

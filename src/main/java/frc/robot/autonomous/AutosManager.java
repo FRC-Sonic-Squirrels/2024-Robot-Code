@@ -94,7 +94,8 @@ public class AutosManager {
   }
 
   private Auto sourceAuto() {
-    AutoSubstateMachine substate =
+
+    AutoSubstateMachine substateMachine1 =
         new AutoSubstateMachine(
             drivetrain,
             shooter,
@@ -104,9 +105,63 @@ public class AutosManager {
             "sourceAuto.1",
             "G5S3",
             visionGamepiece::getClosestGamepiece);
+
+    AutoSubstateMachine substateMachine2 =
+        new AutoSubstateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            intake,
+            config,
+            "S3G4",
+            "G4S2",
+            visionGamepiece::getClosestGamepiece);
+
+    AutoSubstateMachine substateMachine3 =
+        new AutoSubstateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            intake,
+            config,
+            "S2G3",
+            "G3S1",
+            visionGamepiece::getClosestGamepiece);
+
+    AutoSubstateMachine substateMachine4 =
+        new AutoSubstateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            intake,
+            config,
+            "S1G2",
+            "G2S1",
+            visionGamepiece::getClosestGamepiece);
+
+    AutoSubstateMachine substateMachine5 =
+        new AutoSubstateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            intake,
+            config,
+            "S1G1",
+            "G1S1",
+            visionGamepiece::getClosestGamepiece);
+
+    AutoStateMachine state =
+        new AutoStateMachine(
+            new AutoSubstateMachine[] {
+              substateMachine1,
+              substateMachine2,
+              substateMachine3,
+              substateMachine4,
+              substateMachine5
+            });
     return new Auto(
         "sourceAuto",
-        substate.asCommand(),
+        state.asCommand(),
         Constants.isRedAlliance()
             ? AllianceFlipUtil.mirrorPose2DOverCenterLine(
                 Choreo.getTrajectory("sourceAuto.1").getInitialPose())
