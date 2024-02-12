@@ -27,20 +27,38 @@ public class GamepieceVisualization {
   private static boolean showingPath = false;
   private static boolean prevShowingPath = false;
   private static boolean showPath = false;
+  private static boolean initial = true;
+  private static GamepieceVisualization instance = new GamepieceVisualization();
+  private static Timer shootingTimer = new Timer();
+  private boolean shootingGamepiece = false;
+
+  public static GamepieceVisualization getInstance() {
+    return instance;
+  }
 
   public void updateVisualization(
       Pose2d robotPose,
       Translation2d robotVel,
       Rotation2d shooterAngle,
       double shooterRPM,
-      Boolean shootingGamepiece,
-      double timeSinceShot) {
+      Boolean shootingGamepiece) {
+    this.shootingGamepiece = shootingGamepiece;
     gamepieceShot = shootingGamepiece && !shootingPrev;
     if (gamepieceShot) {
       robotPoseOfShot = robotPose;
       robotVelOfShot = robotVel;
       shooterAngleOfShot = shooterAngle;
       shooterRPMofShot = shooterRPM;
+    }
+    shootingPrev = shootingGamepiece;
+  }
+
+  public void logTraj() {
+    Logger.recordOutput("Visualization/shootingGamepiece", shootingGamepiece);
+    if (gamepieceShot) shootingTimer.start();
+    if (!shootingGamepiece) {
+      shootingTimer.stop();
+      shootingTimer.reset();
     }
     Translation3d robotToSpeaker =
         Constants.FieldConstants.getSpeakerTranslation3D()
@@ -74,23 +92,41 @@ public class GamepieceVisualization {
         Rotation2d.fromRadians(
             Math.atan2(gamepieceVel.getZ(), Math.hypot(gamepieceVel.getX(), gamepieceVel.getY())));
 
-    showingPath = !(timeSinceShot * gamepieceLinearVel <= dist);
+    showingPath = !(shootingTimer.get() * gamepieceLinearVel <= dist);
     showPath = showingPath && !prevShowingPath;
     if (!poses.isEmpty())
       poses.set(
           0, new Pair<Pose3d, Double>(new Pose3d(0.0, 0.0, -1000.0, new Rotation3d()), 10000000.0));
     if (shootingGamepiece) {
-      if (timeSinceShot * gamepieceLinearVel <= dist) {
-        poses.add(
+      if (shootingTimer.get() * gamepieceLinearVel <= dist) {
+        if (initial) {
+          poses.add(
+              0,
+              new Pair<Pose3d, Double>(
+                  new Pose3d(
+                      new Translation3d(
+                              shootingTimer.get() * gamepieceLinearVel,
+                              new Rotation3d(0.0, -pitch.getRadians(), yaw.getRadians() + Math.PI))
+                          .plus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation())),
+                      new Rotation3d(
+                          0.0,
+                          shooterAngleOfShot.getRadians(),
+                          robotPoseOfShot.getRotation().getRadians())),
+                  Timer.getFPGATimestamp()));
+          initial = false;
+        }
+        poses.set(
             0,
             new Pair<Pose3d, Double>(
                 new Pose3d(
                     new Translation3d(
-                            timeSinceShot * gamepieceLinearVel,
+                            shootingTimer.get() * gamepieceLinearVel,
                             new Rotation3d(0.0, -pitch.getRadians(), yaw.getRadians() + Math.PI))
-                        .plus(GeometryUtil.translation2dTo3d(robotPose.getTranslation())),
+                        .plus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation())),
                     new Rotation3d(
-                        0.0, shooterAngle.getRadians(), robotPose.getRotation().getRadians())),
+                        0.0,
+                        shooterAngleOfShot.getRadians(),
+                        robotPoseOfShot.getRotation().getRadians())),
                 Timer.getFPGATimestamp()));
       } else {
         if (showPath)
@@ -102,9 +138,11 @@ public class GamepieceVisualization {
                                 gamepieceSpacing * i,
                                 new Rotation3d(
                                     0.0, -pitch.getRadians(), yaw.getRadians() + Math.PI))
-                            .plus(GeometryUtil.translation2dTo3d(robotPose.getTranslation())),
+                            .plus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation())),
                         new Rotation3d(
-                            0.0, shooterAngle.getRadians(), robotPose.getRotation().getRadians())),
+                            0.0,
+                            shooterAngleOfShot.getRadians(),
+                            robotPoseOfShot.getRotation().getRadians())),
                     Timer.getFPGATimestamp()));
           }
       }
@@ -117,11 +155,7 @@ public class GamepieceVisualization {
     for (int i = 0; i < poses.size(); i++) {
       loggedPoses[i] = poses.get(i).getFirst();
     }
-    shootingPrev = shootingGamepiece;
     prevShowingPath = showingPath;
-  }
-
-  public void logTraj() {
     Logger.recordOutput("Visualization/GamepieceTraj", loggedPoses);
   }
 }

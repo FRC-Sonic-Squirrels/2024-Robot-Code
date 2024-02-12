@@ -62,6 +62,7 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
@@ -523,8 +524,6 @@ public class RobotContainer {
 
     SimpleMechanismVisualization.logMechanism();
 
-    scoreSpeaker.updateVisualization();
-
     MechanismVisualization.updateVisualization(
         arm.getAngle(),
         shooter.getPitch(),
@@ -532,5 +531,7 @@ public class RobotContainer {
         endEffector.intakeSideTOFDetectGamepiece() || endEffector.shooterSideTOFDetectGamepiece());
 
     MechanismVisualization.logMechanism();
+
+    GamepieceVisualization.getInstance().logTraj();
   }
 }

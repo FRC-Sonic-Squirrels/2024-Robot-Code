@@ -220,7 +220,7 @@ public final class Constants {
 
       public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
 
-      public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
+      public static final double SIM_INITIAL_ANGLE = Math.toRadians(14.0);
     }
 
     public static class Launcher {
