@@ -22,7 +22,6 @@ public class EndEffectorPercentOut extends Command {
 
   public EndEffectorPercentOut(EndEffector endEffector, double percent) {
     this(endEffector, () -> percent);
-    addRequirements(endEffector);
   }
 
   // Called when the command is initially scheduled.
