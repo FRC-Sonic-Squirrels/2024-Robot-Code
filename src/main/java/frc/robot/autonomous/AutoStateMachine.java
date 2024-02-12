@@ -10,55 +10,36 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class AutoStateMachine extends StateMachine {
-  public StateHandler[] handlers;
-  private DrivetrainWrapper drive;
-  private Shooter shooter;
+  private final DrivetrainWrapper drive;
+  private final Shooter shooter;
+  private final AutoSubstateMachine[] subStates;
+  private int currentSubState;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoStateMachine(
-      AutoSubstateMachine[] subStates, DrivetrainWrapper drive, Shooter shooter) {
+      DrivetrainWrapper drive, Shooter shooter, AutoSubstateMachine[] subStates) {
     this.drive = drive;
     this.shooter = shooter;
-    handlers = new StateHandler[subStates.length];
-
-    for (int i = subStates.length - 1; i >= 0; i--) {
-      int j = i + 1;
-
-      final int iFinal = i;
-
-      if (i != subStates.length - 1) {
-        handlers[i] =
-            () -> {
-              return suspendForSubStateMachine(
-                  subStates[iFinal],
-                  new ResumeStateHandler() {
-                    @Override
-                    public StateHandler advance(StateMachine subStateMachine) {
-                      return handlers[j];
-                    }
-                  });
-            };
-      } else {
-        handlers[i] =
-            () -> {
-              return suspendForSubStateMachine(
-                  subStates[iFinal],
-                  new ResumeStateHandler() {
-                    @Override
-                    public StateHandler advance(StateMachine subStateMachine) {
-                      return setDone();
-                    }
-                  });
-            };
-      }
-    }
+    this.subStates = subStates;
 
     setInitialState(makeInitialShot());
   }
 
   private StateHandler makeInitialShot() {
-    ScoreSpeaker scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
-    // scoreSpeaker.schedule();
-    return handlers[0];
+    if (false) {
+      ScoreSpeaker scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
+      scoreSpeaker.schedule();
+    }
+
+    return this::nextSubState;
+  }
+
+  private StateHandler nextSubState() {
+    if (currentSubState >= subStates.length) {
+      return setDone();
+    }
+
+    return suspendForSubStateMachine(
+        subStates[currentSubState++], subStateMachine -> AutoStateMachine.this::nextSubState);
   }
 }
