@@ -152,15 +152,15 @@ public class AutosManager {
 
     AutoStateMachine state =
         new AutoStateMachine(
+            drivetrain,
+            shooter,
             new AutoSubstateMachine[] {
               substateMachine1,
               substateMachine2,
               substateMachine3,
               substateMachine4,
               substateMachine5
-            },
-            drivetrain,
-            shooter);
+            });
     return new Auto(
         "sourceAuto",
         state.asCommand(),
