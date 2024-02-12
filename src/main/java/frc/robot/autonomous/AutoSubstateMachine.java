@@ -48,7 +48,8 @@ public class AutoSubstateMachine extends StateMachine {
     this.trajToShoot = Choreo.getTrajectory(trajToShoot);
     this.closestGamepiece = closestGamepiece;
 
-    Logger.recordOutput("Autonomous/followGPpathStarted", true);
+    setInitialState(this::followPathToGamePiece);
+
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
@@ -57,11 +58,11 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoThetaPidController(),
             drive.getPoseEstimatorPose());
 
-    setInitialState(this::followPathToGamePiece);
     Logger.recordOutput("Autonomous/SubstateConstructed", true);
   }
 
   private StateHandler followPathToGamePiece() {
+    Logger.recordOutput("Autonomous/followGPpathStarted", true);
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
     if (chassisSpeeds != null) {
@@ -92,8 +93,12 @@ public class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler followPathToShooter() {
+    Logger.recordOutput("Autonomous/time", timeFromStart());
+    scoreSpeaker.updateVisualization();
     if (scoreSpeaker.isFinished()) {
       Logger.recordOutput("Autonomous/ShooterDone", true);
+      // return setDone();
+      drive.resetVelocityOverride();
       return setDone();
     }
 
@@ -105,6 +110,7 @@ public class AutoSubstateMachine extends StateMachine {
     }
 
     Logger.recordOutput("Autonomous/stopped", true);
-    return setStopped();
+    drive.resetVelocityOverride();
+    return null;
   }
 }

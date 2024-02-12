@@ -41,11 +41,11 @@ public class MechanismVisualization {
         new Pose3d(0.0, 0.0, Units.inchesToMeters(elevatorHeightInches), new Rotation3d());
     arm =
         new Pose3d(
-            -0.24,
+            0.24,
             0.0,
             0.535 + elevatorCarriage.getZ(),
-            new Rotation3d(0.0, armAngle.getRadians() + Math.PI, 0.0));
-    shooter = new Pose3d(-0.025, 0.0, 0.257, new Rotation3d(0.0, -shooterAngle.getRadians(), 0.0));
+            new Rotation3d(0.0, -armAngle.getRadians() + Math.PI, 0.0));
+    shooter = new Pose3d(0.025, 0.0, 0.257, new Rotation3d(0.0, shooterAngle.getRadians(), 0.0));
     gamepiece = endEffectorBeamBreak ? arm : new Pose3d(100, 100, 100, new Rotation3d());
   }
 

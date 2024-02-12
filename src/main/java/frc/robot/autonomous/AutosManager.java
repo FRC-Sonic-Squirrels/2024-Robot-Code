@@ -3,6 +3,8 @@ package frc.robot.autonomous;
 import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.lib.team2930.AllianceFlipUtil;
+import frc.robot.Constants;
 import frc.robot.DrivetrainWrapper;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -103,7 +105,12 @@ public class AutosManager {
             "G5S3",
             visionGamepiece::getClosestGamepiece);
     return new Auto(
-        "sourceAuto", substate.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+        "sourceAuto",
+        substate.asCommand(),
+        Constants.isRedAlliance()
+            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(
+                Choreo.getTrajectory("sourceAuto.1").getInitialPose())
+            : Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   }
 
   // private Auto testAuto() {
