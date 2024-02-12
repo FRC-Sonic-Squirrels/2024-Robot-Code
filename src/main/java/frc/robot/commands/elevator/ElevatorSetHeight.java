@@ -13,7 +13,6 @@ public class ElevatorSetHeight extends Command {
   Elevator elevator;
 
   DoubleSupplier heightSupplier;
-  double height;
 
   public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
     this.heightSupplier = heightSupplier;
@@ -23,7 +22,6 @@ public class ElevatorSetHeight extends Command {
 
   public ElevatorSetHeight(Elevator elevator, double height) {
     this(elevator, () -> height);
-    addRequirements(elevator);
   }
 
   // Called when the command is initially scheduled.
@@ -33,7 +31,7 @@ public class ElevatorSetHeight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    elevator.setHeight(height);
+    elevator.setHeight(heightSupplier.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
