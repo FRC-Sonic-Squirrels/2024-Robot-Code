@@ -23,6 +23,7 @@ public class AutoSubstateMachine extends StateMachine {
   private EndEffector endEffector;
   private Intake intake;
   private RobotConfig config;
+  private String trajToGamepieceName;
   private ChoreoTrajectory trajToGamePiece;
   private ChoreoTrajectory trajToShoot;
   private Supplier<ProcessedGamepieceData> closestGamepiece;
@@ -44,12 +45,17 @@ public class AutoSubstateMachine extends StateMachine {
     this.endEffector = endEffector;
     this.intake = intake;
     this.config = config;
+    this.trajToGamepieceName = trajToGP;
     this.trajToGamePiece = Choreo.getTrajectory(trajToGP);
     this.trajToShoot = Choreo.getTrajectory(trajToShoot);
     this.closestGamepiece = closestGamepiece;
 
-    setInitialState(this::followPathToGamePiece);
+    setInitialState(this::initFollowPathToGamePiece);
 
+    Logger.recordOutput("Autonomous/SubstateConstructed", true);
+  }
+
+  private StateHandler initFollowPathToGamePiece() {
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
@@ -57,12 +63,13 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
             drive.getPoseEstimatorPose());
-
-    Logger.recordOutput("Autonomous/SubstateConstructed", true);
+    return this::followPathToGamePiece;
   }
 
   private StateHandler followPathToGamePiece() {
     Logger.recordOutput("Autonomous/followGPpathStarted", true);
+    Logger.recordOutput("Autonomous/" + trajToGamepieceName + "Started", true);
+    Logger.recordOutput("Autonomous/timeFromStart", timeFromStart());
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
     if (chassisSpeeds != null) {
