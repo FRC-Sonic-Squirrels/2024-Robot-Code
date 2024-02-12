@@ -214,7 +214,8 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
-          // README: for development purposes, comment any of the real IO's you DONT want to use and
+          // README: for development purposes, comment any of the real IO's you DON'T want to use
+          // and
           // uncomment the empty IO's as a replacement
 
           // -- All real IO's
