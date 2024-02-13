@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -145,35 +143,17 @@ public final class Constants {
   public class IntakeConstants {
     public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
-    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
-    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
-    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
-    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
-
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
   }
 
   public class EndEffectorConstants {
-    public static final boolean SUPPLY_CURRENT_LIMIT_ENABLE = true;
-    public static final double SUPPLY_CURRENT_LIMIT = 50.0;
-    public static final double SUPPLY_CURRENT_THRESHOLD = 80.0;
-    public static final double SUPPLY_TIME_THRESHOLD = 2.0;
-
     public static final double INDEX_PERCENT_OUT = 0.8;
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
 
-    public static final InvertedValue INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
-    public static final NeutralModeValue NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
-  }
-
-  public class WristConstants {
-    public static final Rotation2d MAX_WRIST_ANGLE = Rotation2d.fromDegrees(90);
-    public static final Rotation2d MIN_WRIST_ANGLE = Rotation2d.fromDegrees(-90);
-    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(-90);
-    ;
+    public static final double SHOOTING_PERCENT_OUT = 0.8;
   }
 
   public class ElevatorConstants {
@@ -181,7 +161,7 @@ public final class Constants {
     public static final double GEAR_RATIO = 25.93;
     public static final double WHEEL_RADIUS = 1.118;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final double MAX_HEIGHT = Units.inchesToMeters(25.0); //
+    public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
   }
@@ -253,18 +233,28 @@ public final class Constants {
   }
 
   public class CanIDs {
+    // READ ME: CAN ID's THAT ARE NOT VALID TO USE
+    // 1, 11, 21, 31
+    // 2, 12, 22, 32
+    // 3, 13, 23, 33
+    // 4, 14, 24, 34
+    // all these CAN ID's are reserved for the Drivetrain
+
     // TODO: get actual can ids
-    public static final int INTAKE_CAN_ID = 0;
-    public static final int SHOOTER_LEAD_CAN_ID = 1;
-    public static final int SHOOTER_FOLLOW_CAN_ID = 2;
-    public static final int SHOOTER_PIVOT_CAN_ID = 8;
-    public static final int SHOOTER_KICKER_CAN_ID = 9;
-    public static final int ARM_CAN_ID = 40;
-    public static final int ELEVATOR_CAN_ID = 4;
-    public static final int END_EFFECTOR_CAN_ID = 6;
-    public static final int WRIST_CAN_ID = 7;
-    public static final int INTAKE_TOF_CAN_ID = 10;
-    public static final int SHOOTER_TOF_CAN_ID = 11;
+    public static final int INTAKE_CAN_ID = 15;
+
+    public static final int SHOOTER_LEAD_CAN_ID = 25;
+    public static final int SHOOTER_FOLLOW_CAN_ID = 26;
+    public static final int SHOOTER_PIVOT_CAN_ID = 27;
+    public static final int SHOOTER_KICKER_CAN_ID = 28;
+
+    public static final int ARM_CAN_ID = 17;
+
+    public static final int ELEVATOR_CAN_ID = 16;
+
+    public static final int END_EFFECTOR_CAN_ID = 18;
+    public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 35;
+    public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 36;
   }
 
   public class DIOPorts {

@@ -56,7 +56,8 @@ public class ScoreSpeaker extends Command {
   private ShootingSolver solver =
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
-          new Translation3d(),
+          new Translation3d(0, 0, 0),
+          new Translation3d(0, -10, 0),
           Constants.ShooterConstants.SHOOTING_SPEED,
           Constants.ShooterConstants.SHOOTING_TIME);
 
@@ -180,8 +181,9 @@ public class ScoreSpeaker extends Command {
         "ScoreSpeaker/targetPose",
         new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
 
-    drive.runVelocityPrioritizeRotation(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
+    drive.runVelocity(
+        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()),
+        true);
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
@@ -214,9 +216,9 @@ public class ScoreSpeaker extends Command {
 
     shooting =
         shootGamepiece.getAsBoolean()
-            && shooter.pivotIsAtTarget()
+            && shooter.isPivotIsAtTarget()
             && rotationController.atSetpoint()
-            && shooter.isAtShootingRPM();
+            && shooter.isAtTargetRPM();
 
     Logger.recordOutput("ScoreSpeaker/shooting", shooting);
 
@@ -237,7 +239,7 @@ public class ScoreSpeaker extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0));
+    drive.runVelocity(new ChassisSpeeds(0, 0, 0), false);
   }
 
   // Returns true when the command should end.

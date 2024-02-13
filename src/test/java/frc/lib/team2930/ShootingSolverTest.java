@@ -13,6 +13,7 @@ public class ShootingSolverTest {
   public void testOrbit() {
     Translation3d Pspeaker = new Translation3d(0, 0, 10);
     Translation3d PaxisOfRotationShooter = new Translation3d(0, 0, 0);
+    Translation3d PfrontOfShooter = new Translation3d(0, -1, 0);
     double shootingTime = 1;
 
     var robotVel = new Translation2d(10, 0);
@@ -24,7 +25,10 @@ public class ShootingSolverTest {
     //
     for (double shooterSpeed = 10; shooterSpeed < 50; shooterSpeed += 10) {
 
-      var solver = new ShootingSolver(Pspeaker, PaxisOfRotationShooter, shooterSpeed, shootingTime);
+      var solver =
+          new ShootingSolver(
+              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime);
+
       for (double angle = 0; angle < 360; angle += 45) {
         var rot = Rotation2d.fromDegrees(angle);
 
@@ -44,11 +48,14 @@ public class ShootingSolverTest {
           assertEquals(45.0, res.pitch().getDegrees(), 0.0001);
 
           var angleDiff = angle - res.heading().getDegrees();
-          if (angleDiff > 360) {
+          if (angleDiff < -180) {
+            angleDiff += 360;
+          }
+          if (angleDiff > 180) {
             angleDiff -= 360;
           }
 
-          assertEquals(180 - Math.toDegrees(Math.acos(10 / VnoteHorizontal)), angleDiff, 0.0001);
+          assertEquals(-Math.toDegrees(Math.acos(10 / VnoteHorizontal)), angleDiff, 0.0001);
         }
       }
     }
@@ -57,10 +64,13 @@ public class ShootingSolverTest {
   public void printSpeedSweep() {
     Translation3d Pspeaker = new Translation3d(0, 0, 10);
     Translation3d PaxisOfRotationShooter = new Translation3d(0, 0, 0);
+    Translation3d PfrontOfShooter = new Translation3d(0, 0, 0);
     double shootingTime = 1;
 
     for (double shooterSpeed = 10; shooterSpeed <= 50; shooterSpeed += 10) {
-      var solver = new ShootingSolver(Pspeaker, PaxisOfRotationShooter, shooterSpeed, shootingTime);
+      var solver =
+          new ShootingSolver(
+              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime);
       for (double i = -10; i <= 10; i += 0.1) {
         var res =
             solver.computeAngles(0, new Pose2d(-i, 10, new Rotation2d(0)), new Translation2d(i, 0));
