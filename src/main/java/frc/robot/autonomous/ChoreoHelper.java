@@ -31,12 +31,13 @@ public class ChoreoHelper {
   public ChoreoHelper(
       double initialTime,
       ChoreoTrajectory traj,
-      PIDController translationalFeedback,
+      PIDController translationalFeedbackX,
+      PIDController translationalFeedbackY,
       PIDController rotationalFeedback,
       Pose2d initPose) {
     this.traj = traj;
-    this.xFeedback = translationalFeedback;
-    this.yFeedback = translationalFeedback;
+    this.xFeedback = translationalFeedbackX;
+    this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
     this.states = getStates();
@@ -72,6 +73,10 @@ public class ChoreoHelper {
 
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
+
+    // double xVel = state.velocityX;
+    // double yVel = state.velocityY;
+    Logger.recordOutput("Autonomous/stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
     Logger.recordOutput("Autonomous/optimalPose", state.getPose());
