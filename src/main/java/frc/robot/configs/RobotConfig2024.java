@@ -153,11 +153,11 @@ public class RobotConfig2024 extends RobotConfig {
               Units.inchesToMeters(22.31306)),
           new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
 
-  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "3_INTAKE_LEFT";
-  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "4_INTAKE_RIGHT";
-  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_SHOOTER_LEFT";
-  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "2_SHOOTER_RIGHT";
-  public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection";
+  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "3_Intake_Left_See3Cam";
+  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "4_Intake_Right_See3Cam";
+  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
+  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "2_Shooter_Right_See3Cam";
+  public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
 
   public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
