@@ -103,29 +103,30 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+  private void setSingleStripBlinking(
+      Color color1, Color color2, double seconds, int startingLED, int endingLED) {
+
+    double period = (2 * Math.PI) / seconds;
+    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
+      for (int i = startingLED; i <= endingLED; i++) {
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+      }
+    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
+      for (int i = startingLED; i <= endingLED; i++) {
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+      }
     }
   }
 
-  private void setSingleStripBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2,
-      int startingLED,
-      int endingLED) {
-
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
-      for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+  private void setAllBlinking(Color color1, Color color2, double seconds) {
+    double period = (2 * Math.PI) / seconds;
+    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
+      for (int i = 0; i <= ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
-      for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
+      for (int i = 0; i <= ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
     }
   }
