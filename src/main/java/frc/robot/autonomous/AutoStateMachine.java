@@ -5,12 +5,20 @@
 package frc.robot.autonomous;
 
 import frc.lib.team2930.StateMachine;
+import frc.robot.DrivetrainWrapper;
+import frc.robot.commands.ScoreSpeaker;
+import frc.robot.subsystems.shooter.Shooter;
 
 public class AutoStateMachine extends StateMachine {
   public StateHandler[] handlers;
+  private DrivetrainWrapper drive;
+  private Shooter shooter;
 
   /** Creates a new AutoSubstateMachine. */
-  public AutoStateMachine(AutoSubstateMachine[] subStates) {
+  public AutoStateMachine(
+      AutoSubstateMachine[] subStates, DrivetrainWrapper drive, Shooter shooter) {
+    this.drive = drive;
+    this.shooter = shooter;
     handlers = new StateHandler[subStates.length];
 
     for (int i = subStates.length - 1; i >= 0; i--) {
@@ -45,6 +53,12 @@ public class AutoStateMachine extends StateMachine {
       }
     }
 
-    setInitialState(handlers[0]);
+    setInitialState(makeInitialShot());
+  }
+
+  private StateHandler makeInitialShot() {
+    ScoreSpeaker scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
+    // scoreSpeaker.schedule();
+    return handlers[0];
   }
 }

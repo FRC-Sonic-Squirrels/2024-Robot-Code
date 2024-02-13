@@ -104,8 +104,6 @@ public class AutoSubstateMachine extends StateMachine {
     scoreSpeaker.updateVisualization();
     if (scoreSpeaker.isFinished()) {
       Logger.recordOutput("Autonomous/ShooterDone", true);
-      // return setDone();
-      drive.resetVelocityOverride();
       return setDone();
     }
 
