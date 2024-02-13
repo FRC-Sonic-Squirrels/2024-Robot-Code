@@ -46,7 +46,7 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT_REAL_CAMERAS;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -74,8 +74,9 @@ public final class Constants {
       // use supplier because if we just create the object, the fields in the
       // config classes are also created. Meaning tunableNumber values are stuck to the first
       // object that is created. In this case ExampleRobotConfig. Suppliers solve this
-      // by only creating the specific config object coresponding to the robot type
+      // by only creating the specific config object corresponding to the robot type
       ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
+      ROBOT_SIMBOT_REAL_CAMERAS(() -> new SimulatorRobotConfig()),
       ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
       ROBOT_2024(() -> new RobotConfig2024());
 
@@ -96,8 +97,12 @@ public final class Constants {
   public static double MAX_VOLTAGE = 12.0;
 
   public class FieldConstants {
+    // official Field dimensions
+    // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
+    public static double FIELD_LENGTH = 16.451;
+    public static double FIELD_WIDTH = .211;
+
     // FIXME: double check this number
-    public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
     public static final double SPEAKER_HEIGHT_METERS = 1.9812;
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
         new Translation2d(0.03950466960668564, 5.508944988250732);
