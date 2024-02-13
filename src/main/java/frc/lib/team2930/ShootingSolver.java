@@ -11,6 +11,7 @@ public class ShootingSolver {
   private final double shooterSpeed;
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
+  private boolean doneShooting;
 
   public record Solution(
       double timeToShoot, Rotation2d heading, double rotationSpeed, Rotation2d pitch) {}
@@ -34,6 +35,11 @@ public class ShootingSolver {
 
   public void endShooting() {
     startOfShootingTimestamp = Double.NaN;
+    doneShooting = false;
+  }
+
+  public boolean isShooting() {
+    return Double.isFinite(startOfShootingTimestamp) && !doneShooting;
   }
 
   /**
@@ -44,7 +50,11 @@ public class ShootingSolver {
     if (Double.isNaN(this.startOfShootingTimestamp)) {
       timeToShoot = shootingTime;
     } else {
-      timeToShoot = Math.max(0, shootingTime - (currentTime - startOfShootingTimestamp));
+      timeToShoot = shootingTime - (currentTime - startOfShootingTimestamp);
+      if (timeToShoot < 0) {
+        doneShooting = true;
+        timeToShoot = 0;
+      }
     }
 
     // 3d position of robot
@@ -138,6 +148,7 @@ public class ShootingSolver {
     }
 
     double targetTheta = speakerHeading + thetaInNewFrame;
+    // double targetTheta = speakerHeading;
 
     if (DebugSpew) {
       double robotVelX = robotVel.getX();
