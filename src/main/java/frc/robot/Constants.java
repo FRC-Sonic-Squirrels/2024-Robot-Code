@@ -53,7 +53,8 @@ public final class Constants {
 
     // FIXME: update for various robots
     public static Mode getMode() {
-      if (getRobot() == RobotType.ROBOT_SIMBOT) {
+      if (getRobot() == RobotType.ROBOT_SIMBOT
+          || getRobot() == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
         return Mode.SIM;
       }
 
@@ -283,6 +284,6 @@ public final class Constants {
   public class VisionGamepieceConstants {
     public static final Pose3d GAMEPIECE_CAMERA_POSE =
         new Pose3d(0.0, 0.0, Units.inchesToMeters(38), new Rotation3d(0.0, 0.0, 0.0));
-    public static final String CAMERA_NAME = "CAM2024_3";
+    public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 }
