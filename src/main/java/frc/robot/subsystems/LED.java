@@ -143,10 +143,11 @@ public class LED extends SubsystemBase {
   private void setAllSnake(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
-      ledBuffer.setRGB(i, shade*color.getRed(), shade*color.getGreen(), shade*color.getBlue());
+      ledBuffer.setRGB(
+          i, shade * color.getRed(), shade * color.getGreen(), shade * color.getBlue());
 
-    snakeShade += 3;
-    snakeShade %= 255;
+      snakeShade += 3;
+      snakeShade %= 255;
     }
   }
 
