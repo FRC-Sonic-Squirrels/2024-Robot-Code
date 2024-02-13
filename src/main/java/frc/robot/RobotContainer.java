@@ -152,6 +152,10 @@ public class RobotContainer {
                     drivetrain::getPoseEstimatorPose,
                     drivetrain::addVisionEstimate,
                     config.getVisionModuleObjects());
+
+            visionGamepiece =
+                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+
           } else {
             VisionModuleConfiguration[] visionModules = {
               new VisionModuleConfiguration(
@@ -187,7 +191,6 @@ public class RobotContainer {
                   SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
                   SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
             };
-
             // Sim Cameras
             vision =
                 new Vision(
@@ -195,6 +198,9 @@ public class RobotContainer {
                     drivetrain::getPoseEstimatorPose,
                     drivetrain::addVisionEstimate,
                     visionModules);
+
+            visionGamepiece =
+                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           }
 
           arm = new Arm(new ArmIOSim());
@@ -203,8 +209,6 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
-          visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
