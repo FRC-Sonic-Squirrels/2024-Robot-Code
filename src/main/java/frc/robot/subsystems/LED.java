@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) FIRST and other WPILib contributors.                                                                                                                                                                                                                                                                                                                                                                                                                                           
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -59,6 +59,7 @@ public class LED extends SubsystemBase {
         }
         break;
       case TWENTY_SECOND_WARTING:
+        // when the match has 20 seconds left this code will change the color to magenta
         for (int i = 0; i < ledBuffer.getLength(); i++) {
           setAllBlinking(
               Color.magenta.getRed(), 0, Color.magenta.getGreen(), 0, Color.magenta.getBlue(), 0);
