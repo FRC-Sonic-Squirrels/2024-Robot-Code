@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -194,7 +195,7 @@ public class ScoreSpeaker extends Command {
     Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
     Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
     Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
-    Logger.recordOutput("ScoreSpeaker/shooting", shooting);
+    Logger.recordOutput("ScoreSpeaker/shooting/shooting", shooting);
 
     if (shooting) {
       shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
@@ -229,45 +230,26 @@ public class ScoreSpeaker extends Command {
   }
 
   private boolean shootingPosition() {
-    // look at constraints: https://www.desmos.com/calculator/2znzk4zokz
-    if (Constants.isRedAlliance()) {
-      // check if shot is legal
-      if ((DriverStation.isAutonomous()
-              && drive.getPoseEstimatorPose().getX() <= 10.257804870605469)
-          || drive.getPoseEstimatorPose().getX() <= 6.2697529792785645) {
-        return false;
-      }
-      // y <= -0.603x + 11.959
-      // y >= 0.695x -4.923
-      // y <= 6.103558540344238
-      // check if stage is blocking
-      if (drive.getPoseEstimatorPose().getY()
-              <= -0.603 * drive.getPoseEstimatorPose().getX() + 11.959
-          && drive.getPoseEstimatorPose().getY()
-              >= 0.695 * drive.getPoseEstimatorPose().getX() - 4.923
-          && drive.getPoseEstimatorPose().getY() <= 6.103558540344238) {
-        return false;
-      }
-      return true;
-    } else {
-      // check if shot is legal
-      if ((DriverStation.isAutonomous()
-              && drive.getPoseEstimatorPose().getX() >= 6.2697529792785645)
-          || drive.getPoseEstimatorPose().getX() >= 10.257804870605469) {
-        return false;
-      }
-      // y <= 0.808x + 0.793
-      // y >= -0.682x + 6.922
-      // y <= 6.103558540344238
-      // check if stage is blocking
-      if (drive.getPoseEstimatorPose().getY() <= 0.808 * drive.getPoseEstimatorPose().getX() + 0.793
-          && drive.getPoseEstimatorPose().getY()
-              >= -0.682 * drive.getPoseEstimatorPose().getX() + 6.922
-          && drive.getPoseEstimatorPose().getY() <= 6.103558540344238) {
-        return false;
-      }
-      return true;
+    Pose2d flippedPose =
+        Constants.isRedAlliance()
+            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(drive.getPoseEstimatorPose())
+            : drive.getPoseEstimatorPose();
+    // look at constraints: https://www.desmos.com/calculator/1l92xwuols
+    // check if shot is legal
+    if ((DriverStation.isAutonomous() && flippedPose.getX() >= 6.2697529792785645)
+        || flippedPose.getX() >= 10.257804870605469) {
+      return false;
     }
+    // y <= 0.808x+0.3
+    // y >= -0.64x+6.1
+    // y <= 6.103558540344238
+    // check if stage is blocking
+    if (flippedPose.getY() <= 0.808 * flippedPose.getX() + 0.3
+        && flippedPose.getY() >= -0.64 * flippedPose.getX() + 6.1
+        && flippedPose.getY() <= 6.103558540344238) {
+      return false;
+    }
+    return true;
   }
 
   boolean prevIsShooting = false;

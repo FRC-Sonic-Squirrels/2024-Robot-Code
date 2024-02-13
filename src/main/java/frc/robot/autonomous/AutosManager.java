@@ -158,7 +158,9 @@ public class AutosManager {
               substateMachine3,
               substateMachine4,
               substateMachine5
-            });
+            },
+            drivetrain,
+            shooter);
     return new Auto(
         "sourceAuto",
         state.asCommand(),
