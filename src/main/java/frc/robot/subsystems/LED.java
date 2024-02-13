@@ -44,24 +44,16 @@ public class LED extends SubsystemBase {
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-          setAllSolidColor(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
+        setAllSolidColor(Color.GREEN);
         break;
       case SHOOTER_LINING_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
-          for (int i = 0; i < ledBuffer.getLength(); i++) {
-            setAllSolidColor(Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
-          }
-        } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
-          for (int i = 0; i < ledBuffer.getLength(); i++) {
-            setAllSolidColor(Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue());
-          }
-        }
+        setAllBlinking(Color.BLACK, Color.WHITE, 2);
         break;
       case AMP_READY_TO_SCORE:
-        setAllSolidColor(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue());
+        setAllSolidColor(Color.GREEN);
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
@@ -89,52 +81,54 @@ public class LED extends SubsystemBase {
           setAllBlinking(
               Color.yellow.getRed(), 0, Color.yellow.getGreen(), 0, Color.yellow.getBlue(), 0);
       case GAMEPIECE_IN_ROBOT:
-        setAllSolidColor(Color.ORANGE.getRed(), Color.ORANGE.getGreen()/2, Color.ORANGE.getBlue());
+        setAllSolidColor(Color.ORANGE);
         break;
       case CLIMB_MODE:
-        startLength = 20;
-        endLength = 40;
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setSingleStripSolidColor(
-              // FIXME: change the color 
-              Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), startLength, endLength);
-        }
+        setSingleStripSolidColor(Color.GREEN, 20, 40);
         break;
+      default:
+        setNothing();
     }
 
     led.setData(ledBuffer);
   }
 
-  private void setSingleStripSolidColor(
-      int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
+  private void setSingleStripSolidColor(Color color, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
-  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
+  private void setAllSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
   private void setSingleStripBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2,
-      int startingLED,
-      int endingLED) {
+      Color color1, Color color2, double seconds, int startingLED, int endingLED) {
 
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+    double period = (2 * Math.PI) / seconds;
+    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
       for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
       for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+      }
+    }
+  }
+
+  private void setAllBlinking(Color color1, Color color2, double seconds) {
+    double period = (2 * Math.PI) / seconds;
+    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
+      for (int i = 0; i <= ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+      }
+    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
+      for (int i = 0; i <= ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
     }
   }
@@ -157,6 +151,12 @@ public class LED extends SubsystemBase {
 
     rainbowFirstPixelHue += 3;
     rainbowFirstPixelHue %= 180;
+  }
+
+  private void setNothing() {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      ledBuffer.setRGB(i, Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
+    }
   }
 
   private class individualLED {
