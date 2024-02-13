@@ -191,7 +191,6 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
-
     if (prioritizeRotation) {
       // Calculate module setpoints
 
@@ -257,6 +256,9 @@ public class Drivetrain extends SubsystemBase {
 
     Logger.recordOutput("Drivetrain/speedsX", speeds.vxMetersPerSecond);
     Logger.recordOutput("Drivetrain/speedsY", speeds.vyMetersPerSecond);
+    Logger.recordOutput(
+        "Drivetrain/linearSpeed", Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+    Logger.recordOutput("Drivetrain/linearSpeedMax", config.getRobotMaxLinearVelocity());
     Logger.recordOutput("Drivetrain/speedsRot", speeds.omegaRadiansPerSecond);
 
     // Calculate module setpoints

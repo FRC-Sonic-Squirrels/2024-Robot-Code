@@ -61,6 +61,7 @@ public class AutoSubstateMachine extends StateMachine {
             timeFromStart(),
             this.trajToGamePiece,
             config.getAutoTranslationPidController(),
+            config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
             drive.getPoseEstimatorPose());
     return this::followPathToGamePiece;
@@ -92,6 +93,7 @@ public class AutoSubstateMachine extends StateMachine {
         new ChoreoHelper(
             timeFromStart(),
             this.trajToShoot,
+            config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
             drive.getPoseEstimatorPose());
