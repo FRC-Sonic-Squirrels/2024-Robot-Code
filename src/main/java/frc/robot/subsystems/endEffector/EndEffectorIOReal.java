@@ -14,8 +14,9 @@ import frc.robot.Constants;
 public class EndEffectorIOReal implements EndEffectorIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
 
-  TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.INTAKE_TOF_CAN_ID);
-  TimeOfFlight shooter_tof = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
+  TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID);
+  TimeOfFlight shooter_tof =
+      new TimeOfFlight(Constants.CanIDs.END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID);
 
   private StatusSignal<Double> deviceTemp;
   private StatusSignal<Double> appliedVolts;
