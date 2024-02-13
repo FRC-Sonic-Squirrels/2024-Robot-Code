@@ -38,8 +38,7 @@ public class LedSetStateForSeconds extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    // FIXME: change argument to NOTHING after merge
-    led.setRobotState(null);
+    led.setRobotState(robotStates.NOTHING);
   }
 
   // Returns true when the command should end.
