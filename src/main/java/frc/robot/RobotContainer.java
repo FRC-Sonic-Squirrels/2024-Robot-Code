@@ -412,8 +412,6 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
-    // temporary binding
-    driverController.x().onTrue(new LedSetState(robotStates.SHOOTER_SUCCESS, led));
   }
 
   /**

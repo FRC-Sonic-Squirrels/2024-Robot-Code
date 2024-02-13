@@ -4,6 +4,7 @@
 
 package frc.robot.commands.led;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.robotStates;
@@ -26,6 +27,8 @@ public class LedSetStateForSeconds extends Command {
   @Override
   public void initialize() {
     led.setRobotState(state);
+    Timer.delay(seconds);
+    end(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
