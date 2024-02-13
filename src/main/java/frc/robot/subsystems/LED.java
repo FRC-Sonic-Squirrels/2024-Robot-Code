@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) FIRST and other WPILib contributors.                                                                                                                                                                                                                                                                                                                                                                                                                                           
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -18,17 +18,9 @@ public class LED extends SubsystemBase {
   individualLED led1 = new individualLED(0, 25);
   individualLED led2 = new individualLED(26, 60);
 
-  int startLength;
-  int endLength;
-
-  // FIXME: these are unused but they might come in handy later
-  Color color1 = Color.RED; // (255, 0, 0)
-  Color color2 = Color.GREEN; // (0, 255, 0)
-  Color color3 = Color.BLUE; // (0, 0 255)
-
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.GAMEPIECE_IN_ROBOT;
+  robotStates robotState = robotStates.SHOOTER_LINED_UP;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -40,13 +32,13 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
-      case SHOOTER_LINED_UP:
+      case SHOOTER_SUCCESS:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
         setAllSolidColor(Color.GREEN);
         break;
-      case SHOOTER_LINING_UP:
+      case SHOOTER_LINED_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
@@ -133,6 +125,25 @@ public class LED extends SubsystemBase {
     }
   }
 
+  private void setAllBlinking(
+      int redValue1,
+      int redValue2,
+      int greenValue1,
+      int greenValue2,
+      int blueValue1,
+      int blueValue2) {
+
+    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+      for (int i = 0; i < ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+      }
+    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+      for (int i = 0; i < ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+      }
+    }
+  }
+
   private void setSingleStripRainbow(int startingLED, int endingLED) {
     for (var i = startingLED; i <= endingLED; i++) {
       final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
@@ -151,6 +162,7 @@ public class LED extends SubsystemBase {
 
     rainbowFirstPixelHue += 3;
     rainbowFirstPixelHue %= 180;
+    
   }
 
   private void setNothing() {
