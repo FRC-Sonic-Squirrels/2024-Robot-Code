@@ -7,22 +7,26 @@ package frc.robot.commands.led;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.robotStates;
+
 public class LedSetStateForSeconds extends Command {
+  LED led;
   robotStates state;
   int seconds = 0;
-  LED led;
+
   /** Creates a new LedSetStateForSeconds. */
-  public LedSetStateForSeconds(robotStates state, int seconds, LED led) {
+  public LedSetStateForSeconds(LED led, robotStates state, int seconds) {
+    this.led = led;
     this.state = state;
     this.seconds = seconds;
-    this.led = led;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(led);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    led.setRobotState(state);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -30,7 +34,10 @@ public class LedSetStateForSeconds extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    // FIXME: change argument to NOTHING after merge
+    led.setRobotState(null);
+  }
 
   // Returns true when the command should end.
   @Override

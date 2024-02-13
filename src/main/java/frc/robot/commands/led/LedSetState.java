@@ -7,13 +7,15 @@ package frc.robot.commands.led;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.robotStates;
+
 public class LedSetState extends Command {
-  robotStates state;
   LED led;
+  robotStates state;
+
   /** Creates a new LedSetState. */
-  public LedSetState(robotStates state, LED led) {
-    this.state = state;
+  public LedSetState(LED led, robotStates state) {
     this.led = led;
+    this.state = state;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(led);
   }
