@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.                                                                                                                                                                                                                                                                                                                                                                                                                                           
+// Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -83,42 +83,55 @@ public class LED extends SubsystemBase {
     led.setData(ledBuffer);
   }
 
-  private void setSingleStripSolidColor(Color color, int startingLED, int endingLED) {
+  private void setSingleStripSolidColor(
+      int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
+      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
   }
 
-  private void setAllSolidColor(Color color) {
+  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
+      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
     }
   }
 
   private void setSingleStripBlinking(
-      Color color1, Color color2, double seconds, int startingLED, int endingLED) {
+      int redValue1,
+      int redValue2,
+      int greenValue1,
+      int greenValue2,
+      int blueValue1,
+      int blueValue2,
+      int startingLED,
+      int endingLED) {
 
-    double period = (2 * Math.PI) / seconds;
-    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
+    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
       for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
       }
-    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
+    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
       for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
       }
     }
   }
 
-  private void setAllBlinking(Color color1, Color color2, double seconds) {
-    double period = (2 * Math.PI) / seconds;
-    if (Math.sin(period * (Timer.getFPGATimestamp())) >= 0) {
-      for (int i = 0; i <= ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+  private void setAllBlinking(
+      int redValue1,
+      int redValue2,
+      int greenValue1,
+      int greenValue2,
+      int blueValue1,
+      int blueValue2) {
+
+    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+      for (int i = 0; i < ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
       }
-    } else if (Math.sin(period * (Timer.getFPGATimestamp())) < 0) {
-      for (int i = 0; i <= ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+      for (int i = 0; i < ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
       }
     }
   }
@@ -145,7 +158,6 @@ public class LED extends SubsystemBase {
       snakeShade += 3;
       snakeShade %= 255;
     }
-  }
 
   private void setSingleStripRainbow(int startingLED, int endingLED) {
     for (var i = startingLED; i <= endingLED; i++) {
@@ -165,7 +177,6 @@ public class LED extends SubsystemBase {
 
     rainbowFirstPixelHue += 3;
     rainbowFirstPixelHue %= 180;
-    
   }
 
   private void setNothing() {
