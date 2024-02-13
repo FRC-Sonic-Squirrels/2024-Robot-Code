@@ -147,9 +147,9 @@ public class GamepieceVisualization {
           }
       }
     }
-    for (int i = 0; i < poses.size(); i++) {
-      if (Timer.getFPGATimestamp() - poses.get(i).getSecond() >= timeout) poses.remove(i);
-    }
+    // for (int i = 0; i < poses.size(); i++) {
+    //   if (Timer.getFPGATimestamp() - poses.get(i).getSecond() >= timeout) poses.remove(i);
+    // }
 
     loggedPoses = new Pose3d[poses.size()];
     for (int i = 0; i < poses.size(); i++) {
