@@ -249,6 +249,7 @@ public final class Constants {
 
   public class LEDConstants {
     public static final int PWM_PORT = 8;
+    public static final int MAX_LED_LENGTH = 60;
   }
 
   public class CanIDs {
