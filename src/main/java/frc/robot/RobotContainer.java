@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
@@ -287,12 +288,12 @@ public class RobotContainer {
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
-    // drivetrain.setDefaultCommand(
-    //     new DrivetrainDefaultTeleopDrive(
-    //         drivetrainWrapper,
-    //         () -> -driverController.getLeftY(),
-    //         () -> -driverController.getLeftX(),
-    //         () -> -driverController.getRightX()));
+    drivetrain.setDefaultCommand(
+        new DrivetrainDefaultTeleopDrive(
+            drivetrainWrapper,
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
     // intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
 
