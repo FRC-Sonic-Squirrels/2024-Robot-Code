@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
@@ -22,18 +23,17 @@ public class IntakeIOReal implements IntakeIO {
 
   public IntakeIOReal() {
 
-    motor.setInverted(false);
-    motor.setNeutralMode(NeutralModeValue.Brake);
-
     TalonFXConfiguration config = new TalonFXConfiguration();
     CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
-    currentLimitConfig.SupplyCurrentThreshold = 40.0;
+    currentLimitConfig.SupplyCurrentLimit = 40.0;
     currentLimitConfig.SupplyCurrentLimitEnable = true;
 
     config.CurrentLimits = currentLimitConfig;
 
     config.Feedback.SensorToMechanismRatio = IntakeConstants.GEARING;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     motor.getConfigurator().apply(config);
 
