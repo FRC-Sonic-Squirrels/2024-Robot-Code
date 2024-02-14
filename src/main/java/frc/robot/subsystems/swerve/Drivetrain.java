@@ -186,6 +186,7 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
+
     if (prioritizeRotation) {
       // Calculate module setpoints
 

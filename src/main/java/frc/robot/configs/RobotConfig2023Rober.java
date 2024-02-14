@@ -102,6 +102,14 @@ public class RobotConfig2023Rober extends RobotConfig {
   // -------- GYRO CAN ID ---------
   private static final int GYRO_CAN_ID = 15;
 
+  // -------- GYRO OFFSETS --------
+
+  private static final double GYRO_MOUNTING_PITCH = 0.0;
+
+  private static final double GYRO_MOUNTING_ROLL = 0.0;
+
+  private static final double GYRO_MOUNTING_YAW = 0.0;
+
   // -------- CAN BUS NAME -----------
   private static final String CAN_BUS_NAME = "CANivore";
 
@@ -359,5 +367,20 @@ public class RobotConfig2023Rober extends RobotConfig {
   @Override
   public CurrentLimitsConfigs getSteerTalonCurrentLimitConfig() {
     return STEER_TALON_CURRENT_LIMIT_CONFIGS;
+  }
+
+  @Override
+  public double getGyroMountingPitch() {
+    return GYRO_MOUNTING_PITCH;
+  }
+
+  @Override
+  public double getGyroMountingRoll() {
+    return GYRO_MOUNTING_ROLL;
+  }
+
+  @Override
+  public double getGyroMountingYaw() {
+    return GYRO_MOUNTING_YAW;
   }
 }

@@ -29,17 +29,13 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.intake.IntakeGamepiece;
-import frc.robot.commands.shooter.ShooterStowMode;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
-import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
@@ -221,18 +217,18 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
-          vision =
-              new Vision(
-                  aprilTagLayout,
-                  drivetrain::getPoseEstimatorPose,
-                  drivetrain::addVisionEstimate,
-                  config.getVisionModuleObjects());
-          visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+          // vision =
+          //     new Vision(
+          //         aprilTagLayout,
+          //         drivetrain::getPoseEstimatorPose,
+          //         drivetrain::addVisionEstimate,
+          //         config.getVisionModuleObjects());
+          // visionGamepiece =
+          //     new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
 
           intake = new Intake(new IntakeIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
-          arm = new Arm(new ArmIOReal());
+          // elevator = new Elevator(new ElevatorIOReal());
+          // arm = new Arm(new ArmIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           shooter = new Shooter(new ShooterIOReal());
 
@@ -242,19 +238,19 @@ public class RobotContainer {
           // drivetrain =
           //     new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
-          // vision =
-          //     new Vision(
-          //         aprilTagLayout,
-          //         drivetrain::getPoseEstimatorPose,
-          //         drivetrain::addVisionEstimate,
-          //         config.getReplayVisionModules());
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::addVisionEstimate,
+                  config.getReplayVisionModules());
 
-          // visionGamepiece =
-          //     new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
           // intake = new Intake(new IntakeIO() {});
-          // elevator = new Elevator(new ElevatorIO() {});
-          // arm = new Arm(new ArmIO() {});
+          elevator = new Elevator(new ElevatorIO() {});
+          arm = new Arm(new ArmIO() {});
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
@@ -286,16 +282,16 @@ public class RobotContainer {
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
-    drivetrain.setDefaultCommand(
-        new DrivetrainDefaultTeleopDrive(
-            drivetrainWrapper,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+    // drivetrain.setDefaultCommand(
+    //     new DrivetrainDefaultTeleopDrive(
+    //         drivetrainWrapper,
+    //         () -> -driverController.getLeftY(),
+    //         () -> -driverController.getLeftX(),
+    //         () -> -driverController.getRightX()));
 
-    intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
+    // intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
 
-    shooter.setDefaultCommand(new ShooterStowMode(shooter));
+    // shooter.setDefaultCommand(new ShooterStowMode(shooter));
 
     // Set up named commands for PathPlanner
     // NamedCommands.registerCommand(
@@ -409,6 +405,15 @@ public class RobotContainer {
                 endEffector::intakeSideTOFDetectGamepiece));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
+
+    driverController
+        .x()
+        .whileTrue(
+            new DrivetrainDefaultTeleopDrive(
+                drivetrainWrapper,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX()));
   }
 
   /**

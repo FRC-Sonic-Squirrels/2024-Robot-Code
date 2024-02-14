@@ -38,10 +38,19 @@ public class GyroIOPigeon2 implements GyroIO {
 
   private final RobotConfig config;
 
+  private final Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
+  ;
+
   public GyroIOPigeon2(RobotConfig config) {
 
     this.config = config;
+    pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
+    pigeonConfig.MountPose.MountPoseRoll = config.getGyroMountingRoll();
+    pigeonConfig.MountPose.MountPoseYaw = config.getGyroMountingYaw();
+
     pigeon = new Pigeon2(config.getGyroCANID(), config.getCANBusName());
+
+    pigeon.getConfigurator().apply(pigeonConfig);
 
     yaw = pigeon.getYaw();
     // FIXME: is this the correct method call

@@ -69,7 +69,7 @@ public class DrivetrainWrapper {
         ChassisSpeeds.fromFieldRelativeSpeeds(
             chassisSpeeds.vxMetersPerSecond,
             chassisSpeeds.vyMetersPerSecond,
-            omegaOverride,
+            chassisSpeeds.omegaRadiansPerSecond,
             drivetrain.getRotation());
 
     drivetrain.runVelocity(robotChassisSpeed, prioritizeRotation);
