@@ -185,7 +185,74 @@ public class Drivetrain extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds) {
+  public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
+    if (prioritizeRotation) {
+      // Calculate module setpoints
+
+      SwerveModuleState[] justRotationSetpointStates =
+          kinematics.toSwerveModuleStates(
+              new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond));
+      SwerveModuleState[] calculatedSetpointStates = kinematics.toSwerveModuleStates(speeds);
+      ChassisSpeeds newSpeeds;
+      double realMaxSpeed = 0;
+      for (SwerveModuleState moduleState : calculatedSetpointStates) {
+        realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
+      }
+      if (realMaxSpeed > config.getRobotMaxLinearVelocity()) {
+        /*
+
+        linear cannot exceed the leftover amount after rotation
+        Vmax - abs(Vr) = hypot(Vx, Vy)
+
+        preserve xy ratio
+        Vyprev      Vy
+        -------- = ----
+        Vxprev      Vx
+
+        solve system of equations for Vx and Vy
+
+        Vx = Vxprev / hypot(Vxprev, Vyprev) * abs(max(0.0, Vmax - abs(Vr)))
+
+        Vy = Vyprev * Vx / Vxprev
+
+        */
+
+        double vxMetersPerSecond =
+            (speeds.vxMetersPerSecond
+                    / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond))
+                * Math.abs(
+                    Math.max(
+                        0.0,
+                        config.getRobotMaxLinearVelocity()
+                            - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)));
+
+        // double vxMetersPerSecond =
+        //     Math.copySign(
+        //         Math.abs(
+        //                 Math.max(
+        //                     0.0,
+        //                     config.getRobotMaxLinearVelocity()
+        //                         - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
+        //             / Math.sqrt(
+        //                 (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond,
+        // 2.0))),
+        //         speeds.vxMetersPerSecond);
+        double vyMetersPerSecond =
+            speeds.vyMetersPerSecond * vxMetersPerSecond / speeds.vxMetersPerSecond;
+
+        speeds =
+            new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+        Logger.recordOutput(
+            "Drivetrain/leftoverVelocity",
+            config.getRobotMaxLinearVelocity()
+                - justRotationSetpointStates[0].speedMetersPerSecond);
+      }
+    }
+
+    Logger.recordOutput("Drivetrain/speedsX", speeds.vxMetersPerSecond);
+    Logger.recordOutput("Drivetrain/speedsY", speeds.vyMetersPerSecond);
+    Logger.recordOutput("Drivetrain/speedsRot", speeds.omegaRadiansPerSecond);
+
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -203,82 +270,9 @@ public class Drivetrain extends SubsystemBase {
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
 
-  /**
-   * Runs the drive at the desired velocity, Rotation is prioritized over translation.
-   *
-   * @param speeds Speeds in meters/sec
-   */
-  public void runVelocityPrioritizeRotation(ChassisSpeeds speeds) {
-    // Calculate module setpoints
-
-    SwerveModuleState[] justRotationSetpointStates =
-        kinematics.toSwerveModuleStates(new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond));
-    SwerveModuleState[] calculatedSetpointStates = kinematics.toSwerveModuleStates(speeds);
-    ChassisSpeeds newSpeeds;
-    double realMaxSpeed = 0;
-    for (SwerveModuleState moduleState : calculatedSetpointStates) {
-      realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
-    }
-    if (realMaxSpeed > config.getRobotMaxLinearVelocity()) {
-      /*
-
-      linear cannot exceed the leftover amount after rotation
-      Vmax - abs(Vr) = hypot(Vx, Vy)
-
-      preserve xy ratio
-      Vyprev      Vy
-      -------- = ----
-      Vxprev      Vx
-
-      solve system of equations for Vx and Vy
-
-      Vx = Vxprev / hypot(Vxprev, Vyprev) * abs(max(0.0, Vmax - abs(Vr)))
-
-      Vy = Vyprev * Vx / Vxprev
-
-      */
-
-      double vxMetersPerSecond =
-          (speeds.vxMetersPerSecond
-                  / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond))
-              * Math.abs(
-                  Math.max(
-                      0.0,
-                      config.getRobotMaxLinearVelocity()
-                          - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)));
-
-      // double vxMetersPerSecond =
-      //     Math.copySign(
-      //         Math.abs(
-      //                 Math.max(
-      //                     0.0,
-      //                     config.getRobotMaxLinearVelocity()
-      //                         - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
-      //             / Math.sqrt(
-      //                 (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond,
-      // 2.0))),
-      //         speeds.vxMetersPerSecond);
-      double vyMetersPerSecond =
-          speeds.vyMetersPerSecond * vxMetersPerSecond / speeds.vxMetersPerSecond;
-
-      newSpeeds =
-          new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
-      Logger.recordOutput(
-          "Drivetrain/leftoverVelocity",
-          config.getRobotMaxLinearVelocity() - justRotationSetpointStates[0].speedMetersPerSecond);
-    } else {
-      newSpeeds = speeds;
-      Logger.recordOutput("Drivetrain/leftoverVelocity", Double.NaN);
-    }
-    Logger.recordOutput("Drivetrain/speedsX", newSpeeds.vxMetersPerSecond);
-    Logger.recordOutput("Drivetrain/speedsY", newSpeeds.vyMetersPerSecond);
-    Logger.recordOutput("Drivetrain/speedsRot", newSpeeds.omegaRadiansPerSecond);
-    runVelocity(newSpeeds);
-  }
-
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds());
+    runVelocity(new ChassisSpeeds(), false);
   }
 
   /**

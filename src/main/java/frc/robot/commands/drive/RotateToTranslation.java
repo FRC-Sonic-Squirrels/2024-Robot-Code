@@ -61,7 +61,7 @@ public class RotateToTranslation extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetPose pose to target
+   * @param target pose to target
    * @param drive drivetrain subsystem
    * @return Command to lock rotation in direction of target gamepiece
    */
@@ -85,7 +85,7 @@ public class RotateToTranslation extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetPose pose to target
+   * @param target pose to target
    * @param drive drivetrain subsystem
    * @param endCondition when this command should end
    * @param robotRotationOffset rotation of robot you want facing taget
@@ -114,7 +114,7 @@ public class RotateToTranslation extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetPose pose to target
+   * @param target pose to target
    * @param drive drivetrain subsystem
    * @param endCondition when this command should end
    * @param robotRotationOffset rotation of robot you want facing target
@@ -153,7 +153,7 @@ public class RotateToTranslation extends Command {
    *
    * @param translationXSupplier controller horizontal translation output
    * @param translationYSupplier controller vertical translation output
-   * @param targetPose pose to target
+   * @param target pose to target
    * @param drive drivetrain subsystem
    * @param endCondition when this command should end
    * @param robotRotationOffset rotation of robot you want facing target
@@ -272,8 +272,9 @@ public class RotateToTranslation extends Command {
     }
     Logger.recordOutput("RotateToTranslation/PIDLatency", pidLatency);
 
-    drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()));
+    var robotChassisSpeeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation());
+    drive.runVelocity(robotChassisSpeeds, false);
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("RotateToTranslation/RotationalEffort", rotationalEffort);
@@ -301,7 +302,7 @@ public class RotateToTranslation extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0));
+    drive.runVelocity(new ChassisSpeeds(0, 0, 0), false);
   }
 
   // Returns true when the command should end.

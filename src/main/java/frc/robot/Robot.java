@@ -104,6 +104,14 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    var commandScheduler = CommandScheduler.getInstance();
+    commandScheduler.onCommandInitialize(
+        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), true));
+    commandScheduler.onCommandInterrupt(
+        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
+    commandScheduler.onCommandFinish(
+        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
   }
 
   /** This function is called periodically during all modes. */
@@ -116,21 +124,12 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    CommandScheduler.getInstance()
-        .onCommandInitialize(
-            command -> Logger.recordOutput("ActiveCommands/" + command.getName(), true));
-    CommandScheduler.getInstance()
-        .onCommandInterrupt(
-            command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
-    CommandScheduler.getInstance()
-        .onCommandFinish(
-            command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
-
     // FIXME: remove this eventually
     Logger.recordOutput("TIME/CTRE TIME", Utils.getCurrentTimeSeconds());
     Logger.recordOutput("TIME/FPGA TIME", Timer.getFPGATimestamp());
     Logger.recordOutput("TIME/REAL FPGA", Logger.getRealTimestamp());
 
+    robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();
   }
 

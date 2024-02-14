@@ -17,7 +17,6 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -40,15 +39,19 @@ import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
+import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -59,6 +62,7 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.visualization.MechanismVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -73,6 +77,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   private final Drivetrain drivetrain;
+  private final DrivetrainWrapper drivetrainWrapper;
   private final Vision vision;
   private final Arm arm;
   private final Elevator elevator;
@@ -209,56 +214,51 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
-          // FIXME:
-          // drivetrain =
-          //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+          // README: for development purposes, comment any of the real IO's you DONT want to use and
+          // uncomment the empty IO's as a replacement
 
-          // vision = new Vision(aprilTagLayout, drivetrain, config.getVisionModuleObjects());
-          // arm = new Arm(new ArmIOReal());
-          // elevator = new Elevator(new ElevatorIOReal());
-          // intake = new Intake(new IntakeIOReal());
-          // shooter = new Shooter(new ShooterIOReal());
-          // wrist = new Wrist(new WristIOReal());
-          // endEffector = new EndEffector(new EndEffectorIOReal());
-
-          DriverStation.silenceJoystickConnectionWarning(true);
-
+          // -- All real IO's
           drivetrain =
               new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+
           vision =
               new Vision(
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
                   drivetrain::addVisionEstimate,
                   config.getVisionModuleObjects());
+          visionGamepiece =
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+
+          intake = new Intake(new IntakeIOReal());
+          elevator = new Elevator(new ElevatorIOReal());
           arm = new Arm(new ArmIOReal());
+          endEffector = new EndEffector(new EndEffectorIOReal());
+          shooter = new Shooter(new ShooterIOReal());
 
-          // uncomment this if testing an individual subsystem. Make every subsystem except the one
-          // you are testing have a blank IO
-          // DriverStation.silenceJoystickConnectionWarning(true);
+          led = new LED();
 
+          // -- All empty IO's
           // drivetrain =
           //     new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+
           // vision =
           //     new Vision(
           //         aprilTagLayout,
           //         drivetrain::getPoseEstimatorPose,
           //         drivetrain::addVisionEstimate,
           //         config.getReplayVisionModules());
-          // arm = new Arm(new ArmIOReal());
-          // elevator = new Elevator(new ElevatorIO() {});
+
+          // visionGamepiece =
+          //     new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+
           // intake = new Intake(new IntakeIO() {});
-          // shooter = new Shooter(new ShooterIO() {});
+          // elevator = new Elevator(new ElevatorIO() {});
+          // arm = new Arm(new ArmIO() {});
           // endEffector = new EndEffector(new EndEffectorIO() {});
-          // limelight = new Limelight(new LimelightIO() {}, drivetrain::getPoseEstimatorPose);
+          // shooter = new Shooter(new ShooterIO() {});
+
           // led = new LED();
-          elevator = new Elevator(new ElevatorIO() {});
-          intake = new Intake(new IntakeIO() {});
-          shooter = new Shooter(new ShooterIO() {});
-          endEffector = new EndEffector(new EndEffectorIO() {});
-          led = new LED();
-          visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         default:
@@ -284,9 +284,11 @@ public class RobotContainer {
 
     autoManager = new AutosManager(drivetrain, shooter, intake, endEffector, config, autoChooser);
 
+    drivetrainWrapper = new DrivetrainWrapper(drivetrain);
+
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
-            drivetrain,
+            drivetrainWrapper,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
@@ -402,7 +404,7 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(
-                visionGamepiece::getClosestGamepiece, drivetrain, intake::getBeamBreak));
+                visionGamepiece::getClosestGamepiece, drivetrainWrapper, intake::getBeamBreak));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
   }
@@ -430,6 +432,10 @@ public class RobotContainer {
     return current;
   }
 
+  public void applyToDrivetrain() {
+    drivetrainWrapper.apply();
+  }
+
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(
         new Rotation2d(),
@@ -445,5 +451,13 @@ public class RobotContainer {
     SimpleMechanismVisualization.logMechanism();
 
     scoreSpeaker.updateVisualization();
+
+    MechanismVisualization.updateVisualization(
+        arm.getAngle(),
+        shooter.getPitch(),
+        elevator.getHeightInches(),
+        endEffector.intakeSideTOFDetectGamepiece() || endEffector.shooterSideTOFDetectGamepiece());
+
+    MechanismVisualization.logMechanism();
   }
 }

@@ -10,8 +10,14 @@ import java.util.function.DoubleSupplier;
 
 public class ElevatorSetHeight extends Command {
   /** Creates a new ElevatorSetHeight. */
+  Elevator elevator;
+
+  DoubleSupplier heightSupplier;
+
   public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
+    this.heightSupplier = heightSupplier;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(elevator);
   }
 
   public ElevatorSetHeight(Elevator elevator, double height) {
@@ -24,7 +30,9 @@ public class ElevatorSetHeight extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    elevator.setHeight(heightSupplier.getAsDouble());
+  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -33,6 +41,6 @@ public class ElevatorSetHeight extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return elevator.isAtTarget();
   }
 }
