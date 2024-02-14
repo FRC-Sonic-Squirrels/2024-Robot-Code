@@ -412,6 +412,37 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
+    // driverController
+    //     .x()
+    //     .whileTrue(
+    //         new DrivetrainDefaultTeleopDrive(
+    //             drivetrainWrapper,
+    //             () -> -driverController.getLeftY(),
+    //             () -> -driverController.getLeftX(),
+    //             () -> -driverController.getRightX()));
+
+    // driverController
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             Commands.run(() -> intake.setPercentOut(0.75), intake),
+    //             Commands.run(() -> endEffector.setPercentOut(0.75), endEffector),
+    //             Commands.run(
+    //                 () -> {
+    //                   shooter.setKickerPercentOut(0.75);
+    //                   shooter.setLauncherVoltage(11.0);
+    //                 },
+    //                 shooter)))
+    //     .onFalse(
+    //         Commands.parallel(
+    //             Commands.run(() -> intake.setPercentOut(0.0), intake),
+    //             Commands.run(() -> endEffector.setPercentOut(0.0), endEffector),
+    //             Commands.run(
+    //                 () -> {
+    //                   shooter.setKickerPercentOut(0.0);
+    //                   shooter.setLauncherVoltage(0.0);
+    //                 },
+    //                 shooter)));
     driverController
         .x()
         .whileTrue(
@@ -429,12 +460,14 @@ public class RobotContainer {
         .a()
         .whileTrue(
             new ShooterSimpleShoot(
-                shooter,
-                endEffector,
-                () -> 0.0,
-                () -> Rotation2d.fromDegrees(tunablePivotPitch.get()),
-                () -> 0.0,
-                () -> 0.0));
+                    shooter,
+                    endEffector,
+                    () -> 11,
+                    () -> Rotation2d.fromDegrees(tunablePivotPitch.get()),
+                    () -> 0.95,
+                    () -> 0.5)
+                .alongWith(Commands.runOnce(() -> intake.setPercentOut(0.5), intake)))
+        .onFalse(Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
   }
 
   /**
