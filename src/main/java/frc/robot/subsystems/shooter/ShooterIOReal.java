@@ -104,7 +104,7 @@ public class ShooterIOReal implements ShooterIO {
 
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    kicker.getConfigurator().apply(pivotConfig);
+    kicker.getConfigurator().apply(kickerConfig);
 
     pivotPosition = pivot.getPosition();
     pivotVelocity = pivot.getVelocity();
