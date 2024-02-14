@@ -31,6 +31,7 @@ import frc.robot.autonomous.AutoCommand;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
+import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.shooter.ShooterSimpleShoot;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -412,14 +413,16 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
-    // driverController
-    //     .x()
-    //     .whileTrue(
-    //         new DrivetrainDefaultTeleopDrive(
-    //             drivetrainWrapper,
-    //             () -> -driverController.getLeftY(),
-    //             () -> -driverController.getLeftX(),
-    //             () -> -driverController.getRightX()));
+    if (true) {
+      driverController
+          .x()
+          .whileTrue(
+              new DrivetrainDefaultTeleopDrive(
+                  drivetrainWrapper,
+                  () -> -driverController.getLeftY(),
+                  () -> -driverController.getLeftX(),
+                  () -> -driverController.getRightX()));
+    }
 
     // driverController
     //     .rightTrigger()
