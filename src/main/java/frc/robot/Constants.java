@@ -203,12 +203,16 @@ public final class Constants {
       //           + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
       // }
 
-      public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
+      // public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
+      public static final double GEARING = 125.0;
 
-      public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
+      public static final Rotation2d MIN_ANGLE_RAD = Rotation2d.fromDegrees(12.0);
+      public static final Rotation2d MAX_ANGLE_RAD =
+          Rotation2d.fromDegrees(59.0); // TRUE HARD STOP 61
+      public static final Rotation2d HOME_POSITION = MIN_ANGLE_RAD;
+      public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(61.0);
 
-      public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
-      public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
+      public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
 
       public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
     }

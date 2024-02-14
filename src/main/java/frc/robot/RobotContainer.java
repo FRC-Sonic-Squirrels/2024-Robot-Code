@@ -19,10 +19,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutoCommand;
@@ -30,6 +31,7 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.shooter.ShooterSimpleShoot;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
@@ -92,6 +94,9 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Supplier<AutoCommand>> autoChooser =
       new LoggedDashboardChooser<Supplier<AutoCommand>>("Auto Routine");
   private final AutosManager autoManager;
+
+  private final LoggedTunableNumber tunablePivotPitch =
+      new LoggedTunableNumber("tunablePivotPitch", 30);
 
   ScoreSpeaker scoreSpeaker;
 
@@ -407,37 +412,29 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
-    // driverController
-    //     .x()
-    //     .whileTrue(
-    //         new DrivetrainDefaultTeleopDrive(
-    //             drivetrainWrapper,
-    //             () -> -driverController.getLeftY(),
-    //             () -> -driverController.getLeftX(),
-    //             () -> -driverController.getRightX()));
+    driverController
+        .x()
+        .whileTrue(
+            new DrivetrainDefaultTeleopDrive(
+                drivetrainWrapper,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX()));
 
     driverController
-        .rightTrigger()
+        .b()
+        .onTrue(new InstantCommand(() -> shooter.pivotResetHomePosition(), shooter));
+
+    driverController
+        .a()
         .whileTrue(
-            Commands.parallel(
-                Commands.run(() -> intake.setPercentOut(0.75), intake),
-                Commands.run(() -> endEffector.setPercentOut(0.75), endEffector),
-                Commands.run(
-                    () -> {
-                      shooter.setKickerPercentOut(0.75);
-                      shooter.setLauncherVoltage(11.0);
-                    },
-                    shooter)))
-        .onFalse(
-            Commands.parallel(
-                Commands.run(() -> intake.setPercentOut(0.0), intake),
-                Commands.run(() -> endEffector.setPercentOut(0.0), endEffector),
-                Commands.run(
-                    () -> {
-                      shooter.setKickerPercentOut(0.0);
-                      shooter.setLauncherVoltage(0.0);
-                    },
-                    shooter)));
+            new ShooterSimpleShoot(
+                shooter,
+                endEffector,
+                () -> 0.0,
+                () -> Rotation2d.fromDegrees(tunablePivotPitch.get()),
+                () -> 0.0,
+                () -> 0.0));
   }
 
   /**
