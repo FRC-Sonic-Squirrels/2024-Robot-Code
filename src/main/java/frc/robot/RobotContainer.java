@@ -293,7 +293,8 @@ public class RobotContainer {
             drivetrainWrapper,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+            () -> -driverController.getRightX(),
+            driverController.back()));
 
     // intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
 
@@ -443,14 +444,6 @@ public class RobotContainer {
     //                   shooter.setLauncherVoltage(0.0);
     //                 },
     //                 shooter)));
-    driverController
-        .x()
-        .whileTrue(
-            new DrivetrainDefaultTeleopDrive(
-                drivetrainWrapper,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> -driverController.getRightX()));
 
     driverController
         .b()
@@ -469,7 +462,7 @@ public class RobotContainer {
                 .alongWith(Commands.runOnce(() -> intake.setPercentOut(0.5), intake)))
         .onFalse(Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
 
-    driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
+    // driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
   }
 
   /**
