@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -94,9 +95,19 @@ public class VisionGamepiece extends SubsystemBase {
           "VisionGamepiece/ClosestGamepiece/targetPitchDegrees",
           closestGamepiece.targetPitch.getDegrees());
       Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/poseRobotCentric", new Pose3d(closestGamepiece.pose));
+          "VisionGamepiece/ClosestGamepiece/poseRobotCentric",
+          new Pose3d(
+              closestGamepiece.pose.getX(),
+              closestGamepiece.pose.getY(),
+              (double) 0.0254,
+              new Rotation3d()));
       Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/pose", new Pose3d(closestGamepiece.globalPose));
+          "VisionGamepiece/ClosestGamepiece/pose",
+          new Pose3d(
+              closestGamepiece.globalPose.getX(),
+              closestGamepiece.globalPose.getY(),
+              (double) 0.0254,
+              new Rotation3d()));
       Logger.recordOutput(
           "VisionGamepiece/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
     }
