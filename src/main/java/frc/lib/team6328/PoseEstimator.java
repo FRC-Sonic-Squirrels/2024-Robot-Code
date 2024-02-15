@@ -109,9 +109,11 @@ public class PoseEstimator {
       var visionUpdate =
           new VisionUpdate(timestampedVisionUpdate.pose, timestampedVisionUpdate.stdDevs);
 
-      // TEMP: create blank variable to avoid crashes
-      var existingPoseUpdateAfter = new PoseUpdate(0.0, new Twist2d());
-      existingPoseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
+      var existingPoseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
+      if (existingPoseUpdateAfter.twist == null)
+        // This means that we have no drive data, ignore vision.
+        continue;
+
       if (existingPoseUpdateAfter.timestamp == timestamp) {
         // There was already an update at this timestamp, add to it
         var oldVisionUpdates = existingPoseUpdateAfter.visionUpdates;
