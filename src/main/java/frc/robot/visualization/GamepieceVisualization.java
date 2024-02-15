@@ -17,7 +17,7 @@ public class GamepieceVisualization {
   private static ArrayList<Pair<Pose3d, Double>> poses = new ArrayList<>(200);
   private static Pose3d[] loggedPoses = new Pose3d[] {};
   private static double gamepieceSpacing = 0.7;
-  private static double timeout = 5.0;
+  private static double timeout = 12.0;
   private static Pose2d robotPoseOfShot = new Pose2d();
   private static Translation2d robotVelOfShot = new Translation2d();
   private static Rotation2d shooterAngleOfShot = new Rotation2d();
@@ -147,9 +147,9 @@ public class GamepieceVisualization {
           }
       }
     }
-    // for (int i = 0; i < poses.size(); i++) {
-    //   if (Timer.getFPGATimestamp() - poses.get(i).getSecond() >= timeout) poses.remove(i);
-    // }
+    for (int i = 0; i < poses.size(); i++) {
+      if (Timer.getFPGATimestamp() - poses.get(i).getSecond() >= timeout) poses.remove(i);
+    }
 
     loggedPoses = new Pose3d[poses.size()];
     for (int i = 0; i < poses.size(); i++) {

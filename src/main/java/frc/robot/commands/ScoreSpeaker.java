@@ -62,11 +62,27 @@ public class ScoreSpeaker extends Command {
 
   private Timer timeSinceShot = new Timer();
 
+  private Double deadline;
+
+  private Timer runTime = new Timer();
+
   /**
    * Creates a new RotateToSpeaker.
    *
-   * @param translationXSupplier controller horizontal translation output
-   * @param translationYSupplier controller vertical translation output
+   * @param drive drivetrain subsystem
+   * @param shooter shooter subsystem
+   * @param shootGamepiece when this command should end
+   * @return Command to lock rotation in direction of target
+   */
+  public ScoreSpeaker(
+      DrivetrainWrapper drive, Shooter shooter, BooleanSupplier shootGamepiece, double deadline) {
+    this(drive, shooter, shootGamepiece);
+    this.deadline = deadline;
+  }
+
+  /**
+   * Creates a new RotateToSpeaker.
+   *
    * @param drive drivetrain subsystem
    * @param shooter shooter subsystem
    * @param shootGamepiece when this command should end
@@ -86,6 +102,7 @@ public class ScoreSpeaker extends Command {
   @Override
   public void initialize() {
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
+    runTime.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -98,7 +115,10 @@ public class ScoreSpeaker extends Command {
 
     var result =
         solver.computeAngles(
-            currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
+            currentTime,
+            poseEstimatorPose,
+            drive.getFieldRelativeVelocities().getTranslation(),
+            drive.getFieldRelativeAccelerations());
 
     double targetRotation;
     double targetAngularSpeed;
@@ -132,18 +152,19 @@ public class ScoreSpeaker extends Command {
 
     Logger.recordOutput("ScoreSpeaker/PIDLatency", pidLatency);
 
-    var rotationalEffort = rotationController.calculate(currentRot.getRadians(), targetRotation)
-        // +targetAngularSpeed
-        ;
+    var rotationalEffort =
+        rotationController.calculate(currentRot.getRadians(), targetRotation) + targetAngularSpeed;
 
     rotationalEffort =
-        5
-            * Math.copySign(
-                Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
-                rotationalEffort);
+        Math.copySign(
+            Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
+            rotationalEffort);
 
     Logger.recordOutput(
-        "ScoreSpeaker/targetRotationDegrees", Units.radiansToDegrees(targetRotation));
+        "ScoreSpeaker/targetRotationDegrees",
+        Units.radiansToDegrees(targetRotation) <= 360.0
+            ? Units.radiansToDegrees(targetRotation)
+            : Units.radiansToDegrees(targetRotation) - 360.0);
 
     Logger.recordOutput(
         "ScoreSpeaker/targetPose",
@@ -181,12 +202,17 @@ public class ScoreSpeaker extends Command {
                         - drive.getPoseEstimatorPose().getY()))));
 
     if (result != null && !readyToShoot) {
+      boolean shootAnyway = false;
+      if (deadline != null) {
+        shootAnyway = runTime.get() >= deadline;
+      }
       readyToShoot =
-          shootGamepiece.getAsBoolean()
-              && shooter.isPivotIsAtTarget()
-              // && rotationController.atSetpoint()
-              && shooter.isAtTargetRPM()
-              && shootingPosition();
+          (shootGamepiece.getAsBoolean()
+                  && shooter.isPivotIsAtTarget()
+                  && rotationController.atSetpoint()
+                  && shooter.isAtTargetRPM()
+                  && shootingPosition())
+              || shootAnyway;
 
       if (readyToShoot) {
         solver.startShooting(Timer.getFPGATimestamp());
@@ -218,6 +244,9 @@ public class ScoreSpeaker extends Command {
   public void end(boolean interrupted) {
     drive.resetVelocityOverride();
     drive.resetRotationOverride();
+
+    runTime.stop();
+    runTime.reset();
 
     Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", 0.0);
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", 0.0);
