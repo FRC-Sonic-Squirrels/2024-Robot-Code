@@ -33,12 +33,13 @@ public class EndEffector extends SubsystemBase {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }
 
+  public double getRPM() {
+    return inputs.velocityRPM;
+  }
+
   public Boolean intakeSideTOFDetectGamepiece() {
     return inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
   }
-
-  // harika's addition: (aka why we won autonomous)
-  String motivationalMessage = "just work bruh";
 
   public Boolean shooterSideTOFDetectGamepiece() {
     return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();

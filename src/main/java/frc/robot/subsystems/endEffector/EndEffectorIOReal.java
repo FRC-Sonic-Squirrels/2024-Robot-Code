@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import frc.robot.Constants;
+import frc.robot.Constants.EndEffectorConstants;
 
 public class EndEffectorIOReal implements EndEffectorIO {
   private TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
@@ -18,9 +19,10 @@ public class EndEffectorIOReal implements EndEffectorIO {
   TimeOfFlight shooter_tof =
       new TimeOfFlight(Constants.CanIDs.END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID);
 
-  private StatusSignal<Double> deviceTemp;
-  private StatusSignal<Double> appliedVolts;
-  private StatusSignal<Double> currentAmps;
+  private final StatusSignal<Double> deviceTemp;
+  private final StatusSignal<Double> appliedVolts;
+  private final StatusSignal<Double> currentAmps;
+  private final StatusSignal<Double> velocityRPS;
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
@@ -35,14 +37,18 @@ public class EndEffectorIOReal implements EndEffectorIO {
     config.CurrentLimits = currentLimitConfig;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    config.Feedback.SensorToMechanismRatio = EndEffectorConstants.GEARING;
+
     motor.getConfigurator().apply(config);
 
     deviceTemp = motor.getDeviceTemp();
     appliedVolts = motor.getMotorVoltage();
     currentAmps = motor.getStatorCurrent();
+    velocityRPS = motor.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVolts);
-    BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps);
+    BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps, velocityRPS);
     BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
 
     motor.optimizeBusUtilization();
@@ -50,8 +56,9 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(deviceTemp, appliedVolts, currentAmps);
+    BaseStatusSignal.refreshAll(deviceTemp, appliedVolts, currentAmps, velocityRPS);
 
+    inputs.velocityRPM = velocityRPS.getValueAsDouble() * 60.0;
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
