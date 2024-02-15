@@ -8,8 +8,10 @@ import frc.lib.team2930.StateMachine;
 import frc.robot.DrivetrainWrapper;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.subsystems.shooter.Shooter;
+import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine extends StateMachine {
+  ScoreSpeaker scoreSpeaker;
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final AutoSubstateMachine[] subStates;
@@ -22,14 +24,13 @@ public class AutoStateMachine extends StateMachine {
     this.shooter = shooter;
     this.subStates = subStates;
 
-    setInitialState(makeInitialShot());
+    setInitialState(() -> makeInitialShot());
   }
 
   private StateHandler makeInitialShot() {
-    if (false) {
-      ScoreSpeaker scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
-      scoreSpeaker.schedule();
-    }
+    scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true, 1.31);
+    scoreSpeaker.schedule();
+    Logger.recordOutput("Autonomous/CommandScheduled", true);
 
     return this::nextSubState;
   }
