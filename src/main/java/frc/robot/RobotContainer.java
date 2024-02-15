@@ -423,7 +423,9 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(
-                visionGamepiece::getClosestGamepiece, drivetrainWrapper, intake::getBeamBreak));
+                visionGamepiece::getClosestGamepiece,
+                drivetrainWrapper,
+                endEffector::intakeSideTOFDetectGamepiece));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
   }
