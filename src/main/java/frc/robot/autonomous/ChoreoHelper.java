@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
 import java.util.List;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ChoreoHelper {
@@ -20,6 +21,8 @@ public class ChoreoHelper {
   private List<ChoreoTrajectoryState> states;
   private double initialTime;
   private double timeOffset;
+  private Supplier<Pose2d> robotPose;
+  private double allowedDist = 0.03;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
@@ -34,16 +37,17 @@ public class ChoreoHelper {
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
       PIDController rotationalFeedback,
-      Pose2d initPose) {
+      Supplier<Pose2d> robotPose) {
     this.traj = traj;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
     this.states = getStates();
+    this.robotPose = robotPose;
     ChoreoTrajectoryState closestState = null;
     for (int i = 0; i < traj.getPoses().length; i++) {
-      closestState = calculateNewClosestState(closestState, this.states.get(i), initPose);
+      closestState = calculateNewClosestState(closestState, this.states.get(i), robotPose.get());
     }
     if (closestState != null) {
       this.timeOffset = closestState.timestamp;
@@ -58,18 +62,17 @@ public class ChoreoHelper {
    * @param robotPose pose of the robot
    * @param timestamp time of path
    */
-  public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
+  public ChassisSpeeds calculateChassisSpeeds(double timestamp) {
     timestamp -= initialTime;
     timestamp += timeOffset;
-    if (timestamp >= traj.getTotalTime()) {
-      return null;
-    }
 
     ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
 
-    double x = robotPose.getX();
-    double y = robotPose.getY();
-    double theta = robotPose.getRotation().getRadians();
+    Pose2d currentRobotPose = robotPose.get();
+
+    double x = currentRobotPose.getX();
+    double y = currentRobotPose.getY();
+    double theta = currentRobotPose.getRotation().getRadians();
 
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
@@ -84,6 +87,10 @@ public class ChoreoHelper {
         "Autonomous/desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
 
     return new ChassisSpeeds(xVel, yVel, omegaVel);
+  }
+
+  public boolean isDone() {
+    return GeometryUtil.getDist(robotPose.get(), traj.getFinalPose()) <= allowedDist;
   }
 
   private ChoreoTrajectoryState calculateNewClosestState(
