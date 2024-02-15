@@ -12,6 +12,8 @@ public interface VisionIO {
     PhotonPipelineResult lastResult = new PhotonPipelineResult();
     double lastTimestampCTRETime = -1.0;
     boolean connected = false;
+    double medianLatency = 0.0;
+    double medianUpdateTime = 0.0;
 
     @Override
     public void toLog(LogTable table) {
@@ -21,6 +23,8 @@ public interface VisionIO {
 
       table.put("lastTimestampCTRETime", lastTimestampCTRETime);
       table.put("connected", connected);
+      table.put("medianLatency", medianLatency);
+      table.put("medianUpdateTime", medianUpdateTime);
     }
 
     @Override
@@ -30,6 +34,8 @@ public interface VisionIO {
 
       lastTimestampCTRETime = table.get("lastTimestampCTRETime", -1.0);
       connected = table.get("connected", false);
+      medianLatency = table.get("medianLatency", 0.0);
+      medianUpdateTime = table.get("medianUpdateTime", 0.0);
     }
   }
 
@@ -39,5 +45,10 @@ public interface VisionIO {
   public default PhotonCamera getCamera() {
     System.out.println("------default getCamera() == null  ------------");
     return null;
+  }
+
+  public default void updateMedians(double latency, double timeSinceLastUpdate) {
+    // medianLatency = latencyMedianFilter.calculate(latency);
+    // medianUpdateTime = updateTimeMedianFilter.calculate(timeSinceLastUpdate);
   }
 }

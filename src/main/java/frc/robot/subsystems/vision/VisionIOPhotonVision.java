@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -13,6 +14,11 @@ public class VisionIOPhotonVision implements VisionIO {
 
   private double lastTimestampCTRETime = -1;
   private PhotonPipelineResult lastResult = new PhotonPipelineResult();
+
+  public double medianLatency = 0.0;
+  MedianFilter latencyMedianFilter = new MedianFilter(50);
+  public double medianUpdateTime = 0.0;
+  MedianFilter updateTimeMedianFilter = new MedianFilter(50);
 
   public VisionIOPhotonVision(String cameraName) {
     camera = new PhotonCamera(cameraName);
@@ -42,6 +48,8 @@ public class VisionIOPhotonVision implements VisionIO {
           double timestamp = Utils.getCurrentTimeSeconds() - (result.getLatencyMillis() / 1000.0);
 
           synchronized (VisionIOPhotonVision.this) {
+            updateMedians(result.getLatencyMillis(), timestamp - lastTimestampCTRETime);
+
             lastTimestampCTRETime = timestamp;
             lastResult = result;
           }
@@ -53,10 +61,17 @@ public class VisionIOPhotonVision implements VisionIO {
     inputs.lastTimestampCTRETime = this.lastTimestampCTRETime;
     inputs.lastResult = this.lastResult;
     inputs.connected = camera.isConnected();
+    inputs.medianLatency = medianLatency;
+    inputs.medianUpdateTime = medianUpdateTime;
   }
 
   @Override
   public PhotonCamera getCamera() {
     return camera;
+  }
+
+  public void updateMedians(double latency, double timeSinceLastUpdate) {
+    medianLatency = latencyMedianFilter.calculate(latency);
+    medianUpdateTime = updateTimeMedianFilter.calculate(timeSinceLastUpdate);
   }
 }
