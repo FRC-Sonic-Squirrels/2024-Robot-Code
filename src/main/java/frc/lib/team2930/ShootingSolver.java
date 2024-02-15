@@ -101,8 +101,22 @@ public class ShootingSolver {
     }
 
     // Desired shooter pivot pitch
-    var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    // var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    var futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
 
+    var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
+    var b =
+        -futureRobotVel
+                .rotateBy(Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY, dPspeakerAxisX)))
+                .getY()
+            / shooterSpeed;
+    var insideCos = b * Math.sqrt(1.0 + a * a) / (a * a + 1.0);
+    double pitchNote;
+    if (Math.abs(insideCos) <= 1.0) {
+      pitchNote = Math.acos(insideCos) + Math.atan(a);
+    } else {
+      pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    }
     // Direction to the speaker from the note.
     double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
 
@@ -132,8 +146,6 @@ public class ShootingSolver {
     // Vn_x = (Vr_x + Vs * cos(targetTheta)) > 0
     //
     var noteRelativeVel = new Translation2d(VnoteHorizontal, 0);
-
-    var futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
 
     Rotation2d frameRotation = Rotation2d.fromRadians(-speakerHeading);
     var robotVelInNewFrame = futureRobotVel.rotateBy(frameRotation);
@@ -197,6 +209,9 @@ public class ShootingSolver {
     var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 
     return new Solution(
-        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(pitchNote));
+        timeToShoot,
+        Rotation2d.fromRadians(targetTheta),
+        rateOfRotation,
+        Rotation2d.fromRadians(pitchNote));
   }
 }
