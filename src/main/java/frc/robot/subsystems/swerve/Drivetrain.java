@@ -390,12 +390,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Rotation2d getRotation() {
-    return rawOdometryPose.getRotation().plus(gyroOffset);
-  }
-
-  /** Returns the current odometry rotation. */
-  public Rotation2d getRotationWithoutOffset() {
-    return rawOdometryPose.getRotation();
+    return getPoseEstimatorPose().getRotation();
   }
 
   /** Resets the current odometry pose. */
