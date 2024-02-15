@@ -29,8 +29,6 @@ import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
-import frc.robot.Constants;
-import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -397,6 +395,8 @@ public class Drivetrain extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    setGyroOffset(pose.getRotation());
+
     this.poseEstimator.resetPose(pose);
     this.rawOdometryPose = pose;
   }
@@ -430,11 +430,10 @@ public class Drivetrain extends SubsystemBase {
     // There is a delay between setting the yaw on the Pigeon and that change
     //      taking effect. As a result, it is recommended to never set the yaw and
     //      adjust the local offset instead.
-    if (Constants.RobotMode.getRobot().equals(RobotType.ROBOT_2024)) {
-      gyroOffset =
-          gyroInputs.connected ? expectedYaw.minus(gyroInputs.yawPosition) : new Rotation2d();
+    if (gyroInputs.connected) {
+      expectedYaw.minus(gyroInputs.yawPosition);
     } else {
-      gyroOffset = expectedYaw.minus(getRotationWithoutOffset());
+      gyroOffset = new Rotation2d();
     }
   }
 
