@@ -63,7 +63,7 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
-            drive.getPoseEstimatorPose());
+            drive::getPoseEstimatorPose);
     return this::followPathToGamePiece;
   }
 
@@ -71,9 +71,8 @@ public class AutoSubstateMachine extends StateMachine {
     Logger.recordOutput("Autonomous/followGPpathStarted", true);
     Logger.recordOutput("Autonomous/" + trajToGamepieceName + "Started", true);
     Logger.recordOutput("Autonomous/timeFromStart", timeFromStart());
-    var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
-    if (chassisSpeeds != null) {
+    var chassisSpeeds = choreoHelper.calculateChassisSpeeds(timeFromStart());
+    if (!choreoHelper.isDone()) {
       // TODO: Check for note in intake.
       drive.setVelocityOverride(chassisSpeeds);
       return null;
@@ -96,7 +95,7 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController(),
-            drive.getPoseEstimatorPose());
+            drive::getPoseEstimatorPose);
 
     return this::followPathToShooter;
   }
@@ -109,9 +108,8 @@ public class AutoSubstateMachine extends StateMachine {
       return setDone();
     }
 
-    var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
-    if (chassisSpeeds != null) {
+    var chassisSpeeds = choreoHelper.calculateChassisSpeeds(timeFromStart());
+    if (!choreoHelper.isDone()) {
       drive.setVelocityOverride(chassisSpeeds);
       return null;
     }
