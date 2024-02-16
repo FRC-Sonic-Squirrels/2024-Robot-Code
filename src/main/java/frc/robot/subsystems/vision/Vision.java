@@ -3,6 +3,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -55,6 +56,9 @@ public class Vision extends SubsystemBase {
 
   private final Consumer<List<TimestampedVisionUpdate>> visionEstimatesConsumer;
   private final Supplier<Pose2d> poseEstimatorPoseSupplier;
+
+  private MedianFilter distance = new MedianFilter(10);
+  private MedianFilter ambiguity = new MedianFilter(20);
 
   public Vision(
       AprilTagFieldLayout aprilTagLayout,
@@ -249,6 +253,29 @@ public class Vision extends SubsystemBase {
     }
 
     averageDistanceFromTags = totalDistance / (double) cleanTargets.size();
+
+    // Calibration DEBUG
+    if (true) {
+
+      // CAVEAT: only works if you do one camera at a time
+
+      PhotonTrackedTarget target = cameraResult.getTargets().get(0);
+      double x =
+          (target.getDetectedCorners().get(0).x + target.getDetectedCorners().get(2).x) / 2.0;
+      double y =
+          (target.getDetectedCorners().get(0).y + target.getDetectedCorners().get(2).y) / 2.0;
+
+      x = x - (1280.0 / 2.0);
+      y = y - (720.0 / 2.0);
+
+      Logger.recordOutput("Vision/Calibrate/" + visionModule.name + "/pixel_x", x);
+      Logger.recordOutput("Vision/Calibrate/" + visionModule.name + "/pixel_y", y);
+      Logger.recordOutput(
+          "Vision/Calibrate/" + visionModule.name + "/ambiguity",
+          ambiguity.calculate(target.getPoseAmbiguity()));
+      Logger.recordOutput(
+          "Vision/Calibrate/" + visionModule.name + "/dist", distance.calculate(totalDistance));
+    }
 
     var distanceFromExistingPoseEstimate =
         prevEstimatedRobotPose
