@@ -23,6 +23,7 @@ public class ChoreoHelper {
   private double timeOffset;
   private Supplier<Pose2d> robotPose;
   private double allowedDist = 0.03;
+  private double allowedExtraTime = 1.0;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
@@ -36,15 +37,14 @@ public class ChoreoHelper {
       ChoreoTrajectory traj,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
-      PIDController rotationalFeedback,
-      Supplier<Pose2d> robotPose) {
+      PIDController rotationalFeedback) {
     this.traj = traj;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
     this.states = getStates();
-    this.robotPose = robotPose;
+
     ChoreoTrajectoryState closestState = null;
     for (int i = 0; i < traj.getPoses().length; i++) {
       closestState = calculateNewClosestState(closestState, this.states.get(i), robotPose.get());
@@ -62,13 +62,13 @@ public class ChoreoHelper {
    * @param robotPose pose of the robot
    * @param timestamp time of path
    */
-  public ChassisSpeeds calculateChassisSpeeds(double timestamp) {
+  public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     timestamp -= initialTime;
     timestamp += timeOffset;
 
     ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
 
-    Pose2d currentRobotPose = robotPose.get();
+    Pose2d currentRobotPose = robotPose;
 
     double x = currentRobotPose.getX();
     double y = currentRobotPose.getY();
@@ -77,8 +77,6 @@ public class ChoreoHelper {
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
 
-    // double xVel = state.velocityX;
-    // double yVel = state.velocityY;
     Logger.recordOutput("Autonomous/stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
@@ -86,11 +84,10 @@ public class ChoreoHelper {
     Logger.recordOutput(
         "Autonomous/desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
 
-    return new ChassisSpeeds(xVel, yVel, omegaVel);
-  }
+    if (GeometryUtil.getDist(currentRobotPose, traj.getFinalPose()) <= allowedDist
+        || timestamp >= traj.getTotalTime() + allowedExtraTime) return null;
 
-  public boolean isDone() {
-    return GeometryUtil.getDist(robotPose.get(), traj.getFinalPose()) <= allowedDist;
+    return new ChassisSpeeds(xVel, yVel, omegaVel);
   }
 
   private ChoreoTrajectoryState calculateNewClosestState(
