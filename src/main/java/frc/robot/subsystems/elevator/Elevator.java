@@ -76,7 +76,7 @@ public class Elevator extends SubsystemBase {
           || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
         io.setPIDConstraints(
             kP.get(),
-            kP.get(),
+            kD.get(),
             kG.get(),
             new Constraints(
                 closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
