@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.autonomous.AutosManager.Auto;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -42,7 +41,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
-  private LoggedDashboardChooser<Supplier<Auto>> autonomousChooser = null;
+  private LoggedDashboardChooser<String> autonomousChooser = null;
   private Auto lastAuto = null;
   private String lastAutoName = null;
   private Alliance lastAlliance = null;
@@ -152,12 +151,11 @@ public class Robot extends LoggedRobot {
     }
 
     var currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-    var currentChooserSelectedName = autonomousChooser.getSendableChooser().getSelected();
-
     if (lastAlliance == null || lastAlliance != currentAlliance) {
       shouldUpdateAutonomousCommand = true;
     }
 
+    var currentChooserSelectedName = autonomousChooser.get();
     if (lastAutoName == null
         || currentChooserSelectedName == null
         || !lastAutoName.equals(currentChooserSelectedName)) {
@@ -167,9 +165,9 @@ public class Robot extends LoggedRobot {
     if (shouldUpdateAutonomousCommand) {
       // b/c chooser returns a supplier when we call get() on the supplier we get a update
       // trajectory & initial position for if our alliance has changed
-      lastAuto = autonomousChooser.get().get();
       lastAutoName = currentChooserSelectedName;
       lastAlliance = currentAlliance;
+      lastAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
 
       // if FMS: only reset if we haven't entered tele. I.E only reset poses before match starts
       // if no FMS: always reset pose to auto pose.

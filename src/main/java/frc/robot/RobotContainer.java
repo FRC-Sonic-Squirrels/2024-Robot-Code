@@ -65,6 +65,7 @@ import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -92,8 +93,9 @@ public class RobotContainer {
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
-  private final LoggedDashboardChooser<Supplier<Auto>> autoChooser =
-      new LoggedDashboardChooser<Supplier<Auto>>("Auto Routine");
+  private final LoggedDashboardChooser<String> autoChooser =
+      new LoggedDashboardChooser<>("Auto Routine");
+  private final HashMap<String, Supplier<Auto>> stringToAutoSupplierMap = new HashMap<>();
   private final AutosManager autoManager;
 
   private final LoggedTunableNumber tunablePivotPitch =
@@ -296,7 +298,14 @@ public class RobotContainer {
 
     autoManager =
         new AutosManager(
-            drivetrainWrapper, shooter, intake, endEffector, visionGamepiece, config, autoChooser);
+            drivetrainWrapper,
+            shooter,
+            intake,
+            endEffector,
+            visionGamepiece,
+            config,
+            autoChooser,
+            stringToAutoSupplierMap);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
@@ -475,8 +484,12 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public LoggedDashboardChooser<Supplier<Auto>> getAutonomousChooser() {
+  public LoggedDashboardChooser<String> getAutonomousChooser() {
     return autoChooser;
+  }
+
+  public Supplier<Auto> getAutoSupplierForString(String string) {
+    return stringToAutoSupplierMap.getOrDefault(string, autoManager::doNothing);
   }
 
   public void setPose(Pose2d pose) {
