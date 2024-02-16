@@ -9,13 +9,15 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOReal implements ElevatorIO {
 
-  private final TalonFX motor = new TalonFX(Constants.CanIDs.ELEVATOR_CAN_ID);
+  private final TalonFX motor = new TalonFX(Constants.CanIDs.ELEVATOR_CAN_ID, "CANivore");
 
   private static final double inchesToMotorRot =
       Constants.ElevatorConstants.GEAR_RATIO
@@ -39,6 +41,10 @@ public class ElevatorIOReal implements ElevatorIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    config.Voltage.PeakForwardVoltage = 2.0;
+    config.Voltage.PeakReverseVoltage = -2.0;
 
     config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
@@ -67,6 +73,12 @@ public class ElevatorIOReal implements ElevatorIO {
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = tempCelsius.getValueAsDouble();
+
+    // closedLoopControl.EnableFOC = fal
+
+    closedLoopControl.EnableFOC = false;
+
+    Logger.recordOutput("Elevator/periodicMotorRot", closedLoopControl.Position);
   }
 
   @Override
@@ -79,6 +91,10 @@ public class ElevatorIOReal implements ElevatorIO {
   public void setHeight(double heightInches) {
     closedLoopControl.withPosition(heightInches * inchesToMotorRot);
     motor.setControl(closedLoopControl);
+
+    Logger.recordOutput("Elevator/motorRotSetpoint", heightInches * inchesToMotorRot);
+
+    System.out.println("in here");
   }
 
   @Override

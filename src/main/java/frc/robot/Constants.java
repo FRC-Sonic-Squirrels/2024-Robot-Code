@@ -158,7 +158,7 @@ public final class Constants {
 
   public class ElevatorConstants {
     // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
-    public static final double GEAR_RATIO = 25.93;
+    public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
     public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
@@ -254,7 +254,7 @@ public final class Constants {
 
     public static final int ARM_CAN_ID = 17;
 
-    public static final int ELEVATOR_CAN_ID = 16;
+    public static final int ELEVATOR_CAN_ID = 37;
 
     public static final int END_EFFECTOR_CAN_ID = 30;
     public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 35;
