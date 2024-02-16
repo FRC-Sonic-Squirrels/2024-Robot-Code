@@ -171,6 +171,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
         turnCurrent);
     driveTalon.optimizeBusUtilization();
     turnTalon.optimizeBusUtilization();
+    cancoder.optimizeBusUtilization();
   }
 
   @Override
