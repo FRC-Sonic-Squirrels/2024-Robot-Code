@@ -38,4 +38,8 @@ public class Intake extends SubsystemBase {
   public double getRPM() {
     return inputs.velocityRPM;
   }
+
+  public boolean getBeamBreak() {
+    return inputs.beamBreak;
+  }
 }
