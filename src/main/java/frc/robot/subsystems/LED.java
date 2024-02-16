@@ -21,7 +21,7 @@ public class LED extends SubsystemBase {
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int snakeShade = 0;
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.TEST;
+  robotStates robotState = robotStates.NOTHING;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -62,7 +62,7 @@ public class LED extends SubsystemBase {
           ledBuffer.setRGB(i, Color.red.getRed(), 0, 0);
         }
         break;
-      case TWENTY_SECOND_WARTING:
+      case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
         for (int i = 0; i < ledBuffer.getLength(); i++) {
           setAllBlinking(
@@ -79,9 +79,6 @@ public class LED extends SubsystemBase {
       case CLIMB_MODE:
         setSingleStripSolidColor(Color.GREEN, 20, 40);
         break;
-      case TEST:
-        setAllSnake(Color.GREEN);
-        // setAllRainbow();
     }
 
     led.setData(ledBuffer);
@@ -201,7 +198,7 @@ public class LED extends SubsystemBase {
     DRIVING_TO_GAMEPIECE(), //
     AUTO_MODE(), //
     NOTHING(), //
-    TWENTY_SECOND_WARTING(), //
+    TWENTY_SECOND_WARNING(), //
     AMP_LINING_UP(),
     SHOOTER_LINING_UP(),
     AMP_READY_TO_SCORE(),
