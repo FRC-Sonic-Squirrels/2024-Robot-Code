@@ -13,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
 import frc.robot.DrivetrainWrapper;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,23 +26,19 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
   private double DEADBAND = 0.1;
 
-  private BooleanSupplier resetRotationOffset;
-
   private Rotation2d rotationOffset = new Rotation2d();
 
   public DrivetrainDefaultTeleopDrive(
       DrivetrainWrapper drivetrain,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier,
-      BooleanSupplier resetRotationOffset) {
+      DoubleSupplier omegaSupplier) {
 
     this.drivetrain = drivetrain;
 
     this.xSupplier = xSupplier;
     this.ySupplier = ySupplier;
     this.omegaSupplier = omegaSupplier;
-    this.resetRotationOffset = resetRotationOffset;
 
     addRequirements(drivetrain.getRequirements());
     setName("DrivetrainDefaultTeleopDrive");
@@ -74,10 +69,6 @@ public class DrivetrainDefaultTeleopDrive extends Command {
             .getTranslation();
 
     var correctedLinearVelocity = AllianceFlipUtil.flipVelocitiesForAlliance(linearVelocity);
-
-    if (resetRotationOffset.getAsBoolean()) {
-      rotationOffset = drivetrain.getPoseEstimatorPose().getRotation().unaryMinus();
-    }
 
     Logger.recordOutput("Commands/TeleopDrive/XSupplier", xSupplier.getAsDouble());
     Logger.recordOutput("Commands/TeleopDrive/YSupplier", ySupplier.getAsDouble());
