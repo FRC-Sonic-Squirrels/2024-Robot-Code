@@ -22,6 +22,14 @@ public class SimulatorRobotConfig extends RobotConfig {
   // ------------ SWERVE ---------------------
   private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
+  // -------- GYRO OFFSETS --------
+
+  private static final double GYRO_MOUNTING_PITCH = 0.0;
+
+  private static final double GYRO_MOUNTING_ROLL = 0.0;
+
+  private static final double GYRO_MOUNTING_YAW = 0.0;
+
   // ------ SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
 
   // --------- SWERVE GEAR RATIO ---------
@@ -316,5 +324,20 @@ public class SimulatorRobotConfig extends RobotConfig {
   @Override
   public CurrentLimitsConfigs getSteerTalonCurrentLimitConfig() {
     throw new RuntimeException("Unsupported action for SIM BOT");
+  }
+
+  @Override
+  public double getGyroMountingPitch() {
+    return GYRO_MOUNTING_PITCH;
+  }
+
+  @Override
+  public double getGyroMountingRoll() {
+    return GYRO_MOUNTING_ROLL;
+  }
+
+  @Override
+  public double getGyroMountingYaw() {
+    return GYRO_MOUNTING_YAW;
   }
 }

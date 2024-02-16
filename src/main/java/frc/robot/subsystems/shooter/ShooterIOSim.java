@@ -22,8 +22,8 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Pivot.GEARING,
           SingleJointedArmSim.estimateMOI(Units.feetToMeters(1.5), 20.0),
           Constants.ShooterConstants.SHOOTER_LENGTH,
-          Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD,
-          Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD,
+          Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD.getRadians(),
+          Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getRadians(),
           false,
           Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE);
 

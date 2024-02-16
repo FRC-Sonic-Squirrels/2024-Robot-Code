@@ -27,7 +27,7 @@ public class ArmIOReal implements ArmIO {
   private final TalonFX motor;
 
   public ArmIOReal() {
-    motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID, "CANivore");
+    motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
 

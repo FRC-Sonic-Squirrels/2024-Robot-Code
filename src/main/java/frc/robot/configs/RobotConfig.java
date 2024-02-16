@@ -37,6 +37,12 @@ public abstract class RobotConfig {
 
   public abstract int getGyroCANID();
 
+  public abstract double getGyroMountingPitch();
+
+  public abstract double getGyroMountingRoll();
+
+  public abstract double getGyroMountingYaw();
+
   public abstract String getCANBusName();
 
   // Robot MAX linear speeds

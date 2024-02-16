@@ -53,6 +53,8 @@ public class Drivetrain extends SubsystemBase {
 
   RobotConfig config;
 
+  private Rotation2d gyroOffset = new Rotation2d();
+
   public Drivetrain(RobotConfig config, GyroIO gyroIO, SwerveModule[] swerveModules) {
 
     if (swerveModules.length > 4) {
@@ -153,7 +155,10 @@ public class Drivetrain extends SubsystemBase {
           // with the change in angle since the last sample.
           Rotation2d gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
           twist =
-              new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
+              new Twist2d(
+                  twist.dx,
+                  twist.dy,
+                  gyroRotation.minus(lastGyroRotation).plus(gyroOffset).getRadians());
           lastGyroRotation = gyroRotation;
         }
         // Apply the twist (change since last sample) to the current pose
@@ -186,6 +191,7 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
+
     if (prioritizeRotation) {
       // Calculate module setpoints
 
@@ -383,13 +389,14 @@ public class Drivetrain extends SubsystemBase {
     return pose;
   }
 
-  /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    return rawOdometryPose.getRotation();
+    return getPoseEstimatorPose().getRotation();
   }
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    setGyroOffset(pose.getRotation());
+
     this.poseEstimator.resetPose(pose);
     this.rawOdometryPose = pose;
   }
@@ -410,5 +417,34 @@ public class Drivetrain extends SubsystemBase {
       current = ArrayUtil.concatWithArrayCopy(current, modules[i].getCurrentAmps());
     }
     return current;
+  }
+
+  /**
+   * Sets the rotation of the robot to the specified value. This method should only be invoked when
+   * the rotation of the robot is known (e.g., at the start of an autonomous path). Zero degrees is
+   * facing away from the driver station; CCW is positive.
+   *
+   * @param expectedYaw the rotation of the robot (in degrees)
+   */
+  public void setGyroOffset(Rotation2d expectedYaw) {
+    // There is a delay between setting the yaw on the Pigeon and that change
+    //      taking effect. As a result, it is recommended to never set the yaw and
+    //      adjust the local offset instead.
+    if (gyroInputs.connected) {
+      expectedYaw.minus(gyroInputs.yawPosition);
+    } else {
+      gyroOffset = new Rotation2d();
+    }
+  }
+
+  /**
+   * Zeroes the gyroscope. This sets the current rotation of the robot to zero degrees. This method
+   * is intended to be invoked only when the alignment beteween the robot's rotation and the gyro is
+   * sufficiently different to make field-relative driving difficult. The robot needs to be
+   * positioned facing away from the driver, ideally aligned to a field wall before this method is
+   * invoked.
+   */
+  public void zeroGyroscope() {
+    setGyroOffset(new Rotation2d());
   }
 }

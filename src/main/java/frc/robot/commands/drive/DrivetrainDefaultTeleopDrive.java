@@ -26,6 +26,8 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
   private double DEADBAND = 0.1;
 
+  private Rotation2d rotationOffset = new Rotation2d();
+
   public DrivetrainDefaultTeleopDrive(
       DrivetrainWrapper drivetrain,
       DoubleSupplier xSupplier,
@@ -84,7 +86,9 @@ public class DrivetrainDefaultTeleopDrive extends Command {
             correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
             omega * drivetrain.getMaxAngularSpeedRadPerSec());
 
-    drivetrain.setVelocity(chassisSpeeds);
+    drivetrain.setVelocity(
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            chassisSpeeds, drivetrain.getRotation().plus(rotationOffset)));
   }
 
   // Called once the command ends or is interrupted.
