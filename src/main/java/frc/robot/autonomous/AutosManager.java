@@ -2,6 +2,7 @@ package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.team2930.AllianceFlipUtil;
 import frc.robot.Constants;
@@ -26,6 +27,8 @@ public class AutosManager {
   private RobotConfig config;
 
   private LoggedDashboardChooser<Supplier<Auto>> chooser;
+
+  public record Auto(String name, Command command, Pose2d initPose) {}
 
   // FIXME: add all other subssystems
 
