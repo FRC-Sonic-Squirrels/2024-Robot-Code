@@ -24,7 +24,7 @@ public class AutoStateMachine extends StateMachine {
     this.shooter = shooter;
     this.subStates = subStates;
 
-    setInitialState(() -> makeInitialShot());
+    setInitialState(this::makeInitialShot);
   }
 
   private StateHandler makeInitialShot() {
