@@ -58,8 +58,8 @@ public class AutoSubstateMachine extends StateMachine {
   private StateHandler initFollowPathToGamePiece() {
     choreoHelper =
         new ChoreoHelper(
-            drive.getPoseEstimatorPose(),
             timeFromStart(),
+            drive.getPoseEstimatorPose(),
             this.trajToGamePiece,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
@@ -87,8 +87,8 @@ public class AutoSubstateMachine extends StateMachine {
 
     choreoHelper =
         new ChoreoHelper(
-            drive.getPoseEstimatorPose(),
             timeFromStart(),
+            drive.getPoseEstimatorPose(),
             this.trajToShoot,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
