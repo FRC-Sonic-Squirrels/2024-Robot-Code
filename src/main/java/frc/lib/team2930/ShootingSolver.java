@@ -94,22 +94,26 @@ public class ShootingSolver {
     }
 
     // Desired shooter pivot pitch
-    // var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    // FIXME: BAD CALCULATION FOR SHOOTER PITCH. NEW APPROACH NECESSARY
+    var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
 
-    var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
-    var b =
-        -robotVel
-                .rotateBy(
-                    Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY, dPspeakerAxisX)).unaryMinus())
-                .getX()
-            / shooterSpeed;
-    var insideCos = b * Math.sqrt(1.0 + a * a) / (a * a + 1.0);
-    double pitchNote;
-    if (Math.abs(insideCos) <= 1.0) {
-      pitchNote = Math.acos(insideCos) + Math.atan(a);
-    } else {
-      pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
-    }
+    // Code using Archit's formula for pitch of shooter.
+    // var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
+    // var b =
+    //     -robotVel
+    //             .rotateBy(
+    //                 Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY,
+    // dPspeakerAxisX)).unaryMinus())
+    //             .getX()
+    //         / shooterSpeed;
+    // var insideCos = b * Math.sqrt(1.0 + a * a) / (a * a + 1.0);
+    // double pitchNote;
+    // if (Math.abs(insideCos) <= 1.0) {
+    //   pitchNote = Math.acos(insideCos) + Math.atan(a);
+    // } else {
+    //   pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    // }
+
     // Direction to the speaker from the note.
     double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
 
