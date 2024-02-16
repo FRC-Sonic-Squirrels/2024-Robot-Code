@@ -46,7 +46,7 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT_REAL_CAMERAS;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -181,7 +181,7 @@ public final class Constants {
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
 
-    public static final double AMP_HEIGHT = Units.inchesToMeters(10.0);
+    public static final double AMP_HEIGHT = Units.inchesToMeters(20.0);
   }
 
   public class ShooterConstants {
@@ -296,7 +296,7 @@ public final class Constants {
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
 
-    public static final Rotation2d AMP_ARM_ANGLE = Rotation2d.fromDegrees(20.0);
+    public static final Rotation2d AMP_ARM_ANGLE = Rotation2d.fromDegrees(50.0);
   }
 
   public class VisionGamepieceConstants {

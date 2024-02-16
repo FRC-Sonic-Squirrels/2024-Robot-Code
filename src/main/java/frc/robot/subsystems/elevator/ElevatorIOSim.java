@@ -17,7 +17,7 @@ public class ElevatorIOSim implements ElevatorIO {
           Constants.ElevatorConstants.PULLEY_DIAMETER / 2,
           0.0,
           Constants.ElevatorConstants.MAX_HEIGHT,
-          true,
+          false,
           0.1);
 
   private double targetHeight = 0.0;
@@ -37,6 +37,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
+    sim.update(0.02);
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
       appliedVolts = feedback.calculate(inputs.heightInches, targetHeight) + kG;
     } else {
@@ -44,7 +45,6 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     sim.setInputVoltage(appliedVolts);
-    sim.update(0.02);
 
     inputs.appliedVolts = appliedVolts;
     inputs.currentAmps = sim.getCurrentDrawAmps();

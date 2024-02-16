@@ -15,6 +15,7 @@ public class ElevatorSetHeight extends Command {
   DoubleSupplier heightSupplier;
 
   public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
+    this.elevator = elevator;
     this.heightSupplier = heightSupplier;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
