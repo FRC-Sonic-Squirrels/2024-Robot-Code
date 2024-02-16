@@ -99,8 +99,9 @@ public class ShootingSolver {
     var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
     var b =
         -robotVel
-                .rotateBy(Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY, dPspeakerAxisX)))
-                .getY()
+                .rotateBy(
+                    Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY, dPspeakerAxisX)).unaryMinus())
+                .getX()
             / shooterSpeed;
     var insideCos = b * Math.sqrt(1.0 + a * a) / (a * a + 1.0);
     double pitchNote;
