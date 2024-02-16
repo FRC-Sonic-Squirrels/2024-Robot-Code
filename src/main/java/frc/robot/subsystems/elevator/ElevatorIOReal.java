@@ -16,7 +16,6 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOReal implements ElevatorIO {
 
@@ -76,12 +75,6 @@ public class ElevatorIOReal implements ElevatorIO {
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = tempCelsius.getValueAsDouble();
-
-    // closedLoopControl.EnableFOC = fal
-
-    closedLoopControl.EnableFOC = false;
-
-    Logger.recordOutput("Elevator/periodicMotorRot", closedLoopControl.Position);
   }
 
   @Override
@@ -94,10 +87,6 @@ public class ElevatorIOReal implements ElevatorIO {
   public void setHeight(Measure<Distance> height) {
     closedLoopControl.withPosition(height.in(Units.Inches) * inchesToMotorRot);
     motor.setControl(closedLoopControl);
-
-    Logger.recordOutput("Elevator/motorRotSetpoint", heightInches * inchesToMotorRot);
-
-    System.out.println("in here");
   }
 
   @Override
