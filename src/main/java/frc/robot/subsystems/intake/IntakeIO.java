@@ -10,6 +10,7 @@ public interface IntakeIO {
     public double currentAmps = 0.0;
     public double tempCelsius = 0.0;
     public double appliedVolts = 0.0;
+    public boolean beamBreak = false;
   }
 
   /** Updates the set of loggable inputs. */
