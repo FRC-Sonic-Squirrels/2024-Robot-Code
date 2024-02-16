@@ -30,8 +30,11 @@ import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.arm.ArmSetAngle;
 import frc.robot.commands.drive.DriveToGamepiece;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.ShooterSimpleShoot;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -424,6 +427,18 @@ public class RobotContainer {
                 endEffector::intakeSideTOFDetectGamepiece));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
+
+    driverController
+        .leftBumper()
+        .whileTrue(
+            new DriveToPose(
+                    drivetrainWrapper,
+                    new Pose2d(
+                        Constants.isRedAlliance() ? 14.714638710021973 : 1.8273155689239502,
+                        7.824395179748535,
+                        Rotation2d.fromDegrees(-90.0)))
+                .alongWith(new ElevatorSetHeight(elevator, Constants.ElevatorConstants.AMP_HEIGHT))
+                .alongWith(new ArmSetAngle(arm, Constants.ArmConstants.AMP_ARM_ANGLE)));
 
     // driverController
     //     .rightTrigger()

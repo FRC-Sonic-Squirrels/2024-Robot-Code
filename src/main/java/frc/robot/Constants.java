@@ -180,6 +180,8 @@ public final class Constants {
     public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
+
+    public static final double AMP_HEIGHT = Units.inchesToMeters(10.0);
   }
 
   public class ShooterConstants {
@@ -293,6 +295,8 @@ public final class Constants {
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
+
+    public static final Rotation2d AMP_ARM_ANGLE = Rotation2d.fromDegrees(20.0);
   }
 
   public class VisionGamepieceConstants {
