@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.team2930.ArrayUtil;
+import frc.lib.team2930.ControlMode;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
@@ -26,22 +27,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   public static final double ODOMETRY_FREQUENCY = 250.0;
-
-  private final SwerveModuleIO io;
-  private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-  private final int index;
-
-  private SimpleMotorFeedforward driveFeedforward;
-  private final PIDController driveFeedback;
-  private final PIDController turnFeedback;
-  private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
-  private double lastPositionMeters = 0.0; // Used for delta calculation
-  private SwerveModulePosition[] positionDeltas = new SwerveModulePosition[] {};
-  private double[] odometryTimestamps = new double[] {};
-
-  private final double WHEEL_RADIUS;
+  public static final double MAX_VOLTAGE = 12.0;
 
   private final LoggedTunableNumber driveKS;
   private final LoggedTunableNumber driveKV;
@@ -52,6 +38,34 @@ public class SwerveModule {
 
   private final LoggedTunableNumber angleKP;
   private final LoggedTunableNumber angleKD;
+
+  private final SwerveModuleIO io;
+  private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+  private final int index;
+
+  private SimpleMotorFeedforward driveFeedforward;
+  private final PIDController driveFeedback;
+  private final PIDController turnFeedback;
+
+  private Rotation2d angleSetpointClosedLoop =
+      null; // Setpoint for closed loop control, null for open loop
+  private double speedVelocitySetpointClosedLoop =
+      0.0; // Setpoint for closed loop control, null for open loop
+
+  private double speedVoltageOpenLoop = 0.0;
+
+  private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
+  private double lastPositionMeters = 0.0; // Used for delta calculation
+
+  private SwerveModulePosition[] positionDeltas = new SwerveModulePosition[] {};
+  private double[] odometryTimestamps = new double[] {};
+
+  private final double WHEEL_RADIUS;
+
+  // controls if drive motor is running voltageOut or velocity closed loop
+  // open loop in tele. Closed loop in auto
+  // steer motor always runs closed loop position
+  private ControlMode controlMode = ControlMode.OPEN_LOOP;
 
   private final RobotConfig config;
 
@@ -115,27 +129,25 @@ public class SwerveModule {
         turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
       }
 
-      // Run closed loop turn control
-      if (angleSetpoint != null) {
+      if (angleSetpointClosedLoop != null) {
         io.setTurnVoltage(
-            turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
+            turnFeedback.calculate(getAngle().getRadians(), angleSetpointClosedLoop.getRadians()));
+      }
 
-        // Run closed loop drive control
-        // Only allowed if closed loop turn control is running
-        if (speedSetpoint != null) {
-          // Scale velocity based on turn error
-          //
-          // When the error is 90^, the velocity setpoint should be 0. As the wheel turns
-          // towards the setpoint, its velocity should increase. This is achieved by
-          // taking the component of the velocity in the direction of the setpoint.
-          double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
+      if (controlMode == ControlMode.CLOSED_LOOP) {
+        // When the error is 90^, the velocity setpoint should be 0. As the wheel turns
+        // towards the setpoint, its velocity should increase. This is achieved by
+        // taking the component of the velocity in the direction of the setpoint.
+        double adjustSpeedSetpoint =
+            speedVelocitySetpointClosedLoop * Math.cos(turnFeedback.getPositionError());
 
-          // Run drive controller
-          double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-          io.setDriveVoltage(
-              driveFeedforward.calculate(velocityRadPerSec)
-                  + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
-        }
+        // Run drive controller
+        double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+        io.setDriveVoltage(
+            driveFeedforward.calculate(velocityRadPerSec)
+                + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+      } else { // open loop
+        io.setDriveVoltage(speedVoltageOpenLoop);
       }
 
       // Calculate position deltas for odometry
@@ -157,14 +169,28 @@ public class SwerveModule {
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
-  public SwerveModuleState runSetpoint(SwerveModuleState state) {
+  public SwerveModuleState runClosedLoopSetpoint(SwerveModuleState state) {
+    controlMode = ControlMode.CLOSED_LOOP;
+
     // Optimize state based on current angle
     // Controllers run in "periodic" when the setpoint is not null
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     // Update setpoints, controllers run in "periodic"
-    angleSetpoint = optimizedState.angle;
-    speedSetpoint = optimizedState.speedMetersPerSecond;
+    angleSetpointClosedLoop = optimizedState.angle;
+    speedVelocitySetpointClosedLoop = optimizedState.speedMetersPerSecond;
+
+    return optimizedState;
+  }
+
+  public SwerveModuleState runOpenLoop(SwerveModuleState state) {
+    controlMode = ControlMode.OPEN_LOOP;
+
+    var optimizedState = SwerveModuleState.optimize(state, getAngle());
+
+    angleSetpointClosedLoop = optimizedState.angle;
+    speedVoltageOpenLoop =
+        (state.speedMetersPerSecond / config.getRobotMaxLinearVelocity()) * MAX_VOLTAGE;
 
     return optimizedState;
   }
@@ -172,11 +198,10 @@ public class SwerveModule {
   /** Runs the module with the specified voltage while controlling to zero degrees. */
   public void runCharacterization(double volts) {
     // Closed loop turn control
-    angleSetpoint = new Rotation2d();
+    angleSetpointClosedLoop = new Rotation2d();
 
-    // Open loop drive control
-    io.setDriveVoltage(volts);
-    speedSetpoint = null;
+    controlMode = ControlMode.OPEN_LOOP;
+    speedVoltageOpenLoop = volts;
   }
 
   /** Disables all outputs to motors. */
@@ -184,9 +209,12 @@ public class SwerveModule {
     io.setTurnVoltage(0.0);
     io.setDriveVoltage(0.0);
 
-    // Disable closed loop control for turn and drive
-    angleSetpoint = null;
-    speedSetpoint = null;
+    controlMode = ControlMode.OPEN_LOOP;
+    // null anglesetpoint = steer motor not rotation to set position
+    // and thus following its last given command. In this case that is
+    // running at a voltage of 0.0
+    angleSetpointClosedLoop = null;
+    speedVoltageOpenLoop = 0.0;
   }
 
   /** Sets whether brake mode is enabled. */
