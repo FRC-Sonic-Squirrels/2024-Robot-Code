@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.autonomous.Auto;
+import frc.robot.autonomous.AutosManager.Auto;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -185,18 +185,18 @@ public class Robot extends LoggedRobot {
       if (shouldResetPose) {
         var pose =
             lastAlliance == Alliance.Blue
-                ? lastAuto.initPose
+                ? lastAuto.initPose()
                 : new Pose2d(
-                    Constants.FieldConstants.FIELD_LENGTH - lastAuto.initPose.getX(),
-                    lastAuto.initPose.getY(),
+                    Constants.FieldConstants.FIELD_LENGTH - lastAuto.initPose().getX(),
+                    lastAuto.initPose().getY(),
                     new Rotation2d(
-                        -lastAuto.initPose.getRotation().getCos(),
-                        lastAuto.initPose.getRotation().getSin()));
+                        -lastAuto.initPose().getRotation().getCos(),
+                        lastAuto.initPose().getRotation().getSin()));
 
         robotContainer.setPose(pose);
       }
 
-      Logger.recordOutput("Auto/SelectedAuto", lastAuto.name);
+      Logger.recordOutput("Auto/SelectedAuto", lastAuto.name());
       Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);
     }
   }
@@ -207,7 +207,7 @@ public class Robot extends LoggedRobot {
 
     // schedule the autonomous command (example)
     if (lastAuto != null) {
-      lastAuto.command.schedule();
+      lastAuto.command().schedule();
     }
   }
 
@@ -223,7 +223,7 @@ public class Robot extends LoggedRobot {
     // continue until interrupted by another command, remove
     // this line or comment it out.
     if (lastAuto != null) {
-      lastAuto.command.cancel();
+      lastAuto.command().cancel();
     }
 
     hasEnteredTeleAtSomePoint = true;
