@@ -43,8 +43,8 @@ public class Elevator extends SubsystemBase {
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(0.0);
-      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+      closedLoopMaxVelocityConstraint.initDefault(10.0);
+      closedLoopMaxAccelerationConstraint.initDefault(10.0);
     }
   }
 
