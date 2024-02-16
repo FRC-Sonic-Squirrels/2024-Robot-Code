@@ -159,7 +159,7 @@ public final class Constants {
   public class ElevatorConstants {
     // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
     public static final double GEAR_RATIO = 25.93;
-    public static final double WHEEL_RADIUS = 1.118;
+    public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
     public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
 
