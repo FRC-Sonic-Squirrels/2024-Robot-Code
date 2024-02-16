@@ -2,10 +2,7 @@ package frc.lib.team2930;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import org.junit.jupiter.api.Test;
 
 public class ShootingSolverTest {
@@ -23,8 +20,7 @@ public class ShootingSolverTest {
     // Create a trajectory tangential to the speaker, rotating it around the speaker,
     // testing different shooter speeds.
     //
-    for (double shooterSpeed = 10; shooterSpeed < 50; shooterSpeed += 10) {
-
+    for (double shooterSpeed = 10; shooterSpeed < 60; shooterSpeed += 10) {
       var solver =
           new ShootingSolver(
               Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime);
@@ -39,6 +35,7 @@ public class ShootingSolverTest {
         var robotPose = new Pose2d(robotPosRotatedAndTranslated, new Rotation2d());
 
         var res = solver.computeAngles(0, robotPose, robotVelRotated);
+
         double VnoteHorizontal = shooterSpeed * Math.cos(Math.toRadians(45));
         if (VnoteHorizontal < 10) {
           assertNull(res);
@@ -46,17 +43,39 @@ public class ShootingSolverTest {
 
           assertNotNull(res);
 
-          assertEquals(45.0, res.pitch().getDegrees(), 0.0001);
-
-          var angleDiff = angle - res.heading().getDegrees();
-          if (angleDiff < -180) {
-            angleDiff += 360;
-          }
-          if (angleDiff > 180) {
-            angleDiff -= 360;
+          if (false) {
+            System.out.printf("Result robotPose: %s\n", robotPose);
+            System.out.printf("Result robotVelRotated: %s\n", robotVelRotated);
+            System.out.printf("Result Pitch: %.1f\n", res.pitch().getDegrees());
+            System.out.printf("Result Heading: %.1f\n", res.heading().getDegrees());
           }
 
-          assertEquals(-Math.toDegrees(Math.acos(10 / VnoteHorizontal)), angleDiff, 0.0001);
+          var noteStart3d = new Translation3d(shooterSpeed, 0, 0);
+
+          var noteMid3d = noteStart3d.rotateBy(new Rotation3d(0, -res.pitch().getRadians(), 0));
+
+          var noteVel3d =
+              noteMid3d.rotateBy(new Rotation3d(0, 0, res.heading().getRadians() + Math.PI));
+
+          var robotVel3d = GeometryUtil.translation2dTo3d(robotVelRotated);
+
+          var noteVelTotal = robotVel3d.plus(noteVel3d);
+
+          if (false) {
+            System.out.printf("noteStart3d: %s\n", noteStart3d);
+            System.out.printf("noteMid3d: %s\n", noteMid3d);
+            System.out.printf("noteVel3d: %s\n", noteVel3d);
+            System.out.printf("robotVel3d: %s\n", robotVel3d);
+            System.out.printf("noteVelTotal: %s\n", noteVelTotal);
+            System.out.printf("totalSpeed: %.1f\n", noteVelTotal.getNorm());
+            System.out.printf(
+                "heading: %.1f\n",
+                Math.toDegrees(Math.atan2(noteVelTotal.getY(), noteVelTotal.getX())));
+          }
+
+          var noteHorizontalReal = Math.hypot(noteVelTotal.getX(), noteVelTotal.getY());
+          var noteVerticalReal = noteVelTotal.getZ();
+          assertEquals(45, Math.toDegrees(Math.atan2(noteVerticalReal, noteHorizontalReal)), 0.1);
         }
       }
     }

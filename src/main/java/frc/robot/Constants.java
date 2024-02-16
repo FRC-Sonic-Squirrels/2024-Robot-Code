@@ -51,10 +51,20 @@ public final class Constants {
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
 
+    public static boolean isSimBot() {
+      switch (getRobot()) {
+        case ROBOT_SIMBOT:
+        case ROBOT_SIMBOT_REAL_CAMERAS:
+          return true;
+
+        default:
+          return false;
+      }
+    }
+
     // FIXME: update for various robots
     public static Mode getMode() {
-      if (getRobot() == RobotType.ROBOT_SIMBOT
-          || getRobot() == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
+      if (isSimBot()) {
         return Mode.SIM;
       }
 

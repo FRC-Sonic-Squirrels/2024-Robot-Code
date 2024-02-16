@@ -198,7 +198,7 @@ public class ScoreSpeaker extends Command {
                         - drive.getPoseEstimatorPose().getY()))));
 
     if (result != null && !readyToShoot) {
-      if (currentTime > deadline) {
+      if (currentTime > shootDeadline) {
         readyToShoot = true;
       } else {
         readyToShoot =

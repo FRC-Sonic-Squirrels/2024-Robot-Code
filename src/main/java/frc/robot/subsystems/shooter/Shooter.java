@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase {
       launcherkP.initDefault(0.5);
       launcherkV.initDefault(0.13);
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
-    } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
+    } else if (Constants.RobotMode.isSimBot()) {
       pivotkP.initDefault(15.0);
       pivotkD.initDefault(0.0);
       pivotkG.initDefault(0.0);
