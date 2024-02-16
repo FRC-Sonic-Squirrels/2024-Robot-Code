@@ -45,11 +45,7 @@ public class ShootingSolver {
   /**
    * @return robot theta and shooter pitch
    */
-  public Solution computeAngles(
-      double currentTime,
-      Pose2d robotPose,
-      Translation2d robotVel,
-      Translation2d robotAcceleration) {
+  public Solution computeAngles(double currentTime, Pose2d robotPose, Translation2d robotVel) {
     double timeToShoot;
     if (Double.isNaN(this.startOfShootingTimestamp)) {
       timeToShoot = shootingTime;
@@ -68,10 +64,7 @@ public class ShootingSolver {
     var Vrobot = GeometryUtil.translation2dTo3d(robotVel);
 
     // Position of robot when note leaves shooter
-    var ProbotFuture =
-        Probot.plus(
-            Vrobot.plus(GeometryUtil.translation2dTo3d(robotAcceleration.times(timeToShoot * 0.5)))
-                .times(timeToShoot));
+    var ProbotFuture = Probot.plus(Vrobot.times(timeToShoot));
     if (DebugSpew) {
       System.out.printf("ProbotFuture: %s\n", ProbotFuture);
     }
@@ -102,11 +95,10 @@ public class ShootingSolver {
 
     // Desired shooter pivot pitch
     // var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
-    var futureRobotVel = robotVel.plus(robotAcceleration.times(timeToShoot));
 
     var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
     var b =
-        -futureRobotVel
+        -robotVel
                 .rotateBy(Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY, dPspeakerAxisX)))
                 .getY()
             / shooterSpeed;
@@ -148,7 +140,7 @@ public class ShootingSolver {
     var noteRelativeVel = new Translation2d(VnoteHorizontal, 0);
 
     Rotation2d frameRotation = Rotation2d.fromRadians(-speakerHeading);
-    var robotVelInNewFrame = futureRobotVel.rotateBy(frameRotation);
+    var robotVelInNewFrame = robotVel.rotateBy(frameRotation);
     var noteRelativeVelInNewFrame = noteRelativeVel.rotateBy(frameRotation);
 
     double robotVelXInNewFrame = robotVelInNewFrame.getX();
