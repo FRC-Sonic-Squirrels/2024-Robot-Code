@@ -62,28 +62,24 @@ public class AutoSubstateMachine extends StateMachine {
             this.trajToGamePiece,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
-            config.getAutoThetaPidController(),
-            drive::getPoseEstimatorPose);
+            config.getAutoThetaPidController());
     return this::followPathToGamePiece;
   }
 
   private StateHandler followPathToGamePiece() {
-    Logger.recordOutput("Autonomous/followGPpathStarted", true);
     Logger.recordOutput("Autonomous/" + trajToGamepieceName + "Started", true);
-    Logger.recordOutput("Autonomous/timeFromStart", timeFromStart());
-    var chassisSpeeds = choreoHelper.calculateChassisSpeeds(timeFromStart());
-    if (!choreoHelper.isDone()) {
+    var chassisSpeeds =
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
+    if (chassisSpeeds != null) {
       // TODO: Check for note in intake.
       drive.setVelocityOverride(chassisSpeeds);
       return null;
     }
 
     if (!intake.getBeamBreak()) {
-      Logger.recordOutput("Autonomous/stopped", true);
+      Logger.recordOutput("Autonomous/gamepieceNotRecieved", true);
       return setStopped();
     }
-
-    Logger.recordOutput("Autonomous/followPathToShooterStarted", true);
 
     scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
     scoreSpeaker.schedule();
@@ -94,27 +90,24 @@ public class AutoSubstateMachine extends StateMachine {
             this.trajToShoot,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
-            config.getAutoThetaPidController(),
-            drive::getPoseEstimatorPose);
+            config.getAutoThetaPidController());
 
     return this::followPathToShooter;
   }
 
   private StateHandler followPathToShooter() {
-    Logger.recordOutput("Autonomous/time", timeFromStart());
     scoreSpeaker.updateVisualization();
     if (scoreSpeaker.isFinished()) {
-      Logger.recordOutput("Autonomous/ShooterDone", true);
       return setDone();
     }
 
-    var chassisSpeeds = choreoHelper.calculateChassisSpeeds(timeFromStart());
-    if (!choreoHelper.isDone()) {
+    var chassisSpeeds =
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
+    if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);
       return null;
     }
 
-    Logger.recordOutput("Autonomous/stopped", true);
     drive.resetVelocityOverride();
     return null;
   }
