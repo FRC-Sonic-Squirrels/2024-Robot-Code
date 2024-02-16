@@ -471,14 +471,15 @@ public class RobotContainer {
 
     driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
 
-    // driverController
-    //       .x()
-    //       .whileTrue(
-    //           new DrivetrainDefaultTeleopDrive(
-    //               drivetrainWrapper,
-    //               () -> -driverController.getLeftY(),
-    //               () -> -driverController.getLeftX(),
-    //               () -> -driverController.getRightX()));
+    if (false)
+      driverController
+          .x()
+          .whileTrue(
+              new DrivetrainDefaultTeleopDrive(
+                  drivetrainWrapper,
+                  () -> -driverController.getLeftY(),
+                  () -> -driverController.getLeftX(),
+                  () -> -driverController.getRightX()));
   }
 
   /**
