@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.configs.RobotConfig;
@@ -43,6 +44,12 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drivetrain extends SubsystemBase {
   public static final AutoLock odometryLock = new AutoLock();
+
+  public static final LoggedTunableNumber driveMotorAccelerationAuto =
+      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationAuto", 1);
+
+  public static final LoggedTunableNumber driveMotorAccelerationTele =
+      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationTele", 1);
 
   private final RobotConfig config;
   private final Supplier<Boolean> isAutonomous;
@@ -313,7 +320,15 @@ public class Drivetrain extends SubsystemBase {
 
     // Send setpoints to modules
     // The module returns the optimized state, useful for logging
-    var optimizedSetpointStates = modules.runSetpoints(setpointStates);
+
+    double driveMotorAcceleration;
+    if (isAutonomous.get()) {
+      driveMotorAcceleration = driveMotorAccelerationAuto.get();
+    } else {
+      driveMotorAcceleration = driveMotorAccelerationTele.get();
+    }
+
+    var optimizedSetpointStates = modules.runSetpoints(setpointStates, driveMotorAcceleration);
 
     // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);

@@ -3,7 +3,9 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainWrapper {
@@ -99,5 +101,12 @@ public class DrivetrainWrapper {
 
   public Rotation2d getRotationGyroOnly() {
     return drivetrain.getRotationGyroOnly();
+  }
+
+  public SysIdRoutine.Mechanism getSysIdMechanism() {
+    return new SysIdRoutine.Mechanism(
+        (voltage) -> drivetrain.runCharacterizationVolts(voltage.in(Units.Volts)),
+        null, // No log consumer, since data is recorded by AdvantageKit
+        drivetrain);
   }
 }

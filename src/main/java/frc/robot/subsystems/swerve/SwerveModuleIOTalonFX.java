@@ -17,8 +17,12 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -76,24 +80,34 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   private final StatusSignal<Double> turnVelocity;
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
+  private final double               distanceToRotation;
 
   private final BaseStatusSignal[] refreshSet;
 
   private VoltageOut driveVoltageRequest;
   private VoltageOut steerVoltageRequest;
 
-  private final RobotConfig globalConfig;
+  private MotionMagicVelocityVoltage driveMotionMagicVelocityRequest =
+      new MotionMagicVelocityVoltage(0.0).withAcceleration(0.0).withEnableFOC(true);
+
+  private MotionMagicVoltage turnMotionMagicVoltageRequest =
+      new MotionMagicVoltage(0.0).withEnableFOC(true);
+
   private final IndividualSwerveModuleConfig moduleSpecificConfig;
 
   private Rotation2d turnRelativeOffset; // Relative + Offset = Absolute
   private double lastPositionMeters;
 
+  private final BaseStatusSignal[] refreshSet;
+
   public SwerveModuleIOTalonFX(
       RobotConfig globalConfig, IndividualSwerveModuleConfig moduleSpecificConfig) {
 
     // --- define constants ---
-    this.globalConfig = globalConfig;
     this.moduleSpecificConfig = moduleSpecificConfig;
+
+    this.distanceToRotation =
+        1.0 / globalConfig.getWheelRadius().in(edu.wpi.first.units.Units.Meters);
 
     driveMotorCANID = moduleSpecificConfig.driveMotorCANID();
     steerMotorCANID = moduleSpecificConfig.steerMotorCANID();
@@ -122,6 +136,9 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     driveTalonConfig.CurrentLimits = driveMotorCurrentLimitConfig;
     driveTalonConfig.MotorOutput.Inverted = driveMotorInverted;
     driveTalonConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
+
+    driveTalonConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
+
     driveTalon.getConfigurator().apply(driveTalonConfig);
 
     setDriveBrakeMode(true);
@@ -131,6 +148,10 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     turnTalonConfig.CurrentLimits = steerMotorCurrentLimitConfig;
     turnTalonConfig.MotorOutput.Inverted = steerMotorInverted;
     // turnTalonConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
+
+    turnTalonConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnTalonConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
+
     turnTalon.getConfigurator().apply(turnTalonConfig);
 
     setTurnBrakeMode(true);
@@ -169,6 +190,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
         turnCurrent);
     driveTalon.optimizeBusUtilization();
     turnTalon.optimizeBusUtilization();
+    cancoder.optimizeBusUtilization();
 
     refreshSet =
         new BaseStatusSignal[] {
@@ -185,15 +207,12 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
     BaseStatusSignal.refreshAll(refreshSet);
 
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(drivePosition.getValueAsDouble()) / DRIVE_GEAR_RATIO;
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
+    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
-    inputs.turnVelocityRadPerSec =
-        Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
+    inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
   }
@@ -247,8 +266,31 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   }
 
   @Override
+  public void setDriveVelocity(
+      double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {
+
+    // m/s -> divide by wheel radius to get radians/s -> convert to rotations
+    var velocityRotationsPerSecond =
+        Units.radiansToRotations(velocityMetersPerSec * distanceToRotation);
+    var accelerationRotationsPerSecondSquared =
+        Units.radiansToRotations(accelerationMetersPerSecondSquared * distanceToRotation);
+
+    driveTalon.setControl(
+        driveMotionMagicVelocityRequest
+            .withVelocity(velocityRotationsPerSecond)
+            .withAcceleration(accelerationRotationsPerSecondSquared));
+  }
+
+  @Override
   public void setTurnVoltage(double volts) {
     turnTalon.setControl(steerVoltageRequest.withOutput(volts));
+  }
+
+  @Override
+  public void setTurnPosition(Rotation2d position) {
+    var rotations = position.getRotations();
+
+    turnTalon.setControl(turnMotionMagicVoltageRequest.withPosition(rotations));
   }
 
   @Override
@@ -267,5 +309,40 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     turnTalon.getConfigurator().apply(config);
+  }
+
+  @Override
+  public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV) {
+    Slot0Configs pidConfig = new Slot0Configs();
+
+    var configurator = driveTalon.getConfigurator();
+    configurator.refresh(pidConfig);
+
+    pidConfig.kP = kP;
+    pidConfig.kD = kD;
+    pidConfig.kS = kS;
+    pidConfig.kV = kV;
+
+    configurator.apply(pidConfig);
+  }
+
+  @Override
+  public void setTurnClosedLoopConstraints(
+      double kP, double kD, double cruiseVelocity, double acceleration) {
+    Slot0Configs pidConfig = new Slot0Configs();
+    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+
+    var configurator = turnTalon.getConfigurator();
+    configurator.refresh(pidConfig);
+    configurator.refresh(mmConfig);
+
+    pidConfig.kP = kP;
+    pidConfig.kD = kD;
+
+    mmConfig.MotionMagicCruiseVelocity = cruiseVelocity;
+    mmConfig.MotionMagicAcceleration = acceleration;
+
+    configurator.apply(pidConfig);
+    configurator.apply(mmConfig);
   }
 }

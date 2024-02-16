@@ -92,4 +92,18 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
 
   @Override
   public void setTurnBrakeMode(boolean enable) {}
+
+  @Override
+  public void setDriveVelocity(
+      double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {}
+
+  @Override
+  public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV) {}
+
+  @Override
+  public void setTurnPosition(Rotation2d position) {}
+
+  @Override
+  public void setTurnClosedLoopConstraints(
+      double kP, double kD, double cruiseVelocity, double acceleration) {}
 }

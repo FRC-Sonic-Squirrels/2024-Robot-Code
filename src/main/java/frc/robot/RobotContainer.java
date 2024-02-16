@@ -294,7 +294,7 @@ public class RobotContainer {
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
                   drivetrain::addVisionEstimate,
-                  config.getVisionModuleObjects());
+                  config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
           elevator = new Elevator(new ElevatorIO() {});
           intake = new Intake(new IntakeIO() {});
@@ -543,6 +543,18 @@ public class RobotContainer {
                             drivetrain.getPoseEstimatorPose().getX(),
                             drivetrain.getPoseEstimatorPose().getY(),
                             Constants.zeroRotation2d)),
+                drivetrain));
+
+    driverController
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    drivetrain.setPose(
+                        new Pose2d(
+                            drivetrain.getPoseEstimatorPose().getX(),
+                            drivetrain.getPoseEstimatorPose().getY(),
+                            new Rotation2d())),
                 drivetrain));
 
     driverController

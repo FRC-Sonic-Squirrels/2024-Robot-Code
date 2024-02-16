@@ -44,6 +44,20 @@ public interface SwerveModuleIO {
 
     @Override
     public void setTurnBrakeMode(boolean enable) {}
+
+    @Override
+    public void setDriveVelocity(
+        double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {}
+
+    @Override
+    public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV) {}
+
+    @Override
+    public void setTurnPosition(Rotation2d position) {}
+
+    @Override
+    public void setTurnClosedLoopConstraints(
+        double kP, double kD, double cruiseVelocity, double acceleration) {}
   }
 
   @AutoLog
@@ -73,8 +87,17 @@ public interface SwerveModuleIO {
   /** Run the drive motor at the specified voltage. */
   void setDriveVoltage(double volts);
 
+  void setDriveVelocity(double velocityMetersPerSec, double accelerationMetersPerSecondSquared);
+
+  void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV);
+
   /** Run the turn motor at the specified voltage. */
   void setTurnVoltage(double volts);
+
+  void setTurnPosition(Rotation2d position);
+
+  void setTurnClosedLoopConstraints(
+      double kP, double kD, double cruiseVelocity, double acceleration);
 
   /** Enable or disable brake mode on the drive motor. */
   void setDriveBrakeMode(boolean enable);

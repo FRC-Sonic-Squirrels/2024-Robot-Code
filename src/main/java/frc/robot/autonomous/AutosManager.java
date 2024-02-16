@@ -7,8 +7,12 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachine;
 import frc.robot.autonomous.substates.DriveAfterSimpleShot;
@@ -27,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
@@ -76,6 +81,7 @@ public class AutosManager {
     list.add(this::middleAuto);
     list.add(this::ampAuto);
     list.add(this::simpleShootAuto);
+    list.add(this::swerveCharacterization);
 
     if (includeDebugPaths) {
       list.add(() -> testPath("TestDrive1Meter", true));
@@ -136,6 +142,42 @@ public class AutosManager {
 
   public Auto doNothing() {
     return new Auto("doNothing", new InstantCommand(), new Pose2d());
+  }
+
+  public Auto swerveCharacterization() {
+    var sysidConfig =
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> {
+              if (state != SysIdRoutineLog.State.kNone) {
+                Logger.recordOutput("Sysid/swervesysidstate", state);
+              }
+            });
+
+    var mechanism = new SysIdRoutine(sysidConfig, drivetrain.getSysIdMechanism());
+
+    var command1 = mechanism.quasistatic(Direction.kForward);
+    var command2 = mechanism.quasistatic(Direction.kReverse);
+    var command3 = mechanism.dynamic(Direction.kForward);
+    var command4 = mechanism.dynamic(Direction.kReverse);
+
+    var finalCommand =
+        command1
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command2)
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command3)
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command4)
+            .andThen(
+                Commands.runOnce(
+                    () ->
+                        Logger.recordOutput(
+                            "Sysid/swervesysidstate", SysIdRoutineLog.State.kNone)));
+
+    return new Auto("swerveCharacterization", finalCommand, new Pose2d());
   }
 
   private Auto sourceAuto() {
@@ -286,15 +328,39 @@ public class AutosManager {
 
   /* Copy these to get waypoints for choreo. If pasted in choreo, they will automatically be turned into waypoints
 
-  G1: {"dataType":"choreo/waypoint","x":8.273,"y":7.474,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":17}
-  G2: {"dataType":"choreo/waypoint","x":8.273,"y":5.792,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  G3: {"dataType":"choreo/waypoint","x":8.273,"y":4.11,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  G4: {"dataType":"choreo/waypoint","x":8.273,"y":2.428,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  G5: {"dataType":"choreo/waypoint","x":8.273,"y":0.742,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  G1: {
+  "dataType":"choreo/waypoint","x":8.273,"y":7.474,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":17
+  }
+  G2: {
+  "dataType":"choreo/waypoint","x":8.273,"y":5.792,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
+  G3: {
+  "dataType":"choreo/waypoint","x":8.273,"y":4.11,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
+  G4: {
+  "dataType":"choreo/waypoint","x":8.273,"y":2.428,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
+  G5: {
+  "dataType":"choreo/waypoint","x":8.273,"y":0.742,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
 
-  S1: {"dataType":"choreo/waypoint","x":4.241904258728027,"y":6.103699207305908,"heading":0.185945735814592,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  S2: {"dataType":"choreo/waypoint","x":4.60924768447876,"y":4.741092681884766,"heading":-0.1594733550343424,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  S3: {"dataType":"choreo/waypoint","x":3.2595736980438232,"y":2.54587984085083,"heading":-0.5838703049653,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  S1: {
+  "dataType":"choreo/waypoint","x":4.241904258728027,"y":6.103699207305908,"heading":0.185945735814592,
+  "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
+  S2: {
+  "dataType":"choreo/waypoint","x":4.60924768447876,"y":4.741092681884766,"heading":-0.1594733550343424,
+  "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
+  S3: {
+  "dataType":"choreo/waypoint","x":3.2595736980438232,"y":2.54587984085083,"heading":-0.5838703049653,
+  "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
+  }
 
   */
 }

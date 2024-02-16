@@ -14,8 +14,6 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -29,17 +27,17 @@ import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   public static final double ODOMETRY_FREQUENCY = 250.0;
+  public static final double MAX_VOLTAGE = 12.0;
 
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final String index;
   private final double wheelRadius;
 
-  private SimpleMotorFeedforward driveFeedforward;
-  private final PIDController driveFeedback;
-  private final PIDController turnFeedback;
-  private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
+  public static final LoggedTunableNumber turnCruiseVelocity =
+      new LoggedTunableNumber("RobotConfig/SwerveTurnCruiseVelocity", 1600);
+  public static final LoggedTunableNumber turnAcceleration =
+      new LoggedTunableNumber("RobotConfig/SwerveTurnAcceleration", 1600);
 
   private final LoggedTunableNumber driveKS;
   private final LoggedTunableNumber driveKV;
@@ -50,6 +48,10 @@ public class SwerveModule {
 
   private final LoggedTunableNumber angleKP;
   private final LoggedTunableNumber angleKD;
+
+  private Rotation2d angleSetpoint; // Setpoint for closed loop control, null for open loop
+  private Double speedSetpoint; // Setpoint for closed loop control, null for open loop
+  private double driveMotorMotionMagicAcceleration;
 
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
@@ -67,11 +69,10 @@ public class SwerveModule {
     angleKP = config.getAngleKP();
     angleKD = config.getAngleKD();
 
-    driveFeedforward = new SimpleMotorFeedforward(driveKS.get(), driveKV.get());
-    driveFeedback = new PIDController(driveKP.get(), 0.0, driveKD.get());
-    turnFeedback = new PIDController(angleKP.get(), 0.0, angleKD.get());
+    io.setDriveClosedLoopConstraints(driveKP.get(), driveKD.get(), driveKS.get(), driveKV.get());
+    io.setTurnClosedLoopConstraints(
+        angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
 
-    turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
     setBrakeMode(true);
   }
 
@@ -100,34 +101,25 @@ public class SwerveModule {
           || driveKP.hasChanged(hc)
           || driveKD.hasChanged(hc)
           || angleKP.hasChanged(hc)
-          || angleKD.hasChanged(hc)) {
-        driveFeedforward = new SimpleMotorFeedforward(driveKS.get(), driveKV.get());
-
-        driveFeedback.setPID(driveKP.get(), 0.0, driveKD.get());
-        turnFeedback.setPID(angleKP.get(), 0.0, angleKD.get());
+          || angleKD.hasChanged(hc)
+          || turnCruiseVelocity.hasChanged(hc)
+          || turnAcceleration.hasChanged(hc)) {
+        io.setDriveClosedLoopConstraints(
+            driveKP.get(),
+            driveKD.get(),
+            driveKS.get(),
+            driveKV.get()); // FIXME: do we need need ks?
+        io.setTurnClosedLoopConstraints(
+            angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
       }
 
       // Run closed loop turn control
       if (angleSetpoint != null) {
-        io.setTurnVoltage(
-            turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
+        io.setTurnPosition(angleSetpoint);
+      }
 
-        // Run closed loop drive control
-        // Only allowed if closed loop turn control is running
-        if (speedSetpoint != null) {
-          // Scale velocity based on turn error
-          //
-          // When the error is 90^, the velocity setpoint should be 0. As the wheel turns
-          // towards the setpoint, its velocity should increase. This is achieved by
-          // taking the component of the velocity in the direction of the setpoint.
-          double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
-
-          // Run drive controller
-          double velocityRadPerSec = adjustSpeedSetpoint / wheelRadius;
-          io.setDriveVoltage(
-              driveFeedforward.calculate(velocityRadPerSec)
-                  + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
-        }
+      if (speedSetpoint != null) {
+        io.setDriveVelocity(speedSetpoint, driveMotorMotionMagicAcceleration);
       }
     }
   }
@@ -137,7 +129,8 @@ public class SwerveModule {
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
-  public SwerveModuleState runSetpoint(SwerveModuleState state) {
+  public SwerveModuleState runSetpoint(
+      SwerveModuleState state, double driveMotorMotionMagicAcceleration) {
     // Optimize state based on current angle
     // Controllers run in "periodic" when the setpoint is not null
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
@@ -146,15 +139,13 @@ public class SwerveModule {
     angleSetpoint = optimizedState.angle;
     speedSetpoint = optimizedState.speedMetersPerSecond;
 
+    this.driveMotorMotionMagicAcceleration = driveMotorMotionMagicAcceleration;
+
     return optimizedState;
   }
 
   /** Runs the module with the specified voltage while controlling to zero degrees. */
   public void runCharacterization(double volts) {
-    // Closed loop turn control
-    angleSetpoint = Constants.zeroRotation2d;
-
-    // Open loop drive control
     io.setDriveVoltage(volts);
     speedSetpoint = null;
   }
@@ -208,5 +199,9 @@ public class SwerveModule {
   public void getCurrentAmps(double[] array, int offset) {
     array[offset] = inputs.driveCurrentAmps;
     array[offset + 1] = inputs.turnCurrentAmps;
+  }
+
+  public double getAppliedVoltage() {
+    return inputs.driveAppliedVolts;
   }
 }
