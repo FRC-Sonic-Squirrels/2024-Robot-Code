@@ -162,7 +162,6 @@ public class ShootingSolver {
     }
 
     double targetTheta = speakerHeading + thetaInNewFrame;
-    // double targetTheta = speakerHeading;
 
     if (DebugSpew) {
       double robotVelX = robotVel.getX();
@@ -202,9 +201,6 @@ public class ShootingSolver {
     var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 
     return new Solution(
-        timeToShoot,
-        Rotation2d.fromRadians(targetTheta),
-        rateOfRotation,
-        Rotation2d.fromRadians(pitchNote));
+        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(pitchNote));
   }
 }

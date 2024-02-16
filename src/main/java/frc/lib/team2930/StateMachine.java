@@ -166,6 +166,7 @@ public class StateMachine {
       subStateMachine.advance();
       Logger.recordOutput("Autonomous/subStateStatus", subStateMachine.status);
       if (subStateMachine.isRunning()) return null;
+
       return handler.advance(subStateMachine);
     };
   }
