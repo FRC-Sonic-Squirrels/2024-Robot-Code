@@ -21,6 +21,7 @@ public class ElevatorSetHeight extends Command {
   public ElevatorSetHeight(Elevator elevator, Supplier<Measure<Distance>> heightSupplier) {
     this.elevator = elevator;
     this.heightSupplier = heightSupplier;
+    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -42,7 +43,9 @@ public class ElevatorSetHeight extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    Logger.recordOutput("elevatorSetHeight", false);
+  }
 
   // Returns true when the command should end.
   @Override
