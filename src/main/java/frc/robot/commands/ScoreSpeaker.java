@@ -60,11 +60,9 @@ public class ScoreSpeaker extends Command {
 
   private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
 
-  private Timer timeSinceShot = new Timer();
-
   private Double deadline;
 
-  private Timer runTime = new Timer();
+  private double shootDeadline;
 
   /**
    * Creates a new RotateToSpeaker.
@@ -102,7 +100,7 @@ public class ScoreSpeaker extends Command {
   @Override
   public void initialize() {
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
-    runTime.start();
+    shootDeadline = deadline != null ? Timer.getFPGATimestamp() + deadline : Double.MAX_VALUE;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -115,10 +113,7 @@ public class ScoreSpeaker extends Command {
 
     var result =
         solver.computeAngles(
-            currentTime,
-            poseEstimatorPose,
-            drive.getFieldRelativeVelocities().getTranslation(),
-            drive.getFieldRelativeAccelerations());
+            currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
 
     double targetRotation;
     double targetAngularSpeed;
@@ -202,38 +197,34 @@ public class ScoreSpeaker extends Command {
                         - drive.getPoseEstimatorPose().getY()))));
 
     if (result != null && !readyToShoot) {
-      boolean shootAnyway = false;
-      if (deadline != null) {
-        shootAnyway = runTime.get() >= deadline;
+      if (currentTime > deadline) {
+        readyToShoot = true;
+      } else {
+        readyToShoot =
+            shootGamepiece.getAsBoolean()
+                && shooter.isPivotIsAtTarget()
+                && rotationController.atSetpoint()
+                && shooter.isAtTargetRPM()
+                && shootingPosition();
+
+        if (readyToShoot) {
+          solver.startShooting(Timer.getFPGATimestamp());
+        }
       }
-      readyToShoot =
-          (shootGamepiece.getAsBoolean()
-                  && shooter.isPivotIsAtTarget()
-                  && rotationController.atSetpoint()
-                  && shooter.isAtTargetRPM()
-                  && shootingPosition())
-              || shootAnyway;
 
-      if (readyToShoot) {
-        solver.startShooting(Timer.getFPGATimestamp());
-        timeSinceShot.start();
+      Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
+      Logger.recordOutput(
+          "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
+      Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
+      Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
+      Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
+      Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
+
+      if (solver.isShooting()) {
+        shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+      } else if (readyToShoot) {
+        shooter.setKickerPercentOut(0.0);
       }
-    }
-
-    Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
-    Logger.recordOutput(
-        "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
-    Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
-    Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
-    Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
-    Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
-
-    if (solver.isShooting()) {
-      shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
-    } else if (readyToShoot) {
-      timeSinceShot.stop();
-      timeSinceShot.reset();
-      shooter.setKickerPercentOut(0.0);
     }
 
     updateVisualization();
@@ -244,9 +235,6 @@ public class ScoreSpeaker extends Command {
   public void end(boolean interrupted) {
     drive.resetVelocityOverride();
     drive.resetRotationOverride();
-
-    runTime.stop();
-    runTime.reset();
 
     Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", 0.0);
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", 0.0);
