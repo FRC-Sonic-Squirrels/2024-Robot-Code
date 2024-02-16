@@ -464,7 +464,7 @@ public class RobotContainer {
                 .alongWith(Commands.runOnce(() -> intake.setPercentOut(0.5), intake)))
         .onFalse(Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
 
-    // driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
+    driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
   }
 
   /**
