@@ -13,7 +13,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOReal implements ElevatorIO {
 
@@ -73,12 +72,6 @@ public class ElevatorIOReal implements ElevatorIO {
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = tempCelsius.getValueAsDouble();
-
-    // closedLoopControl.EnableFOC = fal
-
-    closedLoopControl.EnableFOC = false;
-
-    Logger.recordOutput("Elevator/periodicMotorRot", closedLoopControl.Position);
   }
 
   @Override
@@ -91,10 +84,6 @@ public class ElevatorIOReal implements ElevatorIO {
   public void setHeight(double heightInches) {
     closedLoopControl.withPosition(heightInches * inchesToMotorRot);
     motor.setControl(closedLoopControl);
-
-    Logger.recordOutput("Elevator/motorRotSetpoint", heightInches * inchesToMotorRot);
-
-    System.out.println("in here");
   }
 
   @Override

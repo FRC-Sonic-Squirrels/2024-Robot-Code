@@ -7,7 +7,6 @@ package frc.robot.commands.elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.elevator.Elevator;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSetHeight extends Command {
   /** Creates a new ElevatorSetHeight. */
@@ -34,16 +33,11 @@ public class ElevatorSetHeight extends Command {
   @Override
   public void execute() {
     elevator.setHeight(heightSupplier.getAsDouble());
-
-    System.out.println("height setpoint: " + heightSupplier.getAsDouble());
-    Logger.recordOutput("elevatorSetHeight", true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    Logger.recordOutput("elevatorSetHeight", false);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
