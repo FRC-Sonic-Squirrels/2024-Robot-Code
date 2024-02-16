@@ -193,7 +193,7 @@ public class PoseEstimator {
           // Calculate twist between current and vision pose
           var visionTwist = pose.log(visionUpdate.pose());
 
-          // Apply twist, multipling by Kalman gain values
+          // Apply twist, multiplying by Kalman gain values
           pose =
               pose.exp(
                   new Twist2d(
