@@ -429,17 +429,6 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
-    if (true) {
-      driverController
-          .x()
-          .whileTrue(
-              new DrivetrainDefaultTeleopDrive(
-                  drivetrainWrapper,
-                  () -> -driverController.getLeftY(),
-                  () -> -driverController.getLeftX(),
-                  () -> -driverController.getRightX()));
-    }
-
     // driverController
     //     .rightTrigger()
     //     .whileTrue(
