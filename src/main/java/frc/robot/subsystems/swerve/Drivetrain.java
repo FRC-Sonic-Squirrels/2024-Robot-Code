@@ -73,34 +73,6 @@ public class Drivetrain extends SubsystemBase {
 
     // FIXME: values copied from 6328, learn how to calculate these values
     poseEstimator = new PoseEstimator(0.003, 0.003, 0.0002);
-
-    // Configure AutoBuilder for PathPlanner
-    // FIXME: pass in custom PID constants? Issue for this use case has been created:
-    // https://github.com/mjansen4857/pathplanner/issues/474
-    // FIXME: fix all the pathplanner jank
-    // AutoBuilder.configureHolonomic(
-    //   this::getPose,
-    //   this::setPose,
-    //   () -> kinematics.toChassisSpeeds(getModuleStates()),
-    //   this::runVelocity,
-    //   new HolonomicPathFollowerConfig(
-    //     getMaxAngularSpeedRadPerSec(),
-    //     getCharacterizationVelocity(),
-    //     new ReplanningConfig()),
-    //   () -> true,
-    //   this);
-
-    // // FIXME:
-    // Pathfinding.setPathfinder(new LocalADStarAK());
-    // PathPlannerLogging.setLogActivePathCallback(
-    //     (activePath) -> {
-    //       Logger.recordOutput(
-    //           "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-    //     });
-    // PathPlannerLogging.setLogTargetPoseCallback(
-    //     (targetPose) -> {
-    //       Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-    //     });
   }
 
   private Translation2d simulatedAcceleration = new Translation2d();
@@ -185,12 +157,37 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  /**
-   * Runs the drive at the desired velocity.
-   *
-   * @param speeds Speeds in meters/sec
-   */
-  public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
+  public void runOpenLoop(ChassisSpeeds speeds, boolean prioritizeRotation) {
+    var setpointStates = filterChassisSpeedsAndReturnSwerveStates(speeds, prioritizeRotation);
+
+    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+    for (int i = 0; i < 4; i++) {
+      // The module returns the optimized state, useful for logging
+      optimizedSetpointStates[i] = modules[i].runOpenLoop(setpointStates[i]);
+    }
+
+    // Log setpoint states
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+  }
+
+  public void runClosedLoop(ChassisSpeeds speeds, boolean prioritizeRotation) {
+    var setpointStates = filterChassisSpeedsAndReturnSwerveStates(speeds, prioritizeRotation);
+
+    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+    for (int i = 0; i < 4; i++) {
+      // The module returns the optimized state, useful for logging
+      optimizedSetpointStates[i] = modules[i].runClosedLoopSetpoint(setpointStates[i]);
+    }
+
+    // Log setpoint states
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+  }
+
+  public SwerveModuleState[] filterChassisSpeedsAndReturnSwerveStates(
+      ChassisSpeeds speeds, boolean prioritizeRotation) {
+
     if (prioritizeRotation) {
       // Calculate module setpoints
 
@@ -266,21 +263,12 @@ public class Drivetrain extends SubsystemBase {
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, config.getRobotMaxLinearVelocity());
 
-    // Send setpoints to modules
-    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
-      optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
-    }
-
-    // Log setpoint states
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+    return setpointStates;
   }
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds(), false);
+    runOpenLoop(new ChassisSpeeds(), false);
   }
 
   /**
