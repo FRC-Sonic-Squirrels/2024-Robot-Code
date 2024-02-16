@@ -38,6 +38,7 @@
     "CANivor"
     "CTRE",
     "Gamepiece",
+    "kalman",
     "launcherk",
     "ODOMETRY",
     "pivotk",
