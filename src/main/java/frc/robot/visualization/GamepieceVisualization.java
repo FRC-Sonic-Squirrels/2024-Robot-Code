@@ -41,7 +41,7 @@ public class GamepieceVisualization {
       Translation2d robotVel,
       Rotation2d shooterAngle,
       double shooterRPM,
-      Boolean shootingGamepiece) {
+      boolean shootingGamepiece) {
     this.shootingGamepiece = shootingGamepiece;
     gamepieceShot = shootingGamepiece && !shootingPrev;
     if (gamepieceShot) {
@@ -54,6 +54,7 @@ public class GamepieceVisualization {
   }
 
   public void logTraj() {
+    double shootingTime = shootingTimer.get();
     Logger.recordOutput("Visualization/shootingGamepiece", shootingGamepiece);
     if (gamepieceShot) shootingTimer.start();
     if (!shootingGamepiece) {
@@ -92,20 +93,20 @@ public class GamepieceVisualization {
         Rotation2d.fromRadians(
             Math.atan2(gamepieceVel.getZ(), Math.hypot(gamepieceVel.getX(), gamepieceVel.getY())));
 
-    showingPath = !(shootingTimer.get() * gamepieceLinearVel <= dist);
+    showingPath = !(shootingTime * gamepieceLinearVel <= dist);
     showPath = showingPath && !prevShowingPath;
     if (!poses.isEmpty())
       poses.set(
           0, new Pair<Pose3d, Double>(new Pose3d(0.0, 0.0, -1000.0, new Rotation3d()), 10000000.0));
     if (shootingGamepiece) {
-      if (shootingTimer.get() * gamepieceLinearVel <= dist) {
+      if (shootingTime * gamepieceLinearVel <= dist) {
         if (initial) {
           poses.add(
               0,
               new Pair<Pose3d, Double>(
                   new Pose3d(
                       new Translation3d(
-                              shootingTimer.get() * gamepieceLinearVel,
+                              shootingTime * gamepieceLinearVel,
                               new Rotation3d(0.0, -pitch.getRadians(), yaw.getRadians() + Math.PI))
                           .plus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation())),
                       new Rotation3d(
@@ -120,7 +121,7 @@ public class GamepieceVisualization {
             new Pair<Pose3d, Double>(
                 new Pose3d(
                     new Translation3d(
-                            shootingTimer.get() * gamepieceLinearVel,
+                            shootingTime * gamepieceLinearVel,
                             new Rotation3d(0.0, -pitch.getRadians(), yaw.getRadians() + Math.PI))
                         .plus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation())),
                     new Rotation3d(
