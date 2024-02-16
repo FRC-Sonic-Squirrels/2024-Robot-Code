@@ -34,12 +34,21 @@
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
   "cSpell.words": [
+    "CANID",
+    "CANivor"
     "CTRE",
+    "Gamepiece",
     "launcherk",
     "ODOMETRY",
     "pivotk",
+    "ROBER",
+    "RoboRIO",
     "Setpoint",
-    "SIMBOT"
+    "SIMBOT",
+    "Tele",
+    "Teleop",
+    "wpilibj",
+    "WPILOG"
   ],
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
   "java.debug.settings.onBuildFailureProceed": true

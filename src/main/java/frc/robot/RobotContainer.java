@@ -116,7 +116,7 @@ public class RobotContainer {
     try {
       aprilTagLayout = config.getAprilTagFieldLayout();
     } catch (Exception e) {
-      // FIXME:
+      // FIXME: throw an error.
       aprilTagLayout = new AprilTagFieldLayout(new ArrayList<AprilTag>(), 0.0, 0.0);
     }
 
@@ -141,59 +141,77 @@ public class RobotContainer {
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
+        case ROBOT_SIMBOT_REAL_CAMERAS:
         case ROBOT_SIMBOT:
           com.ctre.phoenix6.unmanaged.Unmanaged.setPhoenixDiagnosticsStartTime(0.0);
 
           drivetrain = new Drivetrain(config, new GyroIO() {}, config.getSwerveModuleObjects());
-          VisionModuleConfiguration[] visionModules = {
-            new VisionModuleConfiguration(
-                new VisionIOSim(
-                    config,
-                    drivetrain::getPoseEstimatorPose,
-                    SimulatorRobotConfig.INTAKE_SIDE_LEFT,
-                    SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME),
-                SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME,
-                SimulatorRobotConfig.INTAKE_SIDE_LEFT),
-            new VisionModuleConfiguration(
-                new VisionIOSim(
-                    config,
-                    drivetrain::getPoseEstimatorPose,
-                    SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
-                    SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME),
-                SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-                SimulatorRobotConfig.INTAKE_SIDE_RIGHT),
-            new VisionModuleConfiguration(
-                new VisionIOSim(
-                    config,
-                    drivetrain::getPoseEstimatorPose,
-                    SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
-                    SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME),
-                SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
-                SimulatorRobotConfig.SHOOTER_SIDE_LEFT),
-            new VisionModuleConfiguration(
-                new VisionIOSim(
-                    config,
-                    drivetrain::getPoseEstimatorPose,
-                    SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
-                    SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME),
-                SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-                SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
-          };
 
-          vision =
-              new Vision(
-                  aprilTagLayout,
-                  drivetrain::getPoseEstimatorPose,
-                  drivetrain::addVisionEstimate,
-                  visionModules);
+          if (robotType == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
+            // Sim Robot, Real Cameras
+            vision =
+                new Vision(
+                    aprilTagLayout,
+                    drivetrain::getPoseEstimatorPose,
+                    drivetrain::addVisionEstimate,
+                    config.getVisionModuleObjects());
+
+            visionGamepiece =
+                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+
+          } else {
+            VisionModuleConfiguration[] visionModules = {
+              new VisionModuleConfiguration(
+                  new VisionIOSim(
+                      config,
+                      drivetrain::getPoseEstimatorPose,
+                      SimulatorRobotConfig.INTAKE_SIDE_LEFT,
+                      SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME),
+                  SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME,
+                  SimulatorRobotConfig.INTAKE_SIDE_LEFT),
+              new VisionModuleConfiguration(
+                  new VisionIOSim(
+                      config,
+                      drivetrain::getPoseEstimatorPose,
+                      SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
+                      SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME),
+                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
+                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT),
+              new VisionModuleConfiguration(
+                  new VisionIOSim(
+                      config,
+                      drivetrain::getPoseEstimatorPose,
+                      SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
+                      SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME),
+                  SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
+                  SimulatorRobotConfig.SHOOTER_SIDE_LEFT),
+              new VisionModuleConfiguration(
+                  new VisionIOSim(
+                      config,
+                      drivetrain::getPoseEstimatorPose,
+                      SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
+                      SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME),
+                  SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
+                  SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
+            };
+            // Sim Cameras
+            vision =
+                new Vision(
+                    aprilTagLayout,
+                    drivetrain::getPoseEstimatorPose,
+                    drivetrain::addVisionEstimate,
+                    visionModules);
+
+            visionGamepiece =
+                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+          }
+
           arm = new Arm(new ArmIOSim());
           elevator = new Elevator(new ElevatorIOSim());
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
           led = new LED();
-          visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -217,7 +235,8 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024:
-          // README: for development purposes, comment any of the real IO's you DONT want to use and
+          // README: for development purposes, comment any of the real IO's you DON'T want to use
+          // and
           // uncomment the empty IO's as a replacement
 
           // -- All real IO's

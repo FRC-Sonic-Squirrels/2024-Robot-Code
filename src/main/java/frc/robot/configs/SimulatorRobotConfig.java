@@ -14,6 +14,7 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
@@ -119,13 +120,11 @@ public class SimulatorRobotConfig extends RobotConfig {
               Units.inchesToMeters(22.31306)),
           new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
 
-  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "INTAKE_SIDE_LEFT";
-  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "INTAKE_SIDE_RIGHT";
-  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "SHOOTER_SIDE_LEFT";
-  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "SHOOTER_SIDE_RIGHT";
-  // public static final String FRONT_LEFT_CAMERA_NAME = "LeftCamera";
-  // public static final String FRONT_RIGHT_CAMERA_NAME = "RightCamera";
-  // public static final String BACK_CAMERA_NAME = "BackCamera";
+  public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
+  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
+  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "2_Shooter_Right_See3Cam";
+  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "3_Intake_Left_See3Cam";
+  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "4_Intake_Right_See3Cam";
 
   public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
@@ -165,12 +164,41 @@ public class SimulatorRobotConfig extends RobotConfig {
     return modules;
   }
 
+  //
+  // @Override
+  // public VisionModuleConfiguration[] getVisionModuleObjects() {
+  //   // does not work for SIM because we need to give VisionIOSim a pose supplier which can only
+  // be
+  //   // obtained from the drivetrain
+  //   throw new RuntimeException("Unsupported action for SIM BOT");
+  // }
+
   // FIXME: define vision modules here
+  // CAVEAT: only call when we're testing real cameras on sim robot
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    // does not work for SIM because we need to give VisionIOSim a pose supplier which can only be
-    // obtained from the drivetrain
-    throw new RuntimeException("Unsupported action for SIM BOT");
+    VisionModuleConfiguration intakeLeft =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(INTAKE_SIDE_LEFT_CAMERA_NAME),
+            INTAKE_SIDE_LEFT_CAMERA_NAME,
+            INTAKE_SIDE_LEFT);
+    VisionModuleConfiguration intakeRight =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(INTAKE_SIDE_RIGHT_CAMERA_NAME),
+            INTAKE_SIDE_RIGHT_CAMERA_NAME,
+            INTAKE_SIDE_RIGHT);
+    VisionModuleConfiguration shooterLeft =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(SHOOTER_SIDE_LEFT_CAMERA_NAME),
+            SHOOTER_SIDE_LEFT_CAMERA_NAME,
+            SHOOTER_SIDE_LEFT);
+    VisionModuleConfiguration shooterRight =
+        new VisionModuleConfiguration(
+            new VisionIOPhotonVision(SHOOTER_SIDE_RIGHT_CAMERA_NAME),
+            SHOOTER_SIDE_RIGHT_CAMERA_NAME,
+            SHOOTER_SIDE_RIGHT);
+
+    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
   }
 
   @Override
