@@ -433,7 +433,7 @@ public class Drivetrain extends SubsystemBase {
     //      taking effect. As a result, it is recommended to never set the yaw and
     //      adjust the local offset instead.
     if (gyroInputs.connected) {
-      expectedYaw.minus(gyroInputs.yawPosition);
+      gyroOffset = expectedYaw.minus(gyroInputs.yawPosition);
     } else {
       gyroOffset = new Rotation2d();
     }
