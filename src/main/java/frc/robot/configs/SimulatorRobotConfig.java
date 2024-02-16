@@ -13,8 +13,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
@@ -154,14 +152,12 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   @Override
   public SwerveModule[] getReplaySwerveModuleObjects() {
-    SwerveModule[] modules = {
+    return new SwerveModule[] {
       new SwerveModule(0, this, new SwerveModuleIO() {}),
       new SwerveModule(1, this, new SwerveModuleIO() {}),
       new SwerveModule(2, this, new SwerveModuleIO() {}),
       new SwerveModule(3, this, new SwerveModuleIO() {}),
     };
-
-    return modules;
   }
 
   //
@@ -177,55 +173,22 @@ public class SimulatorRobotConfig extends RobotConfig {
   // CAVEAT: only call when we're testing real cameras on sim robot
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    VisionModuleConfiguration intakeLeft =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(INTAKE_SIDE_LEFT_CAMERA_NAME),
-            INTAKE_SIDE_LEFT_CAMERA_NAME,
-            INTAKE_SIDE_LEFT);
-    VisionModuleConfiguration intakeRight =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(INTAKE_SIDE_RIGHT_CAMERA_NAME),
-            INTAKE_SIDE_RIGHT_CAMERA_NAME,
-            INTAKE_SIDE_RIGHT);
-    VisionModuleConfiguration shooterLeft =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(SHOOTER_SIDE_LEFT_CAMERA_NAME),
-            SHOOTER_SIDE_LEFT_CAMERA_NAME,
-            SHOOTER_SIDE_LEFT);
-    VisionModuleConfiguration shooterRight =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(SHOOTER_SIDE_RIGHT_CAMERA_NAME),
-            SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-            SHOOTER_SIDE_RIGHT);
-
-    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      VisionModuleConfiguration.build(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
+      VisionModuleConfiguration.build(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
+    };
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    VisionModuleConfiguration intakeLeft =
-        new VisionModuleConfiguration(
-            new VisionIO() {}, SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT);
-
-    VisionModuleConfiguration intakeRight =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-            INTAKE_SIDE_RIGHT);
-
-    VisionModuleConfiguration shooterLeft =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
-            SHOOTER_SIDE_LEFT);
-
-    VisionModuleConfiguration shooterRight =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-            SHOOTER_SIDE_RIGHT);
-
-    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
+      VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
+    };
   }
 
   @Override

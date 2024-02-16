@@ -15,8 +15,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class RobotConfig2023Rober extends RobotConfig {
@@ -210,32 +208,19 @@ public class RobotConfig2023Rober extends RobotConfig {
   // FIXME: define vision modules here
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(FRONT_LEFT_CAMERA_NAME),
-            "frontLeft",
-            FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(FRONT_RIGHT_CAMERA_NAME),
-            "frontRight",
-            FRONT_RIGHT_ROBOT_TO_CAMERA);
-    // VisionModule back = new VisionModule(new VisionIOPhotonVision(BACK_CAMERA_NAME), "back",
-    // BACK_ROBOT_TO_CAMERA);
-
     return new VisionModuleConfiguration[] {
-      frontLeft, frontRight, /*back*/
+      VisionModuleConfiguration.build(FRONT_LEFT_CAMERA_NAME, FRONT_LEFT_ROBOT_TO_CAMERA),
+      VisionModuleConfiguration.build(FRONT_RIGHT_CAMERA_NAME, FRONT_RIGHT_ROBOT_TO_CAMERA)
     };
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-
-    return new VisionModuleConfiguration[] {frontLeft, frontRight};
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.buildReplayStub(FRONT_LEFT_CAMERA_NAME, FRONT_LEFT_ROBOT_TO_CAMERA),
+      VisionModuleConfiguration.buildReplayStub(
+          FRONT_RIGHT_CAMERA_NAME, FRONT_RIGHT_ROBOT_TO_CAMERA)
+    };
   }
 
   @Override

@@ -57,7 +57,6 @@ import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
@@ -162,38 +161,26 @@ public class RobotContainer {
 
           } else {
             VisionModuleConfiguration[] visionModules = {
-              new VisionModuleConfiguration(
-                  new VisionIOSim(
-                      config,
-                      drivetrain::getPoseEstimatorPose,
-                      SimulatorRobotConfig.INTAKE_SIDE_LEFT,
-                      SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME),
+              VisionModuleConfiguration.buildSim(
                   SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME,
-                  SimulatorRobotConfig.INTAKE_SIDE_LEFT),
-              new VisionModuleConfiguration(
-                  new VisionIOSim(
-                      config,
-                      drivetrain::getPoseEstimatorPose,
-                      SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
-                      SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME),
+                  SimulatorRobotConfig.INTAKE_SIDE_LEFT,
+                  config,
+                  drivetrain::getPoseEstimatorPose),
+              VisionModuleConfiguration.buildSim(
                   SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT),
-              new VisionModuleConfiguration(
-                  new VisionIOSim(
-                      config,
-                      drivetrain::getPoseEstimatorPose,
-                      SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
-                      SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME),
+                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
+                  config,
+                  drivetrain::getPoseEstimatorPose),
+              VisionModuleConfiguration.buildSim(
                   SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
-                  SimulatorRobotConfig.SHOOTER_SIDE_LEFT),
-              new VisionModuleConfiguration(
-                  new VisionIOSim(
-                      config,
-                      drivetrain::getPoseEstimatorPose,
-                      SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
-                      SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME),
+                  SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
+                  config,
+                  drivetrain::getPoseEstimatorPose),
+              VisionModuleConfiguration.buildSim(
                   SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-                  SimulatorRobotConfig.SHOOTER_SIDE_RIGHT),
+                  SimulatorRobotConfig.SHOOTER_SIDE_RIGHT,
+                  config,
+                  drivetrain::getPoseEstimatorPose),
             };
             // Sim Cameras
             vision =
@@ -471,7 +458,7 @@ public class RobotContainer {
 
     driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
 
-    if (false)
+    if (false) {
       driverController
           .x()
           .whileTrue(
@@ -480,6 +467,7 @@ public class RobotContainer {
                   () -> -driverController.getLeftY(),
                   () -> -driverController.getLeftX(),
                   () -> -driverController.getRightX()));
+    }
   }
 
   /**
