@@ -36,7 +36,7 @@ public class Vision extends SubsystemBase {
       new LoggedTunableNumber("Vision/MaxSingleTargetAmbiguity", 0.08);
 
   private static LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
-      new LoggedTunableNumber("Vision/MaxValidDistanceFromCurrentEstimateMeters", 3.0);
+      new LoggedTunableNumber("Vision/MaxValidDistanceFromCurrentEstimateMeters", 30.0);
 
   private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
 
@@ -252,7 +252,7 @@ public class Vision extends SubsystemBase {
               .getDistance(newCalculatedRobotPose.getTranslation());
     }
 
-    averageDistanceFromTags = totalDistance / (double) cleanTargets.size();
+    averageDistanceFromTags = totalDistance / (double) numTargetsSeen;
 
     // Calibration DEBUG
     if (true) {
@@ -274,7 +274,8 @@ public class Vision extends SubsystemBase {
           "Vision/Calibrate/" + visionModule.name + "/ambiguity",
           ambiguity.calculate(target.getPoseAmbiguity()));
       Logger.recordOutput(
-          "Vision/Calibrate/" + visionModule.name + "/dist", distance.calculate(totalDistance));
+          "Vision/Calibrate/" + visionModule.name + "/dist",
+          distance.calculate(averageDistanceFromTags));
     }
 
     var distanceFromExistingPoseEstimate =
