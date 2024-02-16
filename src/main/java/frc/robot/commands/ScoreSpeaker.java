@@ -254,7 +254,7 @@ public class ScoreSpeaker extends Command {
     Pose2d reflectedPose =
         Constants.isRedAlliance()
             ? AllianceFlipUtil.mirrorPose2DOverCenterLine(currentPose)
-            : drive.getPoseEstimatorPose(currentPose);
+            : currentPose;
     // look at constraints: https://www.desmos.com/calculator/dvrwcfwnz8
     // check if shot is legal
     if ((DriverStation.isAutonomous() && reflectedPose.getX() >= 6.2697529792785645)
