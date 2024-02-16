@@ -12,10 +12,11 @@ import frc.robot.subsystems.LED.robotStates;
 public class LedSetStateForSeconds extends Command {
   LED led;
   robotStates state;
-  int seconds = 0;
+  double seconds = 0;
+  Timer timer = new Timer();
 
   /** Creates a new LedSetStateForSeconds. */
-  public LedSetStateForSeconds(LED led, robotStates state, int seconds) {
+  public LedSetStateForSeconds(LED led, robotStates state, double seconds) {
     this.led = led;
     this.state = state;
     this.seconds = seconds;
@@ -27,13 +28,13 @@ public class LedSetStateForSeconds extends Command {
   @Override
   public void initialize() {
     led.setRobotState(state);
-    Timer.delay(seconds);
-    end(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    timer.start();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -44,6 +45,6 @@ public class LedSetStateForSeconds extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return timer.get() > seconds;
   }
 }
