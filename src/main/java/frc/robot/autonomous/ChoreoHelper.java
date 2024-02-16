@@ -9,7 +9,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
 import java.util.List;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ChoreoHelper {
@@ -18,10 +17,8 @@ public class ChoreoHelper {
   private PIDController xFeedback;
   private PIDController yFeedback;
   private PIDController rotationalFeedback;
-  private List<ChoreoTrajectoryState> states;
   private double initialTime;
   private double timeOffset;
-  private Supplier<Pose2d> robotPose;
   private double allowedDist = 0.03;
   private double allowedExtraTime = 1.0;
 
@@ -34,6 +31,7 @@ public class ChoreoHelper {
    */
   public ChoreoHelper(
       double initialTime,
+      Pose2d initialPose,
       ChoreoTrajectory traj,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
@@ -43,11 +41,11 @@ public class ChoreoHelper {
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
-    this.states = getStates();
 
     ChoreoTrajectoryState closestState = null;
+    List<ChoreoTrajectoryState> states = getStates();
     for (int i = 0; i < traj.getPoses().length; i++) {
-      closestState = calculateNewClosestState(closestState, this.states.get(i), robotPose.get());
+      closestState = calculateNewClosestState(closestState, states.get(i), initialPose);
     }
     if (closestState != null) {
       this.timeOffset = closestState.timestamp;
