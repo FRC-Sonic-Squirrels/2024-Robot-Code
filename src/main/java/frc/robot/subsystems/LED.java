@@ -45,9 +45,6 @@ public class LED extends SubsystemBase {
         // values we want to use
         setAllBlinking(Color.BLACK, Color.WHITE);
         break;
-      case AMP_READY_TO_SCORE:
-        setAllSolidColor(Color.GREEN);
-        break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
         break;
@@ -72,12 +69,6 @@ public class LED extends SubsystemBase {
         for (int i = 0; i < ledBuffer.getLength(); i++) {
           setAllBlinking(Color.yellow, Color.BLACK);
         }
-      case GAMEPIECE_IN_ROBOT:
-        setAllSolidColor(Color.ORANGE);
-        break;
-      case CLIMB_MODE:
-        setSingleStripSolidColor(Color.GREEN, 20, 40);
-        break;
     }
 
     led.setData(ledBuffer);
@@ -204,18 +195,13 @@ public class LED extends SubsystemBase {
   }
 
   public enum robotStates {
-    SHOOTER_SUCCESS(), //
-    SHOOTER_LINED_UP(), //
-    DRIVING_TO_GAMEPIECE(), //
-    AUTO_MODE(), //
-    NOTHING(), //
-    TWENTY_SECOND_WARNING(), //
-    AMP_LINING_UP(),
-    SHOOTER_LINING_UP(),
-    AMP_READY_TO_SCORE(),
-    GAMEPIECE_IN_ROBOT(),
-    CLIMB_MODE(),
-    TEST()
+    SHOOTER_SUCCESS, //
+    SHOOTER_LINED_UP, //
+    DRIVING_TO_GAMEPIECE, //
+    AUTO_MODE, //
+    NOTHING, //
+    TWENTY_SECOND_WARNING, //
+    AMP_LINING_UP;
   }
 
   public void setRobotState(robotStates robotState) {
