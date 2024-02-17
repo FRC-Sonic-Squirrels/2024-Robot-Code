@@ -14,21 +14,26 @@ public class AutoStateMachine extends StateMachine {
   ScoreSpeaker scoreSpeaker;
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
-  private final AutoSubstateMachine[] subStates;
+  private final StateMachine[] subStates;
   private int currentSubState;
+  private double initShootDeadline;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoStateMachine(
-      DrivetrainWrapper drive, Shooter shooter, AutoSubstateMachine[] subStates) {
+      DrivetrainWrapper drive,
+      Shooter shooter,
+      StateMachine[] subStates,
+      double initShootDeadline) {
     this.drive = drive;
     this.shooter = shooter;
     this.subStates = subStates;
+    this.initShootDeadline = initShootDeadline;
 
     setInitialState(this::makeInitialShot);
   }
 
   private StateHandler makeInitialShot() {
-    scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true, 1.31);
+    scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true, initShootDeadline);
     scoreSpeaker.schedule();
     Logger.recordOutput("Autonomous/CommandScheduled", true);
 

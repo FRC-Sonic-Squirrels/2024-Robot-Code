@@ -314,4 +314,8 @@ public final class Constants {
         new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters), new Rotation3d(0.0, 0.0, 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
+
+  public class AutoConstants {
+    public static final double DIST_TO_START_INTAKING = 1.0;
+  }
 }

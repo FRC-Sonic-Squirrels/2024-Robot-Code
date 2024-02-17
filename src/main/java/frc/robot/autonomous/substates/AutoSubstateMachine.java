@@ -2,11 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.autonomous;
+package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import frc.lib.team2930.StateMachine;
+import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -51,8 +52,6 @@ public class AutoSubstateMachine extends StateMachine {
     this.closestGamepiece = closestGamepiece;
 
     setInitialState(this::initFollowPathToGamePiece);
-
-    Logger.recordOutput("Autonomous/SubstateConstructed", true);
   }
 
   private StateHandler initFollowPathToGamePiece() {

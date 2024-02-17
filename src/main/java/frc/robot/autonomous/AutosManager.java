@@ -4,6 +4,9 @@ import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.lib.team2930.StateMachine;
+import frc.robot.autonomous.substates.AutoSubstateMachine;
+import frc.robot.autonomous.substates.MiddleFirstSubstate;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -52,6 +55,7 @@ public class AutosManager {
 
     list.add(this::doNothing);
     list.add(this::sourceAuto);
+    list.add(this::middleAuto);
 
     return list;
   }
@@ -102,9 +106,34 @@ public class AutosManager {
               substateMachine3,
               substateMachine4,
               substateMachine5
-            });
+            },
+            1.31);
     return new Auto(
         "sourceAuto", state.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private Auto middleAuto() {
+    StateMachine substateMachine1 =
+        new MiddleFirstSubstate(
+            drivetrain, shooter, endEffector, intake, config, visionGamepiece::getClosestGamepiece);
+    StateMachine substateMachine2 = generateSubstateMachine("S1G2", "G2S2");
+    StateMachine substateMachine3 = generateSubstateMachine("S2G3", "G3S3");
+    StateMachine substateMachine4 = generateSubstateMachine("S3G4", "G4S3");
+    StateMachine substateMachine5 = generateSubstateMachine("S3G5", "G5S3");
+    AutoStateMachine state =
+        new AutoStateMachine(
+            drivetrain,
+            shooter,
+            new StateMachine[] {
+              substateMachine1,
+              substateMachine2,
+              substateMachine3,
+              substateMachine4,
+              substateMachine5
+            },
+            0.47);
+    return new Auto(
+        "middleAuto", state.asCommand(), Choreo.getTrajectory("middleAuto.1").getInitialPose());
   }
 
   private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {
