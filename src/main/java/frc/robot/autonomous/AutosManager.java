@@ -4,8 +4,6 @@ import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.lib.team2930.AllianceFlipUtil;
-import frc.robot.Constants;
 import frc.robot.DrivetrainWrapper;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -13,6 +11,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -26,8 +25,6 @@ public class AutosManager {
 
   private RobotConfig config;
 
-  private LoggedDashboardChooser<Supplier<Auto>> chooser;
-
   public record Auto(String name, Command command, Pose2d initPose) {}
 
   public AutosManager(
@@ -37,7 +34,8 @@ public class AutosManager {
       EndEffector endEffector,
       VisionGamepiece visionGamepiece,
       RobotConfig config,
-      LoggedDashboardChooser<Supplier<Auto>> chooser) {
+      LoggedDashboardChooser<String> chooser,
+      HashMap<String, Supplier<Auto>> stringToAutoSupplierMap) {
     this.drivetrain = drivetrain;
     this.shooter = shooter;
     this.endEffector = endEffector;
@@ -46,8 +44,7 @@ public class AutosManager {
 
     this.config = config;
 
-    this.chooser = chooser;
-    fillChooser();
+    fillChooserAndMap(chooser, stringToAutoSupplierMap);
   }
 
   private List<Supplier<Auto>> allCompetitionAutos() {
@@ -59,23 +56,28 @@ public class AutosManager {
     return list;
   }
 
-  private void fillChooser() {
+  private void fillChooserAndMap(
+      LoggedDashboardChooser<String> chooser,
+      HashMap<String, Supplier<Auto>> stringToAutoSupplierMap) {
     var compAutos = this.allCompetitionAutos();
 
     for (int i = 0; i < compAutos.size(); i++) {
       var supplier = compAutos.get(i);
+      var name = supplier.get().name;
       if (i == 0) {
         // FIXME: maybe we dont want do nothing as our default auto? maybe shoot and mobility as
         // default?
         // Do nothing command must be first in list.
-        chooser.addDefaultOption(supplier.get().name, supplier);
+        chooser.addDefaultOption(name, name);
       } else {
-        chooser.addOption(supplier.get().name, supplier);
+        chooser.addOption(name, name);
       }
+
+      stringToAutoSupplierMap.put(name, supplier);
     }
   }
 
-  private Auto doNothing() {
+  public Auto doNothing() {
     return new Auto("doNothing", new InstantCommand(), new Pose2d());
   }
 
@@ -102,12 +104,7 @@ public class AutosManager {
               substateMachine5
             });
     return new Auto(
-        "sourceAuto",
-        state.asCommand(),
-        Constants.isRedAlliance()
-            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(
-                Choreo.getTrajectory("sourceAuto.1").getInitialPose())
-            : Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+        "sourceAuto", state.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
   }
 
   private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {
