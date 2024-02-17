@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -107,128 +108,132 @@ public class ScoreSpeaker extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    try (var ignored = new ExecutionTiming("ScoreSpeaker")) {
 
-    var currentTime = Timer.getFPGATimestamp();
-    var poseEstimatorPose = drive.getPoseEstimatorPose();
-    var currentRot = drive.getPoseEstimatorPose().getRotation();
+      var currentTime = Timer.getFPGATimestamp();
+      var poseEstimatorPose = drive.getPoseEstimatorPose();
+      var currentRot = drive.getPoseEstimatorPose().getRotation();
 
-    var result =
-        solver.computeAngles(
-            currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
+      var result =
+          solver.computeAngles(
+              currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
 
-    double targetRotation;
-    double targetAngularSpeed;
-    Rotation2d targetPitch;
+      double targetRotation;
+      double targetAngularSpeed;
+      Rotation2d targetPitch;
 
-    if (result == null) {
-      targetRotation = poseEstimatorPose.getRotation().getRadians();
-      targetAngularSpeed = 0.0;
-      targetPitch = shooter.getPitch();
-    } else {
-      targetRotation = result.heading().getRadians();
-      targetAngularSpeed = result.rotationSpeed();
-      targetPitch = result.pitch();
-    }
-
-    targetMeasurements.add(
-        new PIDTargetMeasurement(
-            currentTime, targetRotation, currentRot.getRadians() <= targetRotation));
-
-    for (int index = 0; index < targetMeasurements.size(); index++) {
-      PIDTargetMeasurement measurement = targetMeasurements.get(index);
-      if ((measurement.upDirection && currentRot.getRadians() >= measurement.targetRot.getRadians())
-          || (!measurement.upDirection
-              && currentRot.getRadians() <= measurement.targetRot.getRadians())) {
-        pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
-        targetMeasurements.remove(index);
-      } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 3.0) {
-        targetMeasurements.remove(index);
-      }
-    }
-
-    Logger.recordOutput("ScoreSpeaker/PIDLatency", pidLatency);
-
-    var rotationalEffort =
-        rotationController.calculate(currentRot.getRadians(), targetRotation) + targetAngularSpeed;
-
-    rotationalEffort =
-        Math.copySign(
-            Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
-            rotationalEffort);
-
-    Logger.recordOutput(
-        "ScoreSpeaker/targetRotationDegrees",
-        Units.radiansToDegrees(targetRotation) <= 360.0
-            ? Units.radiansToDegrees(targetRotation)
-            : Units.radiansToDegrees(targetRotation) - 360.0);
-
-    Logger.recordOutput(
-        "ScoreSpeaker/targetPose",
-        new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
-
-    drive.setRotationOverride(rotationalEffort);
-
-    // TODO: remove most of these once we are happy with the command
-    Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
-    Logger.recordOutput(
-        "ScoreSpeaker/rotationalErrorDegrees",
-        Units.radiansToDegrees(rotationController.getPositionError()));
-    Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
-    Logger.recordOutput(
-        "ScoreSpeaker/robotRotationDegrees",
-        drive.getPoseEstimatorPose().getRotation().getDegrees());
-    Logger.recordOutput("ScoreSpeaker/atSetpoint", rotationController.atSetpoint());
-
-    if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
-      rotationController.setP(rotationKp.get());
-      rotationController.setD(rotationKd.get());
-    }
-
-    shooter.setLauncherRPM(Constants.ShooterConstants.SHOOTING_RPM);
-
-    shooter.setPivotPosition(targetPitch);
-
-    rotationController.setTolerance(
-        Units.degreesToRadians(
-            (Units.feetToMeters(15.0)
-                / Math.hypot(
-                    Constants.FieldConstants.getSpeakerTranslation().getX()
-                        - drive.getPoseEstimatorPose().getX(),
-                    Constants.FieldConstants.getSpeakerTranslation().getY()
-                        - drive.getPoseEstimatorPose().getY()))));
-
-    if (result != null && !readyToShoot) {
-      if (currentTime > shootDeadline) {
-        readyToShoot = true;
+      if (result == null) {
+        targetRotation = poseEstimatorPose.getRotation().getRadians();
+        targetAngularSpeed = 0.0;
+        targetPitch = shooter.getPitch();
       } else {
-        readyToShoot =
-            shootGamepiece.getAsBoolean()
-                && shooter.isPivotIsAtTarget()
-                && rotationController.atSetpoint()
-                && shooter.isAtTargetRPM()
-                && shootingPosition();
+        targetRotation = result.heading().getRadians();
+        targetAngularSpeed = result.rotationSpeed();
+        targetPitch = result.pitch();
+      }
 
-        if (readyToShoot) {
-          solver.startShooting(Timer.getFPGATimestamp());
+      targetMeasurements.add(
+          new PIDTargetMeasurement(
+              currentTime, targetRotation, currentRot.getRadians() <= targetRotation));
+
+      for (int index = 0; index < targetMeasurements.size(); index++) {
+        PIDTargetMeasurement measurement = targetMeasurements.get(index);
+        if ((measurement.upDirection
+                && currentRot.getRadians() >= measurement.targetRot.getRadians())
+            || (!measurement.upDirection
+                && currentRot.getRadians() <= measurement.targetRot.getRadians())) {
+          pidLatency = pidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
+          targetMeasurements.remove(index);
+        } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 3.0) {
+          targetMeasurements.remove(index);
         }
       }
 
-      Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
+      Logger.recordOutput("ScoreSpeaker/PIDLatency", pidLatency);
+
+      var rotationalEffort =
+          rotationController.calculate(currentRot.getRadians(), targetRotation)
+              + targetAngularSpeed;
+
+      rotationalEffort =
+          Math.copySign(
+              Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
+              rotationalEffort);
+
       Logger.recordOutput(
-          "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
-      Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
-      Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
-      Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
-      Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
+          "ScoreSpeaker/targetRotationDegrees",
+          Units.radiansToDegrees(targetRotation) <= 360.0
+              ? Units.radiansToDegrees(targetRotation)
+              : Units.radiansToDegrees(targetRotation) - 360.0);
 
-      if (solver.isShooting()) {
-        shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
-      } else if (readyToShoot) {
-        shooter.setKickerPercentOut(0.0);
+      Logger.recordOutput(
+          "ScoreSpeaker/targetPose",
+          new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
+
+      drive.setRotationOverride(rotationalEffort);
+
+      // TODO: remove most of these once we are happy with the command
+      Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
+      Logger.recordOutput(
+          "ScoreSpeaker/rotationalErrorDegrees",
+          Units.radiansToDegrees(rotationController.getPositionError()));
+      Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
+      Logger.recordOutput(
+          "ScoreSpeaker/robotRotationDegrees",
+          drive.getPoseEstimatorPose().getRotation().getDegrees());
+      Logger.recordOutput("ScoreSpeaker/atSetpoint", rotationController.atSetpoint());
+
+      if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
+        rotationController.setP(rotationKp.get());
+        rotationController.setD(rotationKd.get());
       }
-    }
 
-    updateVisualization();
+      shooter.setLauncherRPM(Constants.ShooterConstants.SHOOTING_RPM);
+
+      shooter.setPivotPosition(targetPitch);
+
+      rotationController.setTolerance(
+          Units.degreesToRadians(
+              (Units.feetToMeters(15.0)
+                  / Math.hypot(
+                      Constants.FieldConstants.getSpeakerTranslation().getX()
+                          - drive.getPoseEstimatorPose().getX(),
+                      Constants.FieldConstants.getSpeakerTranslation().getY()
+                          - drive.getPoseEstimatorPose().getY()))));
+
+      if (result != null && !readyToShoot) {
+        if (currentTime > shootDeadline) {
+          readyToShoot = true;
+        } else {
+          readyToShoot =
+              shootGamepiece.getAsBoolean()
+                  && shooter.isPivotIsAtTarget()
+                  && rotationController.atSetpoint()
+                  && shooter.isAtTargetRPM()
+                  && shootingPosition();
+
+          if (readyToShoot) {
+            solver.startShooting(Timer.getFPGATimestamp());
+          }
+        }
+
+        Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
+        Logger.recordOutput(
+            "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
+        Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
+        Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
+        Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
+        Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
+
+        if (solver.isShooting()) {
+          shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+        } else if (readyToShoot) {
+          shooter.setKickerPercentOut(0.0);
+        }
+      }
+
+      updateVisualization();
+    }
   }
 
   // Called once the command ends or is interrupted.

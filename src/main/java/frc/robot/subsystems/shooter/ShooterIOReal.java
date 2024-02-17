@@ -230,8 +230,9 @@ public class ShooterIOReal implements ShooterIO {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-    pivot.getConfigurator().refresh(pidConfig);
-    pivot.getConfigurator().refresh(mmConfig);
+    var configurator = pivot.getConfigurator();
+    configurator.refresh(pidConfig);
+    configurator.refresh(mmConfig);
 
     pidConfig.kP = kP;
     pidConfig.kD = kD;
@@ -240,8 +241,8 @@ public class ShooterIOReal implements ShooterIO {
     mmConfig.MotionMagicCruiseVelocity = maxProfiledVelocity;
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
-    pivot.getConfigurator().apply(pidConfig);
-    pivot.getConfigurator().apply(mmConfig);
+    configurator.apply(pidConfig);
+    configurator.apply(mmConfig);
   }
 
   @Override
@@ -249,15 +250,16 @@ public class ShooterIOReal implements ShooterIO {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-    launcher_lead.getConfigurator().refresh(pidConfig);
-    launcher_lead.getConfigurator().refresh(mmConfig);
+    var configurator = launcher_lead.getConfigurator();
+    configurator.refresh(pidConfig);
+    configurator.refresh(mmConfig);
 
     pidConfig.kP = kP;
     pidConfig.kV = kV;
 
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
-    launcher_lead.getConfigurator().apply(pidConfig);
-    launcher_lead.getConfigurator().apply(mmConfig);
+    configurator.apply(pidConfig);
+    configurator.apply(mmConfig);
   }
 }
