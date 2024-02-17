@@ -165,7 +165,6 @@ public class ShuffleBoardLayouts {
     resetHeight.setName("resetHeight");
     elevatorCommandsLayout.add(resetHeight);
   }
-  
 
   // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
