@@ -19,9 +19,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -29,12 +31,12 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
+import frc.robot.commands.MechanismActions;
 import frc.robot.commands.ScoreSpeaker;
-import frc.robot.commands.arm.ArmSetAngle;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.elevator.ElevatorSetHeight;
+import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.shooter.ShooterSimpleShoot;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -428,17 +430,33 @@ public class RobotContainer {
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
-    driverController
-        .leftBumper()
-        .whileTrue(
-            new DriveToPose(
-                    drivetrainWrapper,
+    Trigger gamepieceInEE =
+        new Trigger(
+                () ->
+                    !endEffector.intakeSideTOFDetectGamepiece()
+                        && !endEffector.shooterSideTOFDetectGamepiece())
+            .debounce(0.4);
+
+    Command scoreAmp =
+        new DriveToPose(
+                drivetrainWrapper,
+                () ->
                     new Pose2d(
                         Constants.isRedAlliance() ? 14.714638710021973 : 1.8273155689239502,
                         7.65,
                         Rotation2d.fromDegrees(90.0)))
-                .alongWith(new ElevatorSetHeight(elevator, Constants.ElevatorConstants.AMP_HEIGHT))
-                .alongWith(new ArmSetAngle(arm, Constants.ArmConstants.AMP_ARM_ANGLE)));
+            .alongWith(MechanismActions.ampPosition(elevator, arm))
+            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(gamepieceInEE));
+
+    scoreAmp.setName("ScoreAmp");
+
+    Command loadPosition =
+        Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
+            .andThen(MechanismActions.loadingPosition(elevator, arm));
+
+    loadPosition.setName("LoadPosition");
+
+    driverController.leftBumper().whileTrue(scoreAmp).onFalse(loadPosition);
 
     // driverController
     //     .rightTrigger()

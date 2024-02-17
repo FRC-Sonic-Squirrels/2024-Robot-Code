@@ -7,6 +7,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOSim implements ElevatorIO {
   private ElevatorSim sim =
@@ -16,7 +17,7 @@ public class ElevatorIOSim implements ElevatorIO {
           Constants.ElevatorConstants.CARRIAGE_MASS,
           Constants.ElevatorConstants.PULLEY_DIAMETER / 2,
           0.0,
-          Constants.ElevatorConstants.MAX_HEIGHT,
+          Constants.ElevatorConstants.MAX_HEIGHT_INCHES,
           false,
           0.1);
 
@@ -38,11 +39,14 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     sim.update(0.02);
+    Logger.recordOutput("Elevator/actualTargetHeight", targetHeight);
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
       appliedVolts = feedback.calculate(inputs.heightInches, targetHeight) + kG;
     } else {
       appliedVolts = openLoopVolts;
     }
+
+    Logger.recordOutput("Elevator/error", feedback.getPositionError());
 
     sim.setInputVoltage(appliedVolts);
 

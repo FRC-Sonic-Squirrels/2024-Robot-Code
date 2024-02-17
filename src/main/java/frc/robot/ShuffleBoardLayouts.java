@@ -197,7 +197,7 @@ public class ShuffleBoardLayouts {
 
     var checkElevator =
         Commands.runOnce(
-            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator);
+            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT_INCHES), elevator);
     var checkArm = Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm);
     var checkEndEffector =
         Commands.runOnce(
