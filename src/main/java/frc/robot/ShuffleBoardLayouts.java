@@ -52,6 +52,7 @@ public class ShuffleBoardLayouts {
     intakeDebugLayout();
     endEffectorDebugLayout();
     elevatorDebugLayout();
+    shooterDebugLayout();
     systemsCheck();
   }
 
@@ -184,21 +185,22 @@ public class ShuffleBoardLayouts {
     var tunableRPM = shooterTab.add("tunableRPM", 0.0).withPosition(2, 2).withSize(2, 1).getEntry();
 
     // MOTORS
-    shooterCommandsLayout.add(
-        "setKickerPercentOut",
-        new ConsumeSuppliedValue(
-            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut));
 
-    shooterCommandsLayout.add(
-        "setLauncherPercentOut",
+    var setKickerPercentOut = 
         new ConsumeSuppliedValue(
-            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
+            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut);
+    setKickerPercentOut.setName("setKickerPercentOut");
 
-    shooterCommandsLayout.add(
-        "setLauncherRPM",
+    var setLeadPercentOut = 
         new ConsumeSuppliedValue(
-            shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM));
+            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut);
+    setLeadPercentOut.setName("setLeadPercentOut");
 
+    var setLauncherRPM =
+        new ConsumeSuppliedValue(
+            shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM);
+    setLauncherRPM.setName("setLauncherRPM");
+    
     // shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () ->
     // tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
     var setPivotPosition =
@@ -209,11 +211,18 @@ public class ShuffleBoardLayouts {
             shooter);
     setPivotPosition.setName("setPivotPosition");
 
+    shooterCommandsLayout.add(setKickerPercentOut);
+    shooterCommandsLayout.add(setLeadPercentOut);
+    shooterCommandsLayout.add(setLauncherRPM);
+    shooterCommandsLayout.add(setPivotPosition);
+
     var stopCommand =
         Commands.sequence(
             Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
             Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter),
-            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter));
+            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter),
+            Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter),
+            Commands.runOnce(() -> shooter.setLauncherRPM(0.0), shooter));
 
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
