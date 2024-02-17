@@ -50,6 +50,21 @@
       }
     }
   },
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "Arm_Debug": {
+          "open": true
+        },
+        "Elevator_Debug": {
+          "ElevatorCommands": {
+            "open": true
+          }
+        },
+        "open": true
+      }
+    }
+  },
   "NetworkTables Info": {
     "visible": true
   }
