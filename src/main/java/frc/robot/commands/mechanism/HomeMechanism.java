@@ -29,6 +29,7 @@ public class HomeMechanism extends Command {
     this.arm = arm;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator, arm);
+    setName("HomeMechanism");
   }
 
   // Called when the command is initially scheduled.
