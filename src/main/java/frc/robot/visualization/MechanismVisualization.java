@@ -35,7 +35,7 @@ public class MechanismVisualization {
             0.0,
             Units.inchesToMeters(elevatorHeightInches)
                 * 12.0
-                / Units.metersToInches(Constants.ElevatorConstants.MAX_HEIGHT),
+                / Units.metersToInches(Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
             new Rotation3d());
     elevatorCarriage =
         new Pose3d(0.0, 0.0, Units.inchesToMeters(elevatorHeightInches), new Rotation3d());

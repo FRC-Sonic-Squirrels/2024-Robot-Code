@@ -28,12 +28,12 @@ public class Elevator extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
-      kP.initDefault(0.0);
+      kP.initDefault(0.5);
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(0.0);
-      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+      closedLoopMaxVelocityConstraint.initDefault(100.0);
+      closedLoopMaxAccelerationConstraint.initDefault(100.0);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
       kP.initDefault(0.0);
@@ -66,6 +66,8 @@ public class Elevator extends SubsystemBase {
     try (var ignored = new ExecutionTiming("Elevator")) {
       io.updateInputs(inputs);
       Logger.processInputs("Elevator", inputs);
+
+      Logger.recordOutput("Elevator/targetHeight", targetHeightInches);
 
       // ---- UPDATE TUNABLE NUMBERS
       var hc = hashCode();
