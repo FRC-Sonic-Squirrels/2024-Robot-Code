@@ -27,7 +27,6 @@ public class DriveToPose extends Command {
   private final boolean slowMode;
   private final Supplier<Pose2d> poseSupplier;
 
-  private boolean running = false;
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
   private final ProfiledPIDController thetaController =
@@ -134,8 +133,6 @@ public class DriveToPose extends Command {
 
   @Override
   public void execute() {
-    running = true;
-
     // Update from tunable numbers
     if (driveMaxVelocity.hasChanged(hashCode())
         || driveMaxVelocitySlow.hasChanged(hashCode())
@@ -229,7 +226,6 @@ public class DriveToPose extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    running = false;
     drive.resetVelocityOverride();
     Logger.recordOutput("Odometry/DriveToPoseSetpoint", new double[] {});
     Logger.recordOutput("Odometry/DriveToPoseGoal", new double[] {});
@@ -237,18 +233,13 @@ public class DriveToPose extends Command {
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {
-    return running && driveController.atGoal() && thetaController.atGoal();
+    return isScheduled() && driveController.atGoal() && thetaController.atGoal();
   }
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
   public boolean withinTolerance(double driveTolerance, Rotation2d thetaTolerance) {
-    return running
+    return isScheduled()
         && Math.abs(driveErrorAbs) < driveTolerance
         && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
-  }
-
-  /** Returns whether the command is actively running. */
-  public boolean isRunning() {
-    return running;
   }
 }
