@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.swerve.Drivetrain;
@@ -16,6 +17,11 @@ public class DrivetrainWrapper {
     this.drivetrain = drivetrain;
   }
 
+  /**
+   * Sets robot-centric chassis speeds
+   *
+   * @param chassisSpeeds speeds (m/s, rad/s)
+   */
   public void setVelocity(ChassisSpeeds chassisSpeeds) {
     if (chassisSpeeds == null) chassisSpeeds = new ChassisSpeeds();
     chassisSpeedsBase = chassisSpeeds;
@@ -64,15 +70,8 @@ public class DrivetrainWrapper {
     } else {
       prioritizeRotation = false;
     }
-    // Convert to field relative speeds & send command
-    ChassisSpeeds robotChassisSpeed =
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            chassisSpeeds.vxMetersPerSecond,
-            chassisSpeeds.vyMetersPerSecond,
-            omegaOverride,
-            drivetrain.getRotation());
 
-    drivetrain.runVelocity(robotChassisSpeed, prioritizeRotation);
+    drivetrain.runVelocity(chassisSpeeds, prioritizeRotation);
   }
 
   public Subsystem getRequirements() {
@@ -89,5 +88,13 @@ public class DrivetrainWrapper {
 
   public double getMaxAngularSpeedRadPerSec() {
     return drivetrain.getMaxAngularSpeedRadPerSec();
+  }
+
+  public Rotation2d getRotation() {
+    return drivetrain.getRotation();
+  }
+
+  public Pose2d getFieldRelativeVelocities() {
+    return drivetrain.getFieldRelativeVelocities();
   }
 }

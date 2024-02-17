@@ -4,32 +4,29 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.DrivetrainWrapper;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.visualization.GamepieceVisualization;
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ScoreSpeaker extends Command {
-  private Drivetrain drive;
+  private DrivetrainWrapper drive;
   private Shooter shooter;
 
   private final LoggedTunableNumber rotationKp =
@@ -38,9 +35,6 @@ public class ScoreSpeaker extends Command {
       new LoggedTunableNumber("RotateToSpeaker/rotationKd", 0.0);
 
   private final PIDController rotationController;
-
-  private final DoubleSupplier translationXSupplier;
-  private final DoubleSupplier translationYSupplier;
 
   public static final double DEADBAND = 0.1;
 
@@ -63,37 +57,43 @@ public class ScoreSpeaker extends Command {
 
   private BooleanSupplier shootGamepiece;
 
-  private boolean shooting;
-
-  private boolean prevShooting;
+  private boolean readyToShoot;
 
   private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
+
+  private Double deadline;
+
+  private double shootDeadline;
 
   /**
    * Creates a new RotateToSpeaker.
    *
-   * @param translationXSupplier controller horizontal translation output
-   * @param translationYSupplier controller vertical translation output
    * @param drive drivetrain subsystem
    * @param shooter shooter subsystem
    * @param shootGamepiece when this command should end
    * @return Command to lock rotation in direction of target
    */
   public ScoreSpeaker(
-      DoubleSupplier translationXSupplier,
-      DoubleSupplier translationYSupplier,
-      Drivetrain drive,
-      Shooter shooter,
-      BooleanSupplier shootGamepiece) {
+      DrivetrainWrapper drive, Shooter shooter, BooleanSupplier shootGamepiece, double deadline) {
+    this(drive, shooter, shootGamepiece);
+    this.deadline = deadline;
+  }
+
+  /**
+   * Creates a new RotateToSpeaker.
+   *
+   * @param drive drivetrain subsystem
+   * @param shooter shooter subsystem
+   * @param shootGamepiece when this command should end
+   * @return Command to lock rotation in direction of target
+   */
+  public ScoreSpeaker(DrivetrainWrapper drive, Shooter shooter, BooleanSupplier shootGamepiece) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.translationXSupplier = translationXSupplier;
-    this.translationYSupplier = translationYSupplier;
     this.drive = drive;
     this.shooter = shooter;
     this.shootGamepiece = shootGamepiece;
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
-    addRequirements(drive);
     setName("ScoreSpeaker");
   }
 
@@ -101,31 +101,16 @@ public class ScoreSpeaker extends Command {
   @Override
   public void initialize() {
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
+    shootDeadline = deadline != null ? Timer.getFPGATimestamp() + deadline : Double.MAX_VALUE;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    double linearMagnitude =
-        MathUtil.applyDeadband(
-            Math.hypot(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble()),
-            DEADBAND);
-    Rotation2d linearDirection =
-        new Rotation2d(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble());
-
-    // Square values
-    linearMagnitude = linearMagnitude * linearMagnitude;
-
-    // Calcaulate new linear velocity
-    Translation2d linearVelocity =
-        new Pose2d(new Translation2d(), linearDirection)
-            .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
-            .getTranslation();
-
     var currentTime = Timer.getFPGATimestamp();
     var poseEstimatorPose = drive.getPoseEstimatorPose();
-    var currentRot = drive.getRotation();
+    var currentRot = drive.getPoseEstimatorPose().getRotation();
 
     var result =
         solver.computeAngles(
@@ -140,7 +125,7 @@ public class ScoreSpeaker extends Command {
       targetAngularSpeed = 0.0;
       targetPitch = shooter.getPitch();
     } else {
-      targetRotation = result.heading().getRadians() - Math.PI;
+      targetRotation = result.heading().getRadians();
       targetAngularSpeed = result.rotationSpeed();
       targetPitch = result.pitch();
     }
@@ -164,36 +149,34 @@ public class ScoreSpeaker extends Command {
     Logger.recordOutput("ScoreSpeaker/PIDLatency", pidLatency);
 
     var rotationalEffort =
-        (rotationController.calculate(currentRot.getRadians(), targetRotation)
-            + targetAngularSpeed);
+        rotationController.calculate(currentRot.getRadians(), targetRotation) + targetAngularSpeed;
 
     rotationalEffort =
         Math.copySign(
             Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
             rotationalEffort);
 
-    var xVel = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
-    var yVel = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
-
-    Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", Math.toDegrees(targetRotation));
+    Logger.recordOutput(
+        "ScoreSpeaker/targetRotationDegrees",
+        Units.radiansToDegrees(targetRotation) <= 360.0
+            ? Units.radiansToDegrees(targetRotation)
+            : Units.radiansToDegrees(targetRotation) - 360.0);
 
     Logger.recordOutput(
         "ScoreSpeaker/targetPose",
         new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
 
-    drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotationalEffort, drive.getRotation()),
-        true);
+    drive.setRotationOverride(rotationalEffort);
 
     // TODO: remove most of these once we are happy with the command
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
     Logger.recordOutput(
         "ScoreSpeaker/rotationalErrorDegrees",
         Units.radiansToDegrees(rotationController.getPositionError()));
-    Logger.recordOutput("ScoreSpeaker/desiredLinearVelocity", linearVelocity);
     Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
-    Logger.recordOutput("ScoreSpeaker/robotRotationDegrees", drive.getRotation().getDegrees());
-    Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", targetRotation);
+    Logger.recordOutput(
+        "ScoreSpeaker/robotRotationDegrees",
+        drive.getPoseEstimatorPose().getRotation().getDegrees());
     Logger.recordOutput("ScoreSpeaker/atSetpoint", rotationController.atSetpoint());
 
     if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
@@ -201,7 +184,7 @@ public class ScoreSpeaker extends Command {
       rotationController.setD(rotationKd.get());
     }
 
-    shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_PERCENT_OUT);
+    shooter.setLauncherRPM(Constants.ShooterConstants.SHOOTING_RPM);
 
     shooter.setPivotPosition(targetPitch);
 
@@ -214,38 +197,80 @@ public class ScoreSpeaker extends Command {
                     Constants.FieldConstants.getSpeakerTranslation().getY()
                         - drive.getPoseEstimatorPose().getY()))));
 
-    shooting =
-        shootGamepiece.getAsBoolean()
-            && shooter.isPivotIsAtTarget()
-            && rotationController.atSetpoint()
-            && shooter.isAtTargetRPM();
+    if (result != null && !readyToShoot) {
+      if (currentTime > deadline) {
+        readyToShoot = true;
+      } else {
+        readyToShoot =
+            shootGamepiece.getAsBoolean()
+                && shooter.isPivotIsAtTarget()
+                && rotationController.atSetpoint()
+                && shooter.isAtTargetRPM()
+                && shootingPosition();
 
-    Logger.recordOutput("ScoreSpeaker/shooting", shooting);
+        if (readyToShoot) {
+          solver.startShooting(Timer.getFPGATimestamp());
+        }
+      }
 
-    if (shooting) {
-      shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
-    } else {
-      shooter.setKickerPercentOut(0.0);
-      solver.endShooting();
+      Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
+      Logger.recordOutput(
+          "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
+      Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
+      Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
+      Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
+      Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
+
+      if (solver.isShooting()) {
+        shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+      } else if (readyToShoot) {
+        shooter.setKickerPercentOut(0.0);
+      }
     }
 
-    if (shooting && !prevShooting) {
-      solver.startShooting(Timer.getFPGATimestamp());
-    }
-
-    prevShooting = shooting;
+    updateVisualization();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drive.runVelocity(new ChassisSpeeds(0, 0, 0), false);
+    drive.resetVelocityOverride();
+    drive.resetRotationOverride();
+
+    Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", 0.0);
+    Logger.recordOutput("ScoreSpeaker/RotationalEffort", 0.0);
+    Logger.recordOutput("ScoreSpeaker/rotationalErrorDegrees", 0.0);
+    Logger.recordOutput("ScoreSpeaker/feedForward", 0.0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return readyToShoot && !solver.isShooting();
+  }
+
+  private boolean shootingPosition() {
+    Pose2d currentPose = drive.getPoseEstimatorPose();
+    Pose2d reflectedPose =
+        Constants.isRedAlliance()
+            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(currentPose)
+            : currentPose;
+    // look at constraints: https://www.desmos.com/calculator/dvrwcfwnz8
+    // check if shot is legal
+    if ((DriverStation.isAutonomous() && reflectedPose.getX() >= 6.2697529792785645)
+        || reflectedPose.getX() >= 10.257804870605469) {
+      return false;
+    }
+    // y <= 0.808x + 0.793
+    // y >= -0.64x + 6.1
+    // y <= 6.103558540344238
+    // check if stage is blocking
+    if (reflectedPose.getY() <= 0.808 * reflectedPose.getX() + 0.3
+        && reflectedPose.getY() >= -0.64 * reflectedPose.getX() + 6.1
+        && reflectedPose.getY() <= 6.103558540344238) {
+      return false;
+    }
+    return true;
   }
 
   boolean prevIsShooting = false;
@@ -261,29 +286,19 @@ public class ScoreSpeaker extends Command {
   Pose2d robotPoseOfShot = new Pose2d();
 
   public void updateVisualization() {
-    boolean isShooting = shooting;
 
-    if (!isShooting) {
-      shootingTimer.stop();
-      shootingTimer.reset();
-    }
+    Logger.recordOutput("ShootSpeaker/timer", shootingTimer.get());
 
-    boolean shootingStart = false;
+    Logger.recordOutput("ShootSpeaker/ShootingRPM", shooter.getRPM());
 
-    shootingStart = isShooting && !prevIsShooting;
+    GamepieceVisualization.getInstance()
+        .updateVisualization(
+            drive.getPoseEstimatorPose(),
+            drive.getFieldRelativeVelocities().getTranslation(),
+            shooter.getPitch(),
+            shooter.getRPM(),
+            readyToShoot);
 
-    if (shootingStart) shootingTimer.start();
-
-    gamepieceVisualizer.updateVisualization(
-        drive.getPoseEstimatorPose(),
-        drive.getFieldRelativeVelocities().getTranslation(),
-        shooter.getPitch(),
-        shooter.getRPM(),
-        isShooting,
-        shootingTimer.get());
-
-    prevIsShooting = isShooting;
-
-    gamepieceVisualizer.logTraj();
+    GamepieceVisualization.getInstance().logTraj();
   }
 }

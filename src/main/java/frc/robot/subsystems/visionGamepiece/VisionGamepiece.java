@@ -6,12 +6,16 @@ package frc.robot.subsystems.visionGamepiece;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -43,19 +47,72 @@ public class VisionGamepiece extends SubsystemBase {
 
       Logger.processInputs("VisionGamepiece", inputs);
 
-      // uncomment if simming for target gamepiece
-      // center field:
-      // Translation2d simPose = new Translation2d(8.288247108459473, 2.3854970932006836);
-      // blue source:
-      // Translation2d simPose = new Translation2d(15.472177505493164, 0.7243906259536743);
-      // red source:
-      // Translation2d simPose = new Translation2d(1.1043164730072021, 0.7243906259536743);
+      // uncomment if simming for target gamepieces ---------------------------------------
 
-      // closestGamepiece.pose =
-      //     new Pose2d(
-      //         simPose.getX() - robotPoseSupplier.get().getX(),
-      //         simPose.getY() - robotPoseSupplier.get().getY(),
-      //         new Rotation2d(0));
+      //     Gamepieces (8.273, yMeters, 0.0):
+      //  G1: yMeters = 7.474
+      //  G2: yMeters = 5.792
+      //  G3: yMeters = 4.11
+      //  G4: yMeters = 2.428
+      //  G5: yMeters = 0.742
+
+      Pose2d g1 = new Pose2d(8.273, 7.474, new Rotation2d());
+      Pose2d g2 = new Pose2d(8.273, 5.792, new Rotation2d());
+      Pose2d g3 = new Pose2d(8.273, 4.11, new Rotation2d());
+      Pose2d g4 = new Pose2d(8.273, 2.428, new Rotation2d());
+      Pose2d g5 = new Pose2d(8.273, 2.428, new Rotation2d());
+
+      processedGamepieceData =
+          new ProcessedGamepieceData[] {
+            new ProcessedGamepieceData(
+                new Rotation2d(),
+                new Rotation2d(),
+                GeometryUtil.getDist(robotPoseSupplier.get(), g1),
+                robotPoseSupplier.get().relativeTo(g1),
+                g1,
+                Timer.getFPGATimestamp()),
+            new ProcessedGamepieceData(
+                new Rotation2d(),
+                new Rotation2d(),
+                GeometryUtil.getDist(robotPoseSupplier.get(), g2),
+                robotPoseSupplier.get().relativeTo(g2),
+                g2,
+                Timer.getFPGATimestamp()),
+            new ProcessedGamepieceData(
+                new Rotation2d(),
+                new Rotation2d(),
+                GeometryUtil.getDist(robotPoseSupplier.get(), g3),
+                robotPoseSupplier.get().relativeTo(g3),
+                g3,
+                Timer.getFPGATimestamp()),
+            new ProcessedGamepieceData(
+                new Rotation2d(),
+                new Rotation2d(),
+                GeometryUtil.getDist(robotPoseSupplier.get(), g4),
+                robotPoseSupplier.get().relativeTo(g4),
+                g4,
+                Timer.getFPGATimestamp()),
+            new ProcessedGamepieceData(
+                new Rotation2d(),
+                new Rotation2d(),
+                GeometryUtil.getDist(robotPoseSupplier.get(), g5),
+                robotPoseSupplier.get().relativeTo(g5),
+                g5,
+                Timer.getFPGATimestamp())
+          };
+
+      for (int i = 0; i < processedGamepieceData.length; i++) {
+        if (i == 0) {
+          closestGamepiece = processedGamepieceData[0];
+        } else {
+          if (processedGamepieceData[i].distance < closestGamepiece.distance) {
+            closestGamepiece = processedGamepieceData[i];
+          }
+        }
+        logGamepieceData(new RawGamepieceData(0, 0, 0.0), processedGamepieceData[i], i);
+      }
+
+      // --------------------------------------------------------------------------------------
 
       // closestGamepiece.globalPose = new Pose2d(simPose.getX(), simPose.getY(), new
       // Rotation2d(0));
@@ -93,8 +150,19 @@ public class VisionGamepiece extends SubsystemBase {
           "VisionGamepiece/ClosestGamepiece/targetPitchDegrees",
           closestGamepiece.targetPitch.getDegrees());
       Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/poseRobotCentric", closestGamepiece.pose);
-      Logger.recordOutput("VisionGamepiece/ClosestGamepiece/pose", closestGamepiece.globalPose);
+          "VisionGamepiece/ClosestGamepiece/poseRobotCentric",
+          new Pose3d(
+              closestGamepiece.pose.getX(),
+              closestGamepiece.pose.getY(),
+              (double) 0.0254,
+              new Rotation3d()));
+      Logger.recordOutput(
+          "VisionGamepiece/ClosestGamepiece/pose",
+          new Pose3d(
+              closestGamepiece.globalPose.getX(),
+              closestGamepiece.globalPose.getY(),
+              (double) 0.0254,
+              new Rotation3d()));
       Logger.recordOutput(
           "VisionGamepiece/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
     }

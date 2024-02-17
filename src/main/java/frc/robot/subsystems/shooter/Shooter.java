@@ -41,17 +41,17 @@ public class Shooter extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
-      pivotkP.initDefault(1.0);
+      pivotkP.initDefault(800.0);
       pivotkD.initDefault(0.0);
       pivotkG.initDefault(0.0);
       pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
-      pivotClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+      pivotClosedLoopMaxAccelerationConstraint.initDefault(5.0);
 
       launcherkP.initDefault(0.5);
       launcherkV.initDefault(0.13);
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
-      pivotkP.initDefault(1.0);
+      pivotkP.initDefault(15.0);
       pivotkD.initDefault(0.0);
       pivotkG.initDefault(0.0);
       pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
@@ -106,6 +106,7 @@ public class Shooter extends SubsystemBase {
 
       Logger.processInputs(ROOT_TABLE, inputs);
       Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pivotPosition.getDegrees());
+      Logger.recordOutput(ROOT_TABLE + "/targetPitchDegrees", targetPivotPosition.getDegrees());
 
       pivotTargetMeasurements.add(
           new PIDTargetMeasurement(
@@ -217,5 +218,9 @@ public class Shooter extends SubsystemBase {
 
   public boolean getBeamBreak() {
     return inputs.beamBreak;
+  }
+
+  public void pivotResetHomePosition() {
+    io.resetPivotSensorPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
   }
 }

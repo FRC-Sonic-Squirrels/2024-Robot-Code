@@ -11,6 +11,7 @@ public class ShootingSolver {
   private final double shooterSpeed;
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
+  private boolean doneShooting;
 
   public record Solution(
       double timeToShoot, Rotation2d heading, double rotationSpeed, Rotation2d pitch) {}
@@ -34,6 +35,11 @@ public class ShootingSolver {
 
   public void endShooting() {
     startOfShootingTimestamp = Double.NaN;
+    doneShooting = false;
+  }
+
+  public boolean isShooting() {
+    return Double.isFinite(startOfShootingTimestamp) && !doneShooting;
   }
 
   /**
@@ -44,7 +50,11 @@ public class ShootingSolver {
     if (Double.isNaN(this.startOfShootingTimestamp)) {
       timeToShoot = shootingTime;
     } else {
-      timeToShoot = Math.max(0, shootingTime - (currentTime - startOfShootingTimestamp));
+      timeToShoot = shootingTime - (currentTime - startOfShootingTimestamp);
+      if (timeToShoot < 0) {
+        doneShooting = true;
+        timeToShoot = 0;
+      }
     }
 
     // 3d position of robot
@@ -84,7 +94,25 @@ public class ShootingSolver {
     }
 
     // Desired shooter pivot pitch
+    // FIXME: BAD CALCULATION FOR SHOOTER PITCH. NEW APPROACH NECESSARY
     var pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+
+    // Code using Archit's formula for pitch of shooter.
+    // var a = -xyDistToSpeaker / dPspeakerAxis.getZ();
+    // var b =
+    //     -robotVel
+    //             .rotateBy(
+    //                 Rotation2d.fromRadians(Math.atan2(dPspeakerAxisY,
+    // dPspeakerAxisX)).unaryMinus())
+    //             .getX()
+    //         / shooterSpeed;
+    // var insideCos = b * Math.sqrt(1.0 + a * a) / (a * a + 1.0);
+    // double pitchNote;
+    // if (Math.abs(insideCos) <= 1.0) {
+    //   pitchNote = Math.acos(insideCos) + Math.atan(a);
+    // } else {
+    //   pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
+    // }
 
     // Direction to the speaker from the note.
     double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);

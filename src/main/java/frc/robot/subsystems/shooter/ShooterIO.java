@@ -33,6 +33,8 @@ public interface ShooterIO {
 
   public default void setPivotVoltage(double volts) {}
 
+  public default void resetPivotSensorPosition(Rotation2d position) {}
+
   public default void setPivotClosedLoopConstants(
       double kP,
       double kD,

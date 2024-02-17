@@ -19,7 +19,7 @@ public class ElevatorIOReal implements ElevatorIO {
 
   private static final double inchesToMotorRot =
       Constants.ElevatorConstants.GEAR_RATIO
-          / (2 * Math.PI * Constants.ElevatorConstants.WHEEL_RADIUS);
+          / (Math.PI * Constants.ElevatorConstants.PULLEY_DIAMETER);
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
       new MotionMagicVoltage(0.0).withEnableFOC(false);

@@ -13,7 +13,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
@@ -21,6 +20,14 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   // ------------ SWERVE ---------------------
   private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+
+  // -------- GYRO OFFSETS --------
+
+  private static final double GYRO_MOUNTING_PITCH = 0.0;
+
+  private static final double GYRO_MOUNTING_ROLL = 0.0;
+
+  private static final double GYRO_MOUNTING_YAW = 0.0;
 
   // ------ SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
 
@@ -111,13 +118,11 @@ public class SimulatorRobotConfig extends RobotConfig {
               Units.inchesToMeters(22.31306)),
           new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
 
-  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "INTAKE_SIDE_LEFT";
-  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "INTAKE_SIDE_RIGHT";
-  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "SHOOTER_SIDE_LEFT";
-  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "SHOOTER_SIDE_RIGHT";
-  // public static final String FRONT_LEFT_CAMERA_NAME = "LeftCamera";
-  // public static final String FRONT_RIGHT_CAMERA_NAME = "RightCamera";
-  // public static final String BACK_CAMERA_NAME = "BackCamera";
+  public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
+  public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
+  public static final String SHOOTER_SIDE_RIGHT_CAMERA_NAME = "2_Shooter_Right_See3Cam";
+  public static final String INTAKE_SIDE_LEFT_CAMERA_NAME = "3_Intake_Left_See3Cam";
+  public static final String INTAKE_SIDE_RIGHT_CAMERA_NAME = "4_Intake_Right_See3Cam";
 
   public static final AprilTagFields APRIL_TAG_FIELD = AprilTagFields.k2024Crescendo;
 
@@ -147,49 +152,43 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   @Override
   public SwerveModule[] getReplaySwerveModuleObjects() {
-    SwerveModule[] modules = {
+    return new SwerveModule[] {
       new SwerveModule(0, this, new SwerveModuleIO() {}),
       new SwerveModule(1, this, new SwerveModuleIO() {}),
       new SwerveModule(2, this, new SwerveModuleIO() {}),
       new SwerveModule(3, this, new SwerveModuleIO() {}),
     };
-
-    return modules;
   }
 
+  //
+  // @Override
+  // public VisionModuleConfiguration[] getVisionModuleObjects() {
+  //   // does not work for SIM because we need to give VisionIOSim a pose supplier which can only
+  // be
+  //   // obtained from the drivetrain
+  //   throw new RuntimeException("Unsupported action for SIM BOT");
+  // }
+
   // FIXME: define vision modules here
+  // CAVEAT: only call when we're testing real cameras on sim robot
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    // does not work for SIM because we need to give VisionIOSim a pose supplier which can only be
-    // obtained from the drivetrain
-    throw new RuntimeException("Unsupported action for SIM BOT");
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      VisionModuleConfiguration.build(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
+      VisionModuleConfiguration.build(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
+    };
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    VisionModuleConfiguration intakeLeft =
-        new VisionModuleConfiguration(
-            new VisionIO() {}, SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT);
-
-    VisionModuleConfiguration intakeRight =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-            INTAKE_SIDE_RIGHT);
-
-    VisionModuleConfiguration shooterLeft =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
-            SHOOTER_SIDE_LEFT);
-
-    VisionModuleConfiguration shooterRight =
-        new VisionModuleConfiguration(
-            new VisionIO() {},
-            SimulatorRobotConfig.SHOOTER_SIDE_RIGHT_CAMERA_NAME,
-            SHOOTER_SIDE_RIGHT);
-
-    return new VisionModuleConfiguration[] {intakeLeft, intakeRight, shooterLeft, shooterRight};
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
+      VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
+    };
   }
 
   @Override
@@ -316,5 +315,20 @@ public class SimulatorRobotConfig extends RobotConfig {
   @Override
   public CurrentLimitsConfigs getSteerTalonCurrentLimitConfig() {
     throw new RuntimeException("Unsupported action for SIM BOT");
+  }
+
+  @Override
+  public double getGyroMountingPitch() {
+    return GYRO_MOUNTING_PITCH;
+  }
+
+  @Override
+  public double getGyroMountingRoll() {
+    return GYRO_MOUNTING_ROLL;
+  }
+
+  @Override
+  public double getGyroMountingYaw() {
+    return GYRO_MOUNTING_YAW;
   }
 }

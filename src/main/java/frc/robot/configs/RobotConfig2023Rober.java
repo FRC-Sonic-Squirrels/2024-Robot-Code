@@ -15,8 +15,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class RobotConfig2023Rober extends RobotConfig {
@@ -101,6 +99,14 @@ public class RobotConfig2023Rober extends RobotConfig {
 
   // -------- GYRO CAN ID ---------
   private static final int GYRO_CAN_ID = 15;
+
+  // -------- GYRO OFFSETS --------
+
+  private static final double GYRO_MOUNTING_PITCH = 0.0;
+
+  private static final double GYRO_MOUNTING_ROLL = 0.0;
+
+  private static final double GYRO_MOUNTING_YAW = 0.0;
 
   // -------- CAN BUS NAME -----------
   private static final String CAN_BUS_NAME = "CANivore";
@@ -202,32 +208,19 @@ public class RobotConfig2023Rober extends RobotConfig {
   // FIXME: define vision modules here
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(FRONT_LEFT_CAMERA_NAME),
-            "frontLeft",
-            FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(
-            new VisionIOPhotonVision(FRONT_RIGHT_CAMERA_NAME),
-            "frontRight",
-            FRONT_RIGHT_ROBOT_TO_CAMERA);
-    // VisionModule back = new VisionModule(new VisionIOPhotonVision(BACK_CAMERA_NAME), "back",
-    // BACK_ROBOT_TO_CAMERA);
-
     return new VisionModuleConfiguration[] {
-      frontLeft, frontRight, /*back*/
+      VisionModuleConfiguration.build(FRONT_LEFT_CAMERA_NAME, FRONT_LEFT_ROBOT_TO_CAMERA),
+      VisionModuleConfiguration.build(FRONT_RIGHT_CAMERA_NAME, FRONT_RIGHT_ROBOT_TO_CAMERA)
     };
   }
 
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
-    VisionModuleConfiguration frontLeft =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontLeft", FRONT_LEFT_ROBOT_TO_CAMERA);
-    VisionModuleConfiguration frontRight =
-        new VisionModuleConfiguration(new VisionIO() {}, "frontRight", FRONT_RIGHT_ROBOT_TO_CAMERA);
-
-    return new VisionModuleConfiguration[] {frontLeft, frontRight};
+    return new VisionModuleConfiguration[] {
+      VisionModuleConfiguration.buildReplayStub(FRONT_LEFT_CAMERA_NAME, FRONT_LEFT_ROBOT_TO_CAMERA),
+      VisionModuleConfiguration.buildReplayStub(
+          FRONT_RIGHT_CAMERA_NAME, FRONT_RIGHT_ROBOT_TO_CAMERA)
+    };
   }
 
   @Override
@@ -359,5 +352,20 @@ public class RobotConfig2023Rober extends RobotConfig {
   @Override
   public CurrentLimitsConfigs getSteerTalonCurrentLimitConfig() {
     return STEER_TALON_CURRENT_LIMIT_CONFIGS;
+  }
+
+  @Override
+  public double getGyroMountingPitch() {
+    return GYRO_MOUNTING_PITCH;
+  }
+
+  @Override
+  public double getGyroMountingRoll() {
+    return GYRO_MOUNTING_ROLL;
+  }
+
+  @Override
+  public double getGyroMountingYaw() {
+    return GYRO_MOUNTING_YAW;
   }
 }

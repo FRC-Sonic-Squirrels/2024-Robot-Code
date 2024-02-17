@@ -14,7 +14,7 @@ public class ElevatorIOSim implements ElevatorIO {
           DCMotor.getFalcon500Foc(1),
           Constants.ElevatorConstants.GEAR_RATIO,
           Constants.ElevatorConstants.CARRIAGE_MASS,
-          Constants.ElevatorConstants.WHEEL_RADIUS,
+          Constants.ElevatorConstants.PULLEY_DIAMETER / 2,
           0.0,
           Constants.ElevatorConstants.MAX_HEIGHT,
           true,

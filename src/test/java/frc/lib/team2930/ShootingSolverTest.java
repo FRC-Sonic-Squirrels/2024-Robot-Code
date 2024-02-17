@@ -45,6 +45,7 @@ public class ShootingSolverTest {
         } else {
 
           assertNotNull(res);
+
           assertEquals(45.0, res.pitch().getDegrees(), 0.0001);
 
           var angleDiff = angle - res.heading().getDegrees();

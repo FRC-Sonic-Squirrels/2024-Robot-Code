@@ -22,8 +22,8 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Pivot.GEARING,
           SingleJointedArmSim.estimateMOI(Units.feetToMeters(1.5), 20.0),
           Constants.ShooterConstants.SHOOTER_LENGTH,
-          Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD,
-          Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD,
+          Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD.getRadians(),
+          Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getRadians(),
           false,
           Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE);
 
@@ -40,7 +40,7 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Kicker.MOI);
 
   private final ProfiledPIDController pivotFeedback =
-      new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
+      new ProfiledPIDController(5.0, 0, 0.0, new Constraints(0.5, 1.0));
 
   private double pivotTargetVelRadPerSec = 0.0;
   private PIDController pivotVelController = new PIDController(60, 0, 0);
@@ -55,6 +55,8 @@ public class ShooterIOSim implements ShooterIO {
 
   private double launcherOpenLoopVolts = 0.0;
 
+  private double targetRPM = 0.0;
+
   public ShooterIOSim() {}
 
   @Override
@@ -67,7 +69,7 @@ public class ShooterIOSim implements ShooterIO {
     pivotFeedback.setTolerance(1.0);
 
     inputs.pivotPosition = new Rotation2d(pivot.getAngleRads());
-    inputs.launcherRPM = launcherOpenLoopVolts / 12.0 * 5800.0;
+    inputs.launcherRPM = targetRPM;
 
     inputs.kickerAppliedVolts = kickerVolts;
 
@@ -142,5 +144,10 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setKickerVoltage(double volts) {
     kickerVolts = volts;
+  }
+
+  @Override
+  public void setLauncherRPM(double rpm) {
+    targetRPM = rpm;
   }
 }

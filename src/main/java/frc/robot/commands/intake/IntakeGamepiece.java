@@ -49,11 +49,9 @@ public class IntakeGamepiece extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (intake.getBeamBreak() && !beamBreakPrev) {
-      timeSinceLastGamepiece.reset();
-      timeSinceLastGamepiece.start();
-    }
-    beamBreakPrev = intake.getBeamBreak();
+    timeSinceLastGamepiece.reset();
+    timeSinceLastGamepiece.start();
+
     if (timeSinceLastGamepiece.get() >= 0.01
         && timeSinceLastGamepiece.get() <= rumbleDurationSeconds.get()) {
       if (controller != null)
@@ -75,6 +73,6 @@ public class IntakeGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return timeSinceLastGamepiece.get() >= 0.1;
   }
 }

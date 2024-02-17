@@ -1,6 +1,5 @@
 package frc.robot.autonomous;
 
-import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,35 +17,41 @@ public class ChoreoHelper {
   private PIDController xFeedback;
   private PIDController yFeedback;
   private PIDController rotationalFeedback;
-  private List<ChoreoTrajectoryState> states;
   private double initialTime;
-  private Pose2d closestPose;
+  private double timeOffset;
+  private double allowedDist = 0.03;
+  private double allowedExtraTime = 1.0;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
-   * @param pathName name of path
+   * @param traj trajectory to follow
    * @param translationalFeedback pid in x and y directions
    * @param rotationalFeedback pid for angular velocity
    */
   public ChoreoHelper(
-      String pathName,
-      PIDController translationalFeedback,
-      PIDController rotationalFeedback,
-      Pose2d initPose) {
-    traj = Choreo.getTrajectory(pathName);
-    this.xFeedback = translationalFeedback;
-    this.yFeedback = translationalFeedback;
+      double initialTime,
+      Pose2d initialPose,
+      ChoreoTrajectory traj,
+      PIDController translationalFeedbackX,
+      PIDController translationalFeedbackY,
+      PIDController rotationalFeedback) {
+    this.traj = traj;
+    this.xFeedback = translationalFeedbackX;
+    this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
-    states = getStates();
+
     ChoreoTrajectoryState closestState = null;
+    List<ChoreoTrajectoryState> states = getStates();
     for (int i = 0; i < traj.getPoses().length; i++) {
-      closestState = calculateNewClosestState(closestState, states.get(i), initPose);
+      closestState = calculateNewClosestState(closestState, states.get(i), initialPose);
     }
-    closestPose = closestState.getPose();
-    initialTime = closestState.timestamp;
-    Logger.recordOutput("Autonomous/closestPose", closestPose);
+    if (closestState != null) {
+      this.timeOffset = closestState.timestamp;
+      Logger.recordOutput("Autonomous/closestPose", closestState.getPose());
+    }
+    this.initialTime = initialTime;
   }
 
   /**
@@ -56,17 +61,29 @@ public class ChoreoHelper {
    * @param timestamp time of path
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
-    ChoreoTrajectoryState state = traj.sample(timestamp + initialTime, Constants.isRedAlliance());
+    timestamp -= initialTime;
+    timestamp += timeOffset;
 
-    double xVel = state.velocityX + xFeedback.calculate(robotPose.getX(), state.x);
-    double yVel = state.velocityY + yFeedback.calculate(robotPose.getY(), state.y);
-    double omegaVel =
-        state.angularVelocity
-            + rotationalFeedback.calculate(robotPose.getRotation().getRadians(), state.heading);
+    ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
+
+    Pose2d currentRobotPose = robotPose;
+
+    double x = currentRobotPose.getX();
+    double y = currentRobotPose.getY();
+    double theta = currentRobotPose.getRotation().getRadians();
+
+    double xVel = state.velocityX + xFeedback.calculate(x, state.x);
+    double yVel = state.velocityY + yFeedback.calculate(y, state.y);
+
+    Logger.recordOutput("Autonomous/stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
+    double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
     Logger.recordOutput("Autonomous/optimalPose", state.getPose());
     Logger.recordOutput(
         "Autonomous/desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
+
+    if (GeometryUtil.getDist(currentRobotPose, traj.getFinalPose()) <= allowedDist
+        || timestamp >= traj.getTotalTime() + allowedExtraTime) return null;
 
     return new ChassisSpeeds(xVel, yVel, omegaVel);
   }
@@ -88,8 +105,8 @@ public class ChoreoHelper {
     try {
       var f = traj.getClass().getDeclaredField("samples");
       f.setAccessible(true);
-      var samples = (List<ChoreoTrajectoryState>) f.get(traj);
-      return samples;
+      //noinspection unchecked
+      return (List<ChoreoTrajectoryState>) f.get(traj);
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }

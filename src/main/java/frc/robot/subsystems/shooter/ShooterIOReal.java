@@ -11,6 +11,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
@@ -43,7 +44,7 @@ public class ShooterIOReal implements ShooterIO {
 
   // FIX: add FOC
   private final MotionMagicVoltage pivotClosedLoopControl =
-      new MotionMagicVoltage(0).withEnableFOC(false);
+      new MotionMagicVoltage(0).withEnableFOC(true);
   private final VoltageOut pivotOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
 
   private final MotionMagicVelocityVoltage launcherClosedLoop =
@@ -63,6 +64,7 @@ public class ShooterIOReal implements ShooterIO {
     launcherConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     launcherConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    launcherConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
 
     launcher_lead.getConfigurator().apply(launcherConfig);
@@ -81,6 +83,17 @@ public class ShooterIOReal implements ShooterIO {
     pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
+    // pivotConfig.Voltage.PeakForwardVoltage = 3.0;
+    // pivotConfig.Voltage.PeakReverseVoltage = -3.0;
+
+    pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getRotations();
+    pivotConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD.getRotations();
+
+    pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    pivotConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     pivot.getConfigurator().apply(pivotConfig);
 
     // -- kicker config --
@@ -91,7 +104,7 @@ public class ShooterIOReal implements ShooterIO {
 
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    kicker.getConfigurator().apply(pivotConfig);
+    kicker.getConfigurator().apply(kickerConfig);
 
     pivotPosition = pivot.getPosition();
     pivotVelocity = pivot.getVelocity();
@@ -204,6 +217,11 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setKickerVoltage(double volts) {
     kicker.setControl(kickerOpenLoop.withOutput(volts));
+  }
+
+  @Override
+  public void resetPivotSensorPosition(Rotation2d position) {
+    pivot.setPosition(position.getRotations());
   }
 
   @Override

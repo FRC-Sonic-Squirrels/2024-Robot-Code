@@ -15,7 +15,7 @@ public class IntakeIOSim implements IntakeIO {
 
   private double voltage = 0.0;
 
-  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Intake/BeamBreak", false);
+  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Intake/BeamBreak", true);
 
   public IntakeIOSim() {}
 
@@ -24,7 +24,6 @@ public class IntakeIOSim implements IntakeIO {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.currentAmps = motor.getCurrentDrawAmps();
-    inputs.RPM = motor.getAngularVelocityRPM();
     inputs.beamBreak = beamBreak.get();
   }
 

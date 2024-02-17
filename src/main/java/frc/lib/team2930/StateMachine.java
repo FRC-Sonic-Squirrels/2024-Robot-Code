@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
+import org.littletonrobotics.junction.Logger;
 
 public class StateMachine {
   public enum Status {
@@ -163,6 +164,7 @@ public class StateMachine {
       StateMachine subStateMachine, ResumeStateHandler handler) {
     return () -> {
       subStateMachine.advance();
+      Logger.recordOutput("Autonomous/subStateStatus", subStateMachine.status);
       if (subStateMachine.isRunning()) return null;
 
       return handler.advance(subStateMachine);

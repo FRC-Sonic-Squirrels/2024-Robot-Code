@@ -82,7 +82,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Intake")) {
+    try (var ignored = new ExecutionTiming("Vision")) {
       // update all inputs
       for (VisionModule module : visionModules) {
         module.visionIO.updateInputs(module.visionIOInputs);

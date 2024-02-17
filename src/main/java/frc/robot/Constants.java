@@ -46,14 +46,15 @@ public final class Constants {
   }
 
   public class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT_REAL_CAMERAS;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
 
     // FIXME: update for various robots
     public static Mode getMode() {
-      if (getRobot() == RobotType.ROBOT_SIMBOT) {
+      if (getRobot() == RobotType.ROBOT_SIMBOT
+          || getRobot() == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
         return Mode.SIM;
       }
 
@@ -74,8 +75,9 @@ public final class Constants {
       // use supplier because if we just create the object, the fields in the
       // config classes are also created. Meaning tunableNumber values are stuck to the first
       // object that is created. In this case ExampleRobotConfig. Suppliers solve this
-      // by only creating the specific config object coresponding to the robot type
+      // by only creating the specific config object corresponding to the robot type
       ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
+      ROBOT_SIMBOT_REAL_CAMERAS(() -> new SimulatorRobotConfig()),
       ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
       ROBOT_2024(() -> new RobotConfig2024());
 
@@ -96,8 +98,12 @@ public final class Constants {
   public static double MAX_VOLTAGE = 12.0;
 
   public class FieldConstants {
+    // official Field dimensions
+    // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
+    public static double FIELD_LENGTH = 16.451;
+    public static double FIELD_WIDTH = .211;
+
     // FIXME: double check this number
-    public static double FIELD_LENGTH = 8.28347108459473 * 2.0;
     public static final double SPEAKER_HEIGHT_METERS = 1.9812;
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
         new Translation2d(0.03950466960668564, 5.508944988250732);
@@ -159,7 +165,7 @@ public final class Constants {
   public class ElevatorConstants {
     // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
     public static final double GEAR_RATIO = 25.93;
-    public static final double WHEEL_RADIUS = 1.118;
+    public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
     public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
 
@@ -203,20 +209,24 @@ public final class Constants {
       //           + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
       // }
 
-      public static final Rotation2d SHOOTER_STOW_PITCH = new Rotation2d(Math.toRadians(70.0));
+      // public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
+      public static final double GEARING = 125.0;
 
-      public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
+      public static final Rotation2d MIN_ANGLE_RAD = Rotation2d.fromDegrees(12.0);
+      public static final Rotation2d MAX_ANGLE_RAD =
+          Rotation2d.fromDegrees(59.0); // TRUE HARD STOP 61
+      public static final Rotation2d HOME_POSITION = MIN_ANGLE_RAD;
+      public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(61.0);
 
-      public static final double MIN_ANGLE_RAD = Math.toRadians(20.0);
-      public static final double MAX_ANGLE_RAD = Math.toRadians(87.0);
+      public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
 
-      public static final double SIM_INITIAL_ANGLE = Math.toRadians(85);
+      public static final double SIM_INITIAL_ANGLE = Math.toRadians(14.0);
     }
 
     public static class Launcher {
       public static final double MOI = 5.0;
       // FIX ME: THIS VALUE HAS TO BE CONFIRMED
-      public static final double GEARING = (30.0 / 18.0);
+      public static final double GEARING = (18.0 / 30.0);
       public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
     }
 
@@ -241,18 +251,18 @@ public final class Constants {
     // all these CAN ID's are reserved for the Drivetrain
 
     // TODO: get actual can ids
-    public static final int INTAKE_CAN_ID = 15;
+    public static final int INTAKE_CAN_ID = 34;
 
-    public static final int SHOOTER_LEAD_CAN_ID = 25;
-    public static final int SHOOTER_FOLLOW_CAN_ID = 26;
-    public static final int SHOOTER_PIVOT_CAN_ID = 27;
-    public static final int SHOOTER_KICKER_CAN_ID = 28;
+    public static final int SHOOTER_LEAD_CAN_ID = 33;
+    public static final int SHOOTER_FOLLOW_CAN_ID = 36;
+    public static final int SHOOTER_PIVOT_CAN_ID = 32;
+    public static final int SHOOTER_KICKER_CAN_ID = 35;
 
     public static final int ARM_CAN_ID = 17;
 
     public static final int ELEVATOR_CAN_ID = 16;
 
-    public static final int END_EFFECTOR_CAN_ID = 18;
+    public static final int END_EFFECTOR_CAN_ID = 30;
     public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 35;
     public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 36;
   }
@@ -278,6 +288,6 @@ public final class Constants {
   public class VisionGamepieceConstants {
     public static final Pose3d GAMEPIECE_CAMERA_POSE =
         new Pose3d(0.0, 0.0, Units.inchesToMeters(38), new Rotation3d(0.0, 0.0, 0.0));
-    public static final String CAMERA_NAME = "CAM2024_3";
+    public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 }
