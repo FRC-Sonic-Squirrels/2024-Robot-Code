@@ -53,6 +53,7 @@ public class ShooterIOSim implements ShooterIO {
 
   private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Shooter/beamBreak", false);
 
+  private double[] launcherAppliedVolts = new double[2];
   private double launcherOpenLoopVolts = 0.0;
 
   private double targetRPM = 0.0;
@@ -70,7 +71,7 @@ public class ShooterIOSim implements ShooterIO {
 
     inputs.pivotPosition = new Rotation2d(pivot.getAngleRads());
     inputs.launcherRPM = targetRPM;
-
+    inputs.launcherAppliedVolts[0] = launcherAppliedVolts[0];
     inputs.kickerAppliedVolts = kickerVolts;
 
     inputs.beamBreak = beamBreak.get();
@@ -138,7 +139,8 @@ public class ShooterIOSim implements ShooterIO {
 
   @Override
   public void setLauncherVoltage(double volts) {
-    launcherOpenLoopVolts = volts;
+    // lead
+    launcherAppliedVolts[0] = volts;
   }
 
   @Override

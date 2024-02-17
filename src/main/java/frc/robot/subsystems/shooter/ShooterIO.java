@@ -13,7 +13,7 @@ public interface ShooterIO {
     public double pivotCurrentAmps = 0.0;
 
     public double launcherRPM = 0.0;
-    public double[] launcherAppliedVolts = new double[] {};
+    public double[] launcherAppliedVolts = new double[2];
     public double[] launcherCurrentAmps = new double[] {};
 
     public double kickerAppliedVolts = 0.0;
