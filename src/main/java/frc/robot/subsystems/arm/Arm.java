@@ -125,14 +125,26 @@ public class Arm extends SubsystemBase {
   }
 
   public boolean isAtTargetAngle() {
-    return isAtTargetAngle(closedLoopTolerance);
+    return isAtTargetAngle(closedLoopTargetAngle);
   }
 
-  public boolean isAtTargetAngle(Rotation2d tolerance) {
+  public boolean isAtTargetAngle(Rotation2d target, Rotation2d tolerance) {
     if (currentControlMode == ControlMode.OPEN_LOOP) {
       return false;
     }
-    var error = inputs.armPosition.minus(closedLoopTargetAngle).getRadians();
+    var error = inputs.armPosition.minus(target).getRadians();
     return Math.abs(error) <= tolerance.getRadians();
+  }
+
+  public boolean isAtTargetAngle(Rotation2d target) {
+    return isAtTargetAngle(target, closedLoopTolerance);
+  }
+
+  public double getVoltage() {
+    return inputs.armAppliedVolts;
+  }
+
+  public double getVelocity() {
+    return inputs.armVelocity;
   }
 }

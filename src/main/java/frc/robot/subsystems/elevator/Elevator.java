@@ -113,4 +113,12 @@ public class Elevator extends SubsystemBase {
   public void resetSensorToHomePosition() {
     io.setSensorPosition(Units.Meters.zero());
   }
+
+  public double getVoltage() {
+    return inputs.appliedVolts;
+  }
+
+  public double getVelocity() {
+    return inputs.velocityInchesPerSecond;
+  }
 }

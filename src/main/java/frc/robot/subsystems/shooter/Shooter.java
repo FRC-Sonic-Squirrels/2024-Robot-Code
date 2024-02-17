@@ -222,4 +222,12 @@ public class Shooter extends SubsystemBase {
   public void pivotResetHomePosition() {
     io.resetPivotSensorPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
   }
+
+  public double getPivotVoltage() {
+    return inputs.pivotAppliedVotls;
+  }
+
+  public double getPivotVelocity() {
+    return inputs.pivotVelocityRadsPerSec;
+  }
 }

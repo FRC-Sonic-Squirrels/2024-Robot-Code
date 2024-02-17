@@ -11,6 +11,7 @@ public interface ArmIO {
     public double armAppliedVolts;
     public double armCurrentAmps;
     public double armTempCelsius;
+    public double armVelocity;
   }
 
   /** Updates the set of loggable inputs. */
