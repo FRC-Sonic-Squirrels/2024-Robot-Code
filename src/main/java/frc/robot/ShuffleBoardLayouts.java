@@ -168,7 +168,6 @@ public class ShuffleBoardLayouts {
 
   // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
-    Rotation2d targetRotation = new Rotation2d();
     var shooterTab = Shuffleboard.getTab("Shooter_Debug");
     var shooterCommandsLayout =
         shooterTab
@@ -180,25 +179,39 @@ public class ShuffleBoardLayouts {
     var tunableVoltage =
         shooterTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
-    var tunablePivotRotations = 
-        shooterTab.add("tunablePivotRotations", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
+    var tunablePivotDegrees =
+        shooterTab.add("tunablePivotDegrees", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
     // MOTORS
-    shooterCommandsLayout.add("setKickerPercentOut",
+    shooterCommandsLayout.add(
+        "setKickerPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut));
 
-    shooterCommandsLayout.add("setLauncherPercentOut",
+    shooterCommandsLayout.add(
+        "setLauncherPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
 
-    shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () -> tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
+    // shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () ->
+    // tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
+    var setPivotPosition =
+        Commands.runOnce(
+            () ->
+                shooter.setPivotPosition(
+                    Rotation2d.fromDegrees(tunablePivotDegrees.getDouble(0.0))),
+            shooter);
+    setPivotPosition.setName("setPivotPosition");
 
-    var stopCommand = Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter);
+    var stopCommand =
+        Commands.sequence(
+            Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
+            Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter),
+            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter));
+
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
     shooterCommandsLayout.add(stopCommand);
-
   }
 
   // FIXME: add drive and turn commands
