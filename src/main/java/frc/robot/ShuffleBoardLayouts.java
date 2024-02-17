@@ -168,8 +168,8 @@ public class ShuffleBoardLayouts {
 
   // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
+    Rotation2d targetRotation = new Rotation2d();
     var shooterTab = Shuffleboard.getTab("Shooter_Debug");
-    // FIXME: change layout position
     var shooterCommandsLayout =
         shooterTab
             .getLayout("ShooterCommands", BuiltInLayouts.kList)
@@ -180,20 +180,20 @@ public class ShuffleBoardLayouts {
     var tunableVoltage =
         shooterTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
-    var tunablePivotRotations = shooterTab.add("tunablePivotRotations", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
+    var tunablePivotRotations = 
+        shooterTab.add("tunablePivotRotations", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
+    // MOTORS
     shooterCommandsLayout.add("setKickerPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut));
 
-    shooterCommandsLayout.add("setLeadPercentOut",
+    shooterCommandsLayout.add("setLauncherPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
 
-    shooterCommandsLayout.add("setFollowPercentOut",
-        new ConsumeSuppliedValue(
-            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
-    
+    shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () -> tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
+
     var stopCommand = Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter);
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
