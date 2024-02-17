@@ -19,8 +19,9 @@ public class LED extends SubsystemBase {
   individualLED led2 = new individualLED(26, 60);
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
+  int snakeShade = 0;
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.SHOOTER_LINED_UP;
+  robotStates robotState = robotStates.NOTHING;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -36,13 +37,16 @@ public class LED extends SubsystemBase {
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(255, 0, 0);
+        setAllSolidColor(Color.GREEN);
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(0, 255, 0, 255, 0, 255);
+        setAllBlinking(Color.BLACK, Color.WHITE);
+        break;
+      case AMP_READY_TO_SCORE:
+        setAllSolidColor(Color.GREEN);
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
@@ -58,34 +62,36 @@ public class LED extends SubsystemBase {
           ledBuffer.setRGB(i, Color.red.getRed(), 0, 0);
         }
         break;
-      case TWENTY_SECOND_WARTING:
+      case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(
-              Color.magenta.getRed(), 0, Color.magenta.getGreen(), 0, Color.magenta.getBlue(), 0);
+          setAllBlinking(Color.magenta, Color.BLACK);
         }
         break;
       case AMP_LINING_UP:
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(
-              Color.yellow.getRed(), 0, Color.yellow.getGreen(), 0, Color.yellow.getBlue(), 0);
+          setAllBlinking(Color.yellow, Color.BLACK);
         }
+      case GAMEPIECE_IN_ROBOT:
+        setAllSolidColor(Color.ORANGE);
+        break;
+      case CLIMB_MODE:
+        setSingleStripSolidColor(Color.GREEN, 20, 40);
         break;
     }
 
     led.setData(ledBuffer);
   }
 
-  private void setSingleStripSolidColor(
-      int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
+  private void setSingleStripSolidColor(Color color, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
-  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
+  private void setAllSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
@@ -110,22 +116,27 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2) {
+  private void setAllBlinking(Color color1, Color color2) {
 
     if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
     } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
+    }
+  }
+
+  private void setAllSnake(Color color) {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
+      ledBuffer.setRGB(
+          i, shade * color.getRed(), shade * color.getGreen(), shade * color.getBlue());
+
+      snakeShade += 3;
+      snakeShade %= 255;
     }
   }
 
@@ -147,6 +158,12 @@ public class LED extends SubsystemBase {
 
     rainbowFirstPixelHue += 3;
     rainbowFirstPixelHue %= 180;
+  }
+
+  private void setNothing() {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      ledBuffer.setRGB(i, Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
+    }
   }
 
   private class individualLED {
@@ -173,8 +190,13 @@ public class LED extends SubsystemBase {
     DRIVING_TO_GAMEPIECE(), //
     AUTO_MODE(), //
     NOTHING(), //
-    TWENTY_SECOND_WARTING(), //
-    AMP_LINING_UP(); //
+    TWENTY_SECOND_WARNING(), //
+    AMP_LINING_UP(),
+    SHOOTER_LINING_UP(),
+    AMP_READY_TO_SCORE(),
+    GAMEPIECE_IN_ROBOT(),
+    CLIMB_MODE(),
+    TEST()
   }
 
   public void setRobotState(robotStates robotState) {
