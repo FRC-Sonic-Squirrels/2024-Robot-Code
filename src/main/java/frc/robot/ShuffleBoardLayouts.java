@@ -159,6 +159,11 @@ public class ShuffleBoardLayouts {
     stopCommand.runsWhenDisabled();
     stopCommand.setName("ELEVATOR STOP");
     elevatorCommandsLayout.add(stopCommand);
+
+    var resetHeight = Commands.runOnce(() -> elevator.setHeight(0.0), elevator);
+    resetHeight.runsWhenDisabled();
+    resetHeight.setName("resetHeight");
+    elevatorCommandsLayout.add(resetHeight);
   }
 
   // FIXME: add the rest of the shooter debug logic
@@ -173,7 +178,7 @@ public class ShuffleBoardLayouts {
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tunableVoltage =
-        shooterTab.add("tunableVoltage", 0.0).withPosition(5, 1).withSize(2, 1).getEntry();
+        shooterTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
     shooterCommandsLayout.add(
         new ConsumeSuppliedValue(
@@ -183,6 +188,7 @@ public class ShuffleBoardLayouts {
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
     shooterCommandsLayout.add(stopCommand);
+
   }
 
   // FIXME: add drive and turn commands
