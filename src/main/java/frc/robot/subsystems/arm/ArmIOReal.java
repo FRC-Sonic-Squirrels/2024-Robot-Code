@@ -18,6 +18,7 @@ public class ArmIOReal implements ArmIO {
   private final StatusSignal<Double> positionRotations;
   private final StatusSignal<Double> currentAmps;
   private final StatusSignal<Double> tempCelsius;
+  private final StatusSignal<Double> velocity;
 
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
@@ -47,8 +48,9 @@ public class ArmIOReal implements ArmIO {
     positionRotations = motor.getPosition();
     currentAmps = motor.getStatorCurrent();
     tempCelsius = motor.getDeviceTemp();
+    velocity = motor.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVols, positionRotations);
+    BaseStatusSignal.setUpdateFrequencyForAll(100, appliedVols, positionRotations, velocity);
     BaseStatusSignal.setUpdateFrequencyForAll(50, currentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(1, tempCelsius);
 
@@ -57,12 +59,13 @@ public class ArmIOReal implements ArmIO {
 
   @Override
   public void updateInputs(ArmIOInputs inputs) {
-    BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius);
+    BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius, velocity);
     // could look into latency compensating this value
     inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());
     inputs.armAppliedVolts = appliedVols.getValueAsDouble();
     inputs.armCurrentAmps = currentAmps.getValueAsDouble();
     inputs.armTempCelsius = tempCelsius.getValueAsDouble();
+    inputs.armVelocity = velocity.getValueAsDouble();
   }
 
   @Override
