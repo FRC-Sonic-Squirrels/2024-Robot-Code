@@ -148,10 +148,10 @@ public class ShuffleBoardLayouts {
     //     new ConsumeSuppliedValue(
     //         elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
 
-    elevatorCommandsLayout.add("setVoltage",
+    elevatorCommandsLayout.add(
         new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0)));
 
-    elevatorCommandsLayout.add("setHeight",
+    elevatorCommandsLayout.add(
         new ConsumeSuppliedValue(
             elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
 
