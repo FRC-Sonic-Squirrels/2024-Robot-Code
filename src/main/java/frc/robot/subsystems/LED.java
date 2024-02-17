@@ -20,7 +20,7 @@ public class LED extends SubsystemBase {
 
   AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.SHOOTER_LINED_UP;
+  RobotStates robotState = RobotStates.SHOOTER_LINED_UP;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -167,7 +167,7 @@ public class LED extends SubsystemBase {
     }
   }
 
-  public enum robotStates {
+  public enum RobotStates {
     SHOOTER_SUCCESS(), //
     SHOOTER_LINED_UP(), //
     DRIVING_TO_GAMEPIECE(), //
@@ -177,7 +177,7 @@ public class LED extends SubsystemBase {
     AMP_LINING_UP(); //
   }
 
-  public void setRobotState(robotStates robotState) {
+  public void setRobotState(RobotStates robotState) {
     this.robotState = robotState;
   }
 }
