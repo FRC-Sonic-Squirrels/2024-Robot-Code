@@ -23,12 +23,13 @@ public class IntakeIOSim implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
+    inputs.appliedVolts = voltage;
     inputs.currentAmps = motor.getCurrentDrawAmps();
     inputs.beamBreak = beamBreak.get();
   }
 
   @Override
   public void setVoltage(double volts) {
-    volts = voltage;
+    voltage = volts;
   }
 }
