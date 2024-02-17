@@ -26,7 +26,7 @@ public class Arm extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint");
 
   static {
-    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
+    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
       kP.initDefault(56.0);
       kD.initDefault(0);
       kG.initDefault(0.28);

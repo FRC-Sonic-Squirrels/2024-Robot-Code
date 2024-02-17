@@ -229,7 +229,7 @@ public class RobotContainer {
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
 
-        case ROBOT_2024:
+        case ROBOT_2024_MAESTRO:
           // README: for development purposes, comment any of the real IO's you DON'T want to use
           // and
           // uncomment the empty IO's as a replacement

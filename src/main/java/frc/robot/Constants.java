@@ -74,7 +74,7 @@ public final class Constants {
     public static RobotType getRobot() {
       if (RobotBase.isReal() && ROBOT == RobotType.ROBOT_SIMBOT) {
         invalidRobotAlert.set(true);
-        return RobotType.ROBOT_2024;
+        return RobotType.ROBOT_2024_MAESTRO;
       }
 
       return ROBOT;
@@ -89,7 +89,7 @@ public final class Constants {
       ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
       ROBOT_SIMBOT_REAL_CAMERAS(() -> new SimulatorRobotConfig()),
       ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
-      ROBOT_2024(() -> new RobotConfig2024());
+      ROBOT_2024_MAESTRO(() -> new RobotConfig2024());
 
       public Supplier<RobotConfig> config;
 
