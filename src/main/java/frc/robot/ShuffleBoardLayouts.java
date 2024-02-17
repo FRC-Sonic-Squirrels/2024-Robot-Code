@@ -101,9 +101,9 @@ public class ShuffleBoardLayouts {
         new ConsumeSuppliedValue(
             intake, () -> tunableVoltage.getDouble(0.0), intake::setPercentOut));
 
-    var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake);
-    stopCommand.runsWhenDisabled();
-    stopCommand.setName("INTAKE STOP");
+    var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake); 
+    stopCommand.runsWhenDisabled(); 
+    stopCommand.setName("INTAKE STOP"); 
     intakeCommandsLayout.add(stopCommand);
   }
 
@@ -182,6 +182,8 @@ public class ShuffleBoardLayouts {
     var tunablePivotDegrees =
         shooterTab.add("tunablePivotDegrees", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
+    var tunableRPM = shooterTab.add("tunableRPM", 0.0).withPosition(2, 2).withSize(2, 1).getEntry();
+
     // MOTORS
     shooterCommandsLayout.add(
         "setKickerPercentOut",
@@ -192,6 +194,11 @@ public class ShuffleBoardLayouts {
         "setLauncherPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
+
+    shooterCommandsLayout.add(
+        "setLauncherRPM",
+        new ConsumeSuppliedValue(
+            shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM));
 
     // shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () ->
     // tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
