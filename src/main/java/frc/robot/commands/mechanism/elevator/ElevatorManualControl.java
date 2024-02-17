@@ -1,4 +1,4 @@
-package frc.robot.commands.elevator;
+package frc.robot.commands.mechanism.elevator;
 
 import frc.lib.team2930.commands.ConsumeSuppliedValue;
 import frc.robot.subsystems.elevator.Elevator;
