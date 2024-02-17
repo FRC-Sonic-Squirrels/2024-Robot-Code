@@ -144,14 +144,14 @@ public class ShuffleBoardLayouts {
     var tunableHeight =
         elevatorTab.add("tunableHeight", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
-    // elevatorCommandsLayout.add(
+    // elevatorCommandsLayout.add("setVoltage",
     //     new ConsumeSuppliedValue(
     //         elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
 
-    elevatorCommandsLayout.add(
+    elevatorCommandsLayout.add("setVoltage",
         new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0)));
 
-    elevatorCommandsLayout.add(
+    elevatorCommandsLayout.add("setHeight",
         new ConsumeSuppliedValue(
             elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
 
@@ -245,8 +245,7 @@ public class ShuffleBoardLayouts {
         Commands.sequence(
             Commands.runOnce(() -> shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT), shooter),
             Commands.runOnce(() -> shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_PERCENT_OUT), shooter),
-            Commands.runOnce(() -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD), shooter)
-        );
+            Commands.runOnce(() -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD), shooter));
 
     checkElevator.setName("Check Elevator Height");
     checkArm.setName("Check Arm Angle");
