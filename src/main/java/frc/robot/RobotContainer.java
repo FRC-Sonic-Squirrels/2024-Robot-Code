@@ -156,8 +156,14 @@ public class RobotContainer {
                     drivetrain::addVisionEstimate,
                     config.getVisionModuleObjects());
 
+            // Sim camera, we don't calibrate Object Detection Camera
             visionGamepiece =
-                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+                new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+
+            // Real Camera
+            // visionGamepiece =
+            //     new VisionGamepiece(new VisionGamepieceIOReal(),
+            // drivetrain::getPoseEstimatorPose);
 
           } else {
             VisionModuleConfiguration[] visionModules = {
