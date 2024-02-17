@@ -81,6 +81,7 @@ public class LED extends SubsystemBase {
     }
 
     leftLed.setData(leftLedBuffer);
+    rightLed.setData(rightLedBuffer);
   }
 
   private void setSingleStripSolidColor(
