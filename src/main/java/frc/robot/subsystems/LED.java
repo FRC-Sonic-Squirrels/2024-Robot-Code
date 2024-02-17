@@ -43,7 +43,7 @@ public class LED extends SubsystemBase {
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(Color.BLACK, Color.WHITE, 2);
+        setAllBlinking(Color.BLACK, Color.WHITE);
         break;
       case AMP_READY_TO_SCORE:
         setAllSolidColor(Color.GREEN);
@@ -65,14 +65,13 @@ public class LED extends SubsystemBase {
       case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(
-              Color.magenta.getRed(), 0, Color.magenta.getGreen(), 0, Color.magenta.getBlue(), 0);
+          setAllBlinking(Color.magenta, Color.BLACK);
         }
         break;
       case AMP_LINING_UP:
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(
-              Color.yellow.getRed(), 0, Color.yellow.getGreen(), 0, Color.yellow.getBlue(), 0);
+          setAllBlinking(Color.yellow, Color.BLACK);
+        }
       case GAMEPIECE_IN_ROBOT:
         setAllSolidColor(Color.ORANGE);
         break;
@@ -84,16 +83,15 @@ public class LED extends SubsystemBase {
     led.setData(ledBuffer);
   }
 
-  private void setSingleStripSolidColor(
-      int redValue, int greenValue, int blueValue, int startingLED, int endingLED) {
+  private void setSingleStripSolidColor(Color color, int startingLED, int endingLED) {
     for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
-  private void setAllSolidColor(int redValue, int greenValue, int blueValue) {
+  private void setAllSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, redValue, greenValue, blueValue);
+      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
     }
   }
 
@@ -118,21 +116,15 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2) {
+  private void setAllBlinking(Color color1, Color color2) {
 
     if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
+        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
     } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
+        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
     }
   }
