@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/launcherClosedLoopMaxAccelerationConstraint");
 
   static {
-    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
+    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
       pivotkP.initDefault(800.0);
       pivotkD.initDefault(0.0);
       pivotkG.initDefault(0.0);
