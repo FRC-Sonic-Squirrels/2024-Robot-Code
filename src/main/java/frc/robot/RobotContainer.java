@@ -437,14 +437,18 @@ public class RobotContainer {
                         && !endEffector.shooterSideTOFDetectGamepiece())
             .debounce(0.4);
 
-    Command scoreAmp =
+    DriveToPose driveToAmp =
         new DriveToPose(
-                drivetrainWrapper,
-                () ->
-                    new Pose2d(
-                        Constants.isRedAlliance() ? 14.714638710021973 : 1.8273155689239502,
-                        7.65,
-                        Rotation2d.fromDegrees(90.0)))
+            drivetrainWrapper,
+            () ->
+                new Pose2d(
+                    Constants.isRedAlliance() ? 14.714638710021973 : 1.8273155689239502,
+                    7.65,
+                    Rotation2d.fromDegrees(90.0)));
+
+    Command scoreAmp =
+        driveToAmp
+            .until(driveToAmp::atGoal)
             .alongWith(MechanismActions.ampPosition(elevator, arm))
             .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(gamepieceInEE));
 
