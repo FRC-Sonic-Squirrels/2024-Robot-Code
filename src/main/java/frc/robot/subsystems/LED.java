@@ -130,19 +130,6 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllBlinking(Color color1, Color color2) {
-
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
-      for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
-      }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
-      for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
-      }
-    }
-  }
-
   private void setAllSnake(Color color) {
     for (int i = 0; i < leftLedBuffer.getLength(); i++) {
       final var shade = (snakeShade + (i * 255 / leftLedBuffer.getLength())) % 255;
@@ -151,6 +138,7 @@ public class LED extends SubsystemBase {
 
       snakeShade += 3;
       snakeShade %= 255;
+      }
     }
 
   private void setSingleStripRainbow(int startingLED, int endingLED) {
@@ -173,12 +161,13 @@ public class LED extends SubsystemBase {
     rainbowFirstPixelHue %= 180;
   }
 
-  private void setNothing() {
+  private void setNothing(AddressableLEDBuffer ledBuffer) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setRGB(i, Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
     }
   }
 
+  
   private class individualLED {
     int start;
     int end;
@@ -211,3 +200,4 @@ public class LED extends SubsystemBase {
     this.robotState = robotState;
   }
 }
+
