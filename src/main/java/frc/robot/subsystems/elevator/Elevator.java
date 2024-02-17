@@ -28,12 +28,12 @@ public class Elevator extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
-      kP.initDefault(0.0);
+      kP.initDefault(1);
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(0.0);
-      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+      closedLoopMaxVelocityConstraint.initDefault(10);
+      closedLoopMaxAccelerationConstraint.initDefault(10);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024) {
       kP.initDefault(0.0);
