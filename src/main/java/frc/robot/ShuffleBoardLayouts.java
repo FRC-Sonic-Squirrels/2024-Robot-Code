@@ -155,15 +155,14 @@ public class ShuffleBoardLayouts {
         new ConsumeSuppliedValue(
             elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
 
-    var stopCommand = Commands.runOnce(() -> elevator.setVoltage(0.0), elevator);
+    var stopCommand = 
+        Commands.sequence(
+            Commands.runOnce(() -> elevator.setHeight(0.0), elevator),
+            Commands.runOnce(() -> elevator.setVoltage(0.0), elevator)
+    );
     stopCommand.runsWhenDisabled();
     stopCommand.setName("ELEVATOR STOP");
     elevatorCommandsLayout.add(stopCommand);
-
-    var resetHeight = Commands.runOnce(() -> elevator.setHeight(0.0), elevator);
-    resetHeight.runsWhenDisabled();
-    resetHeight.setName("resetHeight");
-    elevatorCommandsLayout.add(resetHeight);
   }
 
   // FIXME: add the rest of the shooter debug logic
