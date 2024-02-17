@@ -65,9 +65,9 @@ public class ShuffleBoardLayouts {
             .withProperties(Map.of("Label position", "HIDDEN"));
 
     var tuneableAngleSetpoint =
-        armTab.add("tunableSetpointDegrees", 0.0).withPosition(9, 0).withSize(2, 1).getEntry();
+        armTab.add("tunableSetpointDegrees", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
     var tunableVoltage =
-        armTab.add("tunableVoltage", 0.0).withPosition(9, 1).withSize(2, 1).getEntry();
+        armTab.add("tunableVoltage", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
     armCommandsLayout.add(
         new ArmSetAngle(arm, () -> Rotation2d.fromDegrees(tuneableAngleSetpoint.getDouble(0.0))));
@@ -180,10 +180,20 @@ public class ShuffleBoardLayouts {
     var tunableVoltage =
         shooterTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
-    shooterCommandsLayout.add(
+    var tunablePivotRotations = shooterTab.add("tunablePivotRotations", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
+
+    shooterCommandsLayout.add("setKickerPercentOut",
+        new ConsumeSuppliedValue(
+            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut));
+
+    shooterCommandsLayout.add("setLeadPercentOut",
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
 
+    shooterCommandsLayout.add("setFollowPercentOut",
+        new ConsumeSuppliedValue(
+            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut));
+    
     var stopCommand = Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter);
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
