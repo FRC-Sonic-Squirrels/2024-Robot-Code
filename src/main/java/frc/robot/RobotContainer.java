@@ -36,7 +36,9 @@ import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
+import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
+import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterSimpleShoot;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -511,6 +513,10 @@ public class RobotContainer {
                   () -> -driverController.getLeftX(),
                   () -> -driverController.getRightX()));
     }
+
+    // ---------- OPERATOR CONTROLS -----------
+    operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
+    operatorController.b().whileTrue(new HomeShooter(shooter));
   }
 
   /**

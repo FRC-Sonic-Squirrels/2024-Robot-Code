@@ -21,6 +21,7 @@ public class HomeShooter extends Command {
     this.shooter = shooter;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooter);
+    setName("HomeShooter");
   }
 
   // Called when the command is initially scheduled.
