@@ -109,18 +109,17 @@ public class DriveToPose extends Command {
   @Override
   public void initialize() {
     // Reset all controllers
+    var pose = poseSupplier.get();
     var currentPose = drive.getPoseEstimatorPose();
     driveController.reset(
-        currentPose.getTranslation().getDistance(poseSupplier.get().getTranslation()),
+        currentPose.getTranslation().getDistance(pose.getTranslation()),
         Math.min(
             0.0,
             -new Translation2d(
                     drive.getFieldRelativeVelocities().getX(),
                     drive.getFieldRelativeVelocities().getY())
                 .rotateBy(
-                    poseSupplier
-                        .get()
-                        .getTranslation()
+                    pose.getTranslation()
                         .minus(currentPose.getTranslation())
                         .getAngle()
                         .unaryMinus())
@@ -129,48 +128,32 @@ public class DriveToPose extends Command {
         currentPose.getRotation().getRadians(),
         drive.getFieldRelativeVelocities().getRotation().getRadians());
     lastSetpointTranslation = currentPose.getTranslation();
+
+    // Update from tunable numbers
+    driveController.setP(driveKp.get());
+    driveController.setD(driveKd.get());
+    driveController.setConstraints(
+        new TrapezoidProfile.Constraints(
+            slowMode ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
+            driveMaxAcceleration.get()));
+    driveController.setTolerance(slowMode ? driveToleranceSlow.get() : driveTolerance.get());
+    thetaController.setP(thetaKp.get());
+    thetaController.setD(thetaKd.get());
+    thetaController.setConstraints(
+        new TrapezoidProfile.Constraints(
+            slowMode ? thetaMaxVelocitySlow.get() : thetaMaxVelocity.get(),
+            thetaMaxAcceleration.get()));
+    thetaController.setTolerance(slowMode ? thetaToleranceSlow.get() : thetaTolerance.get());
   }
 
   @Override
   public void execute() {
-    // Update from tunable numbers
-    if (driveMaxVelocity.hasChanged(hashCode())
-        || driveMaxVelocitySlow.hasChanged(hashCode())
-        || driveMaxAcceleration.hasChanged(hashCode())
-        || driveTolerance.hasChanged(hashCode())
-        || driveToleranceSlow.hasChanged(hashCode())
-        || thetaMaxVelocity.hasChanged(hashCode())
-        || thetaMaxVelocitySlow.hasChanged(hashCode())
-        || thetaMaxAcceleration.hasChanged(hashCode())
-        || thetaTolerance.hasChanged(hashCode())
-        || thetaToleranceSlow.hasChanged(hashCode())
-        || driveKp.hasChanged(hashCode())
-        || driveKd.hasChanged(hashCode())
-        || thetaKp.hasChanged(hashCode())
-        || thetaKd.hasChanged(hashCode())) {
-      driveController.setP(driveKp.get());
-      driveController.setD(driveKd.get());
-      driveController.setConstraints(
-          new TrapezoidProfile.Constraints(
-              slowMode ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
-              driveMaxAcceleration.get()));
-      driveController.setTolerance(slowMode ? driveToleranceSlow.get() : driveTolerance.get());
-      thetaController.setP(thetaKp.get());
-      thetaController.setD(thetaKd.get());
-      thetaController.setConstraints(
-          new TrapezoidProfile.Constraints(
-              slowMode ? thetaMaxVelocitySlow.get() : thetaMaxVelocity.get(),
-              thetaMaxAcceleration.get()));
-      thetaController.setTolerance(slowMode ? thetaToleranceSlow.get() : thetaTolerance.get());
-    }
-
     // Get current and target pose
     var currentPose = drive.getPoseEstimatorPose();
     var targetPose = poseSupplier.get();
 
     // Calculate drive speed
-    double currentDistance =
-        currentPose.getTranslation().getDistance(poseSupplier.get().getTranslation());
+    double currentDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
     double ffScaler =
         MathUtil.clamp(
             (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
