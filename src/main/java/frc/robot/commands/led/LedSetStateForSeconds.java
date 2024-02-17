@@ -28,13 +28,12 @@ public class LedSetStateForSeconds extends Command {
   @Override
   public void initialize() {
     led.setRobotState(state);
+    timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    timer.start();
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
