@@ -291,20 +291,5 @@ public class ShuffleBoardLayouts {
     systemsCheckCommandsLayout.add(checkEndEffector);
     systemsCheckCommandsLayout.add(checkIntake);
     systemsCheckCommandsLayout.add(checkShooter);
-
-    // var resetAll =
-    //     Commands.sequence(
-    //         Commands.runOnce(() -> elevator.setHeight(0.0), elevator),
-    //         Commands.runOnce(() -> elevator.setVoltage(0.0), elevator),
-    //         Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.HOME_POSITION), arm),
-    //         Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector),
-    //         Commands.runOnce(() -> intake.setPercentOut(0.0), intake),
-    //         Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter),
-    //         Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0.0)), shooter),
-    //         Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
-    //         Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
-    // resetAll.runsWhenDisabled();
-    // resetAll.setName("RESET ALL");
-    // systemsCheckCommandsLayout.add(resetAll);
   }
 }
