@@ -31,10 +31,14 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
+import frc.robot.commands.AutoClimb;
+import frc.robot.commands.MechanismActions;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.arm.ArmSetAngle;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.elevator.ElevatorSetHeight;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -110,6 +114,7 @@ public class RobotContainer {
       new LoggedTunableNumber("tunablePivotPitch", 30);
 
   ScoreSpeaker scoreSpeaker;
+  AutoClimb autoClimb;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -381,7 +386,7 @@ public class RobotContainer {
 
         X button: move all position controlled subsystems to hard stops to reset sensor position
 
-        Y button: toggle climb mode (A: confirm climb)
+        Y button: toggle climb mode
 
         Start: reset odometry
 
@@ -517,6 +522,39 @@ public class RobotContainer {
     // ---------- OPERATOR CONTROLS -----------
     operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
     operatorController.b().whileTrue(new HomeShooter(shooter));
+    autoClimb =
+        new AutoClimb(
+            drivetrainWrapper, elevator, arm, endEffector, drivetrainWrapper::getPoseEstimatorPose);
+
+    DriveToPose driveToClimbPos =
+        new DriveToPose(
+            drivetrainWrapper,
+            () -> autoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose()));
+
+    Command climbCommand =
+        (driveToClimbPos
+                .alongWith(
+                    new ElevatorSetHeight(
+                        elevator,
+                        () ->
+                            autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose())
+                                ? Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE
+                                : Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN))
+                .alongWith(
+                    new ArmSetAngle(
+                        arm,
+                        () ->
+                            autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose())
+                                ? Rotation2d.fromDegrees(0.0)
+                                : Rotation2d.fromDegrees(90.0))))
+            .until(driveToClimbPos::atGoal)
+            .andThen(autoClimb);
+
+    climbCommand.setName("AutoClimb");
+
+    driverController.y().whileTrue(climbCommand);
+
+    driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
   }
 
   /**
@@ -573,5 +611,7 @@ public class RobotContainer {
     MechanismVisualization.logMechanism();
 
     GamepieceVisualization.getInstance().logTraj();
+
+    autoClimb.logEstimated3dPose();
   }
 }

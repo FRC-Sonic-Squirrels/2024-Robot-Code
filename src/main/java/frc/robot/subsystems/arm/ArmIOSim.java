@@ -24,7 +24,7 @@ public class ArmIOSim implements ArmIO {
           ARM_LENGTH.in(Units.Meters),
           Constants.ArmConstants.MIN_ARM_ANGLE.getRadians(),
           Constants.ArmConstants.MAX_ARM_ANGLE.getRadians(),
-          true,
+          false,
           0);
 
   private final ProfiledPIDController feedback;

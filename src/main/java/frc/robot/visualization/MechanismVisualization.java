@@ -33,13 +33,23 @@ public class MechanismVisualization {
         new Pose3d(
             0.0,
             0.0,
-            Units.Inches.of(elevatorHeightInches).in(Units.Inches)
+            Units.Inches.of(
+                        elevatorHeightInches
+                            - 8.0
+                            - 8.0
+                                * (Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches)
+                                    - elevatorHeightInches)
+                                / Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches))
+                    .in(Units.Meters)
                 * 12.0
                 / Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches),
             new Rotation3d());
     elevatorCarriage =
         new Pose3d(
-            0.0, 0.0, Units.Inches.of(elevatorHeightInches).in(Units.Meters), new Rotation3d());
+            0.0,
+            0.0,
+            Units.Inches.of(elevatorHeightInches - 8.0).in(Units.Meters),
+            new Rotation3d());
     arm =
         new Pose3d(
             0.24,
@@ -47,7 +57,11 @@ public class MechanismVisualization {
             0.535 + elevatorCarriage.getZ(),
             new Rotation3d(0.0, -armAngle.getRadians() + Math.PI, 0.0));
     shooter = new Pose3d(0.025, 0.0, 0.257, new Rotation3d(0.0, shooterAngle.getRadians(), 0.0));
-    gamepiece = endEffectorBeamBreak ? arm : new Pose3d(100, 100, 100, new Rotation3d());
+    gamepiece =
+        // endEffectorBeamBreak ?
+        arm
+    // : new Pose3d(100, 100, 100, new Rotation3d())
+    ;
   }
 
   public static void logMechanism() {

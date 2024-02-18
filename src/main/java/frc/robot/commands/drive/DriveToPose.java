@@ -205,6 +205,9 @@ public class DriveToPose extends Command {
         new Pose2d(
             lastSetpointTranslation, new Rotation2d(thetaController.getSetpoint().position)));
     Logger.recordOutput("Odometry/DriveToPoseGoal", targetPose);
+    Logger.recordOutput("DriveToPose/isScheduled", isScheduled());
+    Logger.recordOutput("DriveToPose/DriveControllerIsAtGoal", driveController.atGoal());
+    Logger.recordOutput("DriveToPose/ThetaControllerIsAtGoal", thetaController.atGoal());
   }
 
   @Override
@@ -216,13 +219,16 @@ public class DriveToPose extends Command {
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {
-    return isScheduled() && driveController.atGoal() && thetaController.atGoal();
+    return
+    // isScheduled() &&
+    driveController.atGoal() && thetaController.atGoal();
   }
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
   public boolean withinTolerance(double driveTolerance, Rotation2d thetaTolerance) {
-    return isScheduled()
-        && Math.abs(driveErrorAbs) < driveTolerance
+    return
+    // isScheduled() &&
+    Math.abs(driveErrorAbs) < driveTolerance
         && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
   }
 }
