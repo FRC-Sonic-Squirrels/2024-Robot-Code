@@ -28,14 +28,14 @@ public class MechanismPositions {
   private static LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
       new LoggedTunableNumber(
           "MechanismPositions/climbPrepUnderStageElevatorHeightInches",
-          Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE);
+          Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE.in(Units.Inches));
   private static LoggedTunableNumber climbPrepUnderStageArmAngleDegrees =
       new LoggedTunableNumber("MechanismPositions/climbPrepUnderStageArmAngleDegrees", -45.0);
 
   private static LoggedTunableNumber climbPrepElevatorHeightInches =
       new LoggedTunableNumber(
           "MechanismPositions/climbPrepElevatorHeightInches",
-          Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN);
+          Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN.in(Units.Inches));
   private static LoggedTunableNumber climbPrepArmAngleDegrees =
       new LoggedTunableNumber("MechanismPositions/climbPrepArmAngleDegrees", 90.0);
 
@@ -61,13 +61,13 @@ public class MechanismPositions {
 
   public static MechanismPosition climbPrepUnderStagePosition() {
     return new MechanismPosition(
-        climbPrepUnderStageElevatorHeightInches.get(),
+        Units.Inches.of(climbPrepUnderStageElevatorHeightInches.get()),
         Rotation2d.fromDegrees(climbPrepUnderStageArmAngleDegrees.get()));
   }
 
   public static MechanismPosition climbPrepPosition() {
     return new MechanismPosition(
-        climbPrepElevatorHeightInches.get(),
+        Units.Inches.of(climbPrepElevatorHeightInches.get()),
         Rotation2d.fromDegrees(climbPrepArmAngleDegrees.get()));
   }
 }
