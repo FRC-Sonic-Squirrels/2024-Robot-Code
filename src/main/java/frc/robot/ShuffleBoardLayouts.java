@@ -102,9 +102,9 @@ public class ShuffleBoardLayouts {
         new ConsumeSuppliedValue(
             intake, () -> tunableVoltage.getDouble(0.0), intake::setPercentOut));
 
-    var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake); 
-    stopCommand.runsWhenDisabled(); 
-    stopCommand.setName("INTAKE STOP"); 
+    var stopCommand = Commands.runOnce(() -> intake.setPercentOut(0.0), intake);
+    stopCommand.runsWhenDisabled();
+    stopCommand.setName("INTAKE STOP");
     intakeCommandsLayout.add(stopCommand);
   }
 
@@ -156,11 +156,10 @@ public class ShuffleBoardLayouts {
         new ConsumeSuppliedValue(
             elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
 
-    var stopCommand = 
+    var stopCommand =
         Commands.sequence(
             Commands.runOnce(() -> elevator.setHeight(0.0), elevator),
-            Commands.runOnce(() -> elevator.setVoltage(0.0), elevator)
-    );
+            Commands.runOnce(() -> elevator.setVoltage(0.0), elevator));
     stopCommand.runsWhenDisabled();
     stopCommand.setName("ELEVATOR STOP");
     elevatorCommandsLayout.add(stopCommand);
@@ -186,21 +185,20 @@ public class ShuffleBoardLayouts {
 
     // MOTORS
 
-    var setKickerPercentOut = 
+    var setKickerPercentOut =
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut);
     setKickerPercentOut.setName("setKickerPercentOut");
 
-    var setLeadPercentOut = 
+    var setLeadPercentOut =
         new ConsumeSuppliedValue(
             shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut);
     setLeadPercentOut.setName("setLeadPercentOut");
 
     var setLauncherRPM =
-        new ConsumeSuppliedValue(
-            shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM);
+        new ConsumeSuppliedValue(shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM);
     setLauncherRPM.setName("setLauncherRPM");
-    
+
     // shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () ->
     // tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
     var setPivotPosition =
@@ -244,40 +242,52 @@ public class ShuffleBoardLayouts {
 
     var checkElevator =
         Commands.sequence(
-            Commands.runOnce(() -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator),
+            Commands.runOnce(
+                () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator),
             Commands.waitUntil(() -> elevator.isAtTarget()),
             Commands.runOnce(() -> elevator.setHeight(0.0), elevator));
-    
+
     var checkArm =
         Commands.sequence(
             Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm),
             Commands.waitUntil(() -> arm.getAngle() == Constants.ArmConstants.MAX_ARM_ANGLE),
             Commands.runOnce(() -> arm.setAngle(Rotation2d.fromDegrees(0.0)), arm));
-    
+
     var checkEndEffector =
         Commands.sequence(
-            Commands.runOnce(() -> endEffector.setPercentOut(Constants.EndEffectorConstants.INDEX_PERCENT_OUT), endEffector),
-            Commands.waitSeconds(3), 
+            Commands.runOnce(
+                () -> endEffector.setPercentOut(Constants.EndEffectorConstants.INDEX_PERCENT_OUT),
+                endEffector),
+            Commands.waitSeconds(3),
             Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
     var checkIntake =
         Commands.sequence(
-            Commands.runOnce(() -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT), intake),
-            Commands.waitSeconds(3), 
+            Commands.runOnce(
+                () -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT),
+                intake),
+            Commands.waitSeconds(3),
             Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
 
     var checkShooter =
         Commands.sequence(
-            Commands.runOnce(() -> shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT), shooter),
+            Commands.runOnce(
+                () ->
+                    shooter.setKickerPercentOut(
+                        Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT),
+                shooter),
             Commands.waitSeconds(3),
             Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter),
-
-            Commands.runOnce(() -> shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_PERCENT_OUT), shooter),
+            Commands.runOnce(
+                () -> shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_PERCENT_OUT),
+                shooter),
             Commands.waitSeconds(3),
             Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter),
-
-            Commands.runOnce(() -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD), shooter),
-            Commands.waitUntil(() -> shooter.getPitch() == Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD),
+            Commands.runOnce(
+                () -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD),
+                shooter),
+            Commands.waitUntil(
+                () -> shooter.getPitch() == Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD),
             Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0.0)), shooter));
 
     checkElevator.setName("Check Elevator Height");
