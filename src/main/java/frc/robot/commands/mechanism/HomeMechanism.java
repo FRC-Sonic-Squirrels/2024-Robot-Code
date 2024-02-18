@@ -15,7 +15,8 @@ public class HomeMechanism extends Command {
   private boolean elevatorReset = false;
   private boolean beginHomingArm = false;
   private final double safeElevatorHeightForArmResetting = 5.0;
-  private final double homingVoltage = -0.1;
+  private final double homingVoltageElevator = -0.1;
+  private final double homingVoltageArm = -0.1;
   private final double homingVelocityMaxToResetElevator = 0.02;
   private final double homingVelocityMaxToResetArm = 0.02;
 
@@ -37,8 +38,8 @@ public class HomeMechanism extends Command {
   public void execute() {
     if (armReset) {
       if (!elevatorReset) {
-        elevator.setVoltage(homingVoltage);
-        if (Math.abs(elevator.getVoltage()) >= Math.abs(homingVoltage) / 2.0
+        elevator.setVoltage(homingVoltageElevator);
+        if (Math.abs(elevator.getVoltage()) >= Math.abs(homingVoltageElevator) / 2.0
             && Math.abs(elevator.getVelocity()) <= homingVelocityMaxToResetElevator) {
           elevator.resetSensorToHomePosition();
           elevatorReset = true;
@@ -46,8 +47,8 @@ public class HomeMechanism extends Command {
       }
     } else {
       if (beginHomingArm) {
-        arm.setVoltage(homingVoltage);
-        if (Math.abs(arm.getVoltage()) >= Math.abs(homingVoltage) / 2.0
+        arm.setVoltage(homingVoltageArm);
+        if (Math.abs(arm.getVoltage()) >= Math.abs(homingVoltageArm) / 2.0
             && Math.abs(arm.getVelocity()) <= homingVelocityMaxToResetArm) {
           arm.resetSensorToHomePosition();
           armReset = true;
