@@ -38,7 +38,7 @@ public class Arm extends SubsystemBase {
 
       kP.initDefault(2.5);
       kD.initDefault(0);
-      kG.initDefault(1.485);
+      kG.initDefault(0.0);
 
       closedLoopMaxVelocityConstraint.initDefault(40);
       closedLoopMaxAccelerationConstraint.initDefault(80);

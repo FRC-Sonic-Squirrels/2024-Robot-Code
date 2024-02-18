@@ -25,6 +25,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team6328.Alert;
 import frc.lib.team6328.Alert.AlertType;
 import frc.robot.configs.RobotConfig;
@@ -150,9 +151,30 @@ public final class Constants {
       return Units.Meters.of(Math.hypot(speakerDx, speakerDy));
     }
 
-    public static class Gamepieces {
-      public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
-      public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
+    public static final Translation2d STAGE_CENTER_BLUE_ALLIANCE =
+        new Translation2d(4.856116771697998, 4.1);
+
+    public static Pose2d[] getClimbPositionsBlueAlliance(double distFromCenter) {
+      Pose2d[] poses = new Pose2d[3];
+      for (int i = 0; i < poses.length; i++) {
+        Translation2d offset = new Translation2d(distFromCenter, Rotation2d.fromDegrees(i * 120.0));
+        poses[i] =
+            new Pose2d(
+                STAGE_CENTER_BLUE_ALLIANCE.plus(offset), Rotation2d.fromDegrees(i * 120.0 - 180.0));
+      }
+      return poses;
+    }
+
+    public static Translation2d getStageCenter() {
+      return isRedAlliance()
+          ? AllianceFlipUtil.mirrorTranslation2DOverCenterLine(STAGE_CENTER_BLUE_ALLIANCE)
+          : STAGE_CENTER_BLUE_ALLIANCE;
+    }
+    ;
+
+    public class Gamepieces {
+      public static final Measure<Distance> NOTE_INNER_RADIUS_METERS = Units.Meters.of(0.127);
+      public static final Measure<Distance> NOTE_OUTER_RADIUS_METERS = Units.Meters.of(0.1778);
     }
   }
 
@@ -188,10 +210,14 @@ public final class Constants {
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(25.0);
+    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(29.5);
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
-    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(3.0);
+    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(11.0);
+    public static final double SUPPLY_CURRENT_LIMIT = 40.0;
+
+    public static final double MAX_HEIGHT_BELOW_STAGE = 11.0;
+    public static final double HEIGHT_ABOVE_CHAIN = 25.5;
   }
 
   public static class ShooterConstants {
@@ -307,6 +333,8 @@ public final class Constants {
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
 
     public static final Rotation2d AMP_SAFE_ANGLE = Rotation2d.fromDegrees(-87);
+
+    public static final Rotation2d TRAP_SCORE_ANGLE = Rotation2d.fromDegrees(15.0);
   }
 
   public static class VisionGamepieceConstants {
