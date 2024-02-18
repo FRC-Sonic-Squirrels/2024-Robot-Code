@@ -50,7 +50,7 @@ public class ElevatorIOReal implements ElevatorIO {
     // config.Voltage.PeakReverseVoltage = -2.0;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-        ElevatorConstants.MAX_HEIGHT * inchesToMotorRot;
+        ElevatorConstants.MAX_HEIGHT.in(Units.Inches) * inchesToMotorRot;
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
 
     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0 * inchesToMotorRot;

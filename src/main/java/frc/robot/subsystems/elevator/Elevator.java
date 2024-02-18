@@ -39,7 +39,7 @@ public class Elevator extends SubsystemBase {
       closedLoopMaxAccelerationConstraint.initDefault(100.0);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(0.0);
+      kP.initDefault(2.0);
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
