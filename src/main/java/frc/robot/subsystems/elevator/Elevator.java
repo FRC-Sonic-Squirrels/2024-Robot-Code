@@ -39,12 +39,12 @@ public class Elevator extends SubsystemBase {
       closedLoopMaxAccelerationConstraint.initDefault(100.0);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(0.0);
+      kP.initDefault(2.0);
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(0.0);
-      closedLoopMaxAccelerationConstraint.initDefault(0.0);
+      closedLoopMaxVelocityConstraint.initDefault(640.0);
+      closedLoopMaxAccelerationConstraint.initDefault(640.0);
     }
   }
 
@@ -81,7 +81,7 @@ public class Elevator extends SubsystemBase {
           || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
         io.setPIDConstraints(
             kP.get(),
-            kP.get(),
+            kD.get(),
             kG.get(),
             new Constraints(
                 closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));

@@ -9,12 +9,14 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOReal implements ElevatorIO {
 
@@ -42,6 +44,17 @@ public class ElevatorIOReal implements ElevatorIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    // config.Voltage.PeakForwardVoltage = 2.0;
+    // config.Voltage.PeakReverseVoltage = -2.0;
+
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        ElevatorConstants.MAX_HEIGHT.in(Units.Inches) * inchesToMotorRot;
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0 * inchesToMotorRot;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
