@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOReal implements ElevatorIO {
 
@@ -42,8 +43,15 @@ public class ElevatorIOReal implements ElevatorIO {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    config.Voltage.PeakForwardVoltage = 2.0;
-    config.Voltage.PeakReverseVoltage = -2.0;
+    // config.Voltage.PeakForwardVoltage = 2.0;
+    // config.Voltage.PeakReverseVoltage = -2.0;
+
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        ElevatorConstants.MAX_HEIGHT * inchesToMotorRot;
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0 * inchesToMotorRot;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 

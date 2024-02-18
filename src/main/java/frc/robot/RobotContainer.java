@@ -98,6 +98,9 @@ public class RobotContainer {
   private final LoggedTunableNumber tunbleElevatorHeight =
       new LoggedTunableNumber("tunableElevatorHeight", 5.0);
 
+  private final LoggedTunableNumber tunbleElevatorHeight2 =
+      new LoggedTunableNumber("tunableElevatorHeight2", 5.0);
+
   ScoreSpeaker scoreSpeaker;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -472,6 +475,12 @@ public class RobotContainer {
     driverController
         .x()
         .whileTrue(new ElevatorSetHeight(elevator, () -> tunbleElevatorHeight.get()));
+
+    driverController
+        .y()
+        .whileTrue(new ElevatorSetHeight(elevator, () -> tunbleElevatorHeight2.get()));
+
+    driverController.b().whileTrue(new InstantCommand(() -> elevator.setVoltage(0.0), elevator));
 
     // driverController.a().whileTrue(Commands.runOnce(() -> elevator.setVoltage(0.0), elevator));
   }

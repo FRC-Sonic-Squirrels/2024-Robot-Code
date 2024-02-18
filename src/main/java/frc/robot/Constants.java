@@ -161,7 +161,8 @@ public final class Constants {
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final double MAX_HEIGHT = Units.inchesToMeters(21.5); //
+    public static final double TRUE_HARD_STOP = 26.6; //
+    public static final double MAX_HEIGHT = 26.0; //
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
   }
