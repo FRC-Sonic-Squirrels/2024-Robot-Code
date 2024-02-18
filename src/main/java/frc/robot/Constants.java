@@ -48,7 +48,7 @@ public final class Constants {
     return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
   }
 
-  public class RobotMode {
+  public static class RobotMode {
     private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
 
     private static final Alert invalidRobotAlert =
@@ -89,14 +89,14 @@ public final class Constants {
       // config classes are also created. Meaning tunableNumber values are stuck to the first
       // object that is created. In this case ExampleRobotConfig. Suppliers solve this
       // by only creating the specific config object corresponding to the robot type
-      ROBOT_SIMBOT(() -> new SimulatorRobotConfig()),
-      ROBOT_SIMBOT_REAL_CAMERAS(() -> new SimulatorRobotConfig()),
-      ROBOT_2023_RETIRED_ROBER(() -> new RobotConfig2023Rober()),
-      ROBOT_2024_MAESTRO(() -> new RobotConfig2024());
+      ROBOT_SIMBOT(SimulatorRobotConfig::new),
+      ROBOT_SIMBOT_REAL_CAMERAS(SimulatorRobotConfig::new),
+      ROBOT_2023_RETIRED_ROBER(RobotConfig2023Rober::new),
+      ROBOT_2024_MAESTRO(RobotConfig2024::new);
 
-      public Supplier<RobotConfig> config;
+      public final Supplier<RobotConfig> config;
 
-      private RobotType(Supplier<RobotConfig> config) {
+      RobotType(Supplier<RobotConfig> config) {
         this.config = config;
       }
     }
@@ -110,7 +110,7 @@ public final class Constants {
 
   public static double MAX_VOLTAGE = 12.0;
 
-  public class FieldConstants {
+  public static class FieldConstants {
     // official Field dimensions
     // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
     public static double FIELD_LENGTH = 16.451;
@@ -150,14 +150,14 @@ public final class Constants {
       return Units.Meters.of(Math.hypot(speakerDx, speakerDy));
     }
 
-    public class Gamepieces {
+    public static class Gamepieces {
       public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
       public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
     }
   }
 
-  public class MotorConstants {
-    public class KrakenConstants {
+  public static class MotorConstants {
+    public static class KrakenConstants {
       public static final double MAX_RPM = 6000.0;
       public static final double NOMINAL_VOLTAGE_VOLTS = 12.0;
       public static final double STALL_TORQUE_NEWTON_METERS = 7.09;
@@ -167,14 +167,14 @@ public final class Constants {
     }
   }
 
-  public class IntakeConstants {
+  public static class IntakeConstants {
     public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
   }
 
-  public class EndEffectorConstants {
+  public static class EndEffectorConstants {
     public static final double INDEX_PERCENT_OUT = 0.8;
 
     public static final double GEARING = 1.0;
@@ -183,7 +183,7 @@ public final class Constants {
     public static final double SHOOTING_PERCENT_OUT = 0.8;
   }
 
-  public class ElevatorConstants {
+  public static class ElevatorConstants {
     // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
@@ -194,7 +194,7 @@ public final class Constants {
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(3.0);
   }
 
-  public class ShooterConstants {
+  public static class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
     public static final double SHOOTING_PERCENT_OUT = 0.95;
@@ -213,7 +213,7 @@ public final class Constants {
         new Translation3d(
             SHOOTER_OFFSET.getX(), SHOOTER_OFFSET.getY(), Units.Inches.of(5).in(Units.Meters));
 
-    public class Pivot {
+    public static class Pivot {
       // Old Calculations:
       // public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
       //   return new Rotation2d(
@@ -259,12 +259,12 @@ public final class Constants {
     }
   }
 
-  public class LEDConstants {
+  public static class LEDConstants {
     public static final int PWM_PORT = 8;
     public static final int MAX_LED_LENGTH = 60;
   }
 
-  public class CanIDs {
+  public static class CanIDs {
     // READ ME: CAN ID's THAT ARE NOT VALID TO USE
     // 1, 11, 21, 31
     // 2, 12, 22, 32
@@ -289,7 +289,7 @@ public final class Constants {
     public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 36;
   }
 
-  public class DIOPorts {
+  public static class DIOPorts {
     // TODO: get actual DIO ports
   }
 
@@ -299,7 +299,7 @@ public final class Constants {
     VOLTAGE
   }
 
-  public class ArmConstants {
+  public static class ArmConstants {
     public static final double GEAR_RATIO = (72.0 / 12.0) * (42.0 / 16.0);
 
     public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
@@ -309,7 +309,7 @@ public final class Constants {
     public static final Rotation2d AMP_SAFE_ANGLE = Rotation2d.fromDegrees(-87);
   }
 
-  public class VisionGamepieceConstants {
+  public static class VisionGamepieceConstants {
     public static final Pose3d GAMEPIECE_CAMERA_POSE =
         new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters), new Rotation3d(0.0, 0.0, 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
