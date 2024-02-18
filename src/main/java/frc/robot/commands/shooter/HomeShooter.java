@@ -15,6 +15,8 @@ public class HomeShooter extends Command {
   private boolean shooterReset = false;
   private final Rotation2d safePivotAngle =
       Constants.ShooterConstants.Pivot.HOME_POSITION.plus(Rotation2d.fromDegrees(2.0));
+  private final double homingVoltage = -0.1;
+  private final double homingVelocityMaxToResetShooter = 0.02;
 
   /** Creates a new HomeMechanism. */
   public HomeShooter(Shooter shooter) {
@@ -37,12 +39,13 @@ public class HomeShooter extends Command {
       }
 
       if (homeShooter) {
-        shooter.setPivotVoltage(-0.1);
+        shooter.setPivotVoltage(homingVoltage);
       } else {
         shooter.setPivotPosition(safePivotAngle);
       }
 
-      if (shooter.getPivotVoltage() <= -0.05 && shooter.getPivotVelocity() >= -0.02) {
+      if (Math.abs(shooter.getPivotVoltage()) >= Math.abs(homingVoltage) / 2.0
+          && shooter.getPivotVelocity() <= homingVelocityMaxToResetShooter) {
         shooter.pivotResetHomePosition();
         shooterReset = true;
       }
