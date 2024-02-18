@@ -11,8 +11,6 @@ import frc.robot.subsystems.elevator.Elevator;
 public class HomeMechanism extends Command {
   private Elevator elevator;
   private Arm arm;
-  private boolean homeElevator = false;
-  private boolean homeArm = false;
   private boolean armReset = false;
   private boolean elevatorReset = false;
   private boolean beginHomingArm = false;
