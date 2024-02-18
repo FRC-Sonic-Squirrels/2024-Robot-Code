@@ -22,6 +22,9 @@ public class HomeMechanism extends Command {
   private final Rotation2d safeArmAngle =
       Constants.ArmConstants.HOME_POSITION.plus(Rotation2d.fromDegrees(2.0));
   private final double safeElevatorHeight = 1.0;
+  private final double homingVoltage = -0.1;
+  private final double homingVelocityMaxToResetElevator = 0.02;
+  private final double homingVelocityMaxToResetArm = 0.02;
 
   /** Creates a new HomeMechanism. */
   public HomeMechanism(Elevator elevator, Arm arm) {
@@ -42,8 +45,9 @@ public class HomeMechanism extends Command {
     if (armReset) {
       if (!elevatorReset) {
         if (homeElevator) {
-          elevator.setVoltage(-0.1);
-          if (elevator.getVoltage() <= -0.05 && elevator.getVelocity() >= -0.02) {
+          elevator.setVoltage(homingVoltage);
+          if (Math.abs(elevator.getVoltage()) >= Math.abs(homingVoltage) / 2.0
+              && Math.abs(elevator.getVelocity()) <= homingVelocityMaxToResetElevator) {
             elevator.resetSensorToHomePosition();
             elevatorReset = true;
           }
@@ -57,8 +61,9 @@ public class HomeMechanism extends Command {
     } else {
       if (beginHomingArm) {
         if (homeArm) {
-          arm.setVoltage(-0.1);
-          if (arm.getVoltage() <= -0.05 && arm.getVelocity() >= -0.02) {
+          arm.setVoltage(homingVoltage);
+          if (Math.abs(arm.getVoltage()) >= Math.abs(homingVoltage) / 2.0
+              && Math.abs(arm.getVelocity()) <= homingVelocityMaxToResetArm) {
             arm.resetSensorToHomePosition();
             armReset = true;
           }
