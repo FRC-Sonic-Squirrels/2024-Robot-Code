@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.GeometryUtil;
@@ -190,7 +189,7 @@ public class RotateToTranslation extends Command {
   @Override
   public void initialize() {
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
-    rotationController.setTolerance(Units.degreesToRadians(5));
+    rotationController.setTolerance(Math.toRadians(5));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -280,7 +279,7 @@ public class RotateToTranslation extends Command {
     Logger.recordOutput("RotateToTranslation/RotationalEffort", rotationalEffort);
     Logger.recordOutput(
         "RotateToTranslation/rotationalErrorDegrees",
-        Units.radiansToDegrees(rotationController.getPositionError()));
+        Math.toDegrees(rotationController.getPositionError()));
     Logger.recordOutput("RotateToTranslation/desiredLinearVelocity", linearVelocity);
     Logger.recordOutput("RotateToTranslation/rotationCorrection", rotVelCorrection);
     Logger.recordOutput(

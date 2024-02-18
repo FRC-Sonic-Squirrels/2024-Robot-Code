@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -24,7 +26,7 @@ public class RobotConfig2024 extends RobotConfig {
   // TODO: ----- !IMPORTANT! FILL IN ALL VALUES !IMPORTANT! -----
 
   // ------------ SWERVE ---------------------
-  private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+  private static final Measure<Distance> WHEEL_RADIUS = Units.Inches.of(2.0);
 
   // ------ SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
   // 0
@@ -122,9 +124,9 @@ public class RobotConfig2024 extends RobotConfig {
 
   // -------- ROBOT DIMENSIONS -----------
   // front to back
-  private static final double TRACK_WIDTH_METERS_X = Units.inchesToMeters(21.75);
+  private static final Measure<Distance> TRACK_WIDTH_X = Units.Inches.of(21.75);
   // left to right
-  private static final double TRACK_WIDTH_METERS_Y = Units.inchesToMeters(21.75);
+  private static final Measure<Distance> TRACK_WIDTH_Y = Units.Inches.of(21.75);
 
   // ------- ROBOT MAX SPEED --------
   private static final double MAX_VELOCITY_METERS_PER_SECOND = 4.78;
@@ -153,34 +155,34 @@ public class RobotConfig2024 extends RobotConfig {
   public static final Transform3d SHOOTER_SIDE_LEFT =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-0.62273),
-              Units.inchesToMeters(9.625919),
-              Units.inchesToMeters(22.21467)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(225.0)));
+              Units.Inches.of(-0.62273).in(Units.Meters),
+              Units.Inches.of(9.625919).in(Units.Meters),
+              Units.Inches.of(22.21467).in(Units.Meters)),
+          new Rotation3d(0.0, 0.0, Math.toRadians(225.0)));
 
   public static final Transform3d SHOOTER_SIDE_RIGHT =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-0.62273),
-              Units.inchesToMeters(-9.625919),
-              Units.inchesToMeters(22.21467)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(135.0)));
+              Units.Inches.of(-0.62273).in(Units.Meters),
+              Units.Inches.of(-9.625919).in(Units.Meters),
+              Units.Inches.of(22.21467).in(Units.Meters)),
+          new Rotation3d(0.0, 0.0, Math.toRadians(135.0)));
 
   public static final Transform3d INTAKE_SIDE_LEFT =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(0.64738),
-              Units.inchesToMeters(13.14840),
-              Units.inchesToMeters(22.31306)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(45.0)));
+              Units.Inches.of(0.64738).in(Units.Meters),
+              Units.Inches.of(13.14840).in(Units.Meters),
+              Units.Inches.of(22.31306).in(Units.Meters)),
+          new Rotation3d(0.0, 0.0, Math.toRadians(45.0)));
 
   public static final Transform3d INTAKE_SIDE_RIGHT =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(0.64738),
-              Units.inchesToMeters(-13.14840),
-              Units.inchesToMeters(22.31306)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
+              Units.Inches.of(0.64738).in(Units.Meters),
+              Units.Inches.of(-13.14840).in(Units.Meters),
+              Units.Inches.of(22.31306).in(Units.Meters)),
+          new Rotation3d(0.0, 0.0, Math.toRadians(-45.0)));
 
   public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
   public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
@@ -213,8 +215,7 @@ public class RobotConfig2024 extends RobotConfig {
     SwerveModule br =
         new SwerveModule(3, this, new SwerveModuleIOTalonFX(this, BACK_RIGHT_MODULE_CONFIG));
 
-    SwerveModule[] modules = {fl, fr, bl, br};
-    return modules;
+    return new SwerveModule[] {fl, fr, bl, br};
   }
 
   @Override
@@ -274,13 +275,13 @@ public class RobotConfig2024 extends RobotConfig {
   }
 
   @Override
-  public double getTrackWidth_Y() {
-    return TRACK_WIDTH_METERS_Y;
+  public Measure<Distance> getTrackWidth_Y() {
+    return TRACK_WIDTH_Y;
   }
 
   @Override
-  public double getTrackWidth_X() {
-    return TRACK_WIDTH_METERS_X;
+  public Measure<Distance> getTrackWidth_X() {
+    return TRACK_WIDTH_X;
   }
 
   @Override
@@ -355,8 +356,8 @@ public class RobotConfig2024 extends RobotConfig {
   }
 
   @Override
-  public double getWheelRadius() {
-    return WHEEL_RADIUS_METERS;
+  public Measure<Distance> getWheelRadius() {
+    return WHEEL_RADIUS;
   }
 
   @Override

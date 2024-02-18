@@ -11,6 +11,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 
 public class ElevatorIOReal implements ElevatorIO {
@@ -76,14 +79,14 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
-  public void setHeight(double heightInches) {
-    closedLoopControl.withPosition(heightInches * inchesToMotorRot);
+  public void setHeight(Measure<Distance> height) {
+    closedLoopControl.withPosition(height.in(Units.Inches) * inchesToMotorRot);
     motor.setControl(closedLoopControl);
   }
 
   @Override
-  public void setSensorPositionInches(double positionInches) {
-    motor.setPosition(positionInches * inchesToMotorRot);
+  public void setSensorPosition(Measure<Distance> position) {
+    motor.setPosition(position.in(Units.Inches) * inchesToMotorRot);
   }
 
   @Override

@@ -4,25 +4,28 @@
 
 package frc.robot.commands.elevator;
 
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.elevator.Elevator;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSetHeight extends Command {
   /** Creates a new ElevatorSetHeight. */
   Elevator elevator;
 
-  DoubleSupplier heightSupplier;
+  Supplier<Measure<Distance>> heightSupplier;
 
-  public ElevatorSetHeight(Elevator elevator, DoubleSupplier heightSupplier) {
+  public ElevatorSetHeight(Elevator elevator, Supplier<Measure<Distance>> heightSupplier) {
     this.elevator = elevator;
     this.heightSupplier = heightSupplier;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
 
-  public ElevatorSetHeight(Elevator elevator, double height) {
+  public ElevatorSetHeight(Elevator elevator, Measure<Distance> height) {
     this(elevator, () -> height);
   }
 
@@ -33,8 +36,8 @@ public class ElevatorSetHeight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    elevator.setHeight(heightSupplier.getAsDouble());
-    Logger.recordOutput("ElevatorSetHeight/targetHeight", heightSupplier.getAsDouble());
+    elevator.setHeight(heightSupplier.get());
+    Logger.recordOutput("ElevatorSetHeight/targetHeight", heightSupplier.get().in(Units.Inches));
   }
 
   // Called once the command ends or is interrupted.

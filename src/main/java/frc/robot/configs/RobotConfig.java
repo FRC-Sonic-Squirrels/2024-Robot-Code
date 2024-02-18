@@ -5,6 +5,9 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -73,7 +76,7 @@ public abstract class RobotConfig {
 
   // ----------------------- ROBOT DIMENSIONS -------------------
 
-  public abstract double getWheelRadius();
+  public abstract Measure<Distance> getWheelRadius();
 
   public abstract double getSwerveModuleDriveGearRatio();
 
@@ -86,7 +89,7 @@ public abstract class RobotConfig {
    * @return the trackwidth (i.e., the center-to-center distance between the left and right wheels)
    *     of the robot in meters
    */
-  public abstract double getTrackWidth_Y();
+  public abstract Measure<Distance> getTrackWidth_Y();
 
   /**
    * Returns the wheelbase (i.e., the center-to-center distance between the front and back wheels)
@@ -95,10 +98,11 @@ public abstract class RobotConfig {
    * @return the wheelbase (i.e., the center-to-center distance between the front and back wheels)
    *     of the robot in meters
    */
-  public abstract double getTrackWidth_X();
+  public abstract Measure<Distance> getTrackWidth_X();
 
   public double getDriveBaseRadius() {
-    return Math.hypot(getTrackWidth_X() / 2.0, getTrackWidth_Y() / 2.0);
+    return Math.hypot(
+        getTrackWidth_X().in(Units.Meters) / 2.0, getTrackWidth_Y().in(Units.Meters) / 2.0);
   }
 
   /**
@@ -125,15 +129,17 @@ public abstract class RobotConfig {
 
   public Translation2d[] getModuleTranslations() {
 
+    double widthX = getTrackWidth_X().in(Units.Meters) / 2.0;
+    double widthY = getTrackWidth_Y().in(Units.Meters) / 2.0;
     return new Translation2d[] {
       // Front left
-      new Translation2d(getTrackWidth_X() / 2.0, getTrackWidth_Y() / 2.0),
+      new Translation2d(widthX, widthY),
       // Front right
-      new Translation2d(getTrackWidth_X() / 2.0, -getTrackWidth_Y() / 2.0),
+      new Translation2d(widthX, -widthY),
       // Back left
-      new Translation2d(-getTrackWidth_X() / 2.0, getTrackWidth_Y() / 2.0),
+      new Translation2d(-widthX, widthY),
       // Back right
-      new Translation2d(-getTrackWidth_X() / 2.0, -getTrackWidth_Y() / 2.0)
+      new Translation2d(-widthX, -widthY)
     };
   }
 

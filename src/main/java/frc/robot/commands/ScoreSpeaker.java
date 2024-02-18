@@ -9,7 +9,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -160,11 +160,11 @@ public class ScoreSpeaker extends Command {
               Math.min(Math.abs(rotationalEffort), drive.getMaxAngularSpeedRadPerSec()),
               rotationalEffort);
 
-      Logger.recordOutput(
-          "ScoreSpeaker/targetRotationDegrees",
-          Units.radiansToDegrees(targetRotation) <= 360.0
-              ? Units.radiansToDegrees(targetRotation)
-              : Units.radiansToDegrees(targetRotation) - 360.0);
+      double targetRotationDegrees = Math.toDegrees(targetRotation);
+      if (targetRotationDegrees > 360) targetRotationDegrees -= 360;
+      if (targetRotationDegrees < -360) targetRotationDegrees += 360;
+
+      Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", targetRotationDegrees);
 
       Logger.recordOutput(
           "ScoreSpeaker/targetPose",
@@ -176,7 +176,7 @@ public class ScoreSpeaker extends Command {
       Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
       Logger.recordOutput(
           "ScoreSpeaker/rotationalErrorDegrees",
-          Units.radiansToDegrees(rotationController.getPositionError()));
+          Math.toDegrees(rotationController.getPositionError()));
       Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
       Logger.recordOutput(
           "ScoreSpeaker/robotRotationDegrees",
@@ -192,14 +192,10 @@ public class ScoreSpeaker extends Command {
 
       shooter.setPivotPosition(targetPitch);
 
+      var speakerDistance =
+          Constants.FieldConstants.getDistanceToSpeaker(drive.getPoseEstimatorPose());
       rotationController.setTolerance(
-          Units.degreesToRadians(
-              (Units.feetToMeters(15.0)
-                  / Math.hypot(
-                      Constants.FieldConstants.getSpeakerTranslation().getX()
-                          - drive.getPoseEstimatorPose().getX(),
-                      Constants.FieldConstants.getSpeakerTranslation().getY()
-                          - drive.getPoseEstimatorPose().getY()))));
+          Math.toDegrees(Units.Feet.of(15.0).in(Units.Meters) / speakerDistance.in(Units.Meters)));
 
       if (result != null && !readyToShoot) {
         if (currentTime > shootDeadline) {

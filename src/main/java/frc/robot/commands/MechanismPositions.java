@@ -1,6 +1,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import frc.lib.team6328.LoggedTunableNumber;
 
 public class MechanismPositions {
@@ -14,15 +17,17 @@ public class MechanismPositions {
   private static LoggedTunableNumber ampArmAngleDegrees =
       new LoggedTunableNumber("MechanismPositions/ampArmAngleDegrees", 50.0);
 
-  public record MechanismPosition(double elevatorHeight, Rotation2d armAngle) {}
+  public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
   public static MechanismPosition loadingPosition() {
     return new MechanismPosition(
-        homeElevatorHeightInches.get(), Rotation2d.fromDegrees(homeArmAngleDegrees.get()));
+        Units.Inches.of(homeElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(homeArmAngleDegrees.get()));
   }
 
   public static MechanismPosition ampPosition() {
     return new MechanismPosition(
-        ampElevatorHeightInches.get(), Rotation2d.fromDegrees(ampArmAngleDegrees.get()));
+        Units.Inches.of(ampElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(ampArmAngleDegrees.get()));
   }
 }

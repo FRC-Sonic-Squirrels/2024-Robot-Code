@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Units;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -61,7 +62,7 @@ public class SwerveModule {
 
     this.config = config;
 
-    this.WHEEL_RADIUS = config.getWheelRadius();
+    this.WHEEL_RADIUS = config.getWheelRadius().in(Units.Meters);
 
     driveKS = config.getDriveKS();
     driveKV = config.getDriveKV();

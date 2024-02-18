@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -23,7 +25,7 @@ public class RobotConfig2023Rober extends RobotConfig {
   private static final boolean PHOENIX_PRO_LICENSE = false;
 
   // ------------ SWERVE ---------------------
-  private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+  private static final Measure<Distance> WHEEL_RADIUS = Units.Inches.of(2.0);
 
   // ------ SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
   // 0
@@ -113,9 +115,9 @@ public class RobotConfig2023Rober extends RobotConfig {
 
   // -------- ROBOT DIMENSIONS -----------
   // front to back
-  private static final double TRACK_WIDTH_METERS_X = Units.inchesToMeters(25);
+  private static final Measure<Distance> TRACK_WIDTH_X = Units.Inches.of(25);
   // left to right
-  private static final double TRACK_WIDTH_METERS_Y = Units.inchesToMeters(23);
+  private static final Measure<Distance> TRACK_WIDTH_Y = Units.Inches.of(23);
 
   // ------- ROBOT MAX SPEED --------
   private static final double MAX_VELOCITY_METERS_PER_SECOND = 4.78;
@@ -145,19 +147,25 @@ public class RobotConfig2023Rober extends RobotConfig {
   private static final Transform3d FRONT_LEFT_ROBOT_TO_CAMERA =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-0.51), Units.inchesToMeters(10.2), Units.inchesToMeters(22.8)),
+              Units.Inches.of(-0.51).in(Units.Meters),
+              Units.Inches.of(10.2).in(Units.Meters),
+              Units.Inches.of(22.0).in(Units.Meters)),
           new Rotation3d(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(30.0)));
 
   private static final Transform3d FRONT_RIGHT_ROBOT_TO_CAMERA =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-0.51), Units.inchesToMeters(-10.2), Units.inchesToMeters(22.8)),
+              Units.Inches.of(-0.51).in(Units.Meters),
+              Units.Inches.of(-10.2).in(Units.Meters),
+              Units.Inches.of(22.0).in(Units.Meters)),
           new Rotation3d(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-30.0)));
 
   private static final Transform3d BACK_ROBOT_TO_CAMERA =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-2.7), Units.inchesToMeters(0.0), Units.inchesToMeters(33.42)),
+              Units.Inches.of(-2.7).in(Units.Meters),
+              Units.Inches.of(0.0).in(Units.Meters),
+              Units.Inches.of(33.42).in(Units.Meters)),
           new Rotation3d(Math.toRadians(0.0), Math.toRadians(10.0), Math.toRadians(180.0)));
 
   public static final String FRONT_LEFT_CAMERA_NAME = "LeftCamera";
@@ -249,13 +257,13 @@ public class RobotConfig2023Rober extends RobotConfig {
   }
 
   @Override
-  public double getTrackWidth_Y() {
-    return TRACK_WIDTH_METERS_Y;
+  public Measure<Distance> getTrackWidth_Y() {
+    return TRACK_WIDTH_Y;
   }
 
   @Override
-  public double getTrackWidth_X() {
-    return TRACK_WIDTH_METERS_X;
+  public Measure<Distance> getTrackWidth_X() {
+    return TRACK_WIDTH_X;
   }
 
   @Override
@@ -330,8 +338,8 @@ public class RobotConfig2023Rober extends RobotConfig {
   }
 
   @Override
-  public double getWheelRadius() {
-    return WHEEL_RADIUS_METERS;
+  public Measure<Distance> getWheelRadius() {
+    return WHEEL_RADIUS;
   }
 
   @Override

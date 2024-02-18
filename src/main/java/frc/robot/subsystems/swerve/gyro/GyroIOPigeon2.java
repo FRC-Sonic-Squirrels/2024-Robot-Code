@@ -19,7 +19,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -36,14 +35,8 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<Double> yAcceleration;
   private final StatusSignal<Double> zAcceleration;
 
-  private final RobotConfig config;
-
-  private final Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
-  ;
-
   public GyroIOPigeon2(RobotConfig config) {
-
-    this.config = config;
+    Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
     pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
     pigeonConfig.MountPose.MountPoseRoll = config.getGyroMountingRoll();
     pigeonConfig.MountPose.MountPoseYaw = config.getGyroMountingYaw();
@@ -79,12 +72,10 @@ public class GyroIOPigeon2 implements GyroIO {
         BaseStatusSignal.refreshAll(yaw, yawVelocity, xAcceleration, yAcceleration, zAcceleration)
             .equals(StatusCode.OK);
     inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-    inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+    inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
 
     inputs.odometryYawPositions =
-        yawPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromDegrees(value))
-            .toArray(Rotation2d[]::new);
+        yawPositionQueue.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
     yawPositionQueue.clear();
 
     inputs.xAcceleration = xAcceleration.getValueAsDouble();

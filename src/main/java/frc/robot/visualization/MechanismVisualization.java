@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
@@ -33,12 +33,13 @@ public class MechanismVisualization {
         new Pose3d(
             0.0,
             0.0,
-            Units.inchesToMeters(elevatorHeightInches)
+            Units.Inches.of(elevatorHeightInches).in(Units.Inches)
                 * 12.0
-                / Units.metersToInches(Constants.ElevatorConstants.MAX_HEIGHT_INCHES),
+                / Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches),
             new Rotation3d());
     elevatorCarriage =
-        new Pose3d(0.0, 0.0, Units.inchesToMeters(elevatorHeightInches), new Rotation3d());
+        new Pose3d(
+            0.0, 0.0, Units.Inches.of(elevatorHeightInches).in(Units.Meters), new Rotation3d());
     arm =
         new Pose3d(
             0.24,

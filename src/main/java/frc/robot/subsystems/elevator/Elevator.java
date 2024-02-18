@@ -5,6 +5,9 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -47,7 +50,7 @@ public class Elevator extends SubsystemBase {
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-  private double targetHeightInches = 0.0;
+  private Measure<Distance> targetHeight = Units.Meters.zero();
 
   /** Creates a new ElevatorSubsystem. */
   public Elevator(ElevatorIO io) {
@@ -67,7 +70,7 @@ public class Elevator extends SubsystemBase {
       io.updateInputs(inputs);
       Logger.processInputs("Elevator", inputs);
 
-      Logger.recordOutput("Elevator/targetHeight", targetHeightInches);
+      Logger.recordOutput("Elevator/targetHeight", targetHeight.in(Units.Inches));
 
       // ---- UPDATE TUNABLE NUMBERS
       var hc = hashCode();
@@ -90,17 +93,17 @@ public class Elevator extends SubsystemBase {
     io.setVoltage(volts);
   }
 
-  public void setHeight(double heightInches) {
-    io.setHeight(heightInches);
-    targetHeightInches = heightInches;
+  public void setHeight(Measure<Distance> height) {
+    io.setHeight(height);
+    targetHeight = height;
   }
 
   public boolean isAtTarget() {
-    return Math.abs(targetHeightInches - inputs.heightInches) <= tolerance.get();
+    return Math.abs(targetHeight.in(Units.Inches) - inputs.heightInches) <= tolerance.get();
   }
 
-  public boolean isAtTarget(double heightInches) {
-    return Math.abs(heightInches - inputs.heightInches) <= tolerance.get();
+  public boolean isAtTarget(Measure<Distance> height) {
+    return Math.abs(height.in(Units.Inches) - inputs.heightInches) <= tolerance.get();
   }
 
   public double getHeightInches() {
@@ -108,6 +111,6 @@ public class Elevator extends SubsystemBase {
   }
 
   public void resetSensorToHomePosition() {
-    io.setSensorPositionInches(0.0);
+    io.setSensorPosition(Units.Meters.zero());
   }
 }

@@ -1,5 +1,8 @@
 package frc.robot.commands;
 
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.commands.MechanismPositions.MechanismPosition;
@@ -25,12 +28,14 @@ public class MechanismActions {
       @Override
       public void execute() {
         targetPosition = position.get();
-        if (elevator.getHeightInches() >= Constants.ElevatorConstants.SAFE_HEIGHT_INCHES)
+        Measure<Distance> safeHeight = Constants.ElevatorConstants.SAFE_HEIGHT;
+
+        if (elevator.getHeightInches() >= safeHeight.in(Units.Inches))
           arm.setAngle(targetPosition.armAngle());
 
-        if (targetPosition.elevatorHeight() <= Constants.ElevatorConstants.SAFE_HEIGHT_INCHES
+        if (targetPosition.elevatorHeight().lte(safeHeight)
             && arm.getAngle().getRadians() >= Constants.ArmConstants.AMP_SAFE_ANGLE.getRadians()) {
-          elevator.setHeight(Constants.ElevatorConstants.SAFE_HEIGHT_INCHES);
+          elevator.setHeight(safeHeight);
         } else {
           elevator.setHeight(targetPosition.elevatorHeight());
         }

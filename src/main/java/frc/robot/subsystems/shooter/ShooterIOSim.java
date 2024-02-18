@@ -6,7 +6,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
@@ -16,24 +16,24 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class ShooterIOSim implements ShooterIO {
 
-  private SingleJointedArmSim pivot =
+  private final SingleJointedArmSim pivot =
       new SingleJointedArmSim(
           DCMotor.getFalcon500Foc(1),
           Constants.ShooterConstants.Pivot.GEARING,
-          SingleJointedArmSim.estimateMOI(Units.feetToMeters(1.5), 20.0),
-          Constants.ShooterConstants.SHOOTER_LENGTH,
+          SingleJointedArmSim.estimateMOI(Units.Feet.of(1.5).in(Units.Meters), 20.0),
+          Constants.ShooterConstants.SHOOTER_LENGTH.in(Units.Meters),
           Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD.getRadians(),
           Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getRadians(),
           false,
           Constants.ShooterConstants.Pivot.SIM_INITIAL_ANGLE);
 
-  private DCMotorSim launcherMotorSim =
+  private final DCMotorSim launcherMotorSim =
       new DCMotorSim(
           DCMotor.getFalcon500Foc(2),
           Constants.ShooterConstants.Launcher.GEARING,
           Constants.ShooterConstants.Launcher.MOI);
 
-  private DCMotorSim kickerMotorSim =
+  private final DCMotorSim kickerMotorSim =
       new DCMotorSim(
           DCMotor.getFalcon500Foc(1),
           Constants.ShooterConstants.Kicker.GEARING,
@@ -42,8 +42,8 @@ public class ShooterIOSim implements ShooterIO {
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(5.0, 0, 0.0, new Constraints(0.5, 1.0));
 
-  private double pivotTargetVelRadPerSec = 0.0;
-  private PIDController pivotVelController = new PIDController(60, 0, 0);
+  private final PIDController pivotVelController = new PIDController(60, 0, 0);
+  private final double pivotTargetVelRadPerSec = 0.0;
   private ControlMode pivotControlMode = ControlMode.VELOCITY;
   private Rotation2d pivotClosedLoopTargetAngle = new Rotation2d();
   private double pivotControlEffort = 0.0;
@@ -51,7 +51,8 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotKg = 0.0;
   private double kickerVolts = 0.0;
 
-  private LoggedDashboardBoolean beamBreak = new LoggedDashboardBoolean("Shooter/beamBreak", false);
+  private final LoggedDashboardBoolean beamBreak =
+      new LoggedDashboardBoolean("Shooter/beamBreak", false);
 
   private double launcherOpenLoopVolts = 0.0;
 

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ElevatorIO {
@@ -19,9 +21,9 @@ public interface ElevatorIO {
 
   public default void setVoltage(double volts) {}
 
-  public default void setHeight(double heightInches) {}
+  public default void setHeight(Measure<Distance> height) {}
 
   public default void setPIDConstraints(double kP, double kD, double kG, Constraints constraints) {}
 
-  public default void setSensorPositionInches(double positionInches) {}
+  public default void setSensorPosition(Measure<Distance> position) {}
 }

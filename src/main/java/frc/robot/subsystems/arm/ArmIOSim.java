@@ -5,21 +5,23 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class ArmIOSim implements ArmIO {
   private double MOMENT_OF_INERTIA = 0.15;
-  private double ARM_LENGTH_METERS = Units.inchesToMeters(14);
+  private Measure<Distance> ARM_LENGTH = Units.Inches.of(14);
 
   SingleJointedArmSim armSim =
       new SingleJointedArmSim(
           DCMotor.getFalcon500Foc(1),
           Constants.ArmConstants.GEAR_RATIO,
           MOMENT_OF_INERTIA,
-          ARM_LENGTH_METERS,
+          ARM_LENGTH.in(Units.Meters),
           Constants.ArmConstants.MIN_ARM_ANGLE.getRadians(),
           Constants.ArmConstants.MAX_ARM_ANGLE.getRadians(),
           true,

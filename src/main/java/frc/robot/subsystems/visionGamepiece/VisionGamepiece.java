@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
@@ -109,7 +109,7 @@ public class VisionGamepiece extends SubsystemBase {
             closestGamepiece = processedGamepieceData[i];
           }
         }
-        logGamepieceData(new RawGamepieceData(0, 0, 0.0), processedGamepieceData[i], i);
+        logGamepieceData(new RawGamepieceData(0, 0, 0), processedGamepieceData[i], i);
       }
 
       // --------------------------------------------------------------------------------------
@@ -199,8 +199,9 @@ public class VisionGamepiece extends SubsystemBase {
 
   private double groundGamepieceDistance(Rotation2d targetPitch) {
     return (Constants.VisionGamepieceConstants.GAMEPIECE_CAMERA_POSE.getZ()
-            - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS_METERS
-                    - Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS_METERS)
+            - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS
+                    .minus(Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS)
+                    .in(Units.Meters))
                 / 2)
         * Math.tan(targetPitch.getRadians());
   }
@@ -210,44 +211,36 @@ public class VisionGamepiece extends SubsystemBase {
   }
 
   private ProcessedGamepieceData processGamepieceData(RawGamepieceData rawGamepieceData) {
-    Rotation2d targetYaw = targetYaw(rawGamepieceData.yaw);
-    Rotation2d targetPitch = targetPitch(rawGamepieceData.pitch);
+    Rotation2d targetYaw = targetYaw(rawGamepieceData.yaw());
+    Rotation2d targetPitch = targetPitch(rawGamepieceData.pitch());
     double distance = groundGamepieceDistance(targetPitch);
     Pose2d pose = groundGamepiecePose(distance, targetYaw);
+    Pose2d robotPose = robotPoseSupplier.get();
+
     return new ProcessedGamepieceData(
         targetYaw,
         targetPitch,
         distance,
         pose,
-        robotPoseSupplier
-            .get()
-            .transformBy(new Transform2d(pose.getX(), pose.getY(), pose.getRotation())),
-        rawGamepieceData.timestamp);
+        robotPose.transformBy(new Transform2d(pose.getX(), pose.getY(), pose.getRotation())),
+        rawGamepieceData.timestamp());
   }
 
   private void logGamepieceData(
       RawGamepieceData rawGamepieceData, ProcessedGamepieceData processedGamepieceData, int index) {
+    String baseName = "VisionGamepiece/Gamepieces/Gamepiece: " + index;
+
+    Logger.recordOutput(baseName + "/Raw/yaw", Math.toDegrees(rawGamepieceData.yaw()));
+    Logger.recordOutput(baseName + "/Raw/pitch", Math.toDegrees(rawGamepieceData.pitch()));
+    Logger.recordOutput(baseName + "/Processed/distance", processedGamepieceData.distance);
     Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/yaw", rawGamepieceData.yaw);
+        baseName + "/Processed/distanceInches",
+        Units.Meters.of(processedGamepieceData.distance).in(Units.Inches));
     Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Raw/pitch", rawGamepieceData.pitch);
+        baseName + "/Processed/targetYaw", processedGamepieceData.targetYaw.getDegrees());
     Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/distance",
-        processedGamepieceData.distance);
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/distanceInches",
-        Units.metersToInches(processedGamepieceData.distance));
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/targetYaw",
-        processedGamepieceData.targetYaw);
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/targetPitch",
-        processedGamepieceData.targetPitch);
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/pose",
-        processedGamepieceData.pose);
-    Logger.recordOutput(
-        "VisionGamepiece/Gamepieces/Gamepiece: " + index + "/Processed/globalPose",
-        processedGamepieceData.globalPose);
+        baseName + "/Processed/targetPitch", processedGamepieceData.targetPitch.getDegrees());
+    Logger.recordOutput(baseName + "/Processed/pose", processedGamepieceData.pose);
+    Logger.recordOutput(baseName + "/Processed/globalPose", processedGamepieceData.globalPose);
   }
 }

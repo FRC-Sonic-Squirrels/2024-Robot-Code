@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
@@ -72,7 +73,7 @@ public class GamepieceVisualization {
     double shooterTangentialVel =
         shooterRPMofShot
             / 60.0
-            * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER_METERS
+            * Constants.ShooterConstants.Launcher.WHEEL_DIAMETER.in(Units.Meters)
             * Math.PI;
 
     Logger.recordOutput("Visualization/ShooterTanSpeed", shooterTangentialVel);

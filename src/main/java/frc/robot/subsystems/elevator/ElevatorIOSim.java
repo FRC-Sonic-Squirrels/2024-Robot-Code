@@ -3,7 +3,9 @@ package frc.robot.subsystems.elevator;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
@@ -17,11 +19,11 @@ public class ElevatorIOSim implements ElevatorIO {
           Constants.ElevatorConstants.CARRIAGE_MASS,
           Constants.ElevatorConstants.PULLEY_DIAMETER / 2,
           0.0,
-          Constants.ElevatorConstants.MAX_HEIGHT_INCHES,
+          Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches),
           false,
           0.1);
 
-  private double targetHeight = 0.0;
+  private Measure<Distance> targetHeight = Units.Meters.zero();
 
   private final ProfiledPIDController feedback =
       new ProfiledPIDController(0.0, 0.0, 0.0, new Constraints(0.0, 0.0));
@@ -41,7 +43,7 @@ public class ElevatorIOSim implements ElevatorIO {
     sim.update(0.02);
     Logger.recordOutput("Elevator/actualTargetHeight", targetHeight);
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
-      appliedVolts = feedback.calculate(inputs.heightInches, targetHeight) + kG;
+      appliedVolts = feedback.calculate(inputs.heightInches, targetHeight.in(Units.Inches)) + kG;
     } else {
       appliedVolts = openLoopVolts;
     }
@@ -52,8 +54,9 @@ public class ElevatorIOSim implements ElevatorIO {
 
     inputs.appliedVolts = appliedVolts;
     inputs.currentAmps = sim.getCurrentDrawAmps();
-    inputs.heightInches = Units.metersToInches(sim.getPositionMeters());
-    inputs.velocityInchesPerSecond = Units.metersToInches(sim.getVelocityMetersPerSecond());
+    inputs.heightInches = Units.Meters.of(sim.getPositionMeters()).in(Units.Inches);
+    inputs.velocityInchesPerSecond =
+        Units.Meters.of(sim.getVelocityMetersPerSecond()).in(Units.Inches);
   }
 
   @Override
@@ -63,14 +66,14 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
-  public void setHeight(double heightInches) {
-    targetHeight = heightInches;
+  public void setHeight(Measure<Distance> height) {
+    targetHeight = height;
     controlMode = ControlMode.CLOSED_LOOP;
   }
 
   @Override
-  public void setSensorPositionInches(double positionInches) {
-    sim.setState(Units.inchesToMeters(positionInches), 0.0);
+  public void setSensorPosition(Measure<Distance> position) {
+    sim.setState(position.in(Units.Meters), 0.0);
   }
 
   @Override

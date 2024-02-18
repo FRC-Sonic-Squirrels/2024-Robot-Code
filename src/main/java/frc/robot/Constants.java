@@ -13,13 +13,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.lib.team6328.Alert;
@@ -114,7 +117,7 @@ public final class Constants {
     public static double FIELD_WIDTH = .211;
 
     // FIXME: double check this number
-    public static final double SPEAKER_HEIGHT_METERS = 1.9812;
+    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Meters.of(1.9812);
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
         new Translation2d(0.03950466960668564, 5.508944988250732);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
@@ -124,12 +127,12 @@ public final class Constants {
         new Translation3d(
             BLUE_SPEAKER_TRANSLATION.getX(),
             BLUE_SPEAKER_TRANSLATION.getY(),
-            Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
+            SPEAKER_HEIGHT.in(Units.Meters));
     public static final Translation3d RED_SPEAKER_TRANSLATION_3D =
         new Translation3d(
             RED_SPEAKER_TRANSLATION.getX(),
             RED_SPEAKER_TRANSLATION.getY(),
-            Constants.FieldConstants.SPEAKER_HEIGHT_METERS);
+            SPEAKER_HEIGHT.in(Units.Meters));
 
     public static Translation2d getSpeakerTranslation() {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION : BLUE_SPEAKER_TRANSLATION;
@@ -139,9 +142,17 @@ public final class Constants {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION_3D : BLUE_SPEAKER_TRANSLATION_3D;
     }
 
+    public static Measure<Distance> getDistanceToSpeaker(Pose2d pose) {
+      var speakerTranslation = FieldConstants.getSpeakerTranslation();
+      var speakerDx = speakerTranslation.getX() - pose.getX();
+      var speakerDy = speakerTranslation.getY() - pose.getY();
+
+      return Units.Meters.of(Math.hypot(speakerDx, speakerDy));
+    }
+
     public class Gamepieces {
-      public static final double NOTE_INNER_RADIUS_METERS = 0.127;
-      public static final double NOTE_OUTER_RADIUS_METERS = 0.1778;
+      public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
+      public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
     }
   }
 
@@ -177,31 +188,31 @@ public final class Constants {
     public static final double GEAR_RATIO = 25.93;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final double MAX_HEIGHT_INCHES = 21.5; //
+    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(21.5); //
 
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
 
-    public static final double SAFE_HEIGHT_INCHES = 3.0;
+    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(3.0);
   }
 
   public class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
     public static final double SHOOTING_RPM = 5000.0;
     public static final double SHOOTING_PERCENT_OUT = 0.95;
-    public static final double SHOOTER_BASE_HEIGHT_METERS = Units.inchesToMeters(4.0);
-    public static final double SHOOTER_LENGTH = Units.inchesToMeters(12.0);
+    public static final Measure<Distance> SHOOTER_BASE_HEIGHT = Units.Inches.of(4.0);
+    public static final Measure<Distance> SHOOTER_LENGTH = Units.Inches.of(12.0);
 
     public static final double SHOOTING_SPEED =
-        SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER_METERS * Math.PI;
+        SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER.in(Units.Meters) * Math.PI;
 
     public static final double SHOOTING_TIME = 0.2;
 
-    public static final Transform2d SHOOTER_OFFSET_METERS =
-        new Transform2d(0, -Units.inchesToMeters(12), new Rotation2d());
+    public static final Transform2d SHOOTER_OFFSET =
+        new Transform2d(0, -Units.Inches.of(12).in(Units.Meters), new Rotation2d());
 
     public static final Translation3d SHOOTER_AXIS_OF_ROTATION =
         new Translation3d(
-            SHOOTER_OFFSET_METERS.getX(), SHOOTER_OFFSET_METERS.getY(), Units.inchesToMeters(5));
+            SHOOTER_OFFSET.getX(), SHOOTER_OFFSET.getY(), Units.Inches.of(5).in(Units.Meters));
 
     public class Pivot {
       // Old Calculations:
@@ -239,7 +250,7 @@ public final class Constants {
       public static final double MOI = 5.0;
       // FIX ME: THIS VALUE HAS TO BE CONFIRMED
       public static final double GEARING = (18.0 / 30.0);
-      public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
+      public static final Measure<Distance> WHEEL_DIAMETER = Units.Inches.of(2.0);
     }
 
     public static class Kicker {
@@ -301,7 +312,7 @@ public final class Constants {
 
   public class VisionGamepieceConstants {
     public static final Pose3d GAMEPIECE_CAMERA_POSE =
-        new Pose3d(0.0, 0.0, Units.inchesToMeters(38), new Rotation3d(0.0, 0.0, 0.0));
+        new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters), new Rotation3d(0.0, 0.0, 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 }

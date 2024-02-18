@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -153,7 +154,9 @@ public class ShuffleBoardLayouts {
 
     elevatorCommandsLayout.add(
         new ConsumeSuppliedValue(
-            elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
+            elevator,
+            () -> tunableHeight.getDouble(0.0),
+            (v) -> elevator.setHeight(Units.Inches.of(v))));
 
     var stopCommand = Commands.runOnce(() -> elevator.setVoltage(0.0), elevator);
     stopCommand.runsWhenDisabled();
@@ -197,7 +200,7 @@ public class ShuffleBoardLayouts {
 
     var checkElevator =
         Commands.runOnce(
-            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT_INCHES), elevator);
+            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator);
     var checkArm = Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm);
     var checkEndEffector =
         Commands.runOnce(
