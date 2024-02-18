@@ -218,9 +218,9 @@ public class ShuffleBoardLayouts {
 
     var stopCommand =
         Commands.sequence(
+            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter),
             Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
             Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter),
-            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter),
             Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter),
             Commands.runOnce(() -> shooter.setLauncherRPM(0.0), shooter));
 
@@ -239,22 +239,46 @@ public class ShuffleBoardLayouts {
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
+    // TODO: add command
+    // var checkArmAndElevator;
+
     var checkElevator =
-        Commands.runOnce(
-            () -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator);
-    var checkArm = Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm);
+        Commands.sequence(
+            Commands.runOnce(() -> elevator.setHeight(Constants.ElevatorConstants.MAX_HEIGHT), elevator),
+            Commands.waitUntil(() -> elevator.isAtTarget()),
+            Commands.runOnce(() -> elevator.setHeight(0.0), elevator));
+    
+    var checkArm =
+        Commands.sequence(
+            Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm),
+            Commands.waitUntil(() -> arm.getAngle() == Constants.ArmConstants.MAX_ARM_ANGLE),
+            Commands.runOnce(() -> arm.setAngle(Rotation2d.fromDegrees(0.0)), arm));
+    
     var checkEndEffector =
-        Commands.runOnce(
-            () -> endEffector.setPercentOut(Constants.EndEffectorConstants.INDEX_PERCENT_OUT),
-            endEffector);
+        Commands.sequence(
+            Commands.runOnce(() -> endEffector.setPercentOut(Constants.EndEffectorConstants.INDEX_PERCENT_OUT), endEffector),
+            Commands.waitSeconds(3), 
+            Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
+
     var checkIntake =
-        Commands.runOnce(
-            () -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT), intake);
+        Commands.sequence(
+            Commands.runOnce(() -> intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT), intake),
+            Commands.waitSeconds(3), 
+            Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
+
     var checkShooter =
         Commands.sequence(
             Commands.runOnce(() -> shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT), shooter),
+            Commands.waitSeconds(3),
+            Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter),
+
             Commands.runOnce(() -> shooter.setPercentOut(Constants.ShooterConstants.SHOOTING_PERCENT_OUT), shooter),
-            Commands.runOnce(() -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD), shooter));
+            Commands.waitSeconds(3),
+            Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter),
+
+            Commands.runOnce(() -> shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD), shooter),
+            Commands.waitUntil(() -> shooter.getPitch() == Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD),
+            Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0.0)), shooter));
 
     checkElevator.setName("Check Elevator Height");
     checkArm.setName("Check Arm Angle");
@@ -268,14 +292,19 @@ public class ShuffleBoardLayouts {
     systemsCheckCommandsLayout.add(checkIntake);
     systemsCheckCommandsLayout.add(checkShooter);
 
-    var stopCommand =
-        Commands.sequence(
-            Commands.runOnce(() -> elevator.setHeight(0.0), elevator),
-            Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.HOME_POSITION), arm),
-            Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector),
-            Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
-    stopCommand.runsWhenDisabled();
-    stopCommand.setName("STOP ALL");
-    systemsCheckCommandsLayout.add(stopCommand);
+    // var resetAll =
+    //     Commands.sequence(
+    //         Commands.runOnce(() -> elevator.setHeight(0.0), elevator),
+    //         Commands.runOnce(() -> elevator.setVoltage(0.0), elevator),
+    //         Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.HOME_POSITION), arm),
+    //         Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector),
+    //         Commands.runOnce(() -> intake.setPercentOut(0.0), intake),
+    //         Commands.runOnce(() -> shooter.setPercentOut(0.0), shooter),
+    //         Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0.0)), shooter),
+    //         Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
+    //         Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
+    // resetAll.runsWhenDisabled();
+    // resetAll.setName("RESET ALL");
+    // systemsCheckCommandsLayout.add(resetAll);
   }
 }
