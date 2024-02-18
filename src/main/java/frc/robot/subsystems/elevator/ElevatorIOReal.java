@@ -17,7 +17,7 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOReal implements ElevatorIO {
 
-  private final TalonFX motor = new TalonFX(Constants.CanIDs.ELEVATOR_CAN_ID, "CANivore");
+  private final TalonFX motor = new TalonFX(Constants.CanIDs.ELEVATOR_CAN_ID);
 
   private static final double inchesToMotorRot =
       Constants.ElevatorConstants.GEAR_RATIO
