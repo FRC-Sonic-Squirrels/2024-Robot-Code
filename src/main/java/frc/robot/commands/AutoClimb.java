@@ -5,12 +5,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.AllianceFlipUtil;
@@ -21,7 +18,7 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
-import java.util.function.Supplier;
+import frc.robot.visualization.ClimbVisualization;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoClimb extends Command {
@@ -30,24 +27,17 @@ public class AutoClimb extends Command {
   private Elevator elevator;
   private Arm arm;
   private EndEffector endEffector;
-  private Supplier<Pose2d> robotPose;
   private int stage = 1;
   private Pose2d initialPose;
   private Trigger endEffectorTrigger;
   private double additionalRobotHeight;
 
   /** Creates a new AutoClimb. */
-  public AutoClimb(
-      DrivetrainWrapper drive,
-      Elevator elevator,
-      Arm arm,
-      EndEffector endEffector,
-      Supplier<Pose2d> robotPose) {
+  public AutoClimb(DrivetrainWrapper drive, Elevator elevator, Arm arm, EndEffector endEffector) {
     this.drive = drive;
     this.elevator = elevator;
     this.arm = arm;
     this.endEffector = endEffector;
-    this.robotPose = robotPose;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator, arm, endEffector);
   }
@@ -68,6 +58,7 @@ public class AutoClimb extends Command {
                         && !endEffector.shooterSideTOFDetectGamepiece())
             .debounce(0.5);
     Logger.recordOutput("AutoClimb/stage", stage);
+    ClimbVisualization.getInstance().updateAdditionalHeight(additionalRobotHeight);
     /*
      * STAGE 0 (before command starts): move in front of chain
      * STAGE 1: bring elevator and arm to position to begin climb
@@ -85,22 +76,25 @@ public class AutoClimb extends Command {
         if (elevator.isAtTarget(Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN)
             && arm.isAtTargetAngle()) {
           stage++;
-          initialPose = robotPose.get();
+          initialPose = drive.getPoseEstimatorPose();
         }
 
         break;
       case 2:
         Translation2d centerToRobot =
-            robotPose.get().getTranslation().minus(Constants.FieldConstants.getStageCenter());
-        double speedMetersPerSecond = 0.2;
+            drive
+                .getPoseEstimatorPose()
+                .getTranslation()
+                .minus(Constants.FieldConstants.getStageCenter());
+        double speedMetersPerSecond = 0.4;
         double flippedSpeedMetersPerSecond =
             centerToRobot.getX() >= 0.0 ? -speedMetersPerSecond : speedMetersPerSecond;
-        double travelDist = 0.07;
+        double travelDist = 0.67;
         double vx =
             flippedSpeedMetersPerSecond
                 / Math.sqrt(1.0 + Math.pow(centerToRobot.getY() / centerToRobot.getX(), 2.0));
         double vy = centerToRobot.getY() * vx / centerToRobot.getX();
-        if (GeometryUtil.getDist(initialPose, robotPose.get()) <= travelDist) {
+        if (GeometryUtil.getDist(initialPose, drive.getPoseEstimatorPose()) <= travelDist) {
           drive.setVelocityOverride(
               ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, 0.0, drive.getRotation()));
         } else {
@@ -146,6 +140,7 @@ public class AutoClimb extends Command {
   @Override
   public void end(boolean interrupted) {
     additionalRobotHeight = 0.0;
+    ClimbVisualization.getInstance().updateAdditionalHeight(0.0);
   }
 
   // Returns true when the command should end.
@@ -159,7 +154,7 @@ public class AutoClimb extends Command {
         Constants.isRedAlliance()
             ? AllianceFlipUtil.mirrorPose2DOverCenterLine(robotPose)
             : robotPose;
-    Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.13853979111);
+    Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
     Logger.recordOutput("AutoClimb/poses", poses);
     Pose2d closestPose = null;
     for (int i = 0; i < poses.length; i++) {
@@ -200,15 +195,5 @@ public class AutoClimb extends Command {
     return flippedPose.getY() < 0.575916 * flippedPose.getX() + 2.41025
         && flippedPose.getY() > -0.558511 * flippedPose.getX() + 5.76085
         && flippedPose.getX() < 5.81;
-  }
-
-  public void logEstimated3dPose() {
-    Logger.recordOutput(
-        "AutoClimb/predictedPose3d",
-        new Pose3d(
-            drive.getPoseEstimatorPose().getX(),
-            drive.getPoseEstimatorPose().getY(),
-            Units.inchesToMeters(additionalRobotHeight),
-            new Rotation3d(0.0, 0.0, drive.getPoseEstimatorPose().getRotation().getRadians())));
   }
 }

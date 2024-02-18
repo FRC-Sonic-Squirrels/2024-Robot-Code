@@ -108,6 +108,7 @@ public class DriveToPose extends Command {
 
   @Override
   public void initialize() {
+    drive.resetVelocityOverride();
     // Reset all controllers
     var pose = poseSupplier.get();
     var currentPose = drive.getPoseEstimatorPose();

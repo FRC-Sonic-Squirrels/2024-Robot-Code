@@ -216,7 +216,9 @@ public final class Constants {
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(11.0);
     public static final double SUPPLY_CURRENT_LIMIT = 40.0;
 
-    public static final double MAX_HEIGHT_BELOW_STAGE = 11.0;
+    public static final double SAFE_HEIGHT_INCHES = 11.0;
+
+    public static final double MAX_HEIGHT_BELOW_STAGE = 0.0;
     public static final double HEIGHT_ABOVE_CHAIN = 25.5;
   }
 

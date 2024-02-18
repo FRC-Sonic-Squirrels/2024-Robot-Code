@@ -5,6 +5,7 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class MechanismPositions {
@@ -24,6 +25,19 @@ public class MechanismPositions {
           ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
   private static LoggedTunableNumber trapArmAngleDegrees =
       new LoggedTunableNumber("MechanismPositions/trapArmAngleDegrees", 35.0);
+  private static LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
+      new LoggedTunableNumber(
+          "MechanismPositions/climbPrepUnderStageElevatorHeightInches",
+          Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE);
+  private static LoggedTunableNumber climbPrepUnderStageArmAngleDegrees =
+      new LoggedTunableNumber("MechanismPositions/climbPrepUnderStageArmAngleDegrees", -45.0);
+
+  private static LoggedTunableNumber climbPrepElevatorHeightInches =
+      new LoggedTunableNumber(
+          "MechanismPositions/climbPrepElevatorHeightInches",
+          Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN);
+  private static LoggedTunableNumber climbPrepArmAngleDegrees =
+      new LoggedTunableNumber("MechanismPositions/climbPrepArmAngleDegrees", 90.0);
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
@@ -43,5 +57,17 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(trapElevatorHeightInches.get()),
         Rotation2d.fromDegrees(trapArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbPrepUnderStagePosition() {
+    return new MechanismPosition(
+        climbPrepUnderStageElevatorHeightInches.get(),
+        Rotation2d.fromDegrees(climbPrepUnderStageArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbPrepPosition() {
+    return new MechanismPosition(
+        climbPrepElevatorHeightInches.get(),
+        Rotation2d.fromDegrees(climbPrepArmAngleDegrees.get()));
   }
 }
