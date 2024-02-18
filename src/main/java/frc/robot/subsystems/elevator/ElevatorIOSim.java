@@ -21,7 +21,7 @@ public class ElevatorIOSim implements ElevatorIO {
           0.0,
           Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches),
           false,
-          Units.inchesToMeters(8.0));
+          Units.Inches.of(8.0).in(Units.Meters));
 
   private Measure<Distance> targetHeight = Units.Meters.zero();
 

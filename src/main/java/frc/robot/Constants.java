@@ -173,8 +173,8 @@ public final class Constants {
     ;
 
     public class Gamepieces {
-      public static final Measure<Distance> NOTE_INNER_RADIUS_METERS = Units.Meters.of(0.127);
-      public static final Measure<Distance> NOTE_OUTER_RADIUS_METERS = Units.Meters.of(0.1778);
+      public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
+      public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
     }
   }
 
@@ -214,12 +214,12 @@ public final class Constants {
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(11.0);
-    public static final double SUPPLY_CURRENT_LIMIT = 40.0;
+    public static final Measure<Distance> SUPPLY_CURRENT_LIMIT = Units.Inches.of(40.0);
 
-    public static final double SAFE_HEIGHT_INCHES = 11.0;
+    public static final Measure<Distance> SAFE_HEIGHT_INCHES = Units.Inches.of(11.0);
 
-    public static final double MAX_HEIGHT_BELOW_STAGE = 0.0;
-    public static final double HEIGHT_ABOVE_CHAIN = 25.5;
+    public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
+    public static final Measure<Distance> HEIGHT_ABOVE_CHAIN = Units.Inches.of(25.5);
   }
 
   public static class ShooterConstants {
