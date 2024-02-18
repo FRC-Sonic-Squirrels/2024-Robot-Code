@@ -17,9 +17,9 @@ public class ElevatorIOSim implements ElevatorIO {
           DCMotor.getFalcon500Foc(1),
           Constants.ElevatorConstants.GEAR_RATIO,
           Constants.ElevatorConstants.CARRIAGE_MASS,
-          Constants.ElevatorConstants.PULLEY_DIAMETER / 2,
+          Units.Inches.of(Constants.ElevatorConstants.PULLEY_DIAMETER).in(Units.Meters) / 2,
           0.0,
-          Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches),
+          Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Meters),
           false,
           Units.Inches.of(8.0).in(Units.Meters));
 
@@ -41,7 +41,7 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     sim.update(0.02);
-    Logger.recordOutput("Elevator/actualTargetHeight", targetHeight);
+    Logger.recordOutput("Elevator/actualTargetHeight", targetHeight.in(Units.Inches));
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
       appliedVolts = feedback.calculate(inputs.heightInches, targetHeight.in(Units.Inches)) + kG;
     } else {
