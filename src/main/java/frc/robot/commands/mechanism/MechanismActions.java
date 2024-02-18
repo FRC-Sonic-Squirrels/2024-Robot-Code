@@ -20,6 +20,14 @@ public class MechanismActions {
     return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
   }
 
+  public static Command climbPrepUnderStagePosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepUnderStagePosition);
+  }
+
+  public static Command climbPrepPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition);
+  }
+
   private static Command goToPositionParallel(
       Elevator elevator, Arm arm, Supplier<MechanismPosition> position) {
     return new Command() {
