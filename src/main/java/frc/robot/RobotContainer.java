@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
@@ -46,16 +45,18 @@ import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
+import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
@@ -105,12 +106,6 @@ public class RobotContainer {
 
   private final LoggedTunableNumber tunablePivotPitch =
       new LoggedTunableNumber("tunablePivotPitch", 30);
-
-  private final LoggedTunableNumber tunbleElevatorHeight =
-      new LoggedTunableNumber("tunableElevatorHeight", 5.0);
-
-  private final LoggedTunableNumber tunbleElevatorHeight2 =
-      new LoggedTunableNumber("tunableElevatorHeight2", 5.0);
 
   ScoreSpeaker scoreSpeaker;
 
@@ -241,8 +236,8 @@ public class RobotContainer {
           // uncomment the empty IO's as a replacement
 
           // -- All real IO's
-          // drivetrain =
-          //     new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+          drivetrain =
+              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
 
           // vision =
           //     new Vision(
@@ -253,17 +248,17 @@ public class RobotContainer {
           // visionGamepiece =
           //     new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
 
-          // intake = new Intake(new IntakeIOReal());
-          elevator = new Elevator(new ElevatorIOReal());
+          intake = new Intake(new IntakeIOReal());
+          // elevator = new Elevator(new ElevatorIOReal());
           // arm = new Arm(new ArmIOReal());
-          // endEffector = new EndEffector(new EndEffectorIOReal());
-          // shooter = new Shooter(new ShooterIOReal());
+          endEffector = new EndEffector(new EndEffectorIOReal());
+          shooter = new Shooter(new ShooterIOReal());
 
           led = new LED();
 
           // -- All empty IO's
-          drivetrain =
-              new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+          // drivetrain =
+          //     new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
           vision =
               new Vision(
@@ -275,11 +270,11 @@ public class RobotContainer {
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
-          intake = new Intake(new IntakeIO() {});
-          // elevator = new Elevator(new ElevatorIO() {});
+          // intake = new Intake(new IntakeIO() {});
+          elevator = new Elevator(new ElevatorIO() {});
           arm = new Arm(new ArmIO() {});
-          endEffector = new EndEffector(new EndEffectorIO() {});
-          shooter = new Shooter(new ShooterIO() {});
+          // endEffector = new EndEffector(new EndEffectorIO() {});
+          // shooter = new Shooter(new ShooterIO() {});
 
           // led = new LED();
           break;
@@ -490,29 +485,6 @@ public class RobotContainer {
     //                   shooter.setLauncherVoltage(0.0);
     //                 },
     //                 shooter)));
-
-    // driverController
-    //     .b()
-    //     .onTrue(new InstantCommand(() -> shooter.pivotResetHomePosition(), shooter));
-
-    // driverController
-    //     .a()
-    //     .whileTrue(
-    //         new ShooterSimpleShoot(
-    //                 shooter,
-    //                 endEffector,
-    //                 () -> 11,
-    //                 () -> Rotation2d.fromDegrees(tunablePivotPitch.get()),
-    //                 () -> 0.95,
-    //                 () -> 0.5)
-    //             .alongWith(Commands.runOnce(() -> intake.setPercentOut(0.5), intake)))
-    //     .onFalse(Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
-
-    // driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
-
-    var cmd = new InstantCommand(() -> elevator.resetSensorToHomePosition(), elevator);
-    // cmd.runsWhenDisabled();
-    driverController.a().whileTrue(cmd);
 
     driverController
         .a()
