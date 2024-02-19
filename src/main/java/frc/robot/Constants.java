@@ -198,12 +198,19 @@ public final class Constants {
   public static class IntakeConstants {
     public static final double INTAKE_IDLE_PERCENT_OUT = 0.8;
 
+    public static final double INTAKE_INTAKING_PERCENT_OUT = 1.0;
+    public static final double NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT = 0.5;
+
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
   }
 
   public static class EndEffectorConstants {
     public static final double INDEX_PERCENT_OUT = 0.8;
+
+    public static final double INTAKING_PERCENT_OUT = 1.0;
+    public static final double NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT = 0.5;
+    public static final double CENTERING_NOTE_REVERSE = -0.2;
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
