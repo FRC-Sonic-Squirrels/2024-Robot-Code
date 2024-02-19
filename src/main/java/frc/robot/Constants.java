@@ -283,7 +283,7 @@ public final class Constants {
 
       public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
 
-      public static final Rotation2d LOADING_POSITION = MAX_ANGLE_RAD;
+      public static final Rotation2d LOADING_POSITION = MIN_ANGLE_RAD;
 
       public static final double SIM_INITIAL_ANGLE = Math.toRadians(14.0);
     }

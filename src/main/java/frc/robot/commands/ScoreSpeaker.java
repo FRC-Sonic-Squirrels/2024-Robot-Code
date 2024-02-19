@@ -205,8 +205,8 @@ public class ScoreSpeaker extends Command {
 
       shooter.setPivotPosition(
           shooter.noteInShooter()
-              ? Constants.ShooterConstants.Pivot.LOADING_POSITION
-              : targetPitch);
+              ? targetPitch
+              : Constants.ShooterConstants.Pivot.LOADING_POSITION);
 
       var speakerDistance =
           Constants.FieldConstants.getDistanceToSpeaker(drive.getPoseEstimatorPose());
