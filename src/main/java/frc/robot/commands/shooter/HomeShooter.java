@@ -4,19 +4,17 @@
 
 package frc.robot.commands.shooter;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class HomeShooter extends Command {
   private Shooter shooter;
-  private boolean homeShooter = false;
   private boolean shooterReset = false;
-  private final Rotation2d safePivotAngle =
-      Constants.ShooterConstants.Pivot.HOME_POSITION.plus(Rotation2d.fromDegrees(2.0));
-  private final double homingVoltage = -0.1;
-  private final double homingVelocityMaxToResetShooter = 0.02;
+  private static final LoggedTunableNumber homingVoltage =
+      new LoggedTunableNumber("HomeShooter/homingVoltage", -0.1);
+  private static final LoggedTunableNumber homingVelocityMaxToResetShooter =
+      new LoggedTunableNumber("HomeShooter/homingVelocityMaxToResetShooter", 0.02);
 
   /** Creates a new HomeMechanism. */
   public HomeShooter(Shooter shooter) {
@@ -34,18 +32,10 @@ public class HomeShooter extends Command {
   @Override
   public void execute() {
     if (!shooterReset) {
-      if (shooter.isPivotIsAtTarget(safePivotAngle)) {
-        homeShooter = true;
-      }
+      shooter.setPivotVoltage(homingVoltage.get());
 
-      if (homeShooter) {
-        shooter.setPivotVoltage(homingVoltage);
-      } else {
-        shooter.setPivotPosition(safePivotAngle);
-      }
-
-      if (Math.abs(shooter.getPivotVoltage()) >= Math.abs(homingVoltage) / 2.0
-          && shooter.getPivotVelocity() <= homingVelocityMaxToResetShooter) {
+      if (Math.abs(shooter.getPivotVoltage()) >= Math.abs(homingVoltage.get()) / 2.0
+          && shooter.getPivotVelocity() <= homingVelocityMaxToResetShooter.get()) {
         shooter.pivotResetHomePosition();
         shooterReset = true;
       }
