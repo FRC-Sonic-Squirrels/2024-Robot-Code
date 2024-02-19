@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -72,7 +71,6 @@ public class ShooterIOReal implements ShooterIO {
 
     launcher_lead.getConfigurator().apply(launcherConfig);
     launcher_follower.getConfigurator().apply(launcherConfig);
-    launcher_follower.setControl(new Follower(Constants.CanIDs.SHOOTER_LEAD_CAN_ID, false));
 
     // --- pivot config ---
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -212,11 +210,13 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setLauncherVoltage(double volts) {
     launcher_lead.setControl(launcherOpenLoop.withOutput(volts));
+    launcher_follower.setControl(launcherOpenLoop.withOutput(volts));
   }
 
   @Override
   public void setLauncherRPM(double rpm) {
     launcher_lead.setControl(launcherClosedLoop.withVelocity(rpm / 60));
+    launcher_follower.setControl(launcherClosedLoop.withVelocity(rpm / 60));
   }
 
   @Override
@@ -255,16 +255,24 @@ public class ShooterIOReal implements ShooterIO {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
-    var configurator = launcher_lead.getConfigurator();
-    configurator.refresh(pidConfig);
-    configurator.refresh(mmConfig);
+    var leadConfigurator = launcher_lead.getConfigurator();
+    var followConfigurator = launcher_follower.getConfigurator();
+
+    leadConfigurator.refresh(pidConfig);
+    leadConfigurator.refresh(mmConfig);
+
+    followConfigurator.refresh(pidConfig);
+    followConfigurator.refresh(mmConfig);
 
     pidConfig.kP = kP;
     pidConfig.kV = kV;
 
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 
-    configurator.apply(pidConfig);
-    configurator.apply(mmConfig);
+    leadConfigurator.apply(pidConfig);
+    leadConfigurator.apply(mmConfig);
+
+    followConfigurator.apply(pidConfig);
+    followConfigurator.apply(mmConfig);
   }
 }
