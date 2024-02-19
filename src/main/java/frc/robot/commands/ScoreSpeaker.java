@@ -68,6 +68,8 @@ public class ScoreSpeaker extends Command {
 
   private double shootDeadline;
 
+  private boolean prevNoteInShoot = false;
+
   /**
    * Creates a new RotateToSpeaker.
    *
@@ -122,6 +124,13 @@ public class ScoreSpeaker extends Command {
     try (var ignored = new ExecutionTiming("ScoreSpeaker")) {
 
       endEffector.setPercentOut(shooter.noteInShooter() ? 0.0 : 0.8);
+      if (!shooter.noteInShooter()) {
+        shooter.setKickerPercentOut(0.8);
+      } else if (!prevNoteInShoot) {
+        shooter.setKickerPercentOut(0.0);
+      }
+
+      prevNoteInShoot = shooter.noteInShooter();
 
       var currentTime = Timer.getFPGATimestamp();
       var poseEstimatorPose = drive.getPoseEstimatorPose();
