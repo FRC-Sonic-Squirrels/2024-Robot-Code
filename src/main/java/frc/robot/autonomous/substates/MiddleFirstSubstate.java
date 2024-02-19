@@ -67,7 +67,12 @@ public class MiddleFirstSubstate extends StateMachine {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
+    if (!endEffectorTrigger.getAsBoolean()) {
+      endEffector.setPercentOut(0.7);
+    }
+
     if (endEffectorTrigger.getAsBoolean() && !prevEndEffectorBeamBreak) {
+      endEffector.setPercentOut(0.0);
       gamepieceCounter++;
       scoreSpeaker =
           new ScoreSpeaker(drive, shooter, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
