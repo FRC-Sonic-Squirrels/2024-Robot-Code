@@ -5,6 +5,7 @@
 package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -15,6 +16,10 @@ public class EndEffector extends SubsystemBase {
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
+  private Trigger shooterToFTrigger =
+      new Trigger(() -> shooterSideTOFDetectGamepiece()).debounce(0.1);
+  private Trigger intakeToFTrigger =
+      new Trigger(() -> intakeSideTOFDetectGamepiece()).debounce(0.1);
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
@@ -51,5 +56,9 @@ public class EndEffector extends SubsystemBase {
 
   public double shooterSideTOFDistanceInches() {
     return inputs.shooterSideTOFDistanceInches;
+  }
+
+  public boolean gamepieceInEndEffector() {
+    return shooterToFTrigger.getAsBoolean() || intakeToFTrigger.getAsBoolean();
   }
 }
