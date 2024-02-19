@@ -16,14 +16,19 @@ public class EndEffector extends SubsystemBase {
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
-  private Trigger shooterToFTrigger =
-      new Trigger(() -> shooterSideTOFDetectGamepiece()).debounce(0.1);
-  private Trigger intakeToFTrigger =
-      new Trigger(() -> intakeSideTOFDetectGamepiece()).debounce(0.1);
+  private final Trigger shooterToFTrigger;
+  private final Trigger intakeToFTrigger;
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
+
+    intakeToFTrigger =
+        new Trigger(
+            () -> inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get());
+    shooterToFTrigger =
+        new Trigger(
+            () -> inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get());
   }
 
   @Override
@@ -43,11 +48,11 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Boolean intakeSideTOFDetectGamepiece() {
-    return inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
+    return intakeToFTrigger.getAsBoolean();
   }
 
   public Boolean shooterSideTOFDetectGamepiece() {
-    return inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get();
+    return shooterToFTrigger.getAsBoolean();
   }
 
   public double intakeSideTOFDistanceInches() {

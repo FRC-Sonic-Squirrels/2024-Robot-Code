@@ -5,7 +5,6 @@
 package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -22,18 +21,11 @@ public class IntakeGamepiece extends Command {
 
   private final Consumer<Double> rumbleConsumer;
 
-  private final Trigger intakeSideTofSeenGamepiece;
-  private final Trigger shooterSideTofSeenGamepiece;
-
   /** Creates a new IntakeDefaultIdleRPM. */
   public IntakeGamepiece(Intake intake, EndEffector endEffector, Consumer<Double> rumbleConsumer) {
     this.intake = intake;
     this.endEffector = endEffector;
     this.rumbleConsumer = rumbleConsumer;
-    intakeSideTofSeenGamepiece =
-        new Trigger(() -> endEffector.intakeSideTOFDetectGamepiece()).debounce(0.05);
-    shooterSideTofSeenGamepiece =
-        new Trigger(() -> endEffector.shooterSideTOFDetectGamepiece()).debounce(0.05);
 
     addRequirements(intake);
     setName("IntakeGamepiece");
@@ -51,25 +43,11 @@ public class IntakeGamepiece extends Command {
   @Override
   public void execute() {
 
-    // if (timeSinceLastGamepiece.get() >= 0.01
-    //     && timeSinceLastGamepiece.get() <= rumbleDurationSeconds.get()) {
-    //   if (controller != null)
-    //     controller.setRumble(RumbleType.kBothRumble, rumbleIntensityPercent.get());
-    //   controllerRumbled = true;
-    // } else if (controllerRumbled) {
-    //   if (controller != null) controller.setRumble(RumbleType.kBothRumble, 0.0);
-    //   controllerRumbled = false;
-    // }
-    // intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT);
-    // if (endEffector.gamepieceInEndEffector()) {
-    //   endEffector.setPercentOut(0.0);
-    //   timeSinceLastGamepiece.start();
-    // } else {
-    //   endEffector.setPercentOut(0.8);
-    // }
+    var intakeSideTofSeenGamepiece = endEffector.intakeSideTOFDetectGamepiece();
+    var shooterSideTofSeenGamepiece = endEffector.shooterSideTOFDetectGamepiece();
 
     var rumbleValue = rumbleIntensityPercent.get();
-    if (!intakeSideTofSeenGamepiece.getAsBoolean() && !shooterSideTofSeenGamepiece.getAsBoolean()) {
+    if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
       intake.setPercentOut(IntakeConstants.INTAKE_INTAKING_PERCENT_OUT);
       endEffector.setPercentOut(EndEffectorConstants.INTAKING_PERCENT_OUT);
 
@@ -77,18 +55,15 @@ public class IntakeGamepiece extends Command {
       rumbleValue = 0.0;
 
       // if we see the game piece slow down system to maintain better control over the note
-    } else if (intakeSideTofSeenGamepiece.getAsBoolean()
-        && !shooterSideTofSeenGamepiece.getAsBoolean()) {
+    } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
       intake.setPercentOut(IntakeConstants.NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT);
       endEffector.setPercentOut(EndEffectorConstants.NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT);
 
-    } else if (!intakeSideTofSeenGamepiece.getAsBoolean()
-        && shooterSideTofSeenGamepiece.getAsBoolean()) {
+    } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
       intake.setPercentOut(0.0);
       endEffector.setPercentOut(EndEffectorConstants.CENTERING_NOTE_REVERSE);
 
-    } else if (intakeSideTofSeenGamepiece.getAsBoolean()
-        && shooterSideTofSeenGamepiece.getAsBoolean()) {
+    } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
       intake.setPercentOut(0.0);
       endEffector.setPercentOut(0.0);
     }
@@ -108,6 +83,7 @@ public class IntakeGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return intakeSideTofSeenGamepiece.getAsBoolean() && shooterSideTofSeenGamepiece.getAsBoolean();
+    return endEffector.intakeSideTOFDetectGamepiece()
+        && endEffector.shooterSideTOFDetectGamepiece();
   }
 }
