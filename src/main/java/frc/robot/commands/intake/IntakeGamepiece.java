@@ -74,7 +74,7 @@ public class IntakeGamepiece extends Command {
       endEffector.setPercentOut(EndEffectorConstants.INTAKING_PERCENT_OUT);
 
       // dont rumble if we dont see gamepiece
-      rumbleConsumer.accept(rumbleValue);
+      rumbleValue = 0.0;
 
       // if we see the game piece slow down system to maintain better control over the note
     } else if (intakeSideTofSeenGamepiece.getAsBoolean()
