@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,7 +36,9 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.shooter.HomeShooter;
@@ -322,8 +325,6 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    // intake.setDefaultCommand(new IntakeGamepiece(intake, driverController.getHID()));
-
     // shooter.setDefaultCommand(new ShooterStowMode(shooter));
 
     // Set up named commands for PathPlanner
@@ -430,6 +431,17 @@ public class RobotContainer {
                 visionGamepiece::getClosestGamepiece,
                 drivetrainWrapper,
                 endEffector::intakeSideTOFDetectGamepiece));
+
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new IntakeGamepiece(
+                    intake,
+                    endEffector,
+                    (rumble) -> {
+                      driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
+                    })
+                .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
     driverController.rightBumper().whileTrue(scoreSpeaker);
 
