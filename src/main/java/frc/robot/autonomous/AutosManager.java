@@ -90,6 +90,7 @@ public class AutosManager {
         new AutoStateMachine(
             drivetrain,
             shooter,
+            endEffector,
             new AutoSubstateMachine[] {
               generateSubstateMachine("sourceAuto.1", "G5S3"),
               generateSubstateMachine("S3G4", "G4S2"),
@@ -107,6 +108,7 @@ public class AutosManager {
         new AutoStateMachine(
             drivetrain,
             shooter,
+            endEffector,
             new StateMachine[] {
               new MiddleFirstSubstate(
                   drivetrain,

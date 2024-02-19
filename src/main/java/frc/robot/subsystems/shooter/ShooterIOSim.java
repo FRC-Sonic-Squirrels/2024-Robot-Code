@@ -9,10 +9,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public class ShooterIOSim implements ShooterIO {
 
@@ -51,8 +51,8 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotKg = 0.0;
   private double kickerVolts = 0.0;
 
-  private final LoggedDashboardBoolean beamBreak =
-      new LoggedDashboardBoolean("Shooter/beamBreak", false);
+  private LoggedTunableNumber timeOfFlightDistance =
+      new LoggedTunableNumber("Shooter/ToFDistance", 18);
 
   private double launcherOpenLoopVolts = 0.0;
 
@@ -74,7 +74,7 @@ public class ShooterIOSim implements ShooterIO {
 
     inputs.kickerAppliedVolts = kickerVolts;
 
-    inputs.beamBreak = beamBreak.get();
+    inputs.timeOfFlightDistance = timeOfFlightDistance.get();
 
     // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
     double ff = 0.0;

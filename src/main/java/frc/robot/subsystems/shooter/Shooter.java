@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -67,6 +68,11 @@ public class Shooter extends SubsystemBase {
 
   private static final LoggedTunableNumber launcherToleranceRPM =
       new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
+
+  public static final LoggedTunableNumber distanceToTriggerNoteDetection =
+      new LoggedTunableNumber("Shooter/distanceToTriggerNote", 8.0);
+
+  private final Trigger noteInShooter = new Trigger(this::getToFActivated).debounce(0.1);
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
@@ -215,8 +221,16 @@ public class Shooter extends SubsystemBase {
     return inputs.kickerAppliedVolts / Constants.MAX_VOLTAGE;
   }
 
-  public boolean getBeamBreak() {
-    return inputs.beamBreak;
+  public double getToFDistance() {
+    return inputs.timeOfFlightDistance;
+  }
+
+  public boolean getToFActivated() {
+    return inputs.timeOfFlightDistance >= distanceToTriggerNoteDetection.get();
+  }
+
+  public boolean noteInShooter() {
+    return noteInShooter.getAsBoolean();
   }
 
   public void pivotResetHomePosition() {
