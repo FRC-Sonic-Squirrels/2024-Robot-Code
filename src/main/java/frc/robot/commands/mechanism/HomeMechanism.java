@@ -4,6 +4,9 @@
 
 package frc.robot.commands.mechanism;
 
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.arm.Arm;
@@ -60,8 +63,9 @@ public class HomeMechanism extends Command {
           armReset = true;
         }
       } else {
-        elevator.setHeight(safeElevatorHeightForArmResetting.get());
-        if (elevator.isAtTarget(safeElevatorHeightForArmResetting.get())) {
+        Measure<Distance> height = Units.Inches.of(safeElevatorHeightForArmResetting.get());
+        elevator.setHeight(height);
+        if (elevator.isAtTarget(height)) {
           beginHomingArm = true;
         }
       }
