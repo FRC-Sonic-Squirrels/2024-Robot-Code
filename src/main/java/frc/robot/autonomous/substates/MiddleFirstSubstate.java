@@ -2,7 +2,6 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
@@ -25,7 +24,6 @@ public class MiddleFirstSubstate extends StateMachine {
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
   private ScoreSpeaker scoreSpeaker;
-  private Trigger endEffectorTrigger;
   private boolean prevEndEffectorBeamBreak = true;
   private int gamepieceCounter = 0;
   private boolean reachedCenter = false;
@@ -58,8 +56,6 @@ public class MiddleFirstSubstate extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
 
-    endEffectorTrigger = new Trigger(endEffector::intakeSideTOFDetectGamepiece).debounce(0.1);
-
     return this::followPath;
   }
 
@@ -67,11 +63,11 @@ public class MiddleFirstSubstate extends StateMachine {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
-    if (!endEffectorTrigger.getAsBoolean()) {
+    if (!endEffector.gamepieceInEndEffector()) {
       endEffector.setPercentOut(0.7);
     }
 
-    if (endEffectorTrigger.getAsBoolean() && !prevEndEffectorBeamBreak) {
+    if (endEffector.gamepieceInEndEffector() && !prevEndEffectorBeamBreak) {
       endEffector.setPercentOut(0.0);
       gamepieceCounter++;
       scoreSpeaker =
@@ -81,7 +77,7 @@ public class MiddleFirstSubstate extends StateMachine {
 
     intake.setPercentOut(0.8);
 
-    prevEndEffectorBeamBreak = endEffectorTrigger.getAsBoolean();
+    prevEndEffectorBeamBreak = endEffector.gamepieceInEndEffector();
 
     if (drive.getPoseEstimatorPose().getX() >= 8.1) {
       reachedCenter = true;
@@ -89,7 +85,7 @@ public class MiddleFirstSubstate extends StateMachine {
 
     if (reachedCenter
         && drive.getPoseEstimatorPose().getX() <= 8.05
-        && !endEffectorTrigger.getAsBoolean()) {
+        && !endEffector.gamepieceInEndEffector()) {
       return setStopped();
     }
 
