@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
-import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.configs.RobotConfig;
@@ -75,13 +74,7 @@ public class MiddleFirstSubstate extends StateMachine {
       scoreSpeaker.schedule();
     }
 
-    if (gamepieceCounter <= 2
-        || (gamepieceCounter == 3
-            && closestGamepiece.get().distance <= Constants.AutoConstants.DIST_TO_START_INTAKING)) {
-      intake.setPercentOut(0.8);
-    } else {
-      intake.setPercentOut(0.0);
-    }
+    intake.setPercentOut(0.8);
 
     prevEndEffectorBeamBreak = endEffectorTrigger.getAsBoolean();
 
