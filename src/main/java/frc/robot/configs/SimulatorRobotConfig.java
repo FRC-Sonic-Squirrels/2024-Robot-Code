@@ -87,36 +87,16 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   // ---- VISION CAMERA TRANSFORM3d's -------
   public static final Transform3d SHOOTER_SIDE_LEFT =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(-0.62273),
-              Units.inchesToMeters(9.625919),
-              Units.inchesToMeters(22.21467)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(225.0)));
+      new Transform3d(new Translation3d(), new Rotation3d());
 
   public static final Transform3d SHOOTER_SIDE_RIGHT =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(-0.62273),
-              Units.inchesToMeters(-9.625919),
-              Units.inchesToMeters(22.21467)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(135.0)));
+      new Transform3d(new Translation3d(), new Rotation3d());
 
   public static final Transform3d INTAKE_SIDE_LEFT =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(0.64738),
-              Units.inchesToMeters(13.14840),
-              Units.inchesToMeters(22.31306)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(45.0)));
+      new Transform3d(new Translation3d(), new Rotation3d());
 
   public static final Transform3d INTAKE_SIDE_RIGHT =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(0.64738),
-              Units.inchesToMeters(-13.14840),
-              Units.inchesToMeters(22.31306)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45.0)));
+      new Transform3d(new Translation3d(), new Rotation3d());
 
   public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
   public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
