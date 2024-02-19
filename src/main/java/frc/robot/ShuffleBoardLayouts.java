@@ -184,7 +184,7 @@ public class ShuffleBoardLayouts {
     var setKickerPercentOut =
         new ConsumeSuppliedValue(
                 shooter, () -> tunablePercentOut.getDouble(0.0), shooter::setKickerPercentOut)
-            .finallyDo(() -> shooter.setPercentOut(0.0));
+            .finallyDo(() -> shooter.setKickerPercentOut(0.0));
     setKickerPercentOut.setName("setKickerPercentOut");
 
     var setLeadPercentOut =
@@ -215,8 +215,7 @@ public class ShuffleBoardLayouts {
         Commands.sequence(
             Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter),
             Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
-            Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter),
-            Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
+            Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter));
 
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
@@ -235,7 +234,8 @@ public class ShuffleBoardLayouts {
 
     // TODO: add command that replaces elevator and arm check
     // var checkArmAndElevator;
-
+    
+    // checks the elevator height
     var checkElevator =
         Commands.sequence(
             Commands.runOnce(
@@ -243,12 +243,14 @@ public class ShuffleBoardLayouts {
             Commands.waitUntil(() -> elevator.isAtTarget()),
             Commands.runOnce(() -> elevator.setHeight(0.0), elevator));
 
+    // checks the arm angle
     var checkArm =
         Commands.sequence(
             Commands.runOnce(() -> arm.setAngle(Constants.ArmConstants.MAX_ARM_ANGLE), arm),
             Commands.waitUntil(() -> arm.getAngle() == Constants.ArmConstants.MAX_ARM_ANGLE),
             Commands.runOnce(() -> arm.setAngle(Rotation2d.fromDegrees(0.0)), arm));
 
+    // checks percent output of end effector motor
     var checkEndEffector =
         Commands.sequence(
             Commands.runOnce(
@@ -257,6 +259,7 @@ public class ShuffleBoardLayouts {
             Commands.waitSeconds(3),
             Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
+    // checks percent output of intake motor
     var checkIntake =
         Commands.sequence(
             Commands.runOnce(
@@ -265,6 +268,7 @@ public class ShuffleBoardLayouts {
             Commands.waitSeconds(3),
             Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
 
+    // checks percent out of kicker and launcher motors, and pivot angle
     var checkShooter =
         Commands.sequence(
             Commands.runOnce(
