@@ -349,7 +349,7 @@ public class RobotContainer {
     shuffleBoardLayouts =
         new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
-    scoreSpeaker = new ScoreSpeaker(drivetrainWrapper, shooter, driverController.a());
+    scoreSpeaker = new ScoreSpeaker(drivetrainWrapper, shooter, endEffector, driverController.a());
 
     // Configure the button bindings
     configureButtonBindings();
