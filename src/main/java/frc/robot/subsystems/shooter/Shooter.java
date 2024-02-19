@@ -72,7 +72,7 @@ public class Shooter extends SubsystemBase {
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("Shooter/distanceToTriggerNote", 8.0);
 
-  public final Trigger noteInShooter = new Trigger(this::getToFActivated).debounce(0.1);
+  private final Trigger noteInShooter = new Trigger(this::getToFActivated).debounce(0.1);
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();

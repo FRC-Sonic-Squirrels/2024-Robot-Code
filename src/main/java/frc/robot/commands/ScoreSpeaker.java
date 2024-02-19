@@ -19,6 +19,7 @@ import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.visualization.GamepieceVisualization;
@@ -29,6 +30,7 @@ import org.littletonrobotics.junction.Logger;
 public class ScoreSpeaker extends Command {
   private DrivetrainWrapper drive;
   private Shooter shooter;
+  private EndEffector endEffector;
 
   private final LoggedTunableNumber rotationKp =
       new LoggedTunableNumber("RotateToSpeaker/rotationKp", 4.9);
@@ -75,8 +77,12 @@ public class ScoreSpeaker extends Command {
    * @return Command to lock rotation in direction of target
    */
   public ScoreSpeaker(
-      DrivetrainWrapper drive, Shooter shooter, BooleanSupplier shootGamepiece, double deadline) {
-    this(drive, shooter, shootGamepiece);
+      DrivetrainWrapper drive,
+      Shooter shooter,
+      EndEffector endEffector,
+      BooleanSupplier shootGamepiece,
+      double deadline) {
+    this(drive, shooter, endEffector, shootGamepiece);
     this.deadline = deadline;
   }
 
@@ -88,11 +94,16 @@ public class ScoreSpeaker extends Command {
    * @param shootGamepiece when this command should end
    * @return Command to lock rotation in direction of target
    */
-  public ScoreSpeaker(DrivetrainWrapper drive, Shooter shooter, BooleanSupplier shootGamepiece) {
+  public ScoreSpeaker(
+      DrivetrainWrapper drive,
+      Shooter shooter,
+      EndEffector endEffector,
+      BooleanSupplier shootGamepiece) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.drive = drive;
     this.shooter = shooter;
     this.shootGamepiece = shootGamepiece;
+    this.endEffector = endEffector;
 
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     setName("ScoreSpeaker");
@@ -109,6 +120,8 @@ public class ScoreSpeaker extends Command {
   @Override
   public void execute() {
     try (var ignored = new ExecutionTiming("ScoreSpeaker")) {
+
+      endEffector.setPercentOut(shooter.noteInShooter() ? 0.0 : 0.8);
 
       var currentTime = Timer.getFPGATimestamp();
       var poseEstimatorPose = drive.getPoseEstimatorPose();
@@ -190,7 +203,10 @@ public class ScoreSpeaker extends Command {
 
       shooter.setLauncherRPM(Constants.ShooterConstants.SHOOTING_RPM);
 
-      shooter.setPivotPosition(targetPitch);
+      shooter.setPivotPosition(
+          shooter.noteInShooter()
+              ? Constants.ShooterConstants.Pivot.LOADING_POSITION
+              : targetPitch);
 
       var speakerDistance =
           Constants.FieldConstants.getDistanceToSpeaker(drive.getPoseEstimatorPose());
