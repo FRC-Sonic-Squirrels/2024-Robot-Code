@@ -229,6 +229,10 @@ public class Shooter extends SubsystemBase {
     return inputs.timeOfFlightDistance >= distanceToTriggerNoteDetection.get();
   }
 
+  public boolean noteInShooter() {
+    return noteInShooter.getAsBoolean();
+  }
+
   public void pivotResetHomePosition() {
     io.resetPivotSensorPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
   }
