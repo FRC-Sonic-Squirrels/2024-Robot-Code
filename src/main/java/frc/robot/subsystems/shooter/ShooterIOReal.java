@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
@@ -52,6 +53,8 @@ public class ShooterIOReal implements ShooterIO {
   private final VoltageOut launcherOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
 
   private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
+
+  TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
   public ShooterIOReal() {
     // --- launcher config ---
@@ -188,6 +191,8 @@ public class ShooterIOReal implements ShooterIO {
           pivotTempCelsius.getValueAsDouble(),
           kickerTempCelsius.getValueAsDouble()
         };
+
+    inputs.timeOfFlightDistance = timeOfFlight.getRange();
   }
 
   // PIVOT

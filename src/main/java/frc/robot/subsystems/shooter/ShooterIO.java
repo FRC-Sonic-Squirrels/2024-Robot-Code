@@ -22,7 +22,7 @@ public interface ShooterIO {
     // launcher lead, launcher follower, pivot, kicker
     public double[] tempsCelcius = new double[] {};
 
-    public boolean beamBreak = false;
+    public double timeOfFlightDistance = 18.0;
   }
 
   /** Updates the set of loggable inputs. */
