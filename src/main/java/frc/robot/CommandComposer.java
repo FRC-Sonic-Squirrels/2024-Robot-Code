@@ -75,7 +75,7 @@ public class CommandComposer {
     DriveToPose driveToAmp =
         new DriveToPose(drivetrainWrapper, Constants.FieldConstants::getAmpScoringPose);
 
-    Measure<Distance> distToElevateMech = Units.Meters.of(1.5);
+    Measure<Distance> distToElevateMech = Units.Meters.of(3.5);
 
     BooleanSupplier withinRangeOfAmp =
         () ->
