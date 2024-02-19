@@ -316,6 +316,7 @@ public final class Constants {
   }
 
   public class AutoConstants {
-    public static final double DIST_TO_START_INTAKING = 1.0;
+    public static final Measure<Distance> DIST_TO_START_INTAKING =
+        edu.wpi.first.units.Units.Meters.of(1.0);
   }
 }
