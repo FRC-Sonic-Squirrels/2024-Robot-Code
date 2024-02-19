@@ -86,26 +86,16 @@ public class AutosManager {
   }
 
   private Auto sourceAuto() {
-    AutoSubstateMachine substateMachine1 = generateSubstateMachine("sourceAuto.1", "G5S3");
-
-    AutoSubstateMachine substateMachine2 = generateSubstateMachine("S3G4", "G4S2");
-
-    AutoSubstateMachine substateMachine3 = generateSubstateMachine("S2G3", "G3S1");
-
-    AutoSubstateMachine substateMachine4 = generateSubstateMachine("S1G2", "G2S1");
-
-    AutoSubstateMachine substateMachine5 = generateSubstateMachine("S1G1", "G1S1");
-
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
             shooter,
             new AutoSubstateMachine[] {
-              substateMachine1,
-              substateMachine2,
-              substateMachine3,
-              substateMachine4,
-              substateMachine5
+              generateSubstateMachine("sourceAuto.1", "G5S3"),
+              generateSubstateMachine("S3G4", "G4S2"),
+              generateSubstateMachine("S2G3", "G3S1"),
+              generateSubstateMachine("S1G2", "G2S1"),
+              generateSubstateMachine("S1G1", "G1S1")
             },
             1.31);
     return new Auto(
@@ -113,23 +103,22 @@ public class AutosManager {
   }
 
   private Auto middleAuto() {
-    StateMachine substateMachine1 =
-        new MiddleFirstSubstate(
-            drivetrain, shooter, endEffector, intake, config, visionGamepiece::getClosestGamepiece);
-    StateMachine substateMachine2 = generateSubstateMachine("S1G2", "G2S2");
-    StateMachine substateMachine3 = generateSubstateMachine("S2G3", "G3S3");
-    StateMachine substateMachine4 = generateSubstateMachine("S3G4", "G4S3");
-    StateMachine substateMachine5 = generateSubstateMachine("S3G5", "G5S3");
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
             shooter,
             new StateMachine[] {
-              substateMachine1,
-              substateMachine2,
-              substateMachine3,
-              substateMachine4,
-              substateMachine5
+              new MiddleFirstSubstate(
+                  drivetrain,
+                  shooter,
+                  endEffector,
+                  intake,
+                  config,
+                  visionGamepiece::getClosestGamepiece),
+              generateSubstateMachine("S1G2", "G2S2"),
+              generateSubstateMachine("S2G3", "G3S3"),
+              generateSubstateMachine("S3G4", "G4S3"),
+              generateSubstateMachine("S3G5", "G5S3")
             },
             0.47);
     return new Auto(
