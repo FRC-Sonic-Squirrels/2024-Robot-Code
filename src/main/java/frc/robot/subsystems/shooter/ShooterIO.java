@@ -9,7 +9,7 @@ public interface ShooterIO {
   public static class ShooterIOInputs {
     public Rotation2d pivotPosition = new Rotation2d();
     public double pivotVelocityRadsPerSec = 0.0;
-    public double pivotAppliedVotls = 0.0;
+    public double pivotAppliedVolts = 0.0;
     public double pivotCurrentAmps = 0.0;
 
     public double launcherRPM = 0.0;

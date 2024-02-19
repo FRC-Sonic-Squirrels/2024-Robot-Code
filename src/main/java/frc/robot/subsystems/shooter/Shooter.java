@@ -224,7 +224,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public double getPivotVoltage() {
-    return inputs.pivotAppliedVotls;
+    return inputs.pivotAppliedVolts;
   }
 
   public double getPivotVelocity() {
