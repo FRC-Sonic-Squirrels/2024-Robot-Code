@@ -89,23 +89,24 @@ public class DriveToGamepiece extends Command {
 
     rotationalErrorDegrees =
         Math.abs(
-            closestGamepiece.targetYaw.getDegrees()
+            closestGamepiece.getYaw(drive.getPoseEstimatorPose()).getDegrees()
                 // - 180.0
                 - poseEstimatorPose.getRotation().getDegrees());
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
 
-    if (isInSourceArea(closestGamepiece.globalPose)) {
+    if (isInSourceArea(closestGamepiece.getGlobalPose())) {
       sourceAngle =
           new Rotation2d(
-              isInBlueSourceArea(closestGamepiece.globalPose)
+              isInBlueSourceArea(closestGamepiece.getGlobalPose())
                   ? -1.0417663596685425
                   : -2.103952069121958);
 
-      gamepieceDirection =
-          new Rotation2d(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
-
-      xVel = xKpSourceArea.get() * Math.cos(gamepieceDirection.getRadians());
-      yVel = yKpSourceArea.get() * Math.sin(gamepieceDirection.getRadians());
+      xVel =
+          xKpSourceArea.get()
+              * Math.cos(closestGamepiece.getYaw(drive.getPoseEstimatorPose()).getRadians());
+      yVel =
+          yKpSourceArea.get()
+              * Math.sin(closestGamepiece.getYaw(drive.getPoseEstimatorPose()).getRadians());
 
       rotVel =
           rotationController.calculate(
@@ -115,18 +116,22 @@ public class DriveToGamepiece extends Command {
       if (advancedMode.get() == 0) {
         xVel =
             rotationalErrorDegrees < allowedRotationalErrorDegreesValue
-                ? xController.calculate(0.0, closestGamepiece.pose.getX())
+                ? xController.calculate(
+                    0.0, closestGamepiece.getRobotCentricPose(drive.getPoseEstimatorPose()).getX())
                 : 0.0;
         yVel =
             rotationalErrorDegrees < allowedRotationalErrorDegreesValue
-                ? yController.calculate(0.0, closestGamepiece.pose.getY())
+                ? yController.calculate(
+                    0.0, closestGamepiece.getRobotCentricPose(drive.getPoseEstimatorPose()).getY())
                 : 0.0;
       } else {
         xVel =
-            xController.calculate(0.0, closestGamepiece.pose.getX())
+            xController.calculate(
+                    0.0, closestGamepiece.getRobotCentricPose(drive.getPoseEstimatorPose()).getX())
                 / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
         yVel =
-            yController.calculate(0.0, closestGamepiece.pose.getY())
+            yController.calculate(
+                    0.0, closestGamepiece.getRobotCentricPose(drive.getPoseEstimatorPose()).getY())
                 / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
       }
       // rotVelCorrection =
@@ -140,7 +145,7 @@ public class DriveToGamepiece extends Command {
       rotVel =
           rotationController.calculate(
               poseEstimatorPose.getRotation().getRadians(),
-              closestGamepiece.targetYaw.getRadians());
+              closestGamepiece.getYaw(drive.getPoseEstimatorPose()).getRadians());
     }
 
     // TODO: ---------------change to estimated pose if using this IRL------------------
