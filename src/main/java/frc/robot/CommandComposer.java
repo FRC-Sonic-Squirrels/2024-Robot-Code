@@ -17,6 +17,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class CommandComposer {
   public static Command autoClimb(
@@ -38,21 +39,22 @@ public class CommandComposer {
     BooleanSupplier underStage =
         () -> autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose());
 
-    Command prepForClimb =
-        new ConditionalCommand(
-            MechanismActions.climbPrepUnderStagePosition(elevator, arm)
-                .until(() -> !underStage.getAsBoolean())
-                .andThen(MechanismActions.climbPrepPosition(elevator, arm)),
-            MechanismActions.climbPrepPosition(elevator, arm),
-            underStage);
+    Supplier<Command> prepForClimb =
+        () ->
+            new ConditionalCommand(
+                MechanismActions.climbPrepUnderStagePosition(elevator, arm)
+                    .until(() -> !underStage.getAsBoolean())
+                    .andThen(MechanismActions.climbPrepPosition(elevator, arm)),
+                MechanismActions.climbPrepPosition(elevator, arm),
+                underStage);
 
     Command climbCommand =
         (driveToClimbPos.alongWith(
                 new ConditionalCommand(
-                    prepForClimb,
+                    prepForClimb.get(),
                     MechanismActions.loadingPosition(elevator, arm)
                         .until(withinRangeOfStage)
-                        .andThen(prepForClimb),
+                        .andThen(prepForClimb.get()),
                     withinRangeOfStage)))
             .until(driveToClimbPos::atGoal)
             .andThen(autoClimb);
