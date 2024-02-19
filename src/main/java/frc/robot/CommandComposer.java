@@ -1,7 +1,8 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -16,7 +17,6 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 public class CommandComposer {
   public static Command autoClimb(
@@ -38,22 +38,21 @@ public class CommandComposer {
     BooleanSupplier underStage =
         () -> autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose());
 
-    Supplier<Command> prepForClimb =
-        () ->
-            new ConditionalCommand(
-                MechanismActions.climbPrepUnderStagePosition(elevator, arm)
-                    .until(() -> !underStage.getAsBoolean())
-                    .andThen(MechanismActions.climbPrepPosition(elevator, arm)),
-                MechanismActions.climbPrepPosition(elevator, arm),
-                underStage);
+    Command prepForClimb =
+        new ConditionalCommand(
+            MechanismActions.climbPrepUnderStagePosition(elevator, arm)
+                .until(() -> !underStage.getAsBoolean())
+                .andThen(MechanismActions.climbPrepPosition(elevator, arm)),
+            MechanismActions.climbPrepPosition(elevator, arm),
+            underStage);
 
     Command climbCommand =
         (driveToClimbPos.alongWith(
                 new ConditionalCommand(
-                    prepForClimb.get(),
+                    prepForClimb,
                     MechanismActions.loadingPosition(elevator, arm)
                         .until(withinRangeOfStage)
-                        .andThen(prepForClimb.get()),
+                        .andThen(prepForClimb),
                     withinRangeOfStage)))
             .until(driveToClimbPos::atGoal)
             .andThen(autoClimb);
@@ -72,18 +71,27 @@ public class CommandComposer {
             .debounce(0.4);
 
     DriveToPose driveToAmp =
-        new DriveToPose(
-            drivetrainWrapper,
-            () ->
-                new Pose2d(
-                    Constants.isRedAlliance() ? 14.714638710021973 : 1.8273155689239502,
-                    7.65,
-                    Rotation2d.fromDegrees(90.0)));
+        new DriveToPose(drivetrainWrapper, Constants.FieldConstants::getAmpScoringPose);
+
+    Measure<Distance> distToElevateMech = Units.Meters.of(1.5);
+
+    BooleanSupplier withinRangeOfAmp =
+        () ->
+            GeometryUtil.getDist(
+                    drivetrainWrapper.getPoseEstimatorPose(),
+                    Constants.FieldConstants.getAmpScoringPose())
+                <= distToElevateMech.in(Units.Meters);
 
     Command scoreAmp =
         driveToAmp
             .until(driveToAmp::atGoal)
-            .alongWith(MechanismActions.ampPosition(elevator, arm))
+            .alongWith(
+                new ConditionalCommand(
+                    MechanismActions.ampPosition(elevator, arm),
+                    MechanismActions.loadingPosition(elevator, arm)
+                        .until(withinRangeOfAmp)
+                        .andThen(MechanismActions.ampPosition(elevator, arm)),
+                    withinRangeOfAmp))
             .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(gamepieceInEE));
 
     scoreAmp.setName("ScoreAmp");
@@ -97,7 +105,7 @@ public class CommandComposer {
         Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
             .andThen(MechanismActions.loadingPosition(elevator, arm));
 
-    cancelScoreAmp.setName("LoadPosition");
+    cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
   }
 }
