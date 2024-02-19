@@ -22,6 +22,17 @@ import java.util.function.Supplier;
 public class CommandComposer {
   public static Command autoClimb(
       DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm, EndEffector endEffector) {
+    /*
+     * Step 1: drive to in front of the chain,
+     * at the same time, if the robot is within 2 meters of the stage:
+     *  if the robot is under the stage
+     *      bring mech into under stage prep,
+     *  else
+     *       bring the mech into climb prep positon,
+     * if we are farther than 2 meters,
+     *  stay in stow/loading position
+     * Step 2: run climb command
+     */
     AutoClimb autoClimb = new AutoClimb(drivetrainWrapper, elevator, arm, endEffector);
 
     DriveToPose driveToClimbPos =
@@ -65,7 +76,12 @@ public class CommandComposer {
 
   public static Command scoreAmp(
       EndEffector endEffector, DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm) {
-    Trigger gamepieceInEE =
+    /*
+     * Step 1: drive to amp
+     * at the same time, if we are within a distance move mech into position
+     * Step 2: run end effector
+     */
+    Trigger noGamepieceInEE =
         new Trigger(
                 () ->
                     !endEffector.intakeSideTOFDetectGamepiece()
@@ -94,7 +110,7 @@ public class CommandComposer {
                         .until(withinRangeOfAmp)
                         .andThen(MechanismActions.ampPosition(elevator, arm)),
                     withinRangeOfAmp))
-            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(gamepieceInEE));
+            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE));
 
     scoreAmp.setName("ScoreAmp");
 
