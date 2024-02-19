@@ -32,7 +32,7 @@ public class IntakeGamepiece extends Command {
   }
 
   public IntakeGamepiece(Intake intake, EndEffector endEffector) {
-    this(intake, endEffector, (Double) -> {});
+    this(intake, endEffector, (ignore) -> {});
   }
 
   // Called when the command is initially scheduled.
