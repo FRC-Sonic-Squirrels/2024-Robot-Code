@@ -145,16 +145,13 @@ public class ShuffleBoardLayouts {
     var tunableHeight =
         elevatorTab.add("tunableHeight", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
-    // elevatorCommandsLayout.add("setVoltage",
-    //     new ConsumeSuppliedValue(
-    //         elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
+    var setVoltage = new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0));
+    setVoltage.setName("setVoltage");
+    elevatorCommandsLayout.add(setVoltage);
 
-    elevatorCommandsLayout.add(
-        new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0)));
-
-    elevatorCommandsLayout.add(
-        new ConsumeSuppliedValue(
-            elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight));
+    var setHeight = new ConsumeSuppliedValue(elevator, () -> tunableHeight.getDouble(0.0), elevator::setHeight);
+    setHeight.setName("setHeight");
+    elevatorCommandsLayout.add(setHeight);
 
     var stopCommand =
         Commands.sequence(
@@ -165,7 +162,6 @@ public class ShuffleBoardLayouts {
     elevatorCommandsLayout.add(stopCommand);
   }
 
-  // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
     var shooterTab = Shuffleboard.getTab("Shooter_Debug");
     var shooterCommandsLayout =
@@ -175,8 +171,8 @@ public class ShuffleBoardLayouts {
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
-    var tunableVoltage =
-        shooterTab.add("tunableVoltage", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
+    var tunablePercentOut =
+        shooterTab.add("tunablePercentOut", 0.0).withPosition(2, 0).withSize(2, 1).getEntry();
 
     var tunablePivotDegrees =
         shooterTab.add("tunablePivotDegrees", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
@@ -187,20 +183,21 @@ public class ShuffleBoardLayouts {
 
     var setKickerPercentOut =
         new ConsumeSuppliedValue(
-            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setKickerPercentOut);
+                shooter, () -> tunablePercentOut.getDouble(0.0), shooter::setKickerPercentOut)
+            .finallyDo(() -> shooter.setPercentOut(0.0));
     setKickerPercentOut.setName("setKickerPercentOut");
 
     var setLeadPercentOut =
         new ConsumeSuppliedValue(
-            shooter, () -> tunableVoltage.getDouble(0.0), shooter::setPercentOut);
+                shooter, () -> tunablePercentOut.getDouble(0.0), shooter::setPercentOut)
+            .finallyDo(() -> shooter.setPercentOut(0.0));
     setLeadPercentOut.setName("setLeadPercentOut");
 
     var setLauncherRPM =
-        new ConsumeSuppliedValue(shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM);
+        new ConsumeSuppliedValue(shooter, () -> tunableRPM.getDouble(0.0), shooter::setLauncherRPM)
+            .finallyDo(() -> shooter.setLauncherRPM(0.0));
     setLauncherRPM.setName("setLauncherRPM");
 
-    // shooterCommandsLayout.add("setPivotPosition", new ConsumeSuppliedValue(shooter, () ->
-    // tunablePivotRotations.getDouble(0.0), shooter::setPivotPosition));
     var setPivotPosition =
         Commands.runOnce(
             () ->
@@ -219,8 +216,7 @@ public class ShuffleBoardLayouts {
             Commands.runOnce(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(0)), shooter),
             Commands.runOnce(() -> shooter.setPivotVoltage(0.0), shooter),
             Commands.runOnce(() -> shooter.setLauncherVoltage(0.0), shooter),
-            Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter),
-            Commands.runOnce(() -> shooter.setLauncherRPM(0.0), shooter));
+            Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
 
     stopCommand.runsWhenDisabled();
     stopCommand.setName("SHOOTER STOP");
@@ -237,7 +233,7 @@ public class ShuffleBoardLayouts {
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
-    // TODO: add command
+    // TODO: add command that replaces elevator and arm check
     // var checkArmAndElevator;
 
     var checkElevator =
