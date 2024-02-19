@@ -30,7 +30,6 @@ import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.commands.AutoClimb;
-import frc.robot.commands.MechanismActions;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
