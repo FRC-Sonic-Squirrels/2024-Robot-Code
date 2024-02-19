@@ -81,7 +81,7 @@ public class AutoSubstateMachine extends StateMachine {
       return setStopped();
     }
 
-    scoreSpeaker = new ScoreSpeaker(drive, shooter, () -> true);
+    scoreSpeaker = new ScoreSpeaker(drive, shooter, endEffector, () -> true);
     scoreSpeaker.schedule();
 
     choreoHelper =

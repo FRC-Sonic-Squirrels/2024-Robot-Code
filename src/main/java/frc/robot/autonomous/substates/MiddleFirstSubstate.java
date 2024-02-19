@@ -73,7 +73,8 @@ public class MiddleFirstSubstate extends StateMachine {
     if (endEffector.gamepieceInEndEffector() && !prevEndEffectorBeamBreak) {
       gamepieceCounter++;
       scoreSpeaker =
-          new ScoreSpeaker(drive, shooter, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
+          new ScoreSpeaker(
+              drive, shooter, endEffector, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
       scoreSpeaker.schedule();
     }
 
