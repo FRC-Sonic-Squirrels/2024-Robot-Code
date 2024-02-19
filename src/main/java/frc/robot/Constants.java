@@ -315,8 +315,7 @@ public final class Constants {
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 
-  public class AutoConstants {
-    public static final Measure<Distance> DIST_TO_START_INTAKING =
-        edu.wpi.first.units.Units.Meters.of(1.0);
+  public static class AutoConstants {
+    public static final Measure<Distance> DIST_TO_START_INTAKING = Units.Meters.of(1.0);
   }
 }

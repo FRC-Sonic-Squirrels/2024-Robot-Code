@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 
 public class IntakeGamepiece extends Command {
@@ -17,6 +18,7 @@ public class IntakeGamepiece extends Command {
   // DELETE THIS COMMAND LATER
 
   private Intake intake;
+  private EndEffector endEffector;
   private XboxController controller;
   private Timer timeSinceLastGamepiece = new Timer();
 
@@ -29,13 +31,14 @@ public class IntakeGamepiece extends Command {
       new LoggedTunableNumber("IntakeGamepiece/rumbleIntensityPercent", 0.3);
 
   /** Creates a new IntakeDefaultIdleRPM. */
-  public IntakeGamepiece(Intake intake) {
-    this(intake, null);
+  public IntakeGamepiece(Intake intake, EndEffector endEffector) {
+    this(intake, endEffector, null);
   }
 
   /** Creates a new IntakeDefaultIdleRPM. */
-  public IntakeGamepiece(Intake intake, XboxController controller) {
+  public IntakeGamepiece(Intake intake, EndEffector endEffector, XboxController controller) {
     this.intake = intake;
+    this.endEffector = endEffector;
     this.controller = controller;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
@@ -44,13 +47,13 @@ public class IntakeGamepiece extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    timeSinceLastGamepiece.reset();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    timeSinceLastGamepiece.reset();
-    timeSinceLastGamepiece.start();
 
     if (timeSinceLastGamepiece.get() >= 0.01
         && timeSinceLastGamepiece.get() <= rumbleDurationSeconds.get()) {
@@ -62,12 +65,19 @@ public class IntakeGamepiece extends Command {
       controllerRumbled = false;
     }
     intake.setPercentOut(Constants.IntakeConstants.INTAKE_IDLE_PERCENT_OUT);
+    if (endEffector.gamepieceInEndEffector()) {
+      endEffector.setPercentOut(0.0);
+      timeSinceLastGamepiece.start();
+    } else {
+      endEffector.setPercentOut(0.8);
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     intake.setPercentOut(0.0);
+    endEffector.setPercentOut(0.0);
   }
 
   // Returns true when the command should end.

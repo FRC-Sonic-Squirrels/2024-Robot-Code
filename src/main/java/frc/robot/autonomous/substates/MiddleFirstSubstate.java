@@ -5,6 +5,7 @@ import com.choreo.lib.ChoreoTrajectory;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -24,6 +25,7 @@ public class MiddleFirstSubstate extends StateMachine {
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
   private ScoreSpeaker scoreSpeaker;
+  private IntakeGamepiece intakeGamepiece;
   private boolean prevEndEffectorBeamBreak = true;
   private int gamepieceCounter = 0;
   private boolean reachedCenter = false;
@@ -63,19 +65,17 @@ public class MiddleFirstSubstate extends StateMachine {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
-    if (!endEffector.gamepieceInEndEffector()) {
-      endEffector.setPercentOut(0.7);
+    if (!endEffector.gamepieceInEndEffector() && prevEndEffectorBeamBreak) {
+      intakeGamepiece = new IntakeGamepiece(intake, endEffector);
+      intakeGamepiece.schedule();
     }
 
     if (endEffector.gamepieceInEndEffector() && !prevEndEffectorBeamBreak) {
-      endEffector.setPercentOut(0.0);
       gamepieceCounter++;
       scoreSpeaker =
           new ScoreSpeaker(drive, shooter, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
       scoreSpeaker.schedule();
     }
-
-    intake.setPercentOut(0.8);
 
     prevEndEffectorBeamBreak = endEffector.gamepieceInEndEffector();
 
