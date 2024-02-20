@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
@@ -72,7 +73,7 @@ public class Shooter extends SubsystemBase {
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("Shooter/distanceToTriggerNote", 8.0);
 
-  private final Trigger noteInShooter = new Trigger(this::getToFActivated).debounce(0.1);
+  private final Trigger noteInShooter = new Trigger(this::getToFActivated);
 
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
@@ -112,6 +113,8 @@ public class Shooter extends SubsystemBase {
       Logger.processInputs(ROOT_TABLE, inputs);
       Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pivotPosition.getDegrees());
       Logger.recordOutput(ROOT_TABLE + "/targetPitchDegrees", targetPivotPosition.getDegrees());
+
+      Logger.recordOutput(ROOT_TABLE + "noteInShooter", noteInShooter.getAsBoolean());
 
       pivotTargetMeasurements.add(
           new PIDTargetMeasurement(
@@ -226,7 +229,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean getToFActivated() {
-    return inputs.timeOfFlightDistance >= distanceToTriggerNoteDetection.get();
+    return inputs.timeOfFlightDistance <= distanceToTriggerNoteDetection.get();
   }
 
   public boolean noteInShooter() {
@@ -243,5 +246,9 @@ public class Shooter extends SubsystemBase {
 
   public double getPivotVelocity() {
     return inputs.pivotVelocityRadsPerSec;
+  }
+
+  public void setNeutralMode(NeutralModeValue value) {
+    io.setNeutralMode(value);
   }
 }

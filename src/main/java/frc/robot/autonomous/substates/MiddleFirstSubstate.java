@@ -66,7 +66,7 @@ public class MiddleFirstSubstate extends StateMachine {
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
     if (!endEffector.gamepieceInEndEffector() && prevEndEffectorBeamBreak) {
-      intakeGamepiece = new IntakeGamepiece(intake, endEffector);
+      intakeGamepiece = new IntakeGamepiece(intake, endEffector, shooter);
       intakeGamepiece.schedule();
     }
 

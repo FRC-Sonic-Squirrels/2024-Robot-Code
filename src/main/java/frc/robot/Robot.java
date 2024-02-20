@@ -114,6 +114,7 @@ public class Robot extends LoggedRobot {
         command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
     commandScheduler.onCommandFinish(
         command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
+    robotContainer.resetSubsystems();
   }
 
   /** This function is called periodically during all modes. */
@@ -133,12 +134,16 @@ public class Robot extends LoggedRobot {
 
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();
+
+    Logger.recordOutput("DIO/0", robotContainer.breakModeButton.get());
+    Logger.recordOutput("DIO/1", robotContainer.homeSensorsButton.get());
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
     // FIXME: need to remove max distance away from current estimate restriction for vision
+    robotContainer.resetSubsystems();
   }
 
   /** This function is called periodically when disabled. */
@@ -202,6 +207,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    robotContainer.setBrakeMode();
 
     // schedule the autonomous command (example)
     if (lastAuto != null) {
@@ -216,6 +222,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    robotContainer.setBrakeMode();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

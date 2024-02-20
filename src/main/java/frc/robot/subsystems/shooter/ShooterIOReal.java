@@ -13,7 +13,9 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
@@ -139,6 +141,9 @@ public class ShooterIOReal implements ShooterIO {
     // launcher_follower.optimizeBusUtilization();
     pivot.optimizeBusUtilization();
     kicker.optimizeBusUtilization();
+
+    timeOfFlight.setRangeOfInterest(6, 6, 10, 10);
+    timeOfFlight.setRangingMode(RangingMode.Short, 40);
   }
 
   @Override
@@ -190,7 +195,7 @@ public class ShooterIOReal implements ShooterIO {
           kickerTempCelsius.getValueAsDouble()
         };
 
-    inputs.timeOfFlightDistance = timeOfFlight.getRange();
+    inputs.timeOfFlightDistance = Units.Millimeters.of(timeOfFlight.getRange()).in(Units.Inches);
   }
 
   // PIVOT
@@ -274,5 +279,10 @@ public class ShooterIOReal implements ShooterIO {
 
     followConfigurator.apply(pidConfig);
     followConfigurator.apply(mmConfig);
+  }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue value) {
+    pivot.setNeutralMode(value);
   }
 }

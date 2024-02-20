@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -39,12 +40,12 @@ public class Elevator extends SubsystemBase {
       closedLoopMaxAccelerationConstraint.initDefault(640.0);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(2.0);
+      kP.initDefault(12.0);
       kD.initDefault(0.0);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(640.0);
-      closedLoopMaxAccelerationConstraint.initDefault(640.0);
+      closedLoopMaxVelocityConstraint.initDefault(1000.0);
+      closedLoopMaxAccelerationConstraint.initDefault(2000.0);
     }
   }
 
@@ -111,7 +112,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void resetSensorToHomePosition() {
-    io.setSensorPosition(Units.Meters.zero());
+    io.setSensorPosition(Constants.ElevatorConstants.HOME_POSITION);
   }
 
   public double getVoltage() {
@@ -120,5 +121,9 @@ public class Elevator extends SubsystemBase {
 
   public double getVelocity() {
     return inputs.velocityInchesPerSecond;
+  }
+
+  public void setNeutralMode(NeutralModeValue value) {
+    io.setNeutralMode(value);
   }
 }

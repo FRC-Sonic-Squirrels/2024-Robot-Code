@@ -1,6 +1,8 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.util.Units;
+import frc.lib.team6328.LoggedTunableNumber;
 
 public class ShootingSolver {
   public static final int DebugSpew = 0;
@@ -12,6 +14,10 @@ public class ShootingSolver {
   private final double shootingTime;
   private double startOfShootingTimestamp = Double.NaN;
   private boolean doneShooting;
+
+  private LoggedTunableNumber tunableX = new LoggedTunableNumber("ShootingSolver/tunableX", 0.0);
+
+  private LoggedTunableNumber tunableY = new LoggedTunableNumber("ShootingSolver/tunableY", 0.0);
 
   public record Solution(
       double timeToShoot, Rotation2d heading, double rotationSpeed, Rotation2d pitch) {}
@@ -70,7 +76,13 @@ public class ShootingSolver {
     }
 
     // Vector pointing from robot to speaker at time that note leaves shooter
-    var dPspeaker = Pspeaker.minus(ProbotFuture);
+    // var dPspeaker = Pspeaker.minus(ProbotFuture);
+
+    var dPspeaker =
+        new Translation3d(
+            Units.inchesToMeters(-tunableX.get()),
+            Units.inchesToMeters(-tunableY.get()),
+            Pspeaker.getZ());
 
     // Direction of the note to face the speaker.
     var thetaNote = Math.atan2(dPspeaker.getY(), dPspeaker.getX());

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -29,4 +30,6 @@ public interface ArmIO {
       double kG,
       double maxProfiledVelocity,
       double maxProfiledAcceleration) {}
+
+  public default void setNeutralMode(NeutralModeValue value) {}
 }

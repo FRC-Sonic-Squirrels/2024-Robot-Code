@@ -37,6 +37,9 @@ public class ScoreSpeaker extends Command {
   private final LoggedTunableNumber rotationKd =
       new LoggedTunableNumber("RotateToSpeaker/rotationKd", 0.0);
 
+  private final LoggedTunableNumber tunableVoltage =
+      new LoggedTunableNumber("RotateToSpeaker/tunableVoltage", 0.5);
+
   private final PIDController rotationController;
 
   public static final double DEADBAND = 0.1;
@@ -69,6 +72,8 @@ public class ScoreSpeaker extends Command {
   private double shootDeadline;
 
   private boolean prevNoteInShoot = false;
+
+  private boolean gamepieceLoaded = false;
 
   /**
    * Creates a new RotateToSpeaker.
@@ -107,6 +112,8 @@ public class ScoreSpeaker extends Command {
     this.shootGamepiece = shootGamepiece;
     this.endEffector = endEffector;
 
+    addRequirements(shooter, endEffector);
+
     this.rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     setName("ScoreSpeaker");
   }
@@ -114,6 +121,7 @@ public class ScoreSpeaker extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    gamepieceLoaded = false;
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
     shootDeadline = deadline != null ? Timer.getFPGATimestamp() + deadline : Double.MAX_VALUE;
   }
@@ -123,12 +131,25 @@ public class ScoreSpeaker extends Command {
   public void execute() {
     try (var ignored = new ExecutionTiming("ScoreSpeaker")) {
 
-      endEffector.setPercentOut(shooter.noteInShooter() ? 0.0 : 0.8);
+      double kickerOut = 0.0;
+
+      // 1
+      // note move,ent
+      // kickerOut = 1.0;
+
+      // 2
+      // aiming
+      //
+
+      endEffector.setPercentOut(shooter.noteInShooter() ? 0.0 : 0.1);
       if (!shooter.noteInShooter()) {
-        shooter.setKickerPercentOut(0.8);
+        shooter.setKickerPercentOut(0.1 * 1.42);
       } else if (!prevNoteInShoot) {
         shooter.setKickerPercentOut(0.0);
+        gamepieceLoaded = true;
       }
+
+      Logger.recordOutput("ScoreSpeaker/gamepieceLoaded", gamepieceLoaded);
 
       prevNoteInShoot = shooter.noteInShooter();
 
@@ -192,7 +213,7 @@ public class ScoreSpeaker extends Command {
           "ScoreSpeaker/targetPose",
           new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
 
-      drive.setRotationOverride(rotationalEffort);
+      // drive.setRotationOverride(rotationalEffort);
 
       // TODO: remove most of these once we are happy with the command
       Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
@@ -210,7 +231,7 @@ public class ScoreSpeaker extends Command {
         rotationController.setD(rotationKd.get());
       }
 
-      shooter.setLauncherRPM(Constants.ShooterConstants.SHOOTING_RPM);
+      shooter.setLauncherVoltage(tunableVoltage.get());
 
       shooter.setPivotPosition(
           shooter.noteInShooter()
@@ -227,11 +248,12 @@ public class ScoreSpeaker extends Command {
           readyToShoot = true;
         } else {
           readyToShoot =
-              shootGamepiece.getAsBoolean()
-                  && shooter.isPivotIsAtTarget()
-                  && rotationController.atSetpoint()
-                  && shooter.isAtTargetRPM()
-                  && shootingPosition();
+              // shootGamepiece.getAsBoolean()
+              shooter.isPivotIsAtTarget()
+          // && rotationController.atSetpoint()
+          // && shooter.isAtTargetRPM()
+          // && shootingPosition()
+          ;
 
           if (readyToShoot) {
             solver.startShooting(Timer.getFPGATimestamp());
@@ -246,10 +268,12 @@ public class ScoreSpeaker extends Command {
         Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
         Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
 
-        if (solver.isShooting()) {
-          shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
-        } else if (readyToShoot) {
-          shooter.setKickerPercentOut(0.0);
+        if (gamepieceLoaded) {
+          if (solver.isShooting()) {
+            shooter.setKickerPercentOut(Constants.ShooterConstants.Kicker.KICKING_PERCENT_OUT);
+          } else if (readyToShoot) {
+            shooter.setKickerPercentOut(0.0);
+          }
         }
       }
 
@@ -263,6 +287,9 @@ public class ScoreSpeaker extends Command {
     drive.resetVelocityOverride();
     drive.resetRotationOverride();
 
+    shooter.setKickerPercentOut(0.0);
+    shooter.setLauncherVoltage(0.0);
+
     Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", 0.0);
     Logger.recordOutput("ScoreSpeaker/RotationalEffort", 0.0);
     Logger.recordOutput("ScoreSpeaker/rotationalErrorDegrees", 0.0);
@@ -272,7 +299,8 @@ public class ScoreSpeaker extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return readyToShoot && !solver.isShooting();
+    // return readyToShoot && !solver.isShooting();
+    return false;
   }
 
   private boolean shootingPosition() {

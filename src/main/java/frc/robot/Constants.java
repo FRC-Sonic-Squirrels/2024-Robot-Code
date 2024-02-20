@@ -50,7 +50,7 @@ public final class Constants {
   }
 
   public static class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024_MAESTRO;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -210,7 +210,7 @@ public final class Constants {
 
     public static final double INTAKING_PERCENT_OUT = 1.0;
     public static final double NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT = 0.5;
-    public static final double CENTERING_NOTE_REVERSE = -0.2;
+    public static final double CENTERING_NOTE_REVERSE = -0.1;
 
     public static final double GEARING = 1.0;
     public static final double MOI = 5.0;
@@ -223,16 +223,19 @@ public final class Constants {
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(29.5);
+    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(25.0);
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
-    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(11.0);
+    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
     public static final Measure<Distance> SUPPLY_CURRENT_LIMIT = Units.Inches.of(40.0);
 
     public static final Measure<Distance> SAFE_HEIGHT_INCHES = Units.Inches.of(11.0);
 
     public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
     public static final Measure<Distance> HEIGHT_ABOVE_CHAIN = Units.Inches.of(25.5);
+
+    public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
+    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.5);
   }
 
   public static class ShooterConstants {
@@ -346,11 +349,11 @@ public final class Constants {
   public static class ArmConstants {
     public static final double GEAR_RATIO = (50.0 / 12.0) * (50.0 / 20.0) * (42.0 / 18.0);
 
-    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(90);
+    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(160);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
 
-    public static final Rotation2d AMP_SAFE_ANGLE = Rotation2d.fromDegrees(-87);
+    public static final Rotation2d ARM_SAFE_ANGLE = Rotation2d.fromDegrees(-87);
 
     public static final Rotation2d TRAP_SCORE_ANGLE = Rotation2d.fromDegrees(15.0);
   }
