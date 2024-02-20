@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -52,4 +53,6 @@ public interface ShooterIO {
 
   // KICKER
   public default void setKickerVoltage(double volts) {}
+
+  public default void setNeutralMode(NeutralModeValue value) {}
 }

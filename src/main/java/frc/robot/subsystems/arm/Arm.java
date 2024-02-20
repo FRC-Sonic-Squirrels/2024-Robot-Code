@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.arm;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,9 +28,9 @@ public class Arm extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(56.0);
-      kD.initDefault(0);
-      kG.initDefault(0.28);
+      kP.initDefault(70.0);
+      kD.initDefault(1.6);
+      kG.initDefault(0.0);
 
       // FIXME: find the theoritical from the JVN docs
       closedLoopMaxVelocityConstraint.initDefault(80);
@@ -146,5 +147,9 @@ public class Arm extends SubsystemBase {
 
   public double getVelocity() {
     return inputs.armVelocity;
+  }
+
+  public void setNeutralMode(NeutralModeValue value) {
+    io.setNeutralMode(value);
   }
 }

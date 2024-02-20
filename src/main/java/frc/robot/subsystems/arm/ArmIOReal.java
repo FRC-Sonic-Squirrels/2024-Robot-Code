@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
@@ -37,6 +38,15 @@ public class ArmIOReal implements ArmIO {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        Constants.ArmConstants.MAX_ARM_ANGLE.getRotations();
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        Constants.ArmConstants.MIN_ARM_ANGLE.minus(Rotation2d.fromDegrees(2.0)).getRotations();
 
     config.Feedback.SensorToMechanismRatio = Constants.ArmConstants.GEAR_RATIO;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -103,5 +113,10 @@ public class ArmIOReal implements ArmIO {
   @Override
   public void resetSensorPosition(Rotation2d angle) {
     motor.setPosition(angle.getRotations());
+  }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue value) {
+    motor.setNeutralMode(value);
   }
 }

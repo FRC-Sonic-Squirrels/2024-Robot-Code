@@ -120,4 +120,9 @@ public class ElevatorIOReal implements ElevatorIO {
     motor.getConfigurator().apply(pidConfig);
     motor.getConfigurator().apply(mmConfig);
   }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue value) {
+    motor.setNeutralMode(value);
+  }
 }

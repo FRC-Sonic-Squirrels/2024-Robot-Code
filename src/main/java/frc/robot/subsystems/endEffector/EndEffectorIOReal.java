@@ -9,6 +9,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.EndEffectorConstants;
 
@@ -42,6 +44,12 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
     motor.getConfigurator().apply(config);
 
+    shooter_tof.setRangeOfInterest(6, 6, 10, 10);
+    intake_tof.setRangeOfInterest(6, 6, 10, 10);
+
+    shooter_tof.setRangingMode(RangingMode.Short, 25);
+    intake_tof.setRangingMode(RangingMode.Short, 25);
+
     deviceTemp = motor.getDeviceTemp();
     appliedVolts = motor.getMotorVoltage();
     currentAmps = motor.getStatorCurrent();
@@ -62,8 +70,10 @@ public class EndEffectorIOReal implements EndEffectorIO {
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
-    inputs.intakeSideTOFDistanceInches = intake_tof.getRange();
-    inputs.shooterSideTOFDistanceInches = shooter_tof.getRange();
+    inputs.intakeSideTOFDistanceInches =
+        Units.Millimeters.of(intake_tof.getRange()).in(Units.Inches);
+    inputs.shooterSideTOFDistanceInches =
+        Units.Millimeters.of(shooter_tof.getRange()).in(Units.Inches);
   }
 
   @Override
