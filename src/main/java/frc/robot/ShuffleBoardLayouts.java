@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.team2930.commands.ConsumeSuppliedValue;
@@ -222,9 +223,10 @@ public class ShuffleBoardLayouts {
     shooterCommandsLayout.add(stopCommand);
   }
 
-  // FIXME: add drive and turn commands
+  // TODO: add drive and turn commands
   public void systemsCheck() {
     var systemsCheckTab = Shuffleboard.getTab("Systems_Check");
+
     var systemsCheckCommandsLayout =
         systemsCheckTab
             .getLayout("SystemsChecks", BuiltInLayouts.kList)
@@ -232,6 +234,13 @@ public class ShuffleBoardLayouts {
             .withSize(2, 4)
             .withProperties(Map.of("Label position", "HIDDEN"));
 
+    var systemsCheckToggle =
+        systemsCheckTab
+            .add("Enable Systems Check", false)
+            .withWidget(BuiltInWidgets.kToggleButton)
+            .withSize(2, 1);
+    boolean toggleStatus = systemsCheckToggle.getEntry();
+    
     // TODO: add command that replaces elevator and arm check
     // var checkArmAndElevator;
     
@@ -296,10 +305,12 @@ public class ShuffleBoardLayouts {
     checkIntake.setName("Check Intake");
     checkShooter.setName("Check Shooter");
 
-    systemsCheckCommandsLayout.add(checkElevator);
-    systemsCheckCommandsLayout.add(checkArm);
-    systemsCheckCommandsLayout.add(checkEndEffector);
-    systemsCheckCommandsLayout.add(checkIntake);
-    systemsCheckCommandsLayout.add(checkShooter);
+    while (true) {
+        systemsCheckCommandsLayout.add(checkElevator);
+        systemsCheckCommandsLayout.add(checkArm);
+        systemsCheckCommandsLayout.add(checkEndEffector);
+        systemsCheckCommandsLayout.add(checkIntake);
+        systemsCheckCommandsLayout.add(checkShooter);
+    }
   }
 }
