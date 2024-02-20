@@ -5,37 +5,31 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.shooter.Shooter;
 
-public class ShooterStowMode extends Command {
+public class ShooterStowAndStopRollers extends Command {
   private Shooter shooter;
 
   /** Creates a new ShooterDefaultCommand. */
-  public ShooterStowMode(Shooter shooter) {
+  public ShooterStowAndStopRollers(Shooter shooter) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     addRequirements(shooter);
-    setName("ShooterStowMode");
+    setName("ShooterStowAndStopRollers");
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    shooter.setPivotPosition(Constants.ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
+  public void initialize() {
+    shooter.setPivotPosition(ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
+    shooter.setLauncherVoltage(0.0);
+    shooter.setKickerPercentOut(0.0);
   }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

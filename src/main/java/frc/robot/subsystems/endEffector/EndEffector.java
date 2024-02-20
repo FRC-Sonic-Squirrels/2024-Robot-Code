@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.endEffector;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
@@ -65,5 +67,9 @@ public class EndEffector extends SubsystemBase {
 
   public boolean gamepieceInEndEffector() {
     return shooterToFTrigger.getAsBoolean() || intakeToFTrigger.getAsBoolean();
+  }
+
+  public Command stopCmd() {
+    return Commands.runOnce(() -> setPercentOut(0.0), this);
   }
 }
