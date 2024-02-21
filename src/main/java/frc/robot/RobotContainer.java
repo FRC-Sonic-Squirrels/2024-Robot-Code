@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
@@ -115,15 +114,6 @@ public class RobotContainer {
       new LoggedDashboardChooser<>("Auto Routine");
   private final HashMap<String, Supplier<Auto>> stringToAutoSupplierMap = new HashMap<>();
   private final AutosManager autoManager;
-
-  private final LoggedTunableNumber tunablePivotPitch =
-      new LoggedTunableNumber("tunablePivotPitchRobotContainer", 30);
-
-  private final LoggedTunableNumber tunableElevatorHeightOne =
-      new LoggedTunableNumber("tunableElevatorHeightOne", 0.0);
-
-  private final LoggedTunableNumber tunableElevatorHeightTwo =
-      new LoggedTunableNumber("tunableElevatorHeightTwo", 0.0);
 
   public DigitalInput breakModeButton = new DigitalInput(0);
   public DigitalInput homeSensorsButton = new DigitalInput(1);
@@ -714,8 +704,8 @@ public class RobotContainer {
   }
 
   public void resetSubsystems() {
-    elevator.setVoltage(0.0);
-    arm.setVoltage(0.0);
+    elevator.resetSubsystem();
+    arm.resetSubsystem();
   }
 
   public void setBrakeMode() {

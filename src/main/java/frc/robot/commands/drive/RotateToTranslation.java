@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.ArrayList;
@@ -30,10 +31,10 @@ public class RotateToTranslation extends Command {
 
   private Rotation2d robotRotationOffset;
 
-  private final LoggedTunableNumber rotationKp =
-      new LoggedTunableNumber("RotateToTranslation/rotationKp", 4.9);
-  private final LoggedTunableNumber rotationKd =
-      new LoggedTunableNumber("RotateToTranslation/rotationKd", 0.0);
+  private static final TunableNumberGroup group = new TunableNumberGroup("RotateToTranslation");
+
+  private final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
+  private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
 
   private final PIDController rotationController;
 
@@ -147,6 +148,7 @@ public class RotateToTranslation extends Command {
   // targetRotation)
   // that way it is generic and not tied just to limelight?
   //
+
   /**
    * Creates a new RotateToTranslation.
    *

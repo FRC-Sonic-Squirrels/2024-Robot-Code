@@ -58,7 +58,7 @@ public class ShooterIOReal implements ShooterIO {
   private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
 
   private final LoggedTunableNumber tunableMultiplier =
-      new LoggedTunableNumber("Shooter/tunableMultiplier", 1.0);
+      Shooter.group.build("tunableMultiplier", 1.0);
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 

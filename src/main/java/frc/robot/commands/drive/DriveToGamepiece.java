@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
@@ -23,18 +24,16 @@ public class DriveToGamepiece extends Command {
 
   private Supplier<Boolean> gamepieceIntaked;
 
-  private LoggedTunableNumber rotationKp =
-      new LoggedTunableNumber("DriveToGamepiece/rotationKp", 0.4);
+  private static final TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
 
-  private LoggedTunableNumber Kp = new LoggedTunableNumber("DriveToGamepiece/Kp", 0.4);
-  private LoggedTunableNumber xKpSourceArea =
-      new LoggedTunableNumber("DriveToGamepiece/xKpSourceArea", 0.1);
-  private LoggedTunableNumber yKpSourceArea =
-      new LoggedTunableNumber("DriveToGamepiece/yKpSourceArea", 0.1);
+  private LoggedTunableNumber rotationKp = group.build("rotationKp", 0.4);
 
-  private LoggedTunableNumber Ki = new LoggedTunableNumber("DriveToGamepiece/Ki", 0.0);
+  private LoggedTunableNumber Kp = group.build("Kp", 0.4);
+  private LoggedTunableNumber xKpSourceArea = group.build("xKpSourceArea", 0.1);
+  private LoggedTunableNumber yKpSourceArea = group.build("yKpSourceArea", 0.1);
 
-  private LoggedTunableNumber Kd = new LoggedTunableNumber("DriveToGamepiece/Kd", 0.0);
+  private LoggedTunableNumber Ki = group.build("Ki", 0.0);
+  private LoggedTunableNumber Kd = group.build("Kd", 0.0);
 
   private PIDController rotationController = new PIDController(rotationKp.get(), 0, 0);
 
@@ -46,10 +45,8 @@ public class DriveToGamepiece extends Command {
   private double yVel;
   private double rotVel;
   private LoggedTunableNumber allowedRotationalErrorDegrees =
-      new LoggedTunableNumber("DriveToGamepiece/allowedRotationalErrorDegrees", 20);
-
-  private LoggedTunableNumber advancedMode =
-      new LoggedTunableNumber("DriveToGamepiece/advancedMode/doAdvancedMotion", 1);
+      group.build("allowedRotationalErrorDegrees", 20);
+  private LoggedTunableNumber advancedMode = group.build("advancedMode/doAdvancedMotion", 1);
 
   private double rotVelCorrection = 0;
   private Rotation2d gamepieceDirection = new Rotation2d();

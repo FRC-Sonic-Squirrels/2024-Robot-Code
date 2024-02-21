@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.RunStateMachineCommand;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team2930.StateMachine;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -41,11 +42,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private Timer timeSinceSeen = new Timer();
 
-  private LoggedTunableNumber tunableRPM =
-      new LoggedTunableNumber("ShooterScoreSpeaker/tunableRPM", 5000.0);
+  private static final TunableNumberGroup group = new TunableNumberGroup("ShooterScoreSpeaker");
 
-  private LoggedTunableNumber tunableAngle =
-      new LoggedTunableNumber("ShooterScoreSpeaker/tunableAngle", 40.0);
+  private LoggedTunableNumber tunableRPM = group.build("tunableRPM", 5000.0);
+  private LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
+
   private double shotTime;
 
   public ShooterScoreSpeakerStateMachine(

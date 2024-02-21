@@ -8,13 +8,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public abstract class RobotConfig {
 
-  protected static final String LOGGED_TUNABLE_DASHBOARD_KEY = "RobotConfig/";
+  protected static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
 
   // VERY IMPORTANT
   public abstract boolean getPhoenix6Licensed();

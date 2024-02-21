@@ -5,16 +5,19 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class HomeShooter extends Command {
   private Shooter shooter;
   private boolean shooterReset = false;
-  private static final LoggedTunableNumber homingVoltage =
-      new LoggedTunableNumber("HomeShooter/homingVoltage", -0.1);
+
+  private static final TunableNumberGroup group = new TunableNumberGroup("HomeShooter");
+
+  private static final LoggedTunableNumber homingVoltage = group.build("homingVoltage", -0.1);
   private static final LoggedTunableNumber homingVelocityMaxToResetShooter =
-      new LoggedTunableNumber("HomeShooter/homingVelocityMaxToResetShooter", 0.02);
+      group.build("homingVelocityMaxToResetShooter", 0.02);
 
   /** Creates a new HomeMechanism. */
   public HomeShooter(Shooter shooter) {
