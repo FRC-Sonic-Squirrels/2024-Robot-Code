@@ -234,8 +234,9 @@ public final class Constants {
     public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
     public static final Measure<Distance> HEIGHT_ABOVE_CHAIN = Units.Inches.of(25.5);
 
+    // FIXME: home position needs to be changed now that we added spacers to swerveModule
     public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
-    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.5);
+    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.5); // was 7.5
   }
 
   public static class ShooterConstants {

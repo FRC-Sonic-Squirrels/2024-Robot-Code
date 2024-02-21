@@ -13,7 +13,7 @@ public interface ShooterIO {
     public double pivotAppliedVolts = 0.0;
     public double pivotCurrentAmps = 0.0;
 
-    public double launcherRPM = 0.0;
+    public double[] launcherRPM = new double[] {};
     public double[] launcherAppliedVolts = new double[] {};
     public double[] launcherCurrentAmps = new double[] {};
 
@@ -49,7 +49,7 @@ public interface ShooterIO {
   public default void setLauncherRPM(double rpm) {}
 
   public default void setLauncherClosedLoopConstants(
-      double kP, double kV, double maxProfiledAcceleration) {}
+      double kP, double kV, double kS, double maxProfiledAcceleration) {}
 
   // KICKER
   public default void setKickerVoltage(double volts) {}

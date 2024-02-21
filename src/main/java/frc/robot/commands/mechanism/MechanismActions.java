@@ -18,6 +18,10 @@ public class MechanismActions {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
   }
 
+  public static Command ampFast(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::AmpFastPosition);
+  }
+
   public static Command ampPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
   }
