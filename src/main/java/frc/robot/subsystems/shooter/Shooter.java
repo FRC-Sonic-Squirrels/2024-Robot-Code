@@ -33,6 +33,8 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
       new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint");
 
+  private static final LoggedTunableNumber launcherkS =
+      new LoggedTunableNumber(ROOT_TABLE + "/launcherkS");
   private static final LoggedTunableNumber launcherkP =
       new LoggedTunableNumber(ROOT_TABLE + "/launcherkP");
   private static final LoggedTunableNumber launcherkV =
@@ -48,9 +50,10 @@ public class Shooter extends SubsystemBase {
       pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
       pivotClosedLoopMaxAccelerationConstraint.initDefault(5.0);
 
-      launcherkP.initDefault(0.5);
-      launcherkV.initDefault(0.13);
-      launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+      launcherkS.initDefault(0.2949);
+      launcherkP.initDefault(0.2);
+      launcherkV.initDefault(0.072);
+      launcherClosedLoopMaxAccelerationConstraint.initDefault(300.0);
     } else if (Constants.RobotMode.isSimBot()) {
       pivotkP.initDefault(15.0);
       pivotkD.initDefault(0.0);
@@ -58,6 +61,7 @@ public class Shooter extends SubsystemBase {
       pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
       pivotClosedLoopMaxAccelerationConstraint.initDefault(10.0);
 
+      launcherkS.initDefault(0.0);
       launcherkP.initDefault(0.5);
       launcherkV.initDefault(0.13);
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
@@ -68,7 +72,8 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
 
   private static final LoggedTunableNumber launcherToleranceRPM =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherToleranceRPM", 20);
+      new LoggedTunableNumber(
+          ROOT_TABLE + "/launcherToleranceRPM", 150); // TODO: tune for better tolerance
 
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       new LoggedTunableNumber("Shooter/distanceToTriggerNote", 8.0);
@@ -95,7 +100,10 @@ public class Shooter extends SubsystemBase {
     this.io = io;
 
     io.setLauncherClosedLoopConstants(
-        launcherkP.get(), launcherkV.get(), launcherClosedLoopMaxAccelerationConstraint.get());
+        launcherkP.get(),
+        launcherkV.get(),
+        launcherkS.get(),
+        launcherClosedLoopMaxAccelerationConstraint.get());
 
     io.setPivotClosedLoopConstants(
         pivotkP.get(),
@@ -137,11 +145,15 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
 
       var hc = hashCode();
-      if (launcherkP.hasChanged(hc)
+      if (launcherkS.hasChanged(hc)
+          || launcherkP.hasChanged(hc)
           || launcherkV.hasChanged(hc)
           || launcherClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
         io.setLauncherClosedLoopConstants(
-            launcherkP.get(), launcherkV.get(), launcherClosedLoopMaxAccelerationConstraint.get());
+            launcherkP.get(),
+            launcherkV.get(),
+            launcherkS.get(),
+            launcherClosedLoopMaxAccelerationConstraint.get());
       }
 
       if (pivotkP.hasChanged(hc)
@@ -192,7 +204,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public double getRPM() {
-    return inputs.launcherRPM;
+    return inputs.launcherRPM[0];
   }
 
   public boolean isAtTargetRPM() {
@@ -200,7 +212,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtTargetRPM(double rpm) {
-    return Math.abs(inputs.launcherRPM - rpm) <= launcherToleranceRPM.get();
+    return Math.abs(inputs.launcherRPM[0] - rpm) <= launcherToleranceRPM.get();
   }
 
   public double getPivotPIDLatency() {

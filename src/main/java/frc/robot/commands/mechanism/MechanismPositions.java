@@ -16,6 +16,11 @@ public class MechanismPositions {
   private static LoggedTunableNumber homeArmAngleDegrees =
       new LoggedTunableNumber("MechanismPositions/homeArmAngleDegrees", -92.0);
 
+  private static LoggedTunableNumber ampFastElevator =
+      new LoggedTunableNumber("MechanismPositions/ampFastElevator", 12.0);
+  private static LoggedTunableNumber ampFastArm =
+      new LoggedTunableNumber("MechanismPositions/ampFastArm", 50.0);
+
   private static LoggedTunableNumber ampElevatorHeightInches =
       new LoggedTunableNumber("MechanismPositions/ampElevatorHeightInches", 17.0);
   private static LoggedTunableNumber ampArmAngleDegrees =
@@ -59,6 +64,11 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(homeElevatorHeightInches.get()),
         Rotation2d.fromDegrees(homeArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition AmpFastPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(ampFastElevator.get()), Rotation2d.fromDegrees(ampFastArm.get()));
   }
 
   public static MechanismPosition ampPosition() {

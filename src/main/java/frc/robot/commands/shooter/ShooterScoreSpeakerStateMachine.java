@@ -4,15 +4,20 @@
 
 package frc.robot.commands.shooter;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.RunStateMachineCommand;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team2930.StateMachine;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class ShooterScoreSpeakerStateMachine extends StateMachine {
@@ -34,6 +39,15 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private boolean loadGamepieceCommandFinished = false;
 
+  private Timer timeSinceSeen = new Timer();
+
+  private LoggedTunableNumber tunableRPM =
+      new LoggedTunableNumber("ShooterScoreSpeaker/tunableRPM", 5000.0);
+
+  private LoggedTunableNumber tunableAngle =
+      new LoggedTunableNumber("ShooterScoreSpeaker/tunableAngle", 40.0);
+  private double shotTime;
+
   public ShooterScoreSpeakerStateMachine(
       DrivetrainWrapper drivetrainWrapper,
       Shooter shooter,
@@ -53,7 +67,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     this.endEffector = endEffector;
     this.externalConfirmation = externalConfirmation;
     this.forceShotIn = forceShotIn;
-
+    Logger.recordOutput("ShooterScoreSpeaker/state", 0);
     setInitialState(this::prepWhileLoadingGamepiece);
   }
 
@@ -63,15 +77,28 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       EndEffector endEffector,
       double forceShotIn) {
 
-    var command =
-        new ShooterScoreSpeakerStateMachine(drivetrainWrapper, shooter, endEffector, forceShotIn)
-            .asCommand();
+    Command command =
+        new RunStateMachineCommand(
+            () ->
+                new ShooterScoreSpeakerStateMachine(
+                    drivetrainWrapper, shooter, endEffector, forceShotIn),
+            shooter,
+            endEffector);
+
     // FIXME: probably dont need this add requirments here once we add the asCommand(Subsytem...
     // requirments) method to the StateMachine class
     command.addRequirements(shooter, endEffector);
 
     // once statemachine is over, stop shooter and end effector subsystems
-    command.andThen(new ShooterStowAndStopRollers(shooter).alongWith(endEffector.stopCmd()));
+    command =
+        command.finallyDo(
+            () -> {
+              shooter.setKickerPercentOut(0.0);
+              endEffector.setPercentOut(0.0);
+              shooter.setLauncherVoltage(0.0);
+              shooter.setPivotPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
+            });
+
     return command;
   }
 
@@ -88,10 +115,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler prepWhileLoadingGamepiece() {
     // aim towards speaker
-
+    Logger.recordOutput("ShooterScoreSpeaker/state", 1);
     // ramp up rpm
-    // shooter.setLauncherRPM(ShooterConstants.SHOOTING_RPM);
-    shooter.setLauncherVoltage(10.0);
+    shooter.setLauncherRPM(
+        // ShooterConstants.SHOOTING_RPM
+        tunableRPM.get());
+    // shooter.setLauncherVoltage(10.0);
 
     if (shooter.noteInShooter()) {
       shooter.setKickerPercentOut(0.0);
@@ -99,14 +128,18 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return this::finalConfirmationsBeforeShooting;
     } else {
       // FIXME: look into calculating gear ratio to make it so kicker and EE spin at same speed
-      shooter.setKickerPercentOut(0.1);
-      endEffector.setPercentOut(0.1);
+      shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
+      if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
+        shooter.setKickerPercentOut(0.1);
+        endEffector.setPercentOut(0.1);
+      }
     }
 
     return null;
   }
 
   public StateHandler finalConfirmationsBeforeShooting() {
+    Logger.recordOutput("ShooterScoreSpeaker/state", 2);
     // still be continuously aiming towards speaker
     // check launcher rpm correct
     // check pivot position correct
@@ -114,7 +147,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check external confirmation active
     // check are we in valid shooting position
     var launcherAtRpm = shooter.isAtTargetRPM();
-    var pivotAtAngle = shooter.isPivotIsAtTarget();
+    shooter.setPivotPosition(Rotation2d.fromDegrees(tunableAngle.get()));
+    var pivotAtAngle = shooter.isPivotIsAtTarget(Rotation2d.fromDegrees(tunableAngle.get()));
     // var robotAtTheta = drivetrainWrapper.isAtTheta();
     var externalConfirmation = this.externalConfirmation.getAsBoolean();
     // var validShootingPosition = validPosition
@@ -122,7 +156,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // FIXME: log each condition
 
     // FIXME: all all condition
-    if (launcherAtRpm && pivotAtAngle && externalConfirmation) {
+    if (launcherAtRpm && pivotAtAngle
+    // && externalConfirmation
+    ) {
+
       return this::shoot;
     }
 
@@ -130,12 +167,27 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   public StateHandler shoot() {
+    Logger.recordOutput("ShooterScoreSpeaker/state", 3);
     // run kicker for X seconds
+    shooter.setKickerPercentOut(0.5);
+    if (!shooter.noteInShooter()) {
+
+      shotTime = this.timeFromStart();
+      return this::shootEnding;
+    }
+    return null;
+  }
+
+  public StateHandler shootEnding() {
+    Logger.recordOutput("ShooterScoreSpeaker/state", 4);
+    if (timeFromStart() < shotTime + 0.2) return null;
+    // visualize gamepiece
 
     return visualizeGamepiece();
   }
 
   public StateHandler visualizeGamepiece() {
+    Logger.recordOutput("ShooterScoreSpeaker/state", 5);
     // visualize gamepiece
 
     return setDone();

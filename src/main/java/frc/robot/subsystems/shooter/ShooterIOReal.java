@@ -16,6 +16,7 @@ import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
@@ -33,6 +34,7 @@ public class ShooterIOReal implements ShooterIO {
   private final StatusSignal<Double> launcherLeadVelocity;
   private final StatusSignal<Double> launcherLeadVoltage;
   private final StatusSignal<Double> launcherLeadCurrentAmps;
+  private final StatusSignal<Double> launcherFollowVelocity;
   private final StatusSignal<Double> launcherFollowerVoltage;
   private final StatusSignal<Double> launcherFollowerCurrentAmps;
 
@@ -55,6 +57,9 @@ public class ShooterIOReal implements ShooterIO {
 
   private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
 
+  private final LoggedTunableNumber tunableMultiplier =
+      new LoggedTunableNumber("Shooter/tunableMultiplier", 1.0);
+
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
   public ShooterIOReal() {
@@ -70,6 +75,8 @@ public class ShooterIOReal implements ShooterIO {
     launcherConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     launcherConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
+
+    launcherConfig.Voltage.PeakReverseVoltage = 0.0;
 
     launcher_lead.getConfigurator().apply(launcherConfig);
     launcher_follower.getConfigurator().apply(launcherConfig);
@@ -115,6 +122,7 @@ public class ShooterIOReal implements ShooterIO {
     pivotCurrentAmps = pivot.getStatorCurrent();
 
     launcherLeadVelocity = launcher_lead.getVelocity();
+    launcherFollowVelocity = launcher_follower.getVelocity();
 
     launcherLeadVoltage = launcher_lead.getMotorVoltage();
     launcherFollowerVoltage = launcher_follower.getMotorVoltage();
@@ -129,7 +137,8 @@ public class ShooterIOReal implements ShooterIO {
     pivotTempCelsius = pivot.getDeviceTemp();
     kickerTempCelsius = kicker.getDeviceTemp();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100, pivotPosition, launcherLeadVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100, pivotPosition, launcherLeadVelocity, launcherFollowVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -157,6 +166,7 @@ public class ShooterIOReal implements ShooterIO {
         launcherLeadVelocity,
         launcherLeadVoltage,
         launcherLeadCurrentAmps,
+        launcherFollowVelocity,
         launcherFollowerVoltage,
         launcherFollowerCurrentAmps,
         // --
@@ -174,7 +184,12 @@ public class ShooterIOReal implements ShooterIO {
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrentAmps.getValueAsDouble();
 
-    inputs.launcherRPM = launcherLeadVelocity.getValueAsDouble() * 60; // rps to rpm = mult by 60
+    inputs.launcherRPM =
+        new double[] {
+          launcherLeadVelocity.getValueAsDouble() * 60.0,
+          launcherFollowVelocity.getValueAsDouble() * 60.0
+        };
+    // rps to rpm = mult by 60
     inputs.launcherAppliedVolts =
         new double[] {
           launcherLeadVoltage.getValueAsDouble(), launcherFollowerVoltage.getValueAsDouble()
@@ -221,7 +236,8 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setLauncherRPM(double rpm) {
     launcher_lead.setControl(launcherClosedLoop.withVelocity(rpm / 60));
-    launcher_follower.setControl(launcherClosedLoop.withVelocity(rpm / 60));
+    launcher_follower.setControl(
+        launcherClosedLoop.withVelocity(rpm / 60 * tunableMultiplier.get()));
   }
 
   @Override
@@ -256,7 +272,8 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setLauncherClosedLoopConstants(double kP, double kV, double maxProfiledAcceleration) {
+  public void setLauncherClosedLoopConstants(
+      double kP, double kV, double kS, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
@@ -271,6 +288,7 @@ public class ShooterIOReal implements ShooterIO {
 
     pidConfig.kP = kP;
     pidConfig.kV = kV;
+    pidConfig.kS = kS;
 
     mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
 

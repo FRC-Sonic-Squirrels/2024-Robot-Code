@@ -45,6 +45,7 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.arm.ArmSetAngle;
 import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
@@ -116,7 +117,7 @@ public class RobotContainer {
   private final AutosManager autoManager;
 
   private final LoggedTunableNumber tunablePivotPitch =
-      new LoggedTunableNumber("tunablePivotPitch", 30);
+      new LoggedTunableNumber("tunablePivotPitchRobotContainer", 30);
 
   private final LoggedTunableNumber tunableElevatorHeightOne =
       new LoggedTunableNumber("tunableElevatorHeightOne", 0.0);
@@ -468,9 +469,18 @@ public class RobotContainer {
                     (rumble) -> {
                       driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
                     })
+                // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
                 .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
-    driverController.rightBumper().whileTrue(scoreSpeaker);
+    driverController
+        .rightBumper()
+        .whileTrue(
+            ShooterScoreSpeakerStateMachine.getAsCommand(
+                drivetrainWrapper, shooter, endEffector, 1000));
+
+    driverController
+        .leftBumper()
+        .onTrue(Commands.run(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(45)), shooter));
 
     // driverController
     //     .leftBumper()
@@ -550,6 +560,8 @@ public class RobotContainer {
     //             () -> elevator.setHeight(Units.Inches.of(tunableElevatorHeightTwo.get())),
     //             elevator));
 
+    // driverController.povLeft().onTrue(MechanismActions.ampFast(elevator, arm));
+
     driverController
         .povUp()
         .onTrue(
@@ -563,6 +575,11 @@ public class RobotContainer {
             MechanismActions.ampStage2Position(elevator, arm)
                 .andThen(MechanismActions.ampStage3Position(elevator, arm))
                 .andThen(MechanismActions.loadingPosition(elevator, arm)));
+
+    // driverController
+    //     .x()
+    //     .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
+    //     .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
     // driverController.povRight().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
     // driverController
