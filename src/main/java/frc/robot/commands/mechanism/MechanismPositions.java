@@ -4,59 +4,54 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class MechanismPositions {
+  private static final TunableNumberGroup group = new TunableNumberGroup("MechanismPositions");
+
   private static LoggedTunableNumber homeElevatorHeightInches =
-      new LoggedTunableNumber(
-          "MechanismPositions/homeElevatorHeightInches",
+      group.build(
+          "homeElevatorHeightInches",
           Constants.ElevatorConstants.LOADING_POSITION.in(Units.Inches));
   private static LoggedTunableNumber homeArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/homeArmAngleDegrees", -92.0);
+      group.build("homeArmAngleDegrees", -92.0);
 
-  private static LoggedTunableNumber ampFastElevator =
-      new LoggedTunableNumber("MechanismPositions/ampFastElevator", 12.0);
-  private static LoggedTunableNumber ampFastArm =
-      new LoggedTunableNumber("MechanismPositions/ampFastArm", 50.0);
+  private static LoggedTunableNumber ampFastElevator = group.build("ampFastElevator", 12.0);
+  private static LoggedTunableNumber ampFastArm = group.build("ampFastArm", 50.0);
 
   private static LoggedTunableNumber ampElevatorHeightInches =
-      new LoggedTunableNumber("MechanismPositions/ampElevatorHeightInches", 17.0);
-  private static LoggedTunableNumber ampArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/ampArmAngleDegrees", 35.0);
+      group.build("ampElevatorHeightInches", 17.0);
+  private static LoggedTunableNumber ampArmAngleDegrees = group.build("ampArmAngleDegrees", 35.0);
 
   private static LoggedTunableNumber ampStage2ElevatorHeightInches =
-      new LoggedTunableNumber("MechanismPositions/ampStage2ElevatorHeightInches", 24.0);
+      group.build("ampStage2ElevatorHeightInches", 24.0);
   private static LoggedTunableNumber ampStage2ArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/ampStage2ArmAngleDegrees", 0.0);
+      group.build("ampStage2ArmAngleDegrees", 0.0);
 
   private static LoggedTunableNumber ampStage3ElevatorHeightInches =
-      new LoggedTunableNumber("MechanismPositions/ampStage3ElevatorHeightInches", 24.0);
+      group.build("ampStage3ElevatorHeightInches", 24.0);
   private static LoggedTunableNumber ampStage3ArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/ampStage3ArmAngleDegrees", -90.0);
+      group.build("ampStage3ArmAngleDegrees", -90.0);
 
   private static LoggedTunableNumber trapElevatorHeightInches =
-      new LoggedTunableNumber(
-          "MechanismPositions/trapElevatorHeightInches",
-          ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
-  private static LoggedTunableNumber trapArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/trapArmAngleDegrees", 35.0);
+      group.build("trapElevatorHeightInches", ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
+  private static LoggedTunableNumber trapArmAngleDegrees = group.build("trapArmAngleDegrees", 35.0);
   private static LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
-      new LoggedTunableNumber(
-          "MechanismPositions/climbPrepUnderStageElevatorHeightInches",
+      group.build(
+          "climbPrepUnderStageElevatorHeightInches",
           Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE.in(Units.Inches));
   private static LoggedTunableNumber climbPrepUnderStageArmAngleDegrees =
-      new LoggedTunableNumber("MechanismPositions/climbPrepUnderStageArmAngleDegrees", -45.0);
+      group.build("climbPrepUnderStageArmAngleDegrees", -45.0);
 
   private static LoggedTunableNumber climbPrepElevatorHeightInches =
-      new LoggedTunableNumber(
-          "MechanismPositions/climbPrepElevatorHeightInches",
+      group.build(
+          "climbPrepElevatorHeightInches",
           Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN.in(Units.Inches));
   private static LoggedTunableNumber climbPrepArmAngleDegrees =
-      new LoggedTunableNumber(
-          "MechanismPositions/climbPrepArmAngleDegrees",
-          Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+      group.build("climbPrepArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 

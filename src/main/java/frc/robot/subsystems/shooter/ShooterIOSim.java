@@ -51,8 +51,7 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotKg = 0.0;
   private double kickerVolts = 0.0;
 
-  private LoggedTunableNumber timeOfFlightDistance =
-      new LoggedTunableNumber("Shooter/ToFDistance", 18);
+  private LoggedTunableNumber timeOfFlightDistance = Shooter.group.build("ToFDistance", 18);
 
   private double launcherOpenLoopVolts = 0.0;
 
@@ -70,7 +69,8 @@ public class ShooterIOSim implements ShooterIO {
     pivotFeedback.setTolerance(1.0);
 
     inputs.pivotPosition = new Rotation2d(pivot.getAngleRads());
-    inputs.launcherRPM[0] = targetRPM;
+
+    inputs.launcherRPM = new double[] {targetRPM};
 
     inputs.kickerAppliedVolts = kickerVolts;
 

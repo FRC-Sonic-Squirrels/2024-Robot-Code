@@ -10,21 +10,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ControlMode;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
-  private static final String ROOT_TABLE = "Arm";
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP");
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD");
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG");
+  private static final TunableNumberGroup group = new TunableNumberGroup("Arm");
+
+  private static final LoggedTunableNumber kP = group.build("kP", 0);
+  private static final LoggedTunableNumber kD = group.build("kD", 0);
+  private static final LoggedTunableNumber kG = group.build("kG", 0);
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
+      group.build("defaultClosedLoopMaxVelocityConstraint", 0);
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint");
+      group.build("defaultClosedLoopMaxAccelerationConstraint", 0);
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
@@ -109,6 +111,11 @@ public class Arm extends SubsystemBase {
     currentControlMode = ControlMode.CLOSED_LOOP;
     closedLoopTargetAngle = angle;
     io.setClosedLoopPosition(angle);
+  }
+
+  public void resetSubsystem() {
+    currentControlMode = ControlMode.OPEN_LOOP;
+    io.setVoltage(0);
   }
 
   public void setVoltage(double volts) {

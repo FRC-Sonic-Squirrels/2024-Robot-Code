@@ -5,6 +5,7 @@
 package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -17,13 +18,13 @@ public class IntakeGamepiece extends Command {
   private EndEffector endEffector;
   private Shooter shooter;
 
-  private LoggedTunableNumber rumbleIntensityPercent =
-      new LoggedTunableNumber("IntakeGamepiece/rumbleIntensityPercent", 0.3);
+  private static final TunableNumberGroup group = new TunableNumberGroup("IntakeGamepiece");
 
-  private LoggedTunableNumber intakingPercent =
-      new LoggedTunableNumber("IntakeGamepiece/intakingPercent", 1.0);
+  private LoggedTunableNumber rumbleIntensityPercent = group.build("rumbleIntensityPercent", 0.3);
+
+  private LoggedTunableNumber intakingPercent = group.build("intakingPercent", 1.0);
   private LoggedTunableNumber intakingPercentWithGamepiece =
-      new LoggedTunableNumber("IntakeGamepiece/intakingPercentWithGamepiece", 0.5);
+      group.build("intakingPercentWithGamepiece", 0.5);
 
   private final Consumer<Double> rumbleConsumer;
 

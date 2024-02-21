@@ -11,24 +11,25 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
-  private static final String ROOT_TABLE = "Elevator";
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber(ROOT_TABLE + "/kP");
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber(ROOT_TABLE + "/kD");
-  private static final LoggedTunableNumber kG = new LoggedTunableNumber(ROOT_TABLE + "/kG");
+  private static final TunableNumberGroup group = new TunableNumberGroup("Elevator");
+
+  private static final LoggedTunableNumber kP = group.build("kP", 0);
+  private static final LoggedTunableNumber kD = group.build("kD", 0);
+  private static final LoggedTunableNumber kG = group.build("kG", 0);
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxVelocityConstraint");
+      group.build("defaultClosedLoopMaxVelocityConstraint", 0);
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/defaultClosedLoopMaxAccelerationConstraint");
+      group.build("defaultClosedLoopMaxAccelerationConstraint", 0);
 
-  private final LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("Elevator/toleranceInches", 0.1);
+  private final LoggedTunableNumber tolerance = group.build("toleranceInches", 0.1);
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
@@ -88,6 +89,10 @@ public class Elevator extends SubsystemBase {
                 closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
       }
     }
+  }
+
+  public void resetSubsystem() {
+    io.setVoltage(0);
   }
 
   public void setVoltage(double volts) {

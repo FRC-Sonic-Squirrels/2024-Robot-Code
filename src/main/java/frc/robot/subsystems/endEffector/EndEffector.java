@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
@@ -16,8 +17,11 @@ import org.littletonrobotics.junction.Logger;
 public class EndEffector extends SubsystemBase {
   private final EndEffectorIO io;
   private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
+
+  private static final TunableNumberGroup group = new TunableNumberGroup("EndEffector");
+
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
-      new LoggedTunableNumber("EndEffector/distanceToTriggerNote", 8.0);
+      group.build("distanceToTriggerNote", 8.0);
   private final Trigger shooterToFTrigger;
   private final Trigger intakeToFTrigger;
 

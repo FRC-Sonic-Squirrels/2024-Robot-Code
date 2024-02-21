@@ -2,6 +2,7 @@ package frc.robot.subsystems.endEffector;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 
@@ -13,11 +14,10 @@ public class EndEffectorIOSim implements EndEffectorIO {
           Constants.EndEffectorConstants.GEARING,
           Constants.EndEffectorConstants.MOI);
 
-  private LoggedTunableNumber shooterTOFInches =
-      new LoggedTunableNumber("sim_EndEffector/shooterTOFInches", 18);
+  private static final TunableNumberGroup group = new TunableNumberGroup("sim_EndEffector");
 
-  private LoggedTunableNumber intakeTOFInches =
-      new LoggedTunableNumber("sim_EndEffector/intakeTOFInches", 18);
+  private LoggedTunableNumber shooterTOFInches = group.build("shooterTOFInches", 18);
+  private LoggedTunableNumber intakeTOFInches = group.build("intakeTOFInches", 18);
 
   private double voltage = 0.0;
 

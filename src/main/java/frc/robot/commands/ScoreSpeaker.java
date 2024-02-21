@@ -13,10 +13,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.team2930.AllianceFlipUtil;
-import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.PIDTargetMeasurement;
-import frc.lib.team2930.ShootingSolver;
+import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -32,13 +29,11 @@ public class ScoreSpeaker extends Command {
   private Shooter shooter;
   private EndEffector endEffector;
 
-  private final LoggedTunableNumber rotationKp =
-      new LoggedTunableNumber("RotateToSpeaker/rotationKp", 4.9);
-  private final LoggedTunableNumber rotationKd =
-      new LoggedTunableNumber("RotateToSpeaker/rotationKd", 0.0);
+  private static final TunableNumberGroup group = new TunableNumberGroup("RotateToSpeaker");
 
-  private final LoggedTunableNumber tunableVoltage =
-      new LoggedTunableNumber("RotateToSpeaker/tunableVoltage", 0.5);
+  private final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
+  private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
+  private final LoggedTunableNumber tunableVoltage = group.build("tunableVoltage", 0.5);
 
   private final PIDController rotationController;
 

@@ -90,23 +90,16 @@ public class RobotConfig2024 extends RobotConfig {
   // ---------- SWERVE STEERING MOTOR PID CONSTANTS -----------
   // FIXE: RN copied from Mechanical advantage (6328) 2023 codebase. Should learn to tune
   // ourselves
-  private static final LoggedTunableNumber ANGLE_KP =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "ANGLE_KP", 5.0);
-  private static final LoggedTunableNumber ANGLE_KD =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "ANGLE_KD", 0.0);
+  private static final LoggedTunableNumber ANGLE_KP = group.build("ANGLE_KP", 5.0);
+  private static final LoggedTunableNumber ANGLE_KD = group.build("ANGLE_KD", 0.0);
 
   // ---------- SWERVE DRIVE MOTOR PID + KS + KV + KA CONSTANTS -------------
-  private static final LoggedTunableNumber DRIVE_KP =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "DRIVE_KP", 0.1);
-  private static final LoggedTunableNumber DRIVE_KD =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "DRIVE_KD", 0.0);
+  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.1);
+  private static final LoggedTunableNumber DRIVE_KD = group.build("DRIVE_KD", 0.0);
 
-  private static final LoggedTunableNumber DRIVE_KS =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "DRIVE_KS", 0.189);
-  private static final LoggedTunableNumber DRIVE_KV =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "DRIVE_KV", 0.128);
-  private static final LoggedTunableNumber DRIVE_KA =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "DRIVE_KA", 0.0);
+  private static final LoggedTunableNumber DRIVE_KS = group.build("DRIVE_KS", 0.189);
+  private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.128);
+  private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 0.0);
 
   // -------- GYRO CAN ID ---------
   private static final int GYRO_CAN_ID = 5;
@@ -134,22 +127,19 @@ public class RobotConfig2024 extends RobotConfig {
 
   // ------- AUTONOMOUS CONSTANTS -------
   private static final LoggedTunableNumber AUTO_MAX_SPEED_METERS_PER_SECOND =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_MAX_SPEED", 2.0);
+      group.build("AUTO_MAX_SPEED", 2.0);
   private static final LoggedTunableNumber AUTO_MAX_ACCELERATION_METERS_PER_SECOND_SQUARED =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_MAX_ACCEL", 2.0);
+      group.build("AUTO_MAX_ACCEL", 2.0);
 
   private static final LoggedTunableNumber AUTO_TRANSLATION_KP =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_TRANSLATION_KP", 6.0);
+      group.build("AUTO_TRANSLATION_KP", 6.0);
   private static final LoggedTunableNumber AUTO_TRANSLATION_KI =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_TRANSLATION_KI", 0.0);
+      group.build("AUTO_TRANSLATION_KI", 0.0);
   private static final LoggedTunableNumber AUTO_TRANSLATION_KD =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_TRANSLATION_KD", 0.0);
-  private static final LoggedTunableNumber AUTO_THETA_KP =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_THETA_KP", 4.9);
-  private static final LoggedTunableNumber AUTO_THETA_KI =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_THETA_KI", 0.0);
-  private static final LoggedTunableNumber AUTO_THETA_KD =
-      new LoggedTunableNumber(LOGGED_TUNABLE_DASHBOARD_KEY + "AUTO_THETA_KD", 0.0);
+      group.build("AUTO_TRANSLATION_KD", 0.0);
+  private static final LoggedTunableNumber AUTO_THETA_KP = group.build("AUTO_THETA_KP", 4.9);
+  private static final LoggedTunableNumber AUTO_THETA_KI = group.build("AUTO_THETA_KI", 0.0);
+  private static final LoggedTunableNumber AUTO_THETA_KD = group.build("AUTO_THETA_KD", 0.0);
 
   // ---- VISION  -------
   public static final Transform3d SHOOTER_SIDE_LEFT =

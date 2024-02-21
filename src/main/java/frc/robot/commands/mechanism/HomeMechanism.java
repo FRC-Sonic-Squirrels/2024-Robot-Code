@@ -8,6 +8,7 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
@@ -18,16 +19,22 @@ public class HomeMechanism extends Command {
   private boolean armReset = false;
   private boolean elevatorReset = false;
   private boolean beginHomingArm = false;
+
+  private static final TunableNumberGroup group = new TunableNumberGroup("HomeMechanism");
+
   private static final LoggedTunableNumber safeElevatorHeightForArmResetting =
-      new LoggedTunableNumber("HomeMechanism/safeElevatorHeightForArmResetting", 5.0);
+      group.build("safeElevatorHeightForArmResetting", 5.0);
+
   private static final LoggedTunableNumber homingVoltageElevator =
-      new LoggedTunableNumber("HomeMechanism/homingVoltageElevator", -0.1);
-  private static final LoggedTunableNumber homingVoltageArm =
-      new LoggedTunableNumber("HomeMechanism/homingVoltageArm", -0.1);
+      group.build("homingVoltageElevator", -0.1);
+
+  private static final LoggedTunableNumber homingVoltageArm = group.build("homingVoltageArm", -0.1);
+
   private static final LoggedTunableNumber homingVelocityMaxToResetElevator =
-      new LoggedTunableNumber("HomeMechanism/homingVelocityMaxToResetElevator", 0.02);
+      group.build("homingVelocityMaxToResetElevator", 0.02);
+
   private static final LoggedTunableNumber homingVelocityMaxToResetArm =
-      new LoggedTunableNumber("HomeMechanism/homingVelocityMaxToResetArm", 0.02);
+      group.build("homingVelocityMaxToResetArm", 0.02);
 
   /** Creates a new HomeMechanism. */
   public HomeMechanism(Elevator elevator, Arm arm) {

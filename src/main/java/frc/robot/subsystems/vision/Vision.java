@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -26,16 +27,18 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Vision extends SubsystemBase {
+  protected static final TunableNumberGroup group = new TunableNumberGroup("Vision");
+
   private static LoggedTunableNumber thetaStdDevCoefficient =
-      new LoggedTunableNumber("Vision/thetaStdDevCoefficient", 0.075);
+      group.build("thetaStdDevCoefficient", 0.075);
   private static LoggedTunableNumber xyStdDevCoefficient =
-      new LoggedTunableNumber("Vision/xyStdDevCoefficient", 0.075);
+      group.build("xyStdDevCoefficient", 0.075);
 
   private static LoggedTunableNumber maxSingleTargetAmbiguity =
-      new LoggedTunableNumber("Vision/MaxSingleTargetAmbiguity", 0.08);
+      group.build("MaxSingleTargetAmbiguity", 0.08);
 
   private static LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
-      new LoggedTunableNumber("Vision/MaxValidDistanceFromCurrentEstimateMeters", 3.0);
+      group.build("MaxValidDistanceFromCurrentEstimateMeters", 3.0);
 
   private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
 

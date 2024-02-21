@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.Units;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
@@ -17,12 +18,11 @@ public class MechanismVisualization {
   private static Pose3d shooter = new Pose3d();
   private static Pose3d gamepiece = new Pose3d();
 
-  private static LoggedTunableNumber armAngleTunable =
-      new LoggedTunableNumber("visualization/armAngle", 0.0);
-  private static LoggedTunableNumber shooterAngleTunable =
-      new LoggedTunableNumber("visualization/shooterAngle", 0.0);
-  private static LoggedTunableNumber elevatorHeightTunable =
-      new LoggedTunableNumber("visualization/elevatorHeight", 0.0);
+  private static final TunableNumberGroup group = new TunableNumberGroup("visualization");
+
+  private static LoggedTunableNumber armAngleTunable = group.build("armAngle", 0.0);
+  private static LoggedTunableNumber shooterAngleTunable = group.build("shooterAngle", 0.0);
+  private static LoggedTunableNumber elevatorHeightTunable = group.build("elevatorHeight", 0.0);
 
   public static void updateVisualization(
       Rotation2d armAngle,

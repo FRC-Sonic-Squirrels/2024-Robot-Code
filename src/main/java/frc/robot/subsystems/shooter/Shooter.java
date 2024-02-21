@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.PIDTargetMeasurement;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
@@ -22,25 +23,28 @@ public class Shooter extends SubsystemBase {
   private static final String ROOT_TABLE = "Shooter";
   private static final double MAX_VOLTAGE = 12;
 
-  private static final LoggedTunableNumber pivotkP =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkP");
-  private static final LoggedTunableNumber pivotkD =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkD");
-  private static final LoggedTunableNumber pivotkG =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotkG");
-  private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxVelocityConstraint");
-  private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotClosedLoopMaxAccelerationConstraint");
+  public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
-  private static final LoggedTunableNumber launcherkS =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherkS");
-  private static final LoggedTunableNumber launcherkP =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherkP");
-  private static final LoggedTunableNumber launcherkV =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherkV");
+  private static final LoggedTunableNumber pivotkP = group.build("pivotkP", 0);
+  private static final LoggedTunableNumber pivotkD = group.build("pivotkD", 0);
+  private static final LoggedTunableNumber pivotkG = group.build("pivotkG", 0);
+  private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
+      group.build("pivotClosedLoopMaxVelocityConstraint", 0);
+  private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
+      group.build("pivotClosedLoopMaxAccelerationConstraint", 0);
+
+  private static final LoggedTunableNumber launcherkS = group.build("launcherkS", 0);
+  private static final LoggedTunableNumber launcherkP = group.build("launcherkP", 0);
+  private static final LoggedTunableNumber launcherkV = group.build("launcherkV", 0);
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
-      new LoggedTunableNumber(ROOT_TABLE + "/launcherClosedLoopMaxAccelerationConstraint");
+      group.build("launcherClosedLoopMaxAccelerationConstraint", 0);
+
+  private static final LoggedTunableNumber pivotToleranceDegrees =
+      group.build("pivotToleranceDegrees", 0.5);
+  private static final LoggedTunableNumber launcherToleranceRPM =
+      group.build("launcherToleranceRPM", 150); // TODO: tune for better tolerance
+  public static final LoggedTunableNumber distanceToTriggerNoteDetection =
+      group.build("distanceToTriggerNote", 8.0);
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
@@ -67,16 +71,6 @@ public class Shooter extends SubsystemBase {
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
     }
   }
-
-  private static final LoggedTunableNumber pivotToleranceDegrees =
-      new LoggedTunableNumber(ROOT_TABLE + "/pivotToleranceDegrees", 0.5);
-
-  private static final LoggedTunableNumber launcherToleranceRPM =
-      new LoggedTunableNumber(
-          ROOT_TABLE + "/launcherToleranceRPM", 150); // TODO: tune for better tolerance
-
-  public static final LoggedTunableNumber distanceToTriggerNoteDetection =
-      new LoggedTunableNumber("Shooter/distanceToTriggerNote", 8.0);
 
   private final Trigger noteInShooter = new Trigger(this::getToFActivated);
 
