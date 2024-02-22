@@ -19,6 +19,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
@@ -123,6 +125,9 @@ public class RobotContainer {
 
   Trigger homeSensorsButtonTrigger =
       new Trigger(() -> !homeSensorsButton.get() && !DriverStation.isEnabled());
+
+  private LoggedTunableNumber tunableX = new LoggedTunableNumber("Localization/tunableXPose", 0.0);
+  private LoggedTunableNumber tunableY = new LoggedTunableNumber("Localization/tunableYPose", 0.0);
 
   boolean brakeModeTriggered = false;
 
@@ -612,6 +617,16 @@ public class RobotContainer {
         .a()
         .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
         .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
+    operatorController
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    drivetrain.setPose(
+                        new Pose2d(
+                            Constants.FieldConstants.getSpeakerTranslation()
+                                .plus(new Translation2d(tunableX.get(), tunableY.get())),
+                            drivetrainWrapper.getRotation()))));
 
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
