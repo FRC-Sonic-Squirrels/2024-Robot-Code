@@ -524,8 +524,6 @@ public class RobotContainer {
     //         new InstantCommand(
     //             () -> arm.setAngle(Rotation2d.fromDegrees(tunablePivotPitch.get())), arm));
 
-    driverController.back().onTrue(Commands.runOnce(drivetrain::zeroGyroscope, drivetrain));
-
     if (false) {
       driverController
           .x()
