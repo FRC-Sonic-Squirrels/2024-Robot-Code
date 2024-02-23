@@ -3,6 +3,7 @@ package frc.robot.autonomous.substates;
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import frc.lib.team2930.StateMachine;
+import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
@@ -83,12 +84,13 @@ public class MiddleFirstSubstate extends StateMachine {
     if (drive.getPoseEstimatorPose().getX() >= 8.1) {
       reachedCenter = true;
     }
-
-    // if (reachedCenter
-    //     && drive.getPoseEstimatorPose().getX() <= 8.05
-    //     && !endEffector.gamepieceInEndEffector()) {
-    //   return setStopped();
-    // }
+    if (Constants.unusedCode) {
+      if (reachedCenter
+          && drive.getPoseEstimatorPose().getX() <= 8.05
+          && !endEffector.gamepieceInEndEffector()) {
+        return setStopped();
+      }
+    }
 
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.

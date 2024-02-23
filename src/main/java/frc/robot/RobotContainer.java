@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
@@ -42,9 +43,11 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.arm.ArmSetAngle;
 import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
+import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
@@ -332,6 +335,8 @@ public class RobotContainer {
             shooter,
             intake,
             endEffector,
+            elevator,
+            arm,
             visionGamepiece,
             config,
             autoChooser,
@@ -609,22 +614,24 @@ public class RobotContainer {
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
     // ---------- OPERATOR CONTROLS -----------
-    // operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
-    // operatorController.b().whileTrue(new HomeShooter(shooter));
+    if (Constants.unusedCode) {
+      operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
+      operatorController.b().whileTrue(new HomeShooter(shooter));
 
-    // operatorController
-    //     .y()
-    //     .onTrue(Commands.runOnce(() -> shooter.setKickerPercentOut(0.8), shooter))
-    //     .onFalse(Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
+      operatorController
+          .y()
+          .onTrue(Commands.runOnce(() -> shooter.setKickerPercentOut(0.8), shooter))
+          .onFalse(Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
 
-    // operatorController
-    //     .povLeft()
-    //     .onTrue(new InstantCommand(elevator::resetSensorToHomePosition, elevator));
-    // operatorController.povUp().onTrue(new InstantCommand(arm::resetSensorToHomePosition, arm));
-    // operatorController
-    //     .a()
-    //     .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
-    //     .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
+      operatorController
+          .povLeft()
+          .onTrue(new InstantCommand(elevator::resetSensorToHomePosition, elevator));
+      operatorController.povUp().onTrue(new InstantCommand(arm::resetSensorToHomePosition, arm));
+      operatorController
+          .a()
+          .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
+          .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
+    }
 
     operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));

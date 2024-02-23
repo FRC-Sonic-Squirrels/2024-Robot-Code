@@ -368,4 +368,6 @@ public final class Constants {
   public static class AutoConstants {
     public static final Measure<Distance> DIST_TO_START_INTAKING = Units.Meters.of(1.0);
   }
+
+  public static boolean unusedCode = false;
 }

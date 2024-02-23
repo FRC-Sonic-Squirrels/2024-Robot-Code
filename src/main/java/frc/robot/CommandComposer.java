@@ -107,7 +107,9 @@ public class CommandComposer {
                 new ConditionalCommand(
                     MechanismActions.ampPosition(elevator, arm),
                     MechanismActions.loadingPosition(elevator, arm)
-                        .andThen(Commands.waitSeconds(1000.0))
+                        .andThen(
+                            Commands.waitSeconds(
+                                1000.0)) // extra time to practically remove end condition
                         .until(withinRangeOfAmp)
                         .andThen(MechanismActions.ampPosition(elevator, arm)),
                     withinRangeOfAmp))
