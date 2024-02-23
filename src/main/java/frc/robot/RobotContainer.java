@@ -569,6 +569,17 @@ public class RobotContainer {
                 .andThen(MechanismActions.ampStage3Position(elevator, arm))
                 .andThen(MechanismActions.loadingPosition(elevator, arm)));
 
+    driverController
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    drivetrain.setPose(
+                        new Pose2d(
+                            Constants.FieldConstants.getSpeakerTranslation()
+                                .plus(new Translation2d(tunableX.get(), tunableY.get())),
+                            Rotation2d.fromDegrees(0.0)))));
+
     // driverController
     //     .x()
     //     .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
@@ -615,16 +626,6 @@ public class RobotContainer {
         .a()
         .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
         .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
-    operatorController
-        .start()
-        .onTrue(
-            Commands.runOnce(
-                () ->
-                    drivetrain.setPose(
-                        new Pose2d(
-                            Constants.FieldConstants.getSpeakerTranslation()
-                                .plus(new Translation2d(tunableX.get(), tunableY.get())),
-                            drivetrainWrapper.getRotation()))));
 
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)

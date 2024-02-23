@@ -4,12 +4,13 @@
 
 package frc.robot.commands.shooter;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.RunStateMachineCommand;
 import frc.lib.team2930.ShootingSolver;
+import frc.lib.team2930.ShootingSolver.Solution;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -44,10 +45,17 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private static final TunableNumberGroup group = new TunableNumberGroup("ShooterScoreSpeaker");
 
-  private LoggedTunableNumber tunableRPM = group.build("tunableRPM", 5000.0);
+  private LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8000.0);
   private LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
 
+  private final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
+  private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
+
+  private final PIDController rotationController;
+
   private double shotTime;
+
+  private Solution solverResult;
 
   public ShooterScoreSpeakerStateMachine(
       DrivetrainWrapper drivetrainWrapper,
@@ -68,6 +76,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     this.endEffector = endEffector;
     this.externalConfirmation = externalConfirmation;
     this.forceShotIn = forceShotIn;
+    rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
+    rotationController.enableContinuousInput(-Math.PI, Math.PI);
     Logger.recordOutput("ShooterScoreSpeaker/state", 0);
     setInitialState(this::prepWhileLoadingGamepiece);
   }
@@ -98,6 +108,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
               endEffector.setPercentOut(0.0);
               shooter.setLauncherVoltage(0.0);
               shooter.setPivotPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
+              drivetrainWrapper.resetRotationOverride();
             });
 
     return command;
@@ -117,6 +128,20 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   public StateHandler prepWhileLoadingGamepiece() {
     // aim towards speaker
     Logger.recordOutput("ShooterScoreSpeaker/state", 1);
+
+    solverResult =
+        solver.computeAngles(
+            Timer.getFPGATimestamp(),
+            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+    rotateToSpeaker();
+
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/headingDegrees",
+        drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
+
     // ramp up rpm
     shooter.setLauncherRPM(
         // ShooterConstants.SHOOTING_RPM
@@ -141,15 +166,35 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler finalConfirmationsBeforeShooting() {
     Logger.recordOutput("ShooterScoreSpeaker/state", 2);
+    solverResult =
+        solver.computeAngles(
+            Timer.getFPGATimestamp(),
+            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+
     // still be continuously aiming towards speaker
     // check launcher rpm correct
     // check pivot position correct
     // check robot theta correct
     // check external confirmation active
     // check are we in valid shooting position
+    boolean pivotAtAngle;
     var launcherAtRpm = shooter.isAtTargetRPM();
-    shooter.setPivotPosition(Rotation2d.fromDegrees(tunableAngle.get()));
-    var pivotAtAngle = shooter.isPivotIsAtTarget(Rotation2d.fromDegrees(tunableAngle.get()));
+    double omega =
+        rotationController.calculate(
+            drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians());
+    if (solverResult != null) {
+      shooter.setPivotPosition(solverResult.pitch());
+      pivotAtAngle = shooter.isPivotIsAtTarget(solverResult.pitch());
+      rotateToSpeaker();
+      logPositions();
+    } else {
+      pivotAtAngle = false;
+    }
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/rotationalError", rotationController.getPositionError());
+    Logger.recordOutput("ShooterScoreSpeaker/omega", omega);
+
     // var robotAtTheta = drivetrainWrapper.isAtTheta();
     var externalConfirmation = this.externalConfirmation.getAsBoolean();
     // var validShootingPosition = validPosition
@@ -169,13 +214,21 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler shoot() {
     Logger.recordOutput("ShooterScoreSpeaker/state", 3);
+    solverResult =
+        solver.computeAngles(
+            Timer.getFPGATimestamp(),
+            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+    rotateToSpeaker();
+    logPositions();
+    shooter.setPivotPosition(solverResult.pitch());
     // run kicker for X seconds
     shooter.setKickerPercentOut(0.5);
-    if (!shooter.noteInShooter()) {
+    // if (!shooter.noteInShooter()) {
 
-      shotTime = this.timeFromStart();
-      return this::shootEnding;
-    }
+    //   shotTime = this.timeFromStart();
+    //   return this::shootEnding;
+    // }
     return null;
   }
 
@@ -192,5 +245,22 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // visualize gamepiece
 
     return setDone();
+  }
+
+  private void logPositions() {
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/pitchTargetDegrees", solverResult.pitch().getDegrees());
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/headingDegrees",
+        drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
+    Logger.recordOutput("ShooterScoreSpeaker/pitchDegrees", shooter.getPitch().getDegrees());
+  }
+
+  private void rotateToSpeaker() {
+    drivetrainWrapper.setRotationOverride(
+        rotationController.calculate(
+            drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians()));
   }
 }

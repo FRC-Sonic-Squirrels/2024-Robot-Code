@@ -118,7 +118,7 @@ public final class Constants {
     public static double FIELD_WIDTH = .211;
 
     // FIXME: double check this number
-    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Meters.of(1.9812);
+    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
         new Translation2d(0.03950466960668564, 5.508944988250732);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
@@ -241,7 +241,7 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final double PREP_RPM = 2500.0;
-    public static final double SHOOTING_RPM = 5000.0;
+    public static final double SHOOTING_RPM = 8000.0;
     public static final double SHOOTING_PERCENT_OUT = 0.95;
     public static final Measure<Distance> SHOOTER_BASE_HEIGHT = Units.Inches.of(4.0);
     public static final Measure<Distance> SHOOTER_LENGTH = Units.Inches.of(12.0);
