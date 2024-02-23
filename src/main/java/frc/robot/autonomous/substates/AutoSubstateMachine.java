@@ -9,6 +9,7 @@ import com.choreo.lib.ChoreoTrajectory;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -30,6 +31,7 @@ public class AutoSubstateMachine extends StateMachine {
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
   public ScoreSpeaker scoreSpeaker;
+  private IntakeGamepiece intakeCommand;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachine(
@@ -55,6 +57,8 @@ public class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler initFollowPathToGamePiece() {
+    intakeCommand = new IntakeGamepiece(intake, endEffector, shooter);
+    intakeCommand.schedule();
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
@@ -76,10 +80,12 @@ public class AutoSubstateMachine extends StateMachine {
       return null;
     }
 
-    if (!intake.getBeamBreak()) {
-      Logger.recordOutput("Autonomous/gamepieceNotRecieved", true);
-      return setStopped();
-    }
+    // if (!intake.getBeamBreak()) {
+    //   Logger.recordOutput("Autonomous/gamepieceNotRecieved", true);
+    //   return setStopped();
+    // }
+
+    intakeCommand.cancel();
 
     scoreSpeaker = new ScoreSpeaker(drive, shooter, endEffector, () -> true);
     scoreSpeaker.schedule();
