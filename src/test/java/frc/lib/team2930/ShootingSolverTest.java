@@ -6,6 +6,8 @@ import edu.wpi.first.math.geometry.*;
 import org.junit.jupiter.api.Test;
 
 public class ShootingSolverTest {
+  public static boolean debugCode;
+
   @Test()
   public void testOrbit() {
     Translation3d Pspeaker = new Translation3d(0, 0, 10);
@@ -43,7 +45,7 @@ public class ShootingSolverTest {
 
           assertNotNull(res);
 
-          if (false) {
+          if (debugCode) {
             System.out.printf("Result robotPose: %s\n", robotPose);
             System.out.printf("Result robotVelRotated: %s\n", robotVelRotated);
             System.out.printf("Result Pitch: %.1f\n", res.pitch().getDegrees());
@@ -61,7 +63,7 @@ public class ShootingSolverTest {
 
           var noteVelTotal = robotVel3d.plus(noteVel3d);
 
-          if (false) {
+          if (debugCode) {
             System.out.printf("noteStart3d: %s\n", noteStart3d);
             System.out.printf("noteMid3d: %s\n", noteMid3d);
             System.out.printf("noteVel3d: %s\n", noteVel3d);

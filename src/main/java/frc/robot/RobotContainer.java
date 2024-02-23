@@ -528,7 +528,7 @@ public class RobotContainer {
     //         new InstantCommand(
     //             () -> arm.setAngle(Rotation2d.fromDegrees(tunablePivotPitch.get())), arm));
 
-    if (false) {
+    if (Constants.unusedCode) {
       driverController
           .x()
           .whileTrue(
