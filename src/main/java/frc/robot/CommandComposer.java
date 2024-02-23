@@ -107,6 +107,7 @@ public class CommandComposer {
                 new ConditionalCommand(
                     MechanismActions.ampPosition(elevator, arm),
                     MechanismActions.loadingPosition(elevator, arm)
+                        .andThen(Commands.waitSeconds(1000.0))
                         .until(withinRangeOfAmp)
                         .andThen(MechanismActions.ampPosition(elevator, arm)),
                     withinRangeOfAmp))
@@ -120,8 +121,11 @@ public class CommandComposer {
   public static Command cancelScoreAmp(
       DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
-        Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
-            .andThen(MechanismActions.loadingPosition(elevator, arm));
+        // Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
+        //     .andThen(
+        MechanismActions.ampPositionToLoadPosition(elevator, arm)
+        // )
+        ;
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;

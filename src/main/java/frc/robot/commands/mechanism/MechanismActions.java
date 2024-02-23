@@ -24,6 +24,18 @@ public class MechanismActions {
   }
 
   public static Command ampPosition(Elevator elevator, Arm arm) {
+    return ampStage3Position(elevator, arm)
+        .andThen(ampStage2Position(elevator, arm))
+        .andThen(ampStage1Position(elevator, arm));
+  }
+
+  public static Command ampPositionToLoadPosition(Elevator elevator, Arm arm) {
+    return ampStage1Position(elevator, arm)
+        .andThen(ampStage2Position(elevator, arm))
+        .andThen(ampStage3Position(elevator, arm));
+  }
+
+  public static Command ampStage1Position(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
   }
 
@@ -41,6 +53,18 @@ public class MechanismActions {
 
   public static Command climbPrepPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition);
+  }
+
+  public static Command climbDownPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbDownPosition);
+  }
+
+  public static Command climbTrapPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition);
+  }
+
+  public static Command climbTrapPushPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPushPosition);
   }
 
   private static Command goToPositionParallel(

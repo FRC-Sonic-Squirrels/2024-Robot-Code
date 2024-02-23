@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
@@ -560,7 +559,7 @@ public class RobotContainer {
         .onTrue(
             MechanismActions.ampStage3Position(elevator, arm)
                 .andThen(MechanismActions.ampStage2Position(elevator, arm))
-                .andThen(MechanismActions.ampPosition(elevator, arm)));
+                .andThen(MechanismActions.ampStage1Position(elevator, arm)));
 
     driverController
         .povRight()
@@ -595,7 +594,7 @@ public class RobotContainer {
     DoubleSupplier elevatorDelta =
         () -> MathUtil.applyDeadband(-operatorController.getLeftY() * 1, 0.3) / 5.0;
     DoubleSupplier armDelta =
-        () -> MathUtil.applyDeadband(operatorController.getRightX() * 1, 0.3) * 10.0;
+        () -> MathUtil.applyDeadband(-operatorController.getRightY() * 1, 0.3) * 10.0;
 
     operatorController
         .x()
@@ -613,19 +612,28 @@ public class RobotContainer {
     // operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
     // operatorController.b().whileTrue(new HomeShooter(shooter));
 
-    operatorController
-        .y()
-        .onTrue(Commands.runOnce(() -> shooter.setKickerPercentOut(0.8), shooter))
-        .onFalse(Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
+    // operatorController
+    //     .y()
+    //     .onTrue(Commands.runOnce(() -> shooter.setKickerPercentOut(0.8), shooter))
+    //     .onFalse(Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
 
+    // operatorController
+    //     .povLeft()
+    //     .onTrue(new InstantCommand(elevator::resetSensorToHomePosition, elevator));
+    // operatorController.povUp().onTrue(new InstantCommand(arm::resetSensorToHomePosition, arm));
+    // operatorController
+    //     .a()
+    //     .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
+    //     .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
+
+    operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
+    operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
+    operatorController.povDown().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
+    operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
     operatorController
-        .povLeft()
-        .onTrue(new InstantCommand(elevator::resetSensorToHomePosition, elevator));
-    operatorController.povUp().onTrue(new InstantCommand(arm::resetSensorToHomePosition, arm));
-    operatorController
-        .a()
-        .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
-        .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
+        .b()
+        .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
+        .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
