@@ -53,6 +53,24 @@ public class MechanismPositions {
   private static LoggedTunableNumber climbPrepArmAngleDegrees =
       group.build("climbPrepArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
 
+  private static LoggedTunableNumber climbDownElevatorHeightInches =
+      group.build("climbDownElevatorHeightInches", 0.0);
+  private static LoggedTunableNumber climbDownArmAngleDegrees =
+      group.build("climbDownArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+
+  private static LoggedTunableNumber climbTrapElevatorHeightInches =
+      group.build(
+          "climbTrapElevatorHeightInches", Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
+  private static LoggedTunableNumber climbTrapArmAngleDegrees =
+      group.build("climbTrapArmAngleDegrees", 45.0);
+
+  private static LoggedTunableNumber climbTrapPushElevatorHeightInches =
+      group.build(
+          "climbTrapPushElevatorHeightInches",
+          Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
+  private static LoggedTunableNumber climbTrapPushArmAngleDegrees =
+      group.build("climbTrapPushArmAngleDegrees", 30.0);
+
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
   public static MechanismPosition loadingPosition() {
@@ -100,5 +118,23 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(climbPrepElevatorHeightInches.get()),
         Rotation2d.fromDegrees(climbPrepArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbDownPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(climbDownElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbDownArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbTrapPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(climbTrapElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbTrapArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbTrapPushPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(climbTrapPushElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbTrapPushArmAngleDegrees.get()));
   }
 }

@@ -223,7 +223,7 @@ public final class Constants {
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(25.0);
+    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(26.0);
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
