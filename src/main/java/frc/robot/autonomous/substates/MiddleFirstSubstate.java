@@ -84,11 +84,11 @@ public class MiddleFirstSubstate extends StateMachine {
       reachedCenter = true;
     }
 
-    if (reachedCenter
-        && drive.getPoseEstimatorPose().getX() <= 8.05
-        && !endEffector.gamepieceInEndEffector()) {
-      return setStopped();
-    }
+    // if (reachedCenter
+    //     && drive.getPoseEstimatorPose().getX() <= 8.05
+    //     && !endEffector.gamepieceInEndEffector()) {
+    //   return setStopped();
+    // }
 
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.

@@ -6,6 +6,9 @@ package frc.robot.autonomous;
 
 import frc.lib.team2930.StateMachine;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.mechanism.MechanismActions;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
@@ -16,6 +19,8 @@ public class AutoStateMachine extends StateMachine {
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final EndEffector endEffector;
+  private final Elevator elevator;
+  private final Arm arm;
   private final StateMachine[] subStates;
   private int currentSubState;
   private double initShootDeadline;
@@ -25,20 +30,26 @@ public class AutoStateMachine extends StateMachine {
       DrivetrainWrapper drive,
       Shooter shooter,
       EndEffector endEffector,
+      Elevator elevator,
+      Arm arm,
       StateMachine[] subStates,
       double initShootDeadline) {
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
+    this.elevator = elevator;
+    this.arm = arm;
     this.subStates = subStates;
     this.initShootDeadline = initShootDeadline;
 
-    setInitialState(this::makeInitialShot);
+    setInitialState(this::autoInitialState);
   }
 
-  private StateHandler makeInitialShot() {
+  private StateHandler autoInitialState() {
     scoreSpeaker = new ScoreSpeaker(drive, shooter, endEffector, () -> true, initShootDeadline);
     scoreSpeaker.schedule();
+
+    MechanismActions.loadingPosition(elevator, arm);
     Logger.recordOutput("Autonomous/CommandScheduled", true);
 
     return this::nextSubState;
