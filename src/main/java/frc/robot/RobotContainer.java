@@ -594,7 +594,7 @@ public class RobotContainer {
     DoubleSupplier elevatorDelta =
         () -> MathUtil.applyDeadband(-operatorController.getLeftY() * 1, 0.3) / 5.0;
     DoubleSupplier armDelta =
-        () -> MathUtil.applyDeadband(-operatorController.getRightY() * 1, 0.3) * 10.0;
+        () -> MathUtil.applyDeadband(operatorController.getRightY() * -1, 0.3) * 10.0;
 
     operatorController
         .x()
