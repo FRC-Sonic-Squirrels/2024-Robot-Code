@@ -9,6 +9,10 @@ public class TunableNumberGroup {
     this.root = root;
   }
 
+  public LoggedTunableNumber build(String name) {
+    return new LoggedTunableNumber(root + "/" + name);
+  }
+
   public LoggedTunableNumber build(String name, double defaultValue) {
     return new LoggedTunableNumber(root + "/" + name, defaultValue);
   }
