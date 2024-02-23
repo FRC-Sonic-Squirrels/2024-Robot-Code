@@ -38,28 +38,26 @@ public class DriveToPose extends Command {
 
   private static final TunableNumberGroup group = new TunableNumberGroup("DriveToPose");
 
-  private static final LoggedTunableNumber driveKp = group.build("DriveKp", 0);
-  private static final LoggedTunableNumber driveKd = group.build("DriveKd", 0);
-  private static final LoggedTunableNumber thetaKp = group.build("ThetaKp", 0);
-  private static final LoggedTunableNumber thetaKd = group.build("ThetaKd", 0);
-  private static final LoggedTunableNumber driveMaxVelocity = group.build("DriveMaxVelocity", 0);
+  private static final LoggedTunableNumber driveKp = group.build("DriveKp");
+  private static final LoggedTunableNumber driveKd = group.build("DriveKd");
+  private static final LoggedTunableNumber thetaKp = group.build("ThetaKp");
+  private static final LoggedTunableNumber thetaKd = group.build("ThetaKd");
+  private static final LoggedTunableNumber driveMaxVelocity = group.build("DriveMaxVelocity");
   private static final LoggedTunableNumber driveMaxVelocitySlow =
-      group.build("DriveMaxVelocitySlow", 0);
+      group.build("DriveMaxVelocitySlow");
   private static final LoggedTunableNumber driveMaxAcceleration =
-      group.build("DriveMaxAcceleration", 0);
-  private static final LoggedTunableNumber thetaMaxVelocity = group.build("ThetaMaxVelocity", 0);
+      group.build("DriveMaxAcceleration");
+  private static final LoggedTunableNumber thetaMaxVelocity = group.build("ThetaMaxVelocity");
   private static final LoggedTunableNumber thetaMaxVelocitySlow =
-      group.build("ThetaMaxVelocitySlow", 0);
+      group.build("ThetaMaxVelocitySlow");
   private static final LoggedTunableNumber thetaMaxAcceleration =
-      group.build("ThetaMaxAcceleration", 0);
-  private static final LoggedTunableNumber driveTolerance = group.build("DriveTolerance", 0);
-  private static final LoggedTunableNumber driveToleranceSlow =
-      group.build("DriveToleranceSlow", 0);
-  private static final LoggedTunableNumber thetaTolerance = group.build("ThetaTolerance", 0);
-  private static final LoggedTunableNumber thetaToleranceSlow =
-      group.build("ThetaToleranceSlow", 0);
-  private static final LoggedTunableNumber ffMinRadius = group.build("FFMinRadius", 0);
-  private static final LoggedTunableNumber ffMaxRadius = group.build("FFMinRadius", 0);
+      group.build("ThetaMaxAcceleration");
+  private static final LoggedTunableNumber driveTolerance = group.build("DriveTolerance");
+  private static final LoggedTunableNumber driveToleranceSlow = group.build("DriveToleranceSlow");
+  private static final LoggedTunableNumber thetaTolerance = group.build("ThetaTolerance");
+  private static final LoggedTunableNumber thetaToleranceSlow = group.build("ThetaToleranceSlow");
+  private static final LoggedTunableNumber ffMinRadius = group.build("FFMinRadius");
+  private static final LoggedTunableNumber ffMaxRadius = group.build("FFMinRadius");
 
   static {
     driveKp.initDefault(2.0);

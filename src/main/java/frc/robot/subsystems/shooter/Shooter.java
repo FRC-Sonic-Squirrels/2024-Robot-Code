@@ -25,19 +25,19 @@ public class Shooter extends SubsystemBase {
 
   public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
-  private static final LoggedTunableNumber pivotkP = group.build("pivotkP", 0);
-  private static final LoggedTunableNumber pivotkD = group.build("pivotkD", 0);
-  private static final LoggedTunableNumber pivotkG = group.build("pivotkG", 0);
+  private static final LoggedTunableNumber pivotkP = group.build("pivotkP");
+  private static final LoggedTunableNumber pivotkD = group.build("pivotkD");
+  private static final LoggedTunableNumber pivotkG = group.build("pivotkG");
   private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
-      group.build("pivotClosedLoopMaxVelocityConstraint", 0);
+      group.build("pivotClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
-      group.build("pivotClosedLoopMaxAccelerationConstraint", 0);
+      group.build("pivotClosedLoopMaxAccelerationConstraint");
 
-  private static final LoggedTunableNumber launcherkS = group.build("launcherkS", 0);
-  private static final LoggedTunableNumber launcherkP = group.build("launcherkP", 0);
-  private static final LoggedTunableNumber launcherkV = group.build("launcherkV", 0);
+  private static final LoggedTunableNumber launcherkS = group.build("launcherkS");
+  private static final LoggedTunableNumber launcherkP = group.build("launcherkP");
+  private static final LoggedTunableNumber launcherkV = group.build("launcherkV");
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
-      group.build("launcherClosedLoopMaxAccelerationConstraint", 0);
+      group.build("launcherClosedLoopMaxAccelerationConstraint");
 
   private static final LoggedTunableNumber pivotToleranceDegrees =
       group.build("pivotToleranceDegrees", 0.5);
