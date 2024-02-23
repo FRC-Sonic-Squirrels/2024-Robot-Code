@@ -11,6 +11,7 @@ import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class MechanismActions {
 
@@ -49,21 +50,27 @@ public class MechanismActions {
             () -> {
               MechanismPosition targetPosition = position.get();
               Measure<Distance> safeHeight = Constants.ElevatorConstants.SAFE_HEIGHT;
-
-              if (elevator.getHeightInches()
-                      >= safeHeight.minus(Units.Inches.of(1.0)).in(Units.Inches)
-                  || position.get().armAngle().getRadians()
-                      <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()) {
+              boolean runningArm =
+                  elevator.getHeightInches()
+                          >= safeHeight.minus(Units.Inches.of(1.0)).in(Units.Inches)
+                      || position.get().armAngle().getRadians()
+                          <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians();
+              if (runningArm) {
                 arm.setAngle(targetPosition.armAngle());
               }
 
-              if (targetPosition.elevatorHeight().lte(safeHeight)
-                  && arm.getAngle().getRadians()
-                      >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()) {
+              boolean runningElevatorSafety =
+                  targetPosition.elevatorHeight().lte(safeHeight)
+                      && arm.getAngle().getRadians()
+                          >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians();
+
+              if (runningElevatorSafety) {
                 elevator.setHeight(safeHeight);
               } else {
                 elevator.setHeight(targetPosition.elevatorHeight());
               }
+              Logger.recordOutput("MechanismActions/runningArm", runningArm);
+              Logger.recordOutput("MechanismActions/runningElevator", runningElevatorSafety);
             },
             elevator,
             arm)
