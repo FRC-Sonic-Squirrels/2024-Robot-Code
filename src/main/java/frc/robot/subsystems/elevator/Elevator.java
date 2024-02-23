@@ -20,14 +20,14 @@ import org.littletonrobotics.junction.Logger;
 public class Elevator extends SubsystemBase {
   private static final TunableNumberGroup group = new TunableNumberGroup("Elevator");
 
-  private static final LoggedTunableNumber kP = group.build("kP", 0);
-  private static final LoggedTunableNumber kD = group.build("kD", 0);
-  private static final LoggedTunableNumber kG = group.build("kG", 0);
+  private static final LoggedTunableNumber kP = group.build("kP");
+  private static final LoggedTunableNumber kD = group.build("kD");
+  private static final LoggedTunableNumber kG = group.build("kG");
 
   private static final LoggedTunableNumber closedLoopMaxVelocityConstraint =
-      group.build("defaultClosedLoopMaxVelocityConstraint", 0);
+      group.build("defaultClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber closedLoopMaxAccelerationConstraint =
-      group.build("defaultClosedLoopMaxAccelerationConstraint", 0);
+      group.build("defaultClosedLoopMaxAccelerationConstraint");
 
   private final LoggedTunableNumber tolerance = group.build("toleranceInches", 0.1);
 
