@@ -8,6 +8,8 @@ import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachine;
 import frc.robot.autonomous.substates.MiddleFirstSubstate;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -24,6 +26,8 @@ public class AutosManager {
   private Shooter shooter;
   private EndEffector endEffector;
   private Intake intake;
+  private final Elevator elevator;
+  private final Arm arm;
   private VisionGamepiece visionGamepiece;
 
   private RobotConfig config;
@@ -35,6 +39,8 @@ public class AutosManager {
       Shooter shooter,
       Intake intake,
       EndEffector endEffector,
+      Elevator elevator,
+      Arm arm,
       VisionGamepiece visionGamepiece,
       RobotConfig config,
       LoggedDashboardChooser<String> chooser,
@@ -43,6 +49,8 @@ public class AutosManager {
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
+    this.elevator = elevator;
+    this.arm = arm;
     this.visionGamepiece = visionGamepiece;
 
     this.config = config;
@@ -91,6 +99,8 @@ public class AutosManager {
             drivetrain,
             shooter,
             endEffector,
+            elevator,
+            arm,
             new AutoSubstateMachine[] {
               generateSubstateMachine("sourceAuto.1", "G5S3"),
               generateSubstateMachine("S3G4", "G4S2"),
@@ -109,6 +119,8 @@ public class AutosManager {
             drivetrain,
             shooter,
             endEffector,
+            elevator,
+            arm,
             new StateMachine[] {
               new MiddleFirstSubstate(
                   drivetrain,

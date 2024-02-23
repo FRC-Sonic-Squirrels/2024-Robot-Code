@@ -224,11 +224,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     shooter.setPivotPosition(solverResult.pitch());
     // run kicker for X seconds
     shooter.setKickerPercentOut(0.5);
-    // if (!shooter.noteInShooter()) {
 
-    //   shotTime = this.timeFromStart();
-    //   return this::shootEnding;
-    // }
+    if (!shooter.noteInShooter()) {
+
+      shotTime = this.timeFromStart();
+      return this::shootEnding;
+    }
     return null;
   }
 
