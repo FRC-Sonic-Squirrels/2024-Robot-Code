@@ -50,7 +50,7 @@ public final class Constants {
   }
 
   public static class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024_MAESTRO;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -114,15 +114,18 @@ public final class Constants {
   public static class FieldConstants {
     // official Field dimensions
     // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
-    public static double FIELD_LENGTH = 16.451;
+    public static double FIELD_LENGTH = 16.451; //TODO: this is wrong
     public static double FIELD_WIDTH = .211;
 
     // FIXME: double check this number
-    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
+    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(
+      6 * 12.0 + 8.5
+      // 57.0
+    );
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.03950466960668564, 5.508944988250732);
+        new Translation2d(0.03950466960668564, 5.508944988250732); //TODO: move to right
     public static final Translation2d RED_SPEAKER_TRANSLATION =
-        new Translation2d(16.508594512939453, 5.508944988250732);
+        AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
     public static final Translation3d BLUE_SPEAKER_TRANSLATION_3D =
         new Translation3d(
@@ -223,7 +226,7 @@ public final class Constants {
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
-    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(26.0);
+    public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(26.2);
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
@@ -236,7 +239,7 @@ public final class Constants {
 
     // FIXME: home position needs to be changed now that we added spacers to swerveModule
     public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
-    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.5); // was 7.5
+    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.35); // was 7.5
   }
 
   public static class ShooterConstants {

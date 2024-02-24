@@ -61,7 +61,7 @@ public class Arm extends SubsystemBase {
   public Arm(ArmIO io) {
     this.io = io;
 
-    io.resetSensorPosition(Constants.ArmConstants.HOME_POSITION);
+    // io.resetSensorPosition(Constants.ArmConstants.HOME_POSITION);
     io.setVoltage(0.0);
 
     io.setClosedLoopConstants(

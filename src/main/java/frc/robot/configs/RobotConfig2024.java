@@ -145,34 +145,34 @@ public class RobotConfig2024 extends RobotConfig {
   public static final Transform3d SHOOTER_SIDE_LEFT =
       new Transform3d(
           new Translation3d(
-              Units.Inches.of(-0.62273).in(Units.Meters),
-              Units.Inches.of(9.625919).in(Units.Meters),
-              Units.Inches.of(22.21467).in(Units.Meters)),
-          new Rotation3d(0.0, 0.0, Math.toRadians(225.0)));
+              Units.Inches.of(-0.21682).in(Units.Meters),
+              Units.Inches.of(6.7949).in(Units.Meters),
+              Units.Inches.of(24.259267).in(Units.Meters)),
+          new Rotation3d(Math.toRadians(180.0), Math.toRadians(-22.0), Math.toRadians(225.0)));
 
   public static final Transform3d SHOOTER_SIDE_RIGHT =
       new Transform3d(
           new Translation3d(
-              Units.Inches.of(-0.62273).in(Units.Meters),
-              Units.Inches.of(-9.625919).in(Units.Meters),
-              Units.Inches.of(22.21467).in(Units.Meters)),
-          new Rotation3d(0.0, 0.0, Math.toRadians(135.0)));
+              Units.Inches.of(-0.21682).in(Units.Meters),
+              Units.Inches.of(-6.7949).in(Units.Meters),
+              Units.Inches.of(24.259267).in(Units.Meters)),
+          new Rotation3d(Math.toRadians(180.0), Math.toRadians(-22.0), Math.toRadians(135.0)));
 
   public static final Transform3d INTAKE_SIDE_LEFT =
       new Transform3d(
           new Translation3d(
-              Units.Inches.of(0.64738).in(Units.Meters),
-              Units.Inches.of(13.14840).in(Units.Meters),
-              Units.Inches.of(22.31306).in(Units.Meters)),
-          new Rotation3d(0.0, 0.0, Math.toRadians(45.0)));
+              Units.Inches.of(2.143069).in(Units.Meters),
+              Units.Inches.of(12.127149).in(Units.Meters),
+              Units.Inches.of(24.990728).in(Units.Meters)),
+          new Rotation3d(Math.toRadians(0.0), Math.toRadians(-22.0), Math.toRadians(35.0)));
 
   public static final Transform3d INTAKE_SIDE_RIGHT =
       new Transform3d(
           new Translation3d(
-              Units.Inches.of(0.64738).in(Units.Meters),
-              Units.Inches.of(-13.14840).in(Units.Meters),
-              Units.Inches.of(22.31306).in(Units.Meters)),
-          new Rotation3d(0.0, 0.0, Math.toRadians(-45.0)));
+              Units.Inches.of(2.143069).in(Units.Meters),
+              Units.Inches.of(-12.127149).in(Units.Meters),
+              Units.Inches.of(24.990728).in(Units.Meters)),
+          new Rotation3d(Math.toRadians(0.0), Math.toRadians(-22.0), Math.toRadians(325.0)));
 
   public static final String OBJECT_DETECTION_CAMERA_NAME = "0_Object_Detection_ELP";
   public static final String SHOOTER_SIDE_LEFT_CAMERA_NAME = "1_Shooter_Left_See3Cam";
@@ -223,7 +223,7 @@ public class RobotConfig2024 extends RobotConfig {
   public VisionModuleConfiguration[] getVisionModuleObjects() {
     return new VisionModuleConfiguration[] {
       VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
-      VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      // VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
     };

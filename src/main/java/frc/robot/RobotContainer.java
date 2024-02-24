@@ -19,7 +19,6 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -294,7 +293,7 @@ public class RobotContainer {
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
                   drivetrain::addVisionEstimate,
-                  config.getReplayVisionModules());
+                  config.getVisionModuleObjects());
 
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
@@ -461,6 +460,25 @@ public class RobotContainer {
     //             endEffector::intakeSideTOFDetectGamepiece));
 
     driverController
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    drivetrain.setPose(
+                        new Pose2d(
+                            drivetrain.getPoseEstimatorPose().getX(),
+                            drivetrain.getPoseEstimatorPose().getY(),
+                            new Rotation2d())),
+                drivetrain));
+
+    driverController
+        .start()
+        .onTrue(
+            Commands.runOnce(() -> vision.useMaxDistanceAwayFromExistingEstimate(false), vision))
+        .onFalse(
+            Commands.runOnce(() -> vision.useMaxDistanceAwayFromExistingEstimate(true), vision));
+
+    driverController
         .rightTrigger()
         .whileTrue(
             new IntakeGamepiece(
@@ -479,9 +497,10 @@ public class RobotContainer {
             ShooterScoreSpeakerStateMachine.getAsCommand(
                 drivetrainWrapper, shooter, endEffector, 1000));
 
-    driverController
-        .leftBumper()
-        .onTrue(Commands.run(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(45)), shooter));
+    // driverController
+    //     .leftBumper()
+    //     .onTrue(Commands.run(() -> shooter.setPivotPosition(Rotation2d.fromDegrees(45)),
+    // shooter));
 
     // driverController
     //     .leftBumper()
@@ -561,30 +580,9 @@ public class RobotContainer {
 
     // driverController.povLeft().onTrue(MechanismActions.ampFast(elevator, arm));
 
-    driverController
-        .povUp()
-        .onTrue(
-            MechanismActions.ampStage3Position(elevator, arm)
-                .andThen(MechanismActions.ampStage2Position(elevator, arm))
-                .andThen(MechanismActions.ampStage1Position(elevator, arm)));
+    driverController.povUp().onTrue(MechanismActions.ampPosition(elevator, arm));
 
-    driverController
-        .povRight()
-        .onTrue(
-            MechanismActions.ampStage2Position(elevator, arm)
-                .andThen(MechanismActions.ampStage3Position(elevator, arm))
-                .andThen(MechanismActions.loadingPosition(elevator, arm)));
-
-    driverController
-        .start()
-        .onTrue(
-            Commands.runOnce(
-                () ->
-                    drivetrain.setPose(
-                        new Pose2d(
-                            Constants.FieldConstants.getSpeakerTranslation()
-                                .plus(new Translation2d(tunableX.get(), tunableY.get())),
-                            Rotation2d.fromDegrees(0.0)))));
+    driverController.povRight().onTrue(MechanismActions.ampPositionToLoadPosition(elevator, arm));
 
     // driverController
     //     .x()

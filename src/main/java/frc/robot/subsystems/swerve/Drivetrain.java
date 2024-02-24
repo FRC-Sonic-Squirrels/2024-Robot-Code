@@ -70,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
     this.modules[3] = swerveModules[3];
 
     // FIXME: values copied from 6328, learn how to calculate these values
-    poseEstimator = new PoseEstimator(0.003, 0.003, 0.0002);
+    poseEstimator = new PoseEstimator(0.1, 0.1, 0.3);
 
     // Configure AutoBuilder for PathPlanner
     // FIXME: pass in custom PID constants? Issue for this use case has been created:
