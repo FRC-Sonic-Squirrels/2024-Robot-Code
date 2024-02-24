@@ -185,6 +185,10 @@ public class Robot extends LoggedRobot {
         shouldResetPose = true;
       }
 
+      if (lastAuto.initPose() == null) {
+        shouldResetPose = false;
+      }
+
       if (shouldResetPose) {
         var pose =
             lastAlliance == Alliance.Blue

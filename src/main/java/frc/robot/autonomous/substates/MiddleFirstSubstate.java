@@ -2,11 +2,12 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class MiddleFirstSubstate extends StateMachine {
 
@@ -25,11 +27,13 @@ public class MiddleFirstSubstate extends StateMachine {
   private ChoreoTrajectory traj;
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
-  private ScoreSpeaker scoreSpeaker;
+  private Command scoreSpeaker;
   private IntakeGamepiece intakeGamepiece;
-  private boolean prevEndEffectorBeamBreak = true;
+  private boolean prevEndEffectorBeamBreak = false;
+  private boolean prevNoteInRobot = false;
   private int gamepieceCounter = 0;
   private boolean reachedCenter = false;
+  private boolean hasShotGP[] = new boolean[] {false, false, false, false, false};
 
   public MiddleFirstSubstate(
       DrivetrainWrapper drive,
@@ -66,7 +70,7 @@ public class MiddleFirstSubstate extends StateMachine {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
-    if (!endEffector.noteInEndEffector() && prevEndEffectorBeamBreak) {
+    if (!endEffector.noteInEndEffector() && !shooter.noteInShooter() && prevNoteInRobot) {
       intakeGamepiece = new IntakeGamepiece(intake, endEffector, shooter);
       intakeGamepiece.schedule();
     }
@@ -74,12 +78,26 @@ public class MiddleFirstSubstate extends StateMachine {
     if (endEffector.noteInEndEffector() && !prevEndEffectorBeamBreak) {
       gamepieceCounter++;
       scoreSpeaker =
-          new ScoreSpeaker(
-              drive, shooter, endEffector, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
-      scoreSpeaker.schedule();
+          ShooterScoreSpeakerStateMachine.getAsCommand(
+              drive,
+              shooter,
+              endEffector,
+              gamepieceCounter == 4 ? 3.0 : (gamepieceCounter == 3 ? 0.75 : 0.93));
+
+      intakeGamepiece.cancel();
+
+      spawnCommand(
+          scoreSpeaker,
+          (command) -> {
+            hasShotGP[gamepieceCounter] = true;
+            return null;
+          });
     }
 
+    Logger.recordOutput("Autonomous/middlePathGamepieceCount", gamepieceCounter);
+
     prevEndEffectorBeamBreak = endEffector.noteInEndEffector();
+    prevNoteInRobot = endEffector.noteInEndEffector() || shooter.noteInShooter();
 
     if (drive.getPoseEstimatorPose().getX() >= 8.1) {
       reachedCenter = true;
@@ -96,9 +114,11 @@ public class MiddleFirstSubstate extends StateMachine {
       // TODO: Check for note in intake.
       drive.setVelocityOverride(chassisSpeeds);
       return null;
+    } else {
+      drive.resetVelocityOverride();
     }
 
-    if (scoreSpeaker.isFinished()) {
+    if (hasShotGP[4]) {
       return setDone();
     }
 

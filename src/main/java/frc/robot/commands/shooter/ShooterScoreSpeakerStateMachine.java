@@ -5,9 +5,12 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.RunStateMachineCommand;
 import frc.lib.team2930.ShootingSolver;
 import frc.lib.team2930.ShootingSolver.Solution;
@@ -197,12 +200,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     // var robotAtTheta = drivetrainWrapper.isAtTheta();
     var externalConfirmation = this.externalConfirmation.getAsBoolean();
-    // var validShootingPosition = validPosition
 
     // FIXME: log each condition
 
     // FIXME: all all condition
-    if (launcherAtRpm && pivotAtAngle
+    Logger.recordOutput("ShooterScoreSpeaker/launcherAtRPM", launcherAtRpm);
+    Logger.recordOutput("ShooterScoreSpeaker/pivotAtAngle", pivotAtAngle);
+    Logger.recordOutput("ShooterScoreSpeaker/shootingPosition", shootingPosition());
+    if ((launcherAtRpm && pivotAtAngle && shootingPosition()) || timeFromStart() >= forceShotIn
     // && externalConfirmation
     ) {
 
@@ -249,19 +254,50 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private void logPositions() {
-    Logger.recordOutput(
-        "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
-    Logger.recordOutput(
-        "ShooterScoreSpeaker/pitchTargetDegrees", solverResult.pitch().getDegrees());
-    Logger.recordOutput(
-        "ShooterScoreSpeaker/headingDegrees",
-        drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
-    Logger.recordOutput("ShooterScoreSpeaker/pitchDegrees", shooter.getPitch().getDegrees());
+    if (solverResult != null) {
+      Logger.recordOutput(
+          "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
+      Logger.recordOutput(
+          "ShooterScoreSpeaker/pitchTargetDegrees", solverResult.pitch().getDegrees());
+      Logger.recordOutput(
+          "ShooterScoreSpeaker/headingDegrees",
+          drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
+      Logger.recordOutput("ShooterScoreSpeaker/pitchDegrees", shooter.getPitch().getDegrees());
+    }
   }
 
   private void rotateToSpeaker() {
-    drivetrainWrapper.setRotationOverride(
-        rotationController.calculate(
-            drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians()));
+    if (solverResult != null)
+      drivetrainWrapper.setRotationOverride(
+          rotationController.calculate(
+              drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians()));
+  }
+
+  private boolean shootingPosition() {
+    Pose2d currentPose = drivetrainWrapper.getPoseEstimatorPose();
+    Pose2d reflectedPose =
+        Constants.isRedAlliance()
+            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(currentPose)
+            : currentPose;
+    // look at constraints: https://www.desmos.com/calculator/dvrwcfwnz8
+    // check if shot is legal
+    if ((DriverStation.isAutonomous() && reflectedPose.getX() >= 6.2697529792785645)
+        || reflectedPose.getX() >= 10.257804870605469) {
+      return false;
+    }
+    // y <= 0.808x + 0.793
+    // y >= -0.64x + 6.1
+    // y <= 6.103558540344238
+    // check if stage is blocking
+    if (reflectedPose.getY() <= 0.808 * reflectedPose.getX() + 0.3
+        && reflectedPose.getY() >= -0.64 * reflectedPose.getX() + 6.1
+        && reflectedPose.getY() <= 6.103558540344238) {
+      return false;
+    }
+    return true;
+  }
+
+  public StateHandler skipToShootIfForceShot() {
+    return timeFromStart() >= forceShotIn ? this::shoot : null;
   }
 }

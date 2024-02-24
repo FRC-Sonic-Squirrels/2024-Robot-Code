@@ -12,7 +12,7 @@ public class RunStateMachineCommand extends Command {
   /** Creates a new RunStateMachineCommand. */
   Supplier<StateMachine> supplier;
 
-  StateMachine stateMachine = null;
+  StateMachine stateMachine = new StateMachine();
 
   public RunStateMachineCommand(
       Supplier<StateMachine> stateMachineSupplier, Subsystem... subsystems) {
