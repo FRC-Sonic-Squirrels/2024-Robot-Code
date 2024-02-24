@@ -2,11 +2,12 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -25,11 +26,12 @@ public class MiddleFirstSubstate extends StateMachine {
   private ChoreoTrajectory traj;
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
-  private ScoreSpeaker scoreSpeaker;
+  private Command scoreSpeaker;
   private IntakeGamepiece intakeGamepiece;
   private boolean prevEndEffectorBeamBreak = true;
   private int gamepieceCounter = 0;
   private boolean reachedCenter = false;
+  private boolean hasShotGP = false;
 
   public MiddleFirstSubstate(
       DrivetrainWrapper drive,
@@ -73,10 +75,14 @@ public class MiddleFirstSubstate extends StateMachine {
 
     if (endEffector.noteInEndEffector() && !prevEndEffectorBeamBreak) {
       gamepieceCounter++;
-      scoreSpeaker =
-          new ScoreSpeaker(
-              drive, shooter, endEffector, () -> true, gamepieceCounter == 3 ? 0.71 : 0.88);
-      scoreSpeaker.schedule();
+      scoreSpeaker = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, 5);
+
+      spawnCommand(
+          scoreSpeaker,
+          (command) -> {
+            hasShotGP = true;
+            return null;
+          });
     }
 
     prevEndEffectorBeamBreak = endEffector.noteInEndEffector();
@@ -98,7 +104,7 @@ public class MiddleFirstSubstate extends StateMachine {
       return null;
     }
 
-    if (scoreSpeaker.isFinished()) {
+    if (hasShotGP) {
       return setDone();
     }
 

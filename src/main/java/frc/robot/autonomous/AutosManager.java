@@ -64,6 +64,7 @@ public class AutosManager {
     list.add(this::doNothing);
     list.add(this::sourceAuto);
     list.add(this::middleAuto);
+    list.add(this::ampAuto);
 
     return list;
   }
@@ -111,6 +112,24 @@ public class AutosManager {
             1.31);
     return new Auto(
         "sourceAuto", state.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+  }
+
+  private Auto ampAuto() {
+    AutoStateMachine state =
+        new AutoStateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            elevator,
+            arm,
+            new AutoSubstateMachine[] {
+              generateSubstateMachine("ampAuto.1", "G1S1"),
+              generateSubstateMachine("S1G2", "G2S2"),
+              generateSubstateMachine("S2G3", "G3S2")
+            },
+            1.31);
+    return new Auto(
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("ampAuto.1").getInitialPose());
   }
 
   private Auto middleAuto() {

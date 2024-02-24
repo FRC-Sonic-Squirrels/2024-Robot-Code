@@ -4,9 +4,10 @@
 
 package frc.robot.autonomous;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
-import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.mechanism.MechanismActions;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -15,7 +16,7 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine extends StateMachine {
-  ScoreSpeaker scoreSpeaker;
+  private Command scoreSpeaker;
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -46,13 +47,20 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler autoInitialState() {
-    scoreSpeaker = new ScoreSpeaker(drive, shooter, endEffector, () -> true, initShootDeadline);
+    scoreSpeaker = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, 5);
     scoreSpeaker.schedule();
 
     MechanismActions.loadingPosition(elevator, arm);
     Logger.recordOutput("Autonomous/CommandScheduled", true);
 
-    return this::nextSubState;
+    return this::initialShot;
+  }
+
+  private StateHandler initialShot() {
+    if (scoreSpeaker.isFinished()) {
+      return this::nextSubState;
+    }
+    return null;
   }
 
   private StateHandler nextSubState() {

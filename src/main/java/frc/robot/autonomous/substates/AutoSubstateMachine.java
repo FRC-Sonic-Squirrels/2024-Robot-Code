@@ -6,10 +6,11 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.intake.IntakeGamepiece;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
@@ -26,12 +27,15 @@ public class AutoSubstateMachine extends StateMachine {
   private Intake intake;
   private RobotConfig config;
   private String trajToGamepieceName;
+  private String trajToShootName;
   private ChoreoTrajectory trajToGamePiece;
   private ChoreoTrajectory trajToShoot;
   private Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
-  public ScoreSpeaker scoreSpeaker;
+  public Command scoreSpeaker;
   private IntakeGamepiece intakeCommand;
+
+  private boolean hasShootGP = false;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachine(
@@ -49,6 +53,7 @@ public class AutoSubstateMachine extends StateMachine {
     this.intake = intake;
     this.config = config;
     this.trajToGamepieceName = trajToGP;
+    this.trajToShootName = trajToShoot;
     this.trajToGamePiece = Choreo.getTrajectory(trajToGP);
     this.trajToShoot = Choreo.getTrajectory(trajToShoot);
     this.closestGamepiece = closestGamepiece;
@@ -71,7 +76,7 @@ public class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler followPathToGamePiece() {
-    Logger.recordOutput("Autonomous/" + trajToGamepieceName + "Started", true);
+    Logger.recordOutput("Autonomous/path", trajToGamepieceName);
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
     if (chassisSpeeds != null) {
@@ -87,8 +92,14 @@ public class AutoSubstateMachine extends StateMachine {
 
     intakeCommand.cancel();
 
-    scoreSpeaker = new ScoreSpeaker(drive, shooter, endEffector, () -> true);
-    scoreSpeaker.schedule();
+    scoreSpeaker = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, 5);
+
+    spawnCommand(
+        scoreSpeaker,
+        (command) -> {
+          hasShootGP = true;
+          return null;
+        });
 
     choreoHelper =
         new ChoreoHelper(
@@ -103,8 +114,9 @@ public class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler followPathToShooter() {
-    scoreSpeaker.updateVisualization();
-    if (scoreSpeaker.isFinished()) {
+    Logger.recordOutput("Autonomous/path", trajToShootName);
+    if (hasShootGP) {
+      drive.resetVelocityOverride();
       return setDone();
     }
 
