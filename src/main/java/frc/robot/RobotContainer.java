@@ -19,7 +19,6 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -292,10 +291,10 @@ public class RobotContainer {
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
                   drivetrain::addVisionEstimate,
-                  config.getReplayVisionModules());
+                  config.getVisionModuleObjects());
 
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
 
           // intake = new Intake(new IntakeIO() {});
           elevator = new Elevator(new ElevatorIOReal());
@@ -468,7 +467,7 @@ public class RobotContainer {
                     (rumble) -> {
                       driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
                     })
-                // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
+                .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
                 .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
     driverController
@@ -574,15 +573,23 @@ public class RobotContainer {
                 .andThen(MechanismActions.loadingPosition(elevator, arm)));
 
     driverController
-        .start()
+        .back()
         .onTrue(
             Commands.runOnce(
                 () ->
                     drivetrain.setPose(
                         new Pose2d(
-                            Constants.FieldConstants.getSpeakerTranslation()
-                                .plus(new Translation2d(tunableX.get(), tunableY.get())),
-                            Rotation2d.fromDegrees(0.0)))));
+                            drivetrain.getPoseEstimatorPose().getX(),
+                            drivetrain.getPoseEstimatorPose().getY(),
+                            new Rotation2d())),
+                drivetrain));
+
+    driverController
+        .start()
+        .onTrue(
+            Commands.runOnce(() -> vision.useMaxDistanceAwayFromExistingEstimate(false), vision))
+        .onFalse(
+            Commands.runOnce(() -> vision.useMaxDistanceAwayFromExistingEstimate(true), vision));
 
     // driverController
     //     .x()

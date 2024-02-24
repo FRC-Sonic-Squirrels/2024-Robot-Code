@@ -156,8 +156,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       // FIXME: look into calculating gear ratio to make it so kicker and EE spin at same speed
       shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
       if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
-        shooter.setKickerPercentOut(0.1);
-        endEffector.setPercentOut(0.1);
+        shooter.setKickerPercentOut(0.4);
+        endEffector.setPercentOut(0.4);
       }
     }
 

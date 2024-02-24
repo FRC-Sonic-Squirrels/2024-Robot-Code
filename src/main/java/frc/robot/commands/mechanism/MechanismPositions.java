@@ -7,7 +7,7 @@ import edu.wpi.first.units.Units;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
-import frc.robot.Constants.ElevatorConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class MechanismPositions {
   private static final TunableNumberGroup group = new TunableNumberGroup("MechanismPositions");
@@ -37,8 +37,8 @@ public class MechanismPositions {
       group.build("ampStage3ArmAngleDegrees", -90.0);
 
   private static LoggedTunableNumber trapElevatorHeightInches =
-      group.build("trapElevatorHeightInches", ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
-  private static LoggedTunableNumber trapArmAngleDegrees = group.build("trapArmAngleDegrees", 35.0);
+      group.build("trapElevatorHeightInches", 26.2);
+  private static LoggedTunableNumber trapArmAngleDegrees = group.build("trapArmAngleDegrees", 23.0);
   private static LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
       group.build(
           "climbPrepUnderStageElevatorHeightInches",
@@ -70,6 +70,10 @@ public class MechanismPositions {
           Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
   private static LoggedTunableNumber climbTrapPushArmAngleDegrees =
       group.build("climbTrapPushArmAngleDegrees", 30.0);
+
+  static {
+    Logger.recordOutput("Imhere", 1);
+  }
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
