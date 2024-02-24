@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachine;
+import frc.robot.autonomous.substates.DriveAfterSimpleShot;
 import frc.robot.autonomous.substates.MiddleFirstSubstate;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.arm.Arm;
@@ -65,6 +66,7 @@ public class AutosManager {
     list.add(this::sourceAuto);
     list.add(this::middleAuto);
     list.add(this::ampAuto);
+    list.add(this::simpleShootAuto);
 
     return list;
   }
@@ -156,6 +158,20 @@ public class AutosManager {
             0.47);
     return new Auto(
         "middleAuto", state.asCommand(), Choreo.getTrajectory("middleAuto.1").getInitialPose());
+  }
+
+  private Auto simpleShootAuto() {
+    AutoStateMachine state =
+        new AutoStateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            elevator,
+            arm,
+            new StateMachine[] {new DriveAfterSimpleShot(drivetrain)},
+            10.0);
+
+    return new Auto("simpleShootAuto", state.asCommand(), null);
   }
 
   private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {
