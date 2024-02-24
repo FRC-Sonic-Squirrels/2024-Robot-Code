@@ -66,12 +66,12 @@ public class MiddleFirstSubstate extends StateMachine {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
-    if (!endEffector.gamepieceInEndEffector() && prevEndEffectorBeamBreak) {
+    if (!endEffector.noteInEndEffector() && prevEndEffectorBeamBreak) {
       intakeGamepiece = new IntakeGamepiece(intake, endEffector, shooter);
       intakeGamepiece.schedule();
     }
 
-    if (endEffector.gamepieceInEndEffector() && !prevEndEffectorBeamBreak) {
+    if (endEffector.noteInEndEffector() && !prevEndEffectorBeamBreak) {
       gamepieceCounter++;
       scoreSpeaker =
           new ScoreSpeaker(
@@ -79,7 +79,7 @@ public class MiddleFirstSubstate extends StateMachine {
       scoreSpeaker.schedule();
     }
 
-    prevEndEffectorBeamBreak = endEffector.gamepieceInEndEffector();
+    prevEndEffectorBeamBreak = endEffector.noteInEndEffector();
 
     if (drive.getPoseEstimatorPose().getX() >= 8.1) {
       reachedCenter = true;
@@ -87,7 +87,7 @@ public class MiddleFirstSubstate extends StateMachine {
     if (Constants.unusedCode) {
       if (reachedCenter
           && drive.getPoseEstimatorPose().getX() <= 8.05
-          && !endEffector.gamepieceInEndEffector()) {
+          && !endEffector.noteInEndEffector()) {
         return setStopped();
       }
     }

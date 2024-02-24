@@ -7,7 +7,6 @@ package frc.robot.subsystems.endEffector;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -22,19 +21,10 @@ public class EndEffector extends SubsystemBase {
 
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       group.build("distanceToTriggerNote", 8.0);
-  private final Trigger shooterToFTrigger;
-  private final Trigger intakeToFTrigger;
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
-
-    intakeToFTrigger =
-        new Trigger(
-            () -> inputs.intakeSideTOFDistanceInches <= distanceToTriggerNoteDetection.get());
-    shooterToFTrigger =
-        new Trigger(
-            () -> inputs.shooterSideTOFDistanceInches <= distanceToTriggerNoteDetection.get());
   }
 
   @Override
@@ -54,11 +44,11 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Boolean intakeSideTOFDetectGamepiece() {
-    return intakeToFTrigger.getAsBoolean();
+    return intakeSideTOFDistanceInches() <= distanceToTriggerNoteDetection.get();
   }
 
   public Boolean shooterSideTOFDetectGamepiece() {
-    return shooterToFTrigger.getAsBoolean();
+    return shooterSideTOFDistanceInches() <= distanceToTriggerNoteDetection.get();
   }
 
   public double intakeSideTOFDistanceInches() {
@@ -69,8 +59,16 @@ public class EndEffector extends SubsystemBase {
     return inputs.shooterSideTOFDistanceInches;
   }
 
-  public boolean gamepieceInEndEffector() {
-    return shooterToFTrigger.getAsBoolean() || intakeToFTrigger.getAsBoolean();
+  public double noteOffsetInches() {
+    if (intakeSideTOFDetectGamepiece() || shooterSideTOFDetectGamepiece()) {
+      return shooterSideTOFDistanceInches() - intakeSideTOFDistanceInches();
+    }
+
+    return Double.NaN;
+  }
+
+  public boolean noteInEndEffector() {
+    return intakeSideTOFDetectGamepiece() || shooterSideTOFDetectGamepiece();
   }
 
   public Command stopCmd() {
