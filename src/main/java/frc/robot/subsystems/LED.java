@@ -13,33 +13,38 @@ import java.awt.Color;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
-  AddressableLED leftLed = new AddressableLED(Constants.LEDConstants.LEFT_PWM_PORT);
+  AddressableLED leftLed1 = new AddressableLED(Constants.LEDConstants.PWM_PORT_1);
+  AddressableLED leftLed2 = new AddressableLED(Constants.LEDConstants.PWM_PORT_2);
+  AddressableLED rightLed1 = new AddressableLED(Constants.LEDConstants.PWM_PORT_3);
+  AddressableLED rightLed2 = new AddressableLED(Constants.LEDConstants.PWM_PORT_4);
 
-  AddressableLED rightLed = new AddressableLED(Constants.LEDConstants.RIGHT_PWM_PORT);
-
-  individualLED leftLed1 = new individualLED(0, 25);
-  individualLED leftLed2 = new individualLED(26, 60);
-
-  individualLED rightLed1 = new individualLED(0, 25);
-  individualLED rightLed2 = new individualLED(26, 60);
-
-  AddressableLEDBuffer leftLedBuffer =
-      new AddressableLEDBuffer(leftLed1.getLength() + leftLed2.getLength());
-  AddressableLEDBuffer rightLedBuffer =
-      new AddressableLEDBuffer(rightLed1.getLength() + rightLed2.getLength());
+  int ledLength = 60;
+  
+  AddressableLEDBuffer leftLedBuffer1 = new AddressableLEDBuffer(ledLength);
+  AddressableLEDBuffer leftLedBuffer2 = new AddressableLEDBuffer(ledLength);
+  AddressableLEDBuffer rightLedBuffer1 = new AddressableLEDBuffer(ledLength);
+  AddressableLEDBuffer rightLedBuffer2 = new AddressableLEDBuffer(ledLength);
 
   int snakeShade = 0;
   int rainbowFirstPixelHue = 0;
   robotStates robotState = robotStates.NOTHING;
 
   public LED() {
-    leftLed.setLength(leftLedBuffer.getLength());
-    leftLed.setData(leftLedBuffer);
-    leftLed.start();
+    leftLed1.setLength(leftLedBuffer1.getLength());
+    leftLed1.setData(leftLedBuffer1);
+    leftLed1.start();
 
-    rightLed.setLength(rightLedBuffer.getLength());
-    rightLed.setData(rightLedBuffer);
-    rightLed.start();
+    leftLed2.setLength(leftLedBuffer2.getLength());
+    leftLed2.setData(leftLedBuffer2);
+    leftLed2.start();
+
+    rightLed1.setLength(rightLedBuffer1.getLength());
+    rightLed1.setData(rightLedBuffer1);
+    rightLed1.start();
+
+    rightLed2.setLength(rightLedBuffer2.getLength());
+    rightLed2.setData(rightLedBuffer2);
+    rightLed2.start();
   }
 
   @Override
@@ -50,38 +55,38 @@ public class LED extends SubsystemBase {
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(Color.RED, leftLedBuffer);
+        setAllSolidColor(Color.RED, leftLedBuffer1);
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(Color.BLACK, Color.WHITE, 0.5, leftLedBuffer);
+        setAllBlinking(Color.BLACK, Color.WHITE, 0.5, leftLedBuffer1);
         break;
       case DRIVING_TO_GAMEPIECE:
-        setAllRainbow(leftLedBuffer);
+        setAllRainbow(leftLedBuffer1);
         break;
       case AUTO_MODE:
-        setAllSolidColor(Color.WHITE, leftLedBuffer);
+        setAllSolidColor(Color.WHITE, leftLedBuffer1);
         break;
       case NOTHING:
         // when the case of the robot is nothing it will be set to red
-        for (int i = 0; i < leftLedBuffer.getLength(); i++) {
-          leftLedBuffer.setRGB(i, Color.red.getRed(), 0, 0);
+        for (int i = 0; i < leftLedBuffer1.getLength(); i++) {
+          leftLedBuffer1.setRGB(i, Color.red.getRed(), 0, 0);
         }
         break;
       case TWENTY_SECOND_WARNING:
-        setAllBlinking(Color.MAGENTA, Color.BLACK, 0.5, leftLedBuffer);
+        setAllBlinking(Color.MAGENTA, Color.BLACK, 0.5, leftLedBuffer1);
 
         break;
       case AMP_LINING_UP:
-        setAllBlinking(Color.YELLOW, Color.BLACK, 0.5, leftLedBuffer);
+        setAllBlinking(Color.YELLOW, Color.BLACK, 0.5, leftLedBuffer1);
 
         break;
     }
 
-    leftLed.setData(leftLedBuffer);
-    rightLed.setData(rightLedBuffer);
+    leftLed1.setData(leftLedBuffer1);
+    leftLed2.setData(rightLedBuffer1);
   }
 
   private void setSingleStripSolidColor(
@@ -120,20 +125,20 @@ public class LED extends SubsystemBase {
       Color color1, Color color2, double seconds, AddressableLEDBuffer ledBuffer) {
 
     if (Math.sin(((2 * Math.PI) / seconds) * Timer.getFPGATimestamp()) >= 0) {
-      for (int i = 0; i < leftLedBuffer.getLength(); i++) {
+      for (int i = 0; i < leftLedBuffer1.getLength(); i++) {
         ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
     } else if (Math.sin((2 * Math.PI) / seconds) * (Timer.getFPGATimestamp()) < 0) {
-      for (int i = 0; i < leftLedBuffer.getLength(); i++) {
+      for (int i = 0; i < leftLedBuffer1.getLength(); i++) {
         ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
     }
   }
 
   private void setAllSnake(Color color) {
-    for (int i = 0; i < leftLedBuffer.getLength(); i++) {
-      final var shade = (snakeShade + (i * 255 / leftLedBuffer.getLength())) % 255;
-      leftLedBuffer.setRGB(
+    for (int i = 0; i < leftLedBuffer1.getLength(); i++) {
+      final var shade = (snakeShade + (i * 255 / leftLedBuffer1.getLength())) % 255;
+      leftLedBuffer1.setRGB(
           i, shade * color.getRed(), shade * color.getGreen(), shade * color.getBlue());
 
       snakeShade += 3;
@@ -143,8 +148,8 @@ public class LED extends SubsystemBase {
 
   private void setSingleStripRainbow(int startingLED, int endingLED) {
     for (var i = startingLED; i <= endingLED; i++) {
-      final var hue = (rainbowFirstPixelHue + (i * 180 / leftLedBuffer.getLength())) % 180;
-      leftLedBuffer.setHSV(i, hue, 255, 128);
+      final var hue = (rainbowFirstPixelHue + (i * 180 / leftLedBuffer1.getLength())) % 180;
+      leftLedBuffer1.setHSV(i, hue, 255, 128);
     }
 
     rainbowFirstPixelHue += 3;
@@ -153,7 +158,7 @@ public class LED extends SubsystemBase {
 
   private void setAllRainbow(AddressableLEDBuffer ledBuffer) {
     for (var i = 0; i < ledBuffer.getLength(); i++) {
-      final var hue = (rainbowFirstPixelHue + (i * 180 / leftLedBuffer.getLength())) % 180;
+      final var hue = (rainbowFirstPixelHue + (i * 180 / leftLedBuffer1.getLength())) % 180;
       ledBuffer.setHSV(i, hue, 255, 128);
     }
 
