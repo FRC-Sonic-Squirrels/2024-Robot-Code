@@ -698,11 +698,9 @@ public class RobotContainer {
         .povUp()
         .onTrue(
             MechanismActions.climbPrepPosition(elevator, arm)
-                .alongWith(
-                    Commands.runOnce(() -> elevator.releaseReactionArms(), elevator).asProxy()));
-    operatorController
-        .povRight()
-        .onTrue(Commands.runOnce(() -> elevator.retractReactionArms(), elevator));
+                // .alongWith(
+                //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
+                    );
     // operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     // operatorController.povDown().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
     // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));

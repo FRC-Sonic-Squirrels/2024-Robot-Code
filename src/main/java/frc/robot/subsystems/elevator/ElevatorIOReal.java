@@ -11,6 +11,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -76,8 +78,8 @@ public class ElevatorIOReal implements ElevatorIO {
 
     motor.optimizeBusUtilization();
 
-    leftServo.setAlwaysHighMode();
-    rightServo.setAlwaysHighMode();
+    // leftServo.setAlwaysHighMode();
+    // rightServo.setAlwaysHighMode();
   }
 
   @Override
@@ -134,14 +136,12 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
-  public void releaseReactionArms() {
-    leftServo.set(-0.5);
-    rightServo.set(-0.5);
+  public void setLeftServoAngle(Rotation2d angle) {
+      leftServo.setAngle(angle.getDegrees());
   }
 
   @Override
-  public void retractReactionArms() {
-    leftServo.setAlwaysHighMode();
-    rightServo.setAlwaysHighMode();
+  public void setRightServoAngle(Rotation2d angle) {
+      rightServo.setAngle(angle.getDegrees());
   }
 }

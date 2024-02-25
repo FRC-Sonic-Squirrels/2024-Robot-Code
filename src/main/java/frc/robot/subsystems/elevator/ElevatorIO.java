@@ -1,6 +1,8 @@
 package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -30,7 +32,7 @@ public interface ElevatorIO {
 
   public default void setNeutralMode(NeutralModeValue value) {}
 
-  public default void releaseReactionArms() {}
+  public default void setRightServoAngle(Rotation2d angle) {}
 
-  public default void retractReactionArms() {}
+  public default void setLeftServoAngle(Rotation2d angle) {}
 }
