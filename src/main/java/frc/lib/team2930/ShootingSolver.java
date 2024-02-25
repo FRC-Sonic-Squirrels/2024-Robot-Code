@@ -1,5 +1,7 @@
 package frc.lib.team2930;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.*;
 
 public class ShootingSolver {
@@ -103,6 +105,8 @@ public class ShootingSolver {
       System.out.printf("       Vy:%.1f\n", robotVel.getY());
     }
 
+    Logger.recordOutput("Solver/zDistToSpeaker", dPspeakerAxis.getZ());
+    Logger.recordOutput("Solver/xyDistToSpeaker", xyDistToSpeaker);
     // Desired pitch of the note trajectory
     double pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
 

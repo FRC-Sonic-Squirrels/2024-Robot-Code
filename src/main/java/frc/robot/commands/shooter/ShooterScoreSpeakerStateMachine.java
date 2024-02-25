@@ -53,6 +53,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8000.0);
   private LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
 
+  private LoggedTunableNumber tunablePitchOffset = group.build("tunablePitchOffset", 0.0);
+
   private final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
   private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
 
@@ -191,9 +193,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double omega =
           rotationController.calculate(
               drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians());
-
-      shooter.setPivotPosition(solverResult.pitch());
-      pivotAtAngle = shooter.isPivotIsAtTarget(solverResult.pitch());
+      var targetPitch = solverResult.pitch().plus(Rotation2d.fromDegrees(tunablePitchOffset.get()));
+      shooter.setPivotPosition(targetPitch);
+      pivotAtAngle = shooter.isPivotIsAtTarget(targetPitch);
       logPositions();
       Logger.recordOutput("ShooterScoreSpeaker/omega", omega);
     } else {
@@ -206,11 +208,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     var externalConfirmation = this.externalConfirmation.getAsBoolean();
     boolean atThetaTarget = false;
 
-    if(solverResult != null){
-      var thetaError = solverResult.heading().getRadians() - drivetrainWrapper.getRotation().getRadians();
+    if (solverResult != null) {
+      var thetaError =
+          solverResult.heading().getRadians() - drivetrainWrapper.getRotation().getRadians();
       while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
       while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
-      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(0.5); 
+      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(0.5);
     }
 
     // FIXME: log each condition
@@ -219,8 +222,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     Logger.recordOutput("ShooterScoreSpeaker/launcherAtRPM", launcherAtRpm);
     Logger.recordOutput("ShooterScoreSpeaker/pivotAtAngle", pivotAtAngle);
     Logger.recordOutput("ShooterScoreSpeaker/shootingPosition", shootingPosition());
-    Logger.recordOutput("ShooterScoreSpeaker/atThetaTarget", atThetaTarget);  
-    if ((launcherAtRpm && pivotAtAngle && shootingPosition() && atThetaTarget) || timeFromStart() >= forceShotIn
+    Logger.recordOutput("ShooterScoreSpeaker/atThetaTarget", atThetaTarget);
+    if ((launcherAtRpm && pivotAtAngle && shootingPosition() && atThetaTarget)
+        || timeFromStart() >= forceShotIn
     // && externalConfirmation
     ) {
 
@@ -239,7 +243,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
             drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
     rotateToSpeaker();
     logPositions();
-    shooter.setPivotPosition(solverResult.pitch());
+    shooter.setPivotPosition(
+        solverResult.pitch().plus(Rotation2d.fromDegrees(tunablePitchOffset.get())));
     // run kicker for X seconds
     shooter.setKickerPercentOut(0.5);
 
@@ -271,12 +276,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Logger.recordOutput(
           "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
       Logger.recordOutput(
-          "ShooterScoreSpeaker/pitchTargetDegrees", solverResult.pitch().getDegrees());
+          "ShooterScoreSpeaker/pitchTargetDegrees",
+          solverResult.pitch().getDegrees() + tunablePitchOffset.get());
       Logger.recordOutput(
           "ShooterScoreSpeaker/headingDegrees",
           drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
       Logger.recordOutput("ShooterScoreSpeaker/pitchDegrees", shooter.getPitch().getDegrees());
-      
     }
   }
 
@@ -290,7 +295,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Logger.recordOutput("ShooterScoreSpeaker/shooterSolver", false);
     }
     Logger.recordOutput(
-        "ShooterScoreSpeaker/rotationalError", Math.toDegrees(rotationController.getPositionError()));
+        "ShooterScoreSpeaker/rotationalError",
+        Math.toDegrees(rotationController.getPositionError()));
   }
 
   private boolean shootingPosition() {

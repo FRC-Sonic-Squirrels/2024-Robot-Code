@@ -17,8 +17,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -41,6 +43,8 @@ import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.ScoreSpeaker;
+import frc.robot.commands.Shimmy;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.intake.IntakeGamepiece;
@@ -113,6 +117,9 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
+  private final LoggedTunableNumber tunableX = new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
+  private final LoggedTunableNumber tunableY = new LoggedTunableNumber("tunableYFromSpeaker", 0);
+
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   private final LoggedDashboardChooser<String> autoChooser =
@@ -129,8 +136,10 @@ public class RobotContainer {
   Trigger homeSensorsButtonTrigger =
       new Trigger(() -> !homeSensorsButton.get() && !DriverStation.isEnabled());
 
-  private LoggedTunableNumber tunableX = new LoggedTunableNumber("Localization/tunableXPose", 0.0);
-  private LoggedTunableNumber tunableY = new LoggedTunableNumber("Localization/tunableYPose", 0.0);
+  // private LoggedTunableNumber tunableX = new LoggedTunableNumber("Localization/tunableXPose",
+  // 0.0);
+  // private LoggedTunableNumber tunableY = new LoggedTunableNumber("Localization/tunableYPose",
+  // 0.0);
 
   boolean brakeModeTriggered = false;
 
@@ -505,7 +514,14 @@ public class RobotContainer {
     // driverController
     //     .leftBumper()
     //     .whileTrue(CommandComposer.scoreAmp(endEffector, drivetrainWrapper, elevator, arm))
-    //     .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, elevator, arm));
+    //     .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator,  arm));
+
+    driverController
+        .leftBumper()
+        .onTrue(MechanismActions.ampFast(elevator, arm))
+        .onFalse(MechanismActions.ampPositionToLoadPosition(elevator, arm));
+
+    operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
 
     // driverController
     //     .rightTrigger()
@@ -565,6 +581,37 @@ public class RobotContainer {
     //     .whileTrue(CommandComposer.autoClimb(drivetrainWrapper, elevator, arm, endEffector));
 
     driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
+
+    driverController
+        .leftTrigger()
+        .whileTrue(new DriveToPose(drivetrainWrapper, Constants.FieldConstants::getAmpScoringPose));
+
+    PIDController rotationController = new PIDController(4.9, 0, 0);
+
+    driverController
+        .povRight()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  drivetrainWrapper.setRotationOverride(
+                      rotationController.calculate(
+                          drivetrainWrapper.getRotation().getRadians(),
+                          Units.Degrees.of(90.0).in(Units.Radians)));
+                }));
+
+    driverController
+        .y()
+        .whileTrue(
+            new DriveToPose(
+                drivetrainWrapper,
+                () ->
+                    new Pose2d(
+                        Constants.FieldConstants.getSpeakerTranslation()
+                            .plus(
+                                new Translation2d(
+                                    Units.Inches.of(tunableX.get()).in(Units.Meters),
+                                    Units.Inches.of(tunableY.get()).in(Units.Meters))),
+                        new Rotation2d())));
     // driverController
     //     .povUp()
     //     .onTrue(
@@ -580,9 +627,10 @@ public class RobotContainer {
 
     // driverController.povLeft().onTrue(MechanismActions.ampFast(elevator, arm));
 
-    driverController.povUp().onTrue(MechanismActions.ampPosition(elevator, arm));
+    // driverController.povUp().onTrue(MechanismActions.ampPosition(elevator, arm));
 
-    driverController.povRight().onTrue(MechanismActions.ampPositionToLoadPosition(elevator, arm));
+    // driverController.povRight().onTrue(MechanismActions.ampPositionToLoadPosition(elevator,
+    // arm));
 
     // driverController
     //     .x()
@@ -633,10 +681,10 @@ public class RobotContainer {
           .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
     }
 
-    operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
-    operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
-    operatorController.povDown().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
-    operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
+    // operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
+    // operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
+    // operatorController.povDown().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
+    // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
     operatorController
         .b()
         .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))

@@ -105,7 +105,8 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     DRIVE_GEAR_RATIO = globalConfig.getSwerveModuleDriveGearRatio();
     TURN_GEAR_RATIO = globalConfig.getSwerveModuleTurnGearRatio();
 
-    driveMotorCurrentLimitConfig = globalConfig.getDriveTalonCurrentLimitConfig();
+    // driveMotorCurrentLimitConfig = globalConfig.getDriveTalonCurrentLimitConfig();
+    driveMotorCurrentLimitConfig = new CurrentLimitsConfigs().withStatorCurrentLimit(60).withStatorCurrentLimitEnable(true);
     steerMotorCurrentLimitConfig = globalConfig.getSteerTalonCurrentLimitConfig();
     // --- define constants ---
 

@@ -22,9 +22,9 @@ public class IntakeGamepiece extends Command {
 
   private LoggedTunableNumber rumbleIntensityPercent = group.build("rumbleIntensityPercent", 0.3);
 
-  private LoggedTunableNumber intakingPercent = group.build("intakingPercent", 0.3);
+  private LoggedTunableNumber intakingPercent = group.build("intakingPercent", 0.4);
   private LoggedTunableNumber intakingPercentWithGamepiece =
-      group.build("intakingPercentWithGamepiece", 0.2);
+      group.build("intakingPercentWithGamepiece", 0.3);
 
   private final Consumer<Double> rumbleConsumer;
 

@@ -69,8 +69,8 @@ public class RobotConfig2024 extends RobotConfig {
   // -------- SWERVE CURRENT LIMITS ---------
   private static final CurrentLimitsConfigs DRIVE_TALON_CURRENT_LIMIT_CONFIGS =
       new CurrentLimitsConfigs()
-          .withSupplyCurrentLimit(50)
-          .withSupplyCurrentThreshold(60)
+          .withSupplyCurrentLimit(20)
+          .withSupplyCurrentThreshold(30)
           .withSupplyTimeThreshold(0.1)
           .withSupplyCurrentLimitEnable(true);
 

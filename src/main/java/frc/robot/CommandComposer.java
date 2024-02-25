@@ -101,8 +101,9 @@ public class CommandComposer {
                 <= distToElevateMech.in(Units.Meters);
 
     Command scoreAmp =
-        driveToAmp
-            .until(driveToAmp::atGoal)
+        // driveToAmp
+        //     .until(driveToAmp::atGoal)
+        Commands.none()
             .alongWith(
                 new ConditionalCommand(
                     MechanismActions.ampPosition(elevator, arm),
@@ -121,13 +122,15 @@ public class CommandComposer {
   }
 
   public static Command cancelScoreAmp(
-      DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm) {
+      DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
         // Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
         //     .andThen(
-        MechanismActions.ampPositionToLoadPosition(elevator, arm)
+        MechanismActions.ampPositionToLoadPosition(elevator, arm).alongWith(new EndEffectorPercentOut(endEffector, 0.0))
         // )
         ;
+
+        
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;

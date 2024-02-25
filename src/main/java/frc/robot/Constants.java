@@ -123,7 +123,7 @@ public final class Constants {
       // 57.0
     );
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.03950466960668564, 5.508944988250732); //TODO: move to right
+        new Translation2d(0.24, 5.508944988250732); //TODO: move to right
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
