@@ -340,13 +340,13 @@ public class ScoreSpeaker extends Command {
 
     Logger.recordOutput("ShootSpeaker/ShootingRPM", shooter.getRPM());
 
-    GamepieceVisualization.getInstance()
-        .updateVisualization(
-            drive.getPoseEstimatorPose(),
-            drive.getFieldRelativeVelocities().getTranslation(),
-            shooter.getPitch(),
-            shooter.getRPM(),
-            readyToShoot);
+    // GamepieceVisualization.getInstance()
+    //     .updateVisualization(
+    //         drive.getPoseEstimatorPose(),
+    //         drive.getFieldRelativeVelocities().getTranslation(),
+    //         shooter.getPitch(),
+    //         shooter.getRPM(),
+    //         readyToShoot);
 
     GamepieceVisualization.getInstance().logTraj();
   }

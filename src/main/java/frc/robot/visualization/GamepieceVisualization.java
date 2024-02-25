@@ -38,30 +38,18 @@ public class GamepieceVisualization {
   }
 
   public void updateVisualization(
-      Pose2d robotPose,
-      Translation2d robotVel,
-      Rotation2d shooterAngle,
-      double shooterRPM,
-      boolean shootingGamepiece) {
-    this.shootingGamepiece = shootingGamepiece;
-    gamepieceShot = shootingGamepiece && !shootingPrev;
-    if (gamepieceShot) {
-      robotPoseOfShot = robotPose;
-      robotVelOfShot = robotVel;
-      shooterAngleOfShot = shooterAngle;
-      shooterRPMofShot = shooterRPM;
-    }
-    shootingPrev = shootingGamepiece;
+      Pose2d robotPose, Translation2d robotVel, Rotation2d shooterAngle, double shooterRPM) {
+    robotPoseOfShot = robotPose;
+    robotVelOfShot = robotVel;
+    shooterAngleOfShot = shooterAngle;
+    shooterRPMofShot = shooterRPM;
+    shootingTimer.reset();
+    shootingTimer.start();
   }
 
   public void logTraj() {
     double shootingTime = shootingTimer.get();
     Logger.recordOutput("Visualization/shootingGamepiece", shootingGamepiece);
-    if (gamepieceShot) shootingTimer.start();
-    if (!shootingGamepiece) {
-      shootingTimer.stop();
-      shootingTimer.reset();
-    }
     Translation3d robotToSpeaker =
         Constants.FieldConstants.getSpeakerTranslation3D()
             .minus(GeometryUtil.translation2dTo3d(robotPoseOfShot.getTranslation()));

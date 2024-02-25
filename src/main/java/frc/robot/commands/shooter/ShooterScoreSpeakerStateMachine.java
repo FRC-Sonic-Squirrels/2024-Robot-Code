@@ -20,6 +20,7 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
+import frc.robot.visualization.GamepieceVisualization;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
@@ -280,7 +281,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler visualizeGamepiece() {
     log("state", 5);
-    // visualize gamepiece
+    GamepieceVisualization.getInstance()
+        .updateVisualization(
+            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getFieldRelativeVelocities().getTranslation(),
+            shooter.getPitch(),
+            shooter.getRPM());
 
     return setDone();
   }
