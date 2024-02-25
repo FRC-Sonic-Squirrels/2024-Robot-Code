@@ -132,11 +132,11 @@ public class Elevator extends SubsystemBase {
     io.setNeutralMode(value);
   }
 
-  public void releaseReactionArms(){
+  public void releaseReactionArms() {
     io.releaseReactionArms();
   }
 
-  public void retractReactionArms(){
+  public void retractReactionArms() {
     io.retractReactionArms();
   }
 }
