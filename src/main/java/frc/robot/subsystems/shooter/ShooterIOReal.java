@@ -151,7 +151,7 @@ public class ShooterIOReal implements ShooterIO {
     pivot.optimizeBusUtilization();
     kicker.optimizeBusUtilization();
 
-    timeOfFlight.setRangeOfInterest(6, 6, 10, 10);
+    timeOfFlight.setRangeOfInterest(0, 16, 16, 0);
     timeOfFlight.setRangingMode(RangingMode.Short, 40);
   }
 

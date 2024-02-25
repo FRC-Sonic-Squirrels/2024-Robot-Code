@@ -104,6 +104,7 @@ public class AutosManager {
             endEffector,
             elevator,
             arm,
+            intake,
             new AutoSubstateMachine[] {
               generateSubstateMachine("sourceAuto.1", "G5S3"),
               generateSubstateMachine("S3G4", "G4S2"),
@@ -124,6 +125,7 @@ public class AutosManager {
             endEffector,
             elevator,
             arm,
+            intake,
             new AutoSubstateMachine[] {
               generateSubstateMachine("ampAuto.1", "G1S1"),
               generateSubstateMachine("S1G2", "G2S2"),
@@ -142,6 +144,7 @@ public class AutosManager {
             endEffector,
             elevator,
             arm,
+            intake,
             new StateMachine[] {
               new MiddleFirstSubstate(
                   drivetrain,
@@ -168,6 +171,7 @@ public class AutosManager {
             endEffector,
             elevator,
             arm,
+            intake,
             new StateMachine[] {new DriveAfterSimpleShot(drivetrain)},
             10.0);
 

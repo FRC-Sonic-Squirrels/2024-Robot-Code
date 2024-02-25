@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
+import frc.lib.team2930.lib.controller_rumble.ControllerRumbleUntilButtonPress;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
@@ -488,7 +489,7 @@ public class RobotContainer {
             Commands.runOnce(() -> vision.useMaxDistanceAwayFromExistingEstimate(true), vision));
 
     driverController
-        .rightTrigger()
+        .rightBumper()
         .whileTrue(
             new IntakeGamepiece(
                     intake,
@@ -501,10 +502,10 @@ public class RobotContainer {
                 .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
     driverController
-        .rightBumper()
+        .rightTrigger()
         .whileTrue(
             ShooterScoreSpeakerStateMachine.getAsCommand(
-                drivetrainWrapper, shooter, endEffector, 1000));
+                drivetrainWrapper, shooter, endEffector, intake, 1000));
 
     // driverController
     //     .leftBumper()
@@ -518,8 +519,20 @@ public class RobotContainer {
 
     driverController
         .leftBumper()
-        .onTrue(MechanismActions.ampFast(elevator, arm))
-        .onFalse(MechanismActions.ampPositionToLoadPosition(elevator, arm));
+        .onTrue(
+            CommandComposer.scoreAmp(
+                endEffector,
+                drivetrainWrapper,
+                elevator,
+                arm,
+                false,
+                new ControllerRumbleUntilButtonPress(
+                    (r) -> {
+                      driverController.getHID().setRumble(RumbleType.kBothRumble, r);
+                    },
+                    driverController.a(),
+                    0.5)))
+        .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
 

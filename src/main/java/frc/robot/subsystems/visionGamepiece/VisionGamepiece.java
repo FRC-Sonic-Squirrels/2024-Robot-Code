@@ -12,10 +12,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -56,61 +54,61 @@ public class VisionGamepiece extends SubsystemBase {
       //  G4: yMeters = 2.428
       //  G5: yMeters = 0.742
 
-      Pose2d g1 = new Pose2d(8.273, 7.474, new Rotation2d());
-      Pose2d g2 = new Pose2d(8.273, 5.792, new Rotation2d());
-      Pose2d g3 = new Pose2d(8.273, 4.11, new Rotation2d());
-      Pose2d g4 = new Pose2d(8.273, 2.428, new Rotation2d());
-      Pose2d g5 = new Pose2d(8.273, 2.428, new Rotation2d());
+      // Pose2d g1 = new Pose2d(8.273, 7.474, new Rotation2d());
+      // Pose2d g2 = new Pose2d(8.273, 5.792, new Rotation2d());
+      // Pose2d g3 = new Pose2d(8.273, 4.11, new Rotation2d());
+      // Pose2d g4 = new Pose2d(8.273, 2.428, new Rotation2d());
+      // Pose2d g5 = new Pose2d(8.273, 2.428, new Rotation2d());
 
-      processedGamepieceData =
-          new ProcessedGamepieceData[] {
-            new ProcessedGamepieceData(
-                new Rotation2d(),
-                new Rotation2d(),
-                GeometryUtil.getDist(robotPoseSupplier.get(), g1),
-                robotPoseSupplier.get().relativeTo(g1),
-                g1,
-                Timer.getFPGATimestamp()),
-            new ProcessedGamepieceData(
-                new Rotation2d(),
-                new Rotation2d(),
-                GeometryUtil.getDist(robotPoseSupplier.get(), g2),
-                robotPoseSupplier.get().relativeTo(g2),
-                g2,
-                Timer.getFPGATimestamp()),
-            new ProcessedGamepieceData(
-                new Rotation2d(),
-                new Rotation2d(),
-                GeometryUtil.getDist(robotPoseSupplier.get(), g3),
-                robotPoseSupplier.get().relativeTo(g3),
-                g3,
-                Timer.getFPGATimestamp()),
-            new ProcessedGamepieceData(
-                new Rotation2d(),
-                new Rotation2d(),
-                GeometryUtil.getDist(robotPoseSupplier.get(), g4),
-                robotPoseSupplier.get().relativeTo(g4),
-                g4,
-                Timer.getFPGATimestamp()),
-            new ProcessedGamepieceData(
-                new Rotation2d(),
-                new Rotation2d(),
-                GeometryUtil.getDist(robotPoseSupplier.get(), g5),
-                robotPoseSupplier.get().relativeTo(g5),
-                g5,
-                Timer.getFPGATimestamp())
-          };
+      // processedGamepieceData =
+      //     new ProcessedGamepieceData[] {
+      //       new ProcessedGamepieceData(
+      //           new Rotation2d(),
+      //           new Rotation2d(),
+      //           GeometryUtil.getDist(robotPoseSupplier.get(), g1),
+      //           robotPoseSupplier.get().relativeTo(g1),
+      //           g1,
+      //           Timer.getFPGATimestamp()),
+      //       new ProcessedGamepieceData(
+      //           new Rotation2d(),
+      //           new Rotation2d(),
+      //           GeometryUtil.getDist(robotPoseSupplier.get(), g2),
+      //           robotPoseSupplier.get().relativeTo(g2),
+      //           g2,
+      //           Timer.getFPGATimestamp()),
+      //       new ProcessedGamepieceData(
+      //           new Rotation2d(),
+      //           new Rotation2d(),
+      //           GeometryUtil.getDist(robotPoseSupplier.get(), g3),
+      //           robotPoseSupplier.get().relativeTo(g3),
+      //           g3,
+      //           Timer.getFPGATimestamp()),
+      //       new ProcessedGamepieceData(
+      //           new Rotation2d(),
+      //           new Rotation2d(),
+      //           GeometryUtil.getDist(robotPoseSupplier.get(), g4),
+      //           robotPoseSupplier.get().relativeTo(g4),
+      //           g4,
+      //           Timer.getFPGATimestamp()),
+      //       new ProcessedGamepieceData(
+      //           new Rotation2d(),
+      //           new Rotation2d(),
+      //           GeometryUtil.getDist(robotPoseSupplier.get(), g5),
+      //           robotPoseSupplier.get().relativeTo(g5),
+      //           g5,
+      //           Timer.getFPGATimestamp())
+      //     };
 
-      for (int i = 0; i < processedGamepieceData.length; i++) {
-        if (i == 0) {
-          closestGamepiece = processedGamepieceData[0];
-        } else {
-          if (processedGamepieceData[i].distance < closestGamepiece.distance) {
-            closestGamepiece = processedGamepieceData[i];
-          }
-        }
-        logGamepieceData(new RawGamepieceData(0, 0, 0), processedGamepieceData[i], i);
-      }
+      // for (int i = 0; i < processedGamepieceData.length; i++) {
+      //   if (i == 0) {
+      //     closestGamepiece = processedGamepieceData[0];
+      //   } else {
+      //     if (processedGamepieceData[i].distance < closestGamepiece.distance) {
+      //       closestGamepiece = processedGamepieceData[i];
+      //     }
+      //   }
+      //   logGamepieceData(new RawGamepieceData(0, 0, 0), processedGamepieceData[i], i);
+      // }
 
       // --------------------------------------------------------------------------------------
 
@@ -241,6 +239,9 @@ public class VisionGamepiece extends SubsystemBase {
     Logger.recordOutput(
         baseName + "/Processed/targetPitch", processedGamepieceData.targetPitch.getDegrees());
     Logger.recordOutput(baseName + "/Processed/pose", processedGamepieceData.pose);
-    Logger.recordOutput(baseName + "/Processed/globalPose", processedGamepieceData.globalPose);
+    // Logger.recordOutput(baseName + "/Processed/globalPose", new
+    // Pose3d(processedGamepieceData.globalPose.getX(), processedGamepieceData.globalPose.getY(),
+    // (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS -
+    // Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS) /2.0);
   }
 }

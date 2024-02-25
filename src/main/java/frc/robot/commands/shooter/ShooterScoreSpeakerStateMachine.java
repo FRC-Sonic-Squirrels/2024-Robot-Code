@@ -21,17 +21,51 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class ShooterScoreSpeakerStateMachine extends StateMachine {
+  private LoggedTunableNumber neverShoot = group.build("neverShoot", 0);
+
+  private static final TunableNumberGroup group = new TunableNumberGroup("ShooterScoreSpeaker");
+
+  private static LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8000.0);
+  private static LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
+
+  private static LoggedTunableNumber tunablePitchOffset = group.build("tunablePitchOffset", 0.0);
+
+  private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
+  private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
+
+  private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);
+
+  private static final LoggedTunableNumber slowLoadingEEPercent =
+      group.build("loading/slowEEPercent", 0.1);
+  private static final LoggedTunableNumber slowLoadingIntakePercent =
+      group.build("loading/slowLoadingIntakePercent", 0.1);
+  private static final LoggedTunableNumber slowLoadingKickerPercent =
+      group.build("loading/slowLoadingKickerPercent", 0.1);
+
+  private static final LoggedTunableNumber loadingEEPercent =
+      group.build("loading/LoadingEEPercent", 0.3);
+  private static final LoggedTunableNumber loadingIntakePercent =
+      group.build("loading/LoadingIntakePercent", 0.3);
+  private static final LoggedTunableNumber loadingKickerPercent =
+      group.build("loading/LoadingKickerPercent", 0.3);
+
+  private static final LoggedTunableNumber shootingKickerPercent =
+      group.build("shootingKickerPercent", 1.0);
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
   private final EndEffector endEffector;
+  private final Intake intake;
   // such as driver confirmation, in auto this is always true
+  private final Consumer<Double> rumbleConsumer;
   private final BooleanSupplier externalConfirmation;
   private final double forceShotIn;
 
@@ -46,18 +80,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private boolean loadGamepieceCommandFinished = false;
 
-  private LoggedTunableNumber neverShoot = group.build("neverShoot", 0);
-
-  private static final TunableNumberGroup group = new TunableNumberGroup("ShooterScoreSpeaker");
-
-  private LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8000.0);
-  private LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
-
-  private LoggedTunableNumber tunablePitchOffset = group.build("tunablePitchOffset", 0.0);
-
-  private final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
-  private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
-
   private final PIDController rotationController;
 
   private double shotTime;
@@ -68,23 +90,21 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       DrivetrainWrapper drivetrainWrapper,
       Shooter shooter,
       EndEffector endEffector,
-      double forceShotIn) {
-    this(drivetrainWrapper, shooter, endEffector, forceShotIn, () -> true);
-  }
-
-  public ShooterScoreSpeakerStateMachine(
-      DrivetrainWrapper drivetrainWrapper,
-      Shooter shooter,
-      EndEffector endEffector,
+      Intake intake,
       double forceShotIn,
-      BooleanSupplier externalConfirmation) {
+      BooleanSupplier externalConfirmation,
+      Consumer<Double> rumbleConsumer) {
     this.drivetrainWrapper = drivetrainWrapper;
     this.shooter = shooter;
     this.endEffector = endEffector;
+    this.intake = intake;
+    this.rumbleConsumer = rumbleConsumer;
     this.externalConfirmation = externalConfirmation;
     this.forceShotIn = forceShotIn;
+
     rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
+
     Logger.recordOutput("ShooterScoreSpeaker/state", 0);
     setInitialState(this::prepWhileLoadingGamepiece);
   }
@@ -93,19 +113,28 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       DrivetrainWrapper drivetrainWrapper,
       Shooter shooter,
       EndEffector endEffector,
-      double forceShotIn) {
+      Intake intake,
+      double forceShotIn,
+      BooleanSupplier externalSupplier,
+      Consumer<Double> rumbleConsumer) {
 
     Command command =
         new RunStateMachineCommand(
             () ->
                 new ShooterScoreSpeakerStateMachine(
-                    drivetrainWrapper, shooter, endEffector, forceShotIn),
+                    drivetrainWrapper,
+                    shooter,
+                    endEffector,
+                    intake,
+                    forceShotIn,
+                    externalSupplier,
+                    rumbleConsumer),
             shooter,
             endEffector);
 
     // FIXME: probably dont need this add requirments here once we add the asCommand(Subsytem...
     // requirments) method to the StateMachine class
-    command.addRequirements(shooter, endEffector);
+    command.addRequirements(shooter, endEffector, intake);
 
     // once statemachine is over, stop shooter and end effector subsystems
     command =
@@ -116,31 +145,28 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
               shooter.setLauncherVoltage(0.0);
               shooter.setPivotPosition(Constants.ShooterConstants.Pivot.HOME_POSITION);
               drivetrainWrapper.resetRotationOverride();
+              rumbleConsumer.accept(0.0);
+              intake.setPercentOut(0.0);
             });
 
     return command;
   }
 
-  //   public StateHandler spawnLoadShooterCommand() {
-  //     spawnCommand(
-  //         new ShooterLoadFromEndEffector().withTimeout(1.5),
-  //         (ignore) -> {
-  //           loadGamepieceCommandFinished = true;
-  //           return null;
-  //         });
-
-  //     return this::prepWhileLoadingGamepiece;
-  //   }
+  public static Command getAsCommand(
+      DrivetrainWrapper drivetrainWrapper,
+      Shooter shooter,
+      EndEffector endEffector,
+      Intake intake,
+      double forceShotIn) {
+    return getAsCommand(
+        drivetrainWrapper, shooter, endEffector, intake, forceShotIn, () -> true, (ignore) -> {});
+  }
 
   public StateHandler prepWhileLoadingGamepiece() {
     // aim towards speaker
     Logger.recordOutput("ShooterScoreSpeaker/state", 1);
 
-    solverResult =
-        solver.computeAngles(
-            Timer.getFPGATimestamp(),
-            drivetrainWrapper.getPoseEstimatorPose(),
-            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+    updateSolver();
     rotateToSpeaker();
 
     if (solverResult != null) {
@@ -160,13 +186,21 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (shooter.noteInShooter()) {
       shooter.setKickerPercentOut(0.0);
       endEffector.setPercentOut(0.0);
+      intake.setPercentOut(0.0);
       return this::finalConfirmationsBeforeShooting;
     } else {
       // FIXME: look into calculating gear ratio to make it so kicker and EE spin at same speed
       shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
       if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
-        shooter.setKickerPercentOut(0.1);
-        endEffector.setPercentOut(0.1);
+        if (endEffector.intakeSideTOFDetectGamepiece()) {
+          shooter.setKickerPercentOut(loadingKickerPercent.get());
+          endEffector.setPercentOut(loadingEEPercent.get());
+          intake.setPercentOut(loadingIntakePercent.get());
+        } else {
+          shooter.setKickerPercentOut(slowLoadingKickerPercent.get());
+          endEffector.setPercentOut(slowLoadingEEPercent.get());
+          intake.setPercentOut(slowLoadingIntakePercent.get());
+        }
       }
     }
 
@@ -175,11 +209,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler finalConfirmationsBeforeShooting() {
     Logger.recordOutput("ShooterScoreSpeaker/state", 2);
-    solverResult =
-        solver.computeAngles(
-            Timer.getFPGATimestamp(),
-            drivetrainWrapper.getPoseEstimatorPose(),
-            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+    updateSolver();
 
     // still be continuously aiming towards speaker
     // check launcher rpm correct
@@ -193,7 +223,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double omega =
           rotationController.calculate(
               drivetrainWrapper.getRotation().getRadians(), solverResult.heading().getRadians());
-      var targetPitch = solverResult.pitch().plus(Rotation2d.fromDegrees(tunablePitchOffset.get()));
+      var targetPitch = solverResult.pitch().plus(Rotation2d.fromDegrees(getPitchOffset()));
       shooter.setPivotPosition(targetPitch);
       pivotAtAngle = shooter.isPivotIsAtTarget(targetPitch);
       logPositions();
@@ -213,22 +243,24 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           solverResult.heading().getRadians() - drivetrainWrapper.getRotation().getRadians();
       while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
       while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
-      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(0.5);
+      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(2.0);
     }
 
-    // FIXME: log each condition
+    var forceShoot = timeFromStart() >= forceShotIn;
 
-    // FIXME: all all condition
-    Logger.recordOutput("ShooterScoreSpeaker/launcherAtRPM", launcherAtRpm);
-    Logger.recordOutput("ShooterScoreSpeaker/pivotAtAngle", pivotAtAngle);
-    Logger.recordOutput("ShooterScoreSpeaker/shootingPosition", shootingPosition());
-    Logger.recordOutput("ShooterScoreSpeaker/atThetaTarget", atThetaTarget);
-    if ((launcherAtRpm && pivotAtAngle && shootingPosition() && atThetaTarget)
-        || timeFromStart() >= forceShotIn
-    // && externalConfirmation
-    ) {
-
-      return this::shoot;
+    Logger.recordOutput("ShooterScoreSpeaker/shootingConfimation/launcherAtRPM", launcherAtRpm);
+    Logger.recordOutput("ShooterScoreSpeaker/shootingConfimation/pivotAtAngle", pivotAtAngle);
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/shootingConfimation/shootingPosition", shootingPosition());
+    Logger.recordOutput("ShooterScoreSpeaker/shootingConfimation/forceShoot", forceShoot);
+    Logger.recordOutput(
+        "ShooterScoreSpeaker/shootingConfimation/driverConfirmation", externalConfirmation);
+    Logger.recordOutput("ShooterScoreSpeaker/shootingConfimation/atThetaTarget", atThetaTarget);
+    if ((launcherAtRpm && pivotAtAngle && shootingPosition() && atThetaTarget) || forceShoot) {
+      rumbleConsumer.accept(rumbleIntensity.get());
+      if (externalConfirmation) {
+        return this::shoot;
+      }
     }
 
     return null;
@@ -236,17 +268,13 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler shoot() {
     Logger.recordOutput("ShooterScoreSpeaker/state", 3);
-    solverResult =
-        solver.computeAngles(
-            Timer.getFPGATimestamp(),
-            drivetrainWrapper.getPoseEstimatorPose(),
-            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+    rumbleConsumer.accept(0.0);
+    updateSolver();
     rotateToSpeaker();
     logPositions();
-    shooter.setPivotPosition(
-        solverResult.pitch().plus(Rotation2d.fromDegrees(tunablePitchOffset.get())));
+    shooter.setPivotPosition(solverResult.pitch().plus(Rotation2d.fromDegrees(getPitchOffset())));
     // run kicker for X seconds
-    shooter.setKickerPercentOut(0.5);
+    shooter.setKickerPercentOut(shootingKickerPercent.get());
 
     if (!shooter.noteInShooter()) {
 
@@ -258,6 +286,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler shootEnding() {
     Logger.recordOutput("ShooterScoreSpeaker/state", 4);
+    updateSolver();
+    rotateToSpeaker();
     if (timeFromStart() < shotTime + 0.2) return null;
     // visualize gamepiece
 
@@ -277,12 +307,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           "ShooterScoreSpeaker/headingTargetDegrees", solverResult.heading().getDegrees());
       Logger.recordOutput(
           "ShooterScoreSpeaker/pitchTargetDegrees",
-          solverResult.pitch().getDegrees() + tunablePitchOffset.get());
+          solverResult.pitch().getDegrees() + getPitchOffset());
       Logger.recordOutput(
           "ShooterScoreSpeaker/headingDegrees",
           drivetrainWrapper.getPoseEstimatorPose().getRotation().getDegrees());
       Logger.recordOutput("ShooterScoreSpeaker/pitchDegrees", shooter.getPitch().getDegrees());
     }
+
+    Logger.recordOutput("ShooterScoreSpeaker/pitchOffset", getPitchOffset());
   }
 
   private void rotateToSpeaker() {
@@ -325,5 +357,21 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler skipToShootIfForceShot() {
     return timeFromStart() >= forceShotIn ? this::shoot : null;
+  }
+
+  public void updateSolver() {
+    solverResult =
+        solver.computeAngles(
+            Timer.getFPGATimestamp(),
+            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
+  }
+
+  private double getPitchOffset() {
+    if (solverResult != null) {
+      double distance = solverResult.xyDistance();
+    }
+    return tunablePitchOffset.get();
+    // return Constants.ShooterConstants.Pivot.getPitchOffset(distance);
   }
 }

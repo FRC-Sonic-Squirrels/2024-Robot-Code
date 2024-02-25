@@ -82,6 +82,7 @@ public class MiddleFirstSubstate extends StateMachine {
               drive,
               shooter,
               endEffector,
+              intake,
               gamepieceCounter == 4 ? 3.0 : (gamepieceCounter == 3 ? 0.75 : 0.93));
 
       intakeGamepiece.cancel();

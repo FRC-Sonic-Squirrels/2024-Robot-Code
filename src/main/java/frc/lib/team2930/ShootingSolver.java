@@ -1,8 +1,7 @@
 package frc.lib.team2930;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.*;
+import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
   public static final int DebugSpew = 0;
@@ -16,7 +15,12 @@ public class ShootingSolver {
   private boolean doneShooting;
 
   public record Solution(
-      double timeToShoot, Rotation2d heading, double rotationSpeed, Rotation2d pitch, Translation3d offset) {}
+      double timeToShoot,
+      Rotation2d heading,
+      double rotationSpeed,
+      Rotation2d pitch,
+      Translation3d offset,
+      double xyDistance) {}
 
   public ShootingSolver(
       Translation3d Pspeaker,
@@ -243,6 +247,11 @@ public class ShootingSolver {
     var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 
     return new Solution(
-        timeToShoot, new Rotation2d(targetTheta), rateOfRotation, new Rotation2d(shooterPitch), dPspeaker);
+        timeToShoot,
+        new Rotation2d(targetTheta),
+        rateOfRotation,
+        new Rotation2d(shooterPitch),
+        dPspeaker,
+        xyDistToSpeaker);
   }
 }

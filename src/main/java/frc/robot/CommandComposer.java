@@ -75,7 +75,12 @@ public class CommandComposer {
   }
 
   public static Command scoreAmp(
-      EndEffector endEffector, DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm) {
+      EndEffector endEffector,
+      DrivetrainWrapper drivetrainWrapper,
+      Elevator elevator,
+      Arm arm,
+      boolean doDrive,
+      Command confirmation) {
     /*
      * Step 1: drive to amp
      * at the same time, if we are within a distance move mech into position
@@ -101,20 +106,11 @@ public class CommandComposer {
                 <= distToElevateMech.in(Units.Meters);
 
     Command scoreAmp =
-        // driveToAmp
-        //     .until(driveToAmp::atGoal)
-        Commands.none()
-            .alongWith(
-                new ConditionalCommand(
-                    MechanismActions.ampPosition(elevator, arm),
-                    MechanismActions.loadingPosition(elevator, arm)
-                        .andThen(
-                            Commands.waitSeconds(
-                                1000.0)) // extra time to practically remove end condition
-                        .until(withinRangeOfAmp)
-                        .andThen(MechanismActions.ampPosition(elevator, arm)),
-                    withinRangeOfAmp))
-            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE));
+        new ConditionalCommand(driveToAmp.until(driveToAmp::atGoal), Commands.none(), () -> doDrive)
+            .alongWith(MechanismActions.ampFast(elevator, arm))
+            .andThen(confirmation)
+            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE))
+            .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");
 
@@ -124,13 +120,15 @@ public class CommandComposer {
   public static Command cancelScoreAmp(
       DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
-        // Commands.waitUntil(() -> drivetrainWrapper.getPoseEstimatorPose().getY() <= 7.4)
-        //     .andThen(
-        MechanismActions.ampPositionToLoadPosition(elevator, arm).alongWith(new EndEffectorPercentOut(endEffector, 0.0))
-        // )
-        ;
-
-        
+        Commands.waitUntil(
+                () ->
+                    GeometryUtil.getDist(
+                            drivetrainWrapper.getPoseEstimatorPose(),
+                            Constants.FieldConstants.getAmpScoringPose())
+                        >= 0.5)
+            .andThen(
+                MechanismActions.loadingPosition(elevator, arm)
+                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0)));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;

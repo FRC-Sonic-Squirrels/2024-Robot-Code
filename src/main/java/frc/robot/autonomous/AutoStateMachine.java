@@ -11,6 +11,7 @@ import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import org.littletonrobotics.junction.Logger;
@@ -22,6 +23,7 @@ public class AutoStateMachine extends StateMachine {
   private final EndEffector endEffector;
   private final Elevator elevator;
   private final Arm arm;
+  private final Intake intake;
   private final StateMachine[] subStates;
   private int currentSubState;
   private double initShootDeadline;
@@ -33,6 +35,7 @@ public class AutoStateMachine extends StateMachine {
       EndEffector endEffector,
       Elevator elevator,
       Arm arm,
+      Intake intake,
       StateMachine[] subStates,
       double initShootDeadline) {
     this.drive = drive;
@@ -40,6 +43,7 @@ public class AutoStateMachine extends StateMachine {
     this.endEffector = endEffector;
     this.elevator = elevator;
     this.arm = arm;
+    this.intake = intake;
     this.subStates = subStates;
     this.initShootDeadline = initShootDeadline;
 
@@ -47,7 +51,8 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler autoInitialState() {
-    scoreSpeaker = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, 5);
+    scoreSpeaker =
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
     scoreSpeaker.schedule();
 
     MechanismActions.loadingPosition(elevator, arm);

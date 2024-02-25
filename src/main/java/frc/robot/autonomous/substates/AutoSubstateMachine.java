@@ -92,7 +92,8 @@ public class AutoSubstateMachine extends StateMachine {
 
     intakeCommand.cancel();
 
-    scoreSpeaker = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, 5);
+    scoreSpeaker =
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
 
     spawnCommand(
         scoreSpeaker,

@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -114,16 +115,17 @@ public final class Constants {
   public static class FieldConstants {
     // official Field dimensions
     // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
-    public static double FIELD_LENGTH = 16.451; //TODO: this is wrong
+    public static double FIELD_LENGTH = 16.451; // TODO: this is wrong
     public static double FIELD_WIDTH = .211;
 
     // FIXME: double check this number
-    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(
-      6 * 12.0 + 8.5
-      // 57.0
-    );
+    public static final Measure<Distance> SPEAKER_HEIGHT =
+        Units.Inches.of(
+            6 * 12.0 + 8.5
+            // 57.0
+            );
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.24, 5.508944988250732); //TODO: move to right
+        new Translation2d(0.24, 5.508944988250732); // TODO: move to right
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
@@ -293,6 +295,19 @@ public final class Constants {
       public static final Rotation2d LOADING_POSITION = MIN_ANGLE_RAD;
 
       public static final double SIM_INITIAL_ANGLE = Math.toRadians(14.0);
+
+      public static final InterpolatingDoubleTreeMap PITCH_ADJUSTMENT_MAP =
+          new InterpolatingDoubleTreeMap();
+
+      public static InterpolatingDoubleTreeMap getPitchjAdjustmentMap() {
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 5.0);
+        return PITCH_ADJUSTMENT_MAP;
+      }
+
+      public static double getPitchOffset(double distance) {
+        return getPitchjAdjustmentMap().get(distance);
+      }
     }
 
     public static class Launcher {
