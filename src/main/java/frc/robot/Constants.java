@@ -297,6 +297,8 @@ public final class Constants {
 
       public static final InterpolatingDoubleTreeMap PITCH_ADJUSTMENT_MAP;
 
+      public static final Measure<Distance> MIN_DISTANCE = Units.Inches.of(80.0);
+
       static {
         PITCH_ADJUSTMENT_MAP = new InterpolatingDoubleTreeMap();
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 1.0);
@@ -310,10 +312,14 @@ public final class Constants {
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 5.75);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 6.25);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 6.375);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.375);
       }
 
-      public static double getPitchOffset(double distance) {
-        return PITCH_ADJUSTMENT_MAP.get(distance);
+      public static double getPitchOffset(Measure<Distance> distance) {
+        if(distance.lt(MIN_DISTANCE)){
+          return 0.0;
+        }
+        return PITCH_ADJUSTMENT_MAP.get(distance.in(Units.Meters));
       }
     }
 

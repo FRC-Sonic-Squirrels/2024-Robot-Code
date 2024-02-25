@@ -349,7 +349,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (solverResult != null) {
       if (Math.abs(offset) < 0.1) {
         double distance = solverResult.xyDistance();
-        offset = Constants.ShooterConstants.Pivot.getPitchOffset(distance);
+        offset = Constants.ShooterConstants.Pivot.getPitchOffset(edu.wpi.first.units.Units.Meters.of(distance));
       }
 
       desiredShootingPitch = solverResult.pitch().plus(Rotation2d.fromDegrees(offset));
