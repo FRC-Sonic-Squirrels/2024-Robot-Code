@@ -19,6 +19,8 @@ public class Shimmy extends Command {
   /** Creates a new Shimmy. */
   public Shimmy(Intake intake, EndEffector endEffector, Shooter shooter) {
     this.intake = intake;
+    this.endEffector = endEffector;
+    this.shooter = shooter;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
