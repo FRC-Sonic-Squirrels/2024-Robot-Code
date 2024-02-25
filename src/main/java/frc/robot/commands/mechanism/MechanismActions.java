@@ -32,7 +32,8 @@ public class MechanismActions {
   public static Command ampPositionToLoadPosition(Elevator elevator, Arm arm) {
     return ampStage1Position(elevator, arm)
         .andThen(ampStage2Position(elevator, arm))
-        .andThen(ampStage3Position(elevator, arm)).andThen(loadingPosition(elevator, arm));
+        .andThen(ampStage3Position(elevator, arm))
+        .andThen(loadingPosition(elevator, arm));
   }
 
   public static Command ampStage1Position(Elevator elevator, Arm arm) {

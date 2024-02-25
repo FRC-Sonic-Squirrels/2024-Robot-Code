@@ -1,7 +1,6 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.geometry.*;
-import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
   public static final int DebugSpew = 0;
@@ -19,7 +18,6 @@ public class ShootingSolver {
       Rotation2d heading,
       double rotationSpeed,
       Rotation2d pitch,
-      Translation3d offset,
       double xyDistance) {}
 
   public ShootingSolver(
@@ -109,8 +107,6 @@ public class ShootingSolver {
       System.out.printf("       Vy:%.1f\n", robotVel.getY());
     }
 
-    Logger.recordOutput("Solver/zDistToSpeaker", dPspeakerAxis.getZ());
-    Logger.recordOutput("Solver/xyDistToSpeaker", xyDistToSpeaker);
     // Desired pitch of the note trajectory
     double pitchNote = Math.atan2(dPspeakerAxis.getZ(), xyDistToSpeaker);
 
@@ -124,7 +120,6 @@ public class ShootingSolver {
     // approximations
     double yawInNewFrame;
 
-    robotVel = new Translation2d();
     while (true) {
       //
       // The system of equations to solve for cancelling the horizontal component of the robot
@@ -251,7 +246,6 @@ public class ShootingSolver {
         new Rotation2d(targetTheta),
         rateOfRotation,
         new Rotation2d(shooterPitch),
-        dPspeaker,
         xyDistToSpeaker);
   }
 }

@@ -15,6 +15,7 @@ public class Shimmy extends Command {
   private Intake intake;
   private EndEffector endEffector;
   private Shooter shooter;
+
   /** Creates a new Shimmy. */
   public Shimmy(Intake intake, EndEffector endEffector, Shooter shooter) {
     this.intake = intake;
