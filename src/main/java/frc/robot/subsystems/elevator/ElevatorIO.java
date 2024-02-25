@@ -29,4 +29,8 @@ public interface ElevatorIO {
   public default void setSensorPosition(Measure<Distance> position) {}
 
   public default void setNeutralMode(NeutralModeValue value) {}
+
+  public default void releaseReactionArms() {}
+
+  public default void retractReactionArms() {}
 }

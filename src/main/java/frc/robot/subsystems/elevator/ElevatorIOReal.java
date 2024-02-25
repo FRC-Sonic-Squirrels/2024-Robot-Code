@@ -15,6 +15,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.Servo;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
@@ -35,6 +36,9 @@ public class ElevatorIOReal implements ElevatorIO {
   private StatusSignal<Double> appliedVolts;
   private StatusSignal<Double> currentAmps;
   private StatusSignal<Double> tempCelsius;
+
+  private Servo leftServo = new Servo(0);
+  private Servo rightServo = new Servo(0);
 
   public ElevatorIOReal() {
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -71,6 +75,9 @@ public class ElevatorIOReal implements ElevatorIO {
     BaseStatusSignal.setUpdateFrequencyForAll(1, tempCelsius);
 
     motor.optimizeBusUtilization();
+
+    leftServo.setAlwaysHighMode();
+    rightServo.setAlwaysHighMode();
   }
 
   @Override
@@ -124,5 +131,17 @@ public class ElevatorIOReal implements ElevatorIO {
   @Override
   public void setNeutralMode(NeutralModeValue value) {
     motor.setNeutralMode(value);
+  }
+
+  @Override
+  public void releaseReactionArms() {
+    leftServo.set(-0.5);
+    rightServo.set(-0.5);
+  }
+
+  @Override
+  public void retractReactionArms() {
+    leftServo.setAlwaysHighMode();
+    rightServo.setAlwaysHighMode();
   }
 }
