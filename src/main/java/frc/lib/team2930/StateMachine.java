@@ -175,7 +175,7 @@ public class StateMachine {
     command.schedule();
 
     return () -> {
-      if (!command.isFinished()) return null;
+      if (command.isScheduled()) return null;
 
       return handler.advance(command);
     };

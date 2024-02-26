@@ -1,5 +1,7 @@
 package frc.robot.autonomous.substates;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,8 +17,8 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 public class DriveAfterSimpleShot extends StateMachine {
   DrivetrainWrapper drive;
   DriveToPose driveToPose;
-  Timer timer = new Timer();
   private LoggedTunableNumber driveDistance = new LoggedTunableNumber("Autonomous/SimpleShot/DistanceMeters", 1.5);
+  Pose2d initialPose;
 
   public DriveAfterSimpleShot(DrivetrainWrapper drive) {
     this.drive = drive;
@@ -24,19 +26,16 @@ public class DriveAfterSimpleShot extends StateMachine {
   }
 
   private StateHandler startTimer() {
-    timer.start();
+      Logger.recordOutput("Autonomous/SimpleShot/startTimer", true);
+    initialPose = drive.getPoseEstimatorPose();
     driveToPose = new DriveToPose(drive, () -> 
       {
       double distance = Constants.isRedAlliance() ? -driveDistance.get() : driveDistance.get();
-      return drive.getPoseEstimatorPose().plus(GeomUtil.poseToTransform(new Pose2d(distance, 0.0, new Rotation2d())));
+      Pose2d targetPose = initialPose.plus(GeomUtil.poseToTransform(new Pose2d(distance, 0.0, new Rotation2d())));
+      Logger.recordOutput("Autonomous/SimpleShot/targetPose", targetPose);
+      return targetPose;
       }
     );
-    spawnCommand(driveToPose, (command) -> {return setDone();});
-    return this::driving;
-  }
-
-  private StateHandler driving() {
-
-    return null;
+    return suspendForCommand(driveToPose, (command) -> {return setDone();});
   }
 }

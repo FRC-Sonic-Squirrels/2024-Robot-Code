@@ -166,6 +166,22 @@ public class RobotContainer {
       aprilTagLayout = new AprilTagFieldLayout(new ArrayList<AprilTag>(), 0.0, 0.0);
     }
 
+    // BUGBUG: practice field usable tags
+    ArrayList<AprilTag> goodTags = new ArrayList<>();
+    for (var tag : aprilTagLayout.getTags())
+    {
+      switch (tag.ID) {
+        case 3:
+        case 4:
+        case 5:
+          goodTags.add(tag);
+          break;
+      }
+    }
+
+    aprilTagLayout = new AprilTagFieldLayout(goodTags, aprilTagLayout.getFieldLength(), aprilTagLayout.getFieldWidth());
+
+
     if (mode == Mode.REPLAY) {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
 
@@ -504,8 +520,7 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .whileTrue(
-            ShooterScoreSpeakerStateMachine.getAsCommand(
-                drivetrainWrapper, shooter, endEffector, intake, 1000));
+        ShooterScoreSpeakerStateMachine.getAsCommand(drivetrainWrapper, shooter, endEffector, intake, 1000, driverController.a(), (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)));
 
     // driverController
     //     .leftBumper()
@@ -702,7 +717,7 @@ public class RobotContainer {
                 //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
                     );
     // operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
-    // operatorController.povDown().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
+    operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
     // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
     operatorController
         .b()

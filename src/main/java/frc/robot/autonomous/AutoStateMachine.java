@@ -27,6 +27,7 @@ public class AutoStateMachine extends StateMachine {
   private final StateMachine[] subStates;
   private int currentSubState;
   private double initShootDeadline;
+  private boolean shootingDone;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoStateMachine(
@@ -53,27 +54,22 @@ public class AutoStateMachine extends StateMachine {
   private StateHandler autoInitialState() {
     scoreSpeaker =
         ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
-    scoreSpeaker.schedule();
-
-    MechanismActions.loadingPosition(elevator, arm);
-    Logger.recordOutput("Autonomous/CommandScheduled", true);
-
-    return this::initialShot;
+    
+    return suspendForCommand(scoreSpeaker, this::shotDone);
   }
 
-  private StateHandler initialShot() {
-    if (scoreSpeaker.isFinished()) {
-      return this::nextSubState;
-    }
-    return null;
+  private StateHandler shotDone(Command command) {
+    Logger.recordOutput("Autonomous/initialShotMade", true);
+    return this::nextSubState;
   }
 
   private StateHandler nextSubState() {
+    Logger.recordOutput("Autonomous/currentSubState", currentSubState);
     if (currentSubState >= subStates.length) {
       return setDone();
     }
 
     return suspendForSubStateMachine(
-        subStates[currentSubState++], subStateMachine -> AutoStateMachine.this::nextSubState);
+        subStates[currentSubState++], subStateMachine -> this::nextSubState);
   }
 }

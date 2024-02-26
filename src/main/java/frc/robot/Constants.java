@@ -36,11 +36,15 @@ import frc.robot.configs.SimulatorRobotConfig;
 import java.util.function.Supplier;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -51,10 +55,10 @@ public final class Constants {
   }
 
   public static class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_SIMBOT;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024_MAESTRO;
 
-    private static final Alert invalidRobotAlert =
-        new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
+    private static final Alert invalidRobotAlert = new Alert(
+        "Invalid robot selected, using competition robot as default.", AlertType.ERROR);
 
     public static boolean isSimBot() {
       switch (getRobot()) {
@@ -88,7 +92,8 @@ public final class Constants {
     // FIXME: update for various robots
     public enum RobotType {
       // use supplier because if we just create the object, the fields in the
-      // config classes are also created. Meaning tunableNumber values are stuck to the first
+      // config classes are also created. Meaning tunableNumber values are stuck to
+      // the first
       // object that is created. In this case ExampleRobotConfig. Suppliers solve this
       // by only creating the specific config object corresponding to the robot type
       ROBOT_SIMBOT(SimulatorRobotConfig::new),
@@ -122,22 +127,19 @@ public final class Constants {
     public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
 
     // TODO: move to right
-    public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.24, 5.508944988250732);
-    public static final Translation2d RED_SPEAKER_TRANSLATION =
-        AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
+    public static final Translation2d BLUE_SPEAKER_TRANSLATION = new Translation2d(0.24, 5.508944988250732);
+    public static final Translation2d RED_SPEAKER_TRANSLATION = AllianceFlipUtil
+        .mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
-    public static final Translation3d BLUE_SPEAKER_TRANSLATION_3D =
-        new Translation3d(
-            BLUE_SPEAKER_TRANSLATION.getX(),
-            BLUE_SPEAKER_TRANSLATION.getY(),
-            SPEAKER_HEIGHT.in(Units.Meters));
+    public static final Translation3d BLUE_SPEAKER_TRANSLATION_3D = new Translation3d(
+        BLUE_SPEAKER_TRANSLATION.getX(),
+        BLUE_SPEAKER_TRANSLATION.getY(),
+        SPEAKER_HEIGHT.in(Units.Meters));
 
-    public static final Translation3d RED_SPEAKER_TRANSLATION_3D =
-        new Translation3d(
-            RED_SPEAKER_TRANSLATION.getX(),
-            RED_SPEAKER_TRANSLATION.getY(),
-            SPEAKER_HEIGHT.in(Units.Meters));
+    public static final Translation3d RED_SPEAKER_TRANSLATION_3D = new Translation3d(
+        RED_SPEAKER_TRANSLATION.getX(),
+        RED_SPEAKER_TRANSLATION.getY(),
+        SPEAKER_HEIGHT.in(Units.Meters));
 
     public static Translation2d getSpeakerTranslation() {
       return isRedAlliance() ? RED_SPEAKER_TRANSLATION : BLUE_SPEAKER_TRANSLATION;
@@ -155,16 +157,14 @@ public final class Constants {
       return Units.Meters.of(Math.hypot(speakerDx, speakerDy));
     }
 
-    public static final Translation2d STAGE_CENTER_BLUE_ALLIANCE =
-        new Translation2d(4.856116771697998, 4.1);
+    public static final Translation2d STAGE_CENTER_BLUE_ALLIANCE = new Translation2d(4.856116771697998, 4.1);
 
     public static Pose2d[] getClimbPositionsBlueAlliance(double distFromCenter) {
       Pose2d[] poses = new Pose2d[3];
       for (int i = 0; i < poses.length; i++) {
         Translation2d offset = new Translation2d(distFromCenter, Rotation2d.fromDegrees(i * 120.0));
-        poses[i] =
-            new Pose2d(
-                STAGE_CENTER_BLUE_ALLIANCE.plus(offset), Rotation2d.fromDegrees(i * 120.0 - 180.0));
+        poses[i] = new Pose2d(
+            STAGE_CENTER_BLUE_ALLIANCE.plus(offset), Rotation2d.fromDegrees(i * 120.0 - 180.0));
       }
       return poses;
     }
@@ -238,7 +238,8 @@ public final class Constants {
     public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
     public static final Measure<Distance> HEIGHT_ABOVE_CHAIN = Units.Inches.of(25.5);
 
-    // FIXME: home position needs to be changed now that we added spacers to swerveModule
+    // FIXME: home position needs to be changed now that we added spacers to
+    // swerveModule
     public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
     public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.35); // was 7.5
   }
@@ -250,42 +251,43 @@ public final class Constants {
     public static final Measure<Distance> SHOOTER_BASE_HEIGHT = Units.Inches.of(4.0);
     public static final Measure<Distance> SHOOTER_LENGTH = Units.Inches.of(12.0);
 
-    public static final double SHOOTING_SPEED =
-        SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER.in(Units.Meters) * Math.PI;
+    public static final double SHOOTING_SPEED = SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER.in(Units.Meters)
+        * Math.PI;
 
     public static final double SHOOTING_TIME = 0.2;
 
-    public static final Transform2d SHOOTER_OFFSET =
-        new Transform2d(0, -Units.Inches.of(12).in(Units.Meters), new Rotation2d());
+    public static final Transform2d SHOOTER_OFFSET = new Transform2d(0, -Units.Inches.of(12).in(Units.Meters),
+        new Rotation2d());
 
-    public static final Translation3d SHOOTER_AXIS_OF_ROTATION =
-        new Translation3d(
-            SHOOTER_OFFSET.getX(), SHOOTER_OFFSET.getY(), Units.Inches.of(5).in(Units.Meters));
+    public static final Translation3d SHOOTER_AXIS_OF_ROTATION = new Translation3d(
+        SHOOTER_OFFSET.getX(), SHOOTER_OFFSET.getY(), Units.Inches.of(5).in(Units.Meters));
 
     public static class Pivot {
       // Old Calculations:
-      // public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double distanceMeters) {
-      //   return new Rotation2d(
-      //       Math.atan2(
-      //           FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS,
+      // public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double
+      // distanceMeters) {
+      // return new Rotation2d(
+      // Math.atan2(
+      // FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS,
       // distanceMeters));
       // }
 
       // public static final double PITCH_VEL_RAD_PER_SEC(
-      //     double velMetersPerSecond, double distanceMeters) {
-      //   // velocity times derivative of distance to shooting pitch formula to get pitch velocity
-      //   return velMetersPerSecond
-      //       * -FieldConstants.SPEAKER_HEIGHT_METERS
-      //       / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
-      //           + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
+      // double velMetersPerSecond, double distanceMeters) {
+      // // velocity times derivative of distance to shooting pitch formula to get
+      // pitch velocity
+      // return velMetersPerSecond
+      // * -FieldConstants.SPEAKER_HEIGHT_METERS
+      // / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
+      // + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
       // }
 
-      // public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 / 10.0);
+      // public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 /
+      // 10.0);
       public static final double GEARING = 125.0;
 
       public static final Rotation2d MIN_ANGLE_RAD = Rotation2d.fromDegrees(12.0);
-      public static final Rotation2d MAX_ANGLE_RAD =
-          Rotation2d.fromDegrees(59.0); // TRUE HARD STOP 61
+      public static final Rotation2d MAX_ANGLE_RAD = Rotation2d.fromDegrees(60.5); // TRUE HARD STOP 61
       public static final Rotation2d HOME_POSITION = MIN_ANGLE_RAD;
       public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(61.0);
 
@@ -309,14 +311,14 @@ public final class Constants {
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(130.0).in(Units.Meters), 5.0);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(140.0).in(Units.Meters), 5.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(150.0).in(Units.Meters), 5.75);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 5.75);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 6.0);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 6.25);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 6.375);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.375);
       }
 
       public static double getPitchOffset(Measure<Distance> distance) {
-        if(distance.lt(MIN_DISTANCE)){
+        if (distance.lt(MIN_DISTANCE)) {
           return 0.0;
         }
         return PITCH_ADJUSTMENT_MAP.get(distance.in(Units.Meters));
@@ -391,8 +393,8 @@ public final class Constants {
   }
 
   public static class VisionGamepieceConstants {
-    public static final Pose3d GAMEPIECE_CAMERA_POSE =
-        new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters), new Rotation3d(0.0, 0.0, 0.0));
+    public static final Pose3d GAMEPIECE_CAMERA_POSE = new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters),
+        new Rotation3d(0.0, 0.0, 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 

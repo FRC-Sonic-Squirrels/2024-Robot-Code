@@ -207,6 +207,11 @@ public class DriveToPose extends Command {
   }
 
   @Override
+  public boolean isFinished() {
+    return atGoal();
+  }
+
+  @Override
   public void end(boolean interrupted) {
     drive.resetVelocityOverride();
     Logger.recordOutput("Odometry/DriveToPoseSetpoint", new double[] {});

@@ -4,6 +4,7 @@
 
 package frc.robot.commands.shooter;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,7 +32,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private LoggedTunableNumber neverShoot = group.build("neverShoot", 0);
 
-  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8000.0);
+  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 9000.0);
   private static final LoggedTunableNumber tunableAngle = group.build("tunableAngle", 40.0);
 
   private static final LoggedTunableNumber tunablePitchOffset =
@@ -83,7 +84,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private double shotTime;
 
   private Solution solverResult;
-  private double desiredPitchOffset;
   private Rotation2d desiredShootingPitch;
   private Rotation2d desiredShootingHeading;
 
@@ -136,6 +136,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // FIXME: probably dont need this add requirments here once we add the asCommand(Subsytem...
     // requirments) method to the StateMachine class
     command.addRequirements(shooter, endEffector, intake);
+    command.setName("ShooterScoreSpeakerStateMachine");
 
     // once statemachine is over, stop shooter and end effector subsystems
     command =
@@ -229,7 +230,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           desiredShootingHeading.getRadians() - drivetrainWrapper.getRotation().getRadians();
       while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
       while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
-      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(2.0);
+      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
     } else {
       atThetaTarget = false;
     }
@@ -347,20 +348,19 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     double offset = tunablePitchOffset.get();
 
     if (solverResult != null) {
-      if (Math.abs(offset) < 0.1) {
         double distance = solverResult.xyDistance();
+      if (Math.abs(offset) < 0.1) {
         offset = Constants.ShooterConstants.Pivot.getPitchOffset(edu.wpi.first.units.Units.Meters.of(distance));
       }
-
-      desiredShootingPitch = solverResult.pitch().plus(Rotation2d.fromDegrees(offset));
+      double desirePitchDegrees = solverResult.pitch().getDegrees() + offset;
+      desiredShootingPitch = Rotation2d.fromDegrees(Math.min(desirePitchDegrees, Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
       desiredShootingHeading = solverResult.heading();
 
       log("headingTargetDegrees", desiredShootingHeading);
       log("pitchTargetDegrees", desiredShootingPitch);
-      log("pitchOffset", desiredPitchOffset);
+      log("pitchOffset", offset);
+      log("xyDistanceFromSpeaker", distance);
     }
-
-    desiredPitchOffset = offset;
   }
 
   private static void log(String key, boolean value) {

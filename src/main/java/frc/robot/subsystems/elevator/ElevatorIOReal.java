@@ -40,7 +40,7 @@ public class ElevatorIOReal implements ElevatorIO {
   private StatusSignal<Double> tempCelsius;
 
   private Servo leftServo = new Servo(0);
-  private Servo rightServo = new Servo(0);
+  private Servo rightServo = new Servo(1);
 
   public ElevatorIOReal() {
     TalonFXConfiguration config = new TalonFXConfiguration();

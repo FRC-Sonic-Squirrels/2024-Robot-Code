@@ -61,7 +61,7 @@ public class MechanismActions {
   }
 
   public static Command climbTrapPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition);
+    return goToPositionParallel(elevator, arm, MechanismPositions::trapPosition);
   }
 
   public static Command climbTrapPushPosition(Elevator elevator, Arm arm) {
