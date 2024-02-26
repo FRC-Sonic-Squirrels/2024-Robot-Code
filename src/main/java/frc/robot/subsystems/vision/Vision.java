@@ -13,6 +13,10 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -360,5 +364,26 @@ public class Vision extends SubsystemBase {
             ? true
             : false;
     Logger.recordOutput(ROOT_TABLE_PATH + "SUCCESSFUL_RESULT?", addedVisionEstimateToPoseEstimator);
+  }
+
+  public static void restartPhotonVision(String ipString) {
+    sendPhotonVisionCommand(ipString, "restartProgram");
+  }
+
+  public static void rebootPhotonVision(String ipString) {
+    sendPhotonVisionCommand(ipString, "restartDevice");
+  }
+
+  public static void sendPhotonVisionCommand(String ipString, String command) {
+    try {
+      HttpClient httpClient = HttpClient.newHttpClient();
+      HttpRequest request =
+          HttpRequest.newBuilder()
+              .uri(new URI("http://" + ipString + ":5800/api/utils/" + command))
+              .POST(HttpRequest.BodyPublishers.noBody())
+              .build();
+      httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    } catch (Exception ignored) {
+    }
   }
 }
