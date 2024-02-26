@@ -674,12 +674,16 @@ public class RobotContainer {
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 
-    SmartDashboard.putData(
-        "PV Restart SW 10.29.30.13",
-        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.13")));
-    SmartDashboard.putData(
-        "PV REBOOT 10.29.30.13",
-        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.13")));
+    // Add Reset and Reboot buttons to SmartDashboard
+    for (int ip = 11; ip <= 14; ip++) {
+      String ipString = "10.29.30." + ip;
+      SmartDashboard.putData(
+          "PV Restart SW ." + ip,
+          new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision(ipString)));
+      SmartDashboard.putData(
+          "PV REBOOT ." + ip,
+          new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision(ipString)));
+    }
   }
 
   /**
