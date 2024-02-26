@@ -382,7 +382,7 @@ public class Vision extends SubsystemBase {
               .uri(new URI("http://" + ipString + ":5800/api/utils/" + command))
               .POST(HttpRequest.BodyPublishers.noBody())
               .build();
-      httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     } catch (Exception ignored) {
     }
   }
