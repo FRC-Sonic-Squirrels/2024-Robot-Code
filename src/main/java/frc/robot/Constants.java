@@ -119,9 +119,9 @@ public final class Constants {
 
   public static class FieldConstants {
     // official Field dimensions
-    // https://github.com/wpilibsuite/allwpilib/blob/1e168f363e23c42bde8b39e75765bb2eb81f97b2/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json#L292
-    public static double FIELD_LENGTH = 16.451; // TODO: this is wrong
-    public static double FIELD_WIDTH = .211;
+    // https://github.com/wpilibsuite/allwpilib/blob/main/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2024-crescendo.json.
+    public static double FIELD_LENGTH = 16.541;
+    public static double FIELD_WIDTH = 8.211;
 
     // FIXME: double check this number
     public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
