@@ -11,7 +11,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
@@ -137,11 +136,11 @@ public class ElevatorIOReal implements ElevatorIO {
 
   @Override
   public void setLeftServoAngle(Rotation2d angle) {
-      leftServo.setAngle(angle.getDegrees());
+    leftServo.setAngle(angle.getDegrees());
   }
 
   @Override
   public void setRightServoAngle(Rotation2d angle) {
-      rightServo.setAngle(angle.getDegrees());
+    rightServo.setAngle(angle.getDegrees());
   }
 }

@@ -6,7 +6,6 @@ package frc.robot.autonomous;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
-import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
@@ -54,7 +53,7 @@ public class AutoStateMachine extends StateMachine {
   private StateHandler autoInitialState() {
     scoreSpeaker =
         ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
-    
+
     return suspendForCommand(scoreSpeaker, this::shotDone);
   }
 

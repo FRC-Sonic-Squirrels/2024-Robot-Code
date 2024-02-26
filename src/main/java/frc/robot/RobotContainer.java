@@ -168,8 +168,7 @@ public class RobotContainer {
 
     // BUGBUG: practice field usable tags
     ArrayList<AprilTag> goodTags = new ArrayList<>();
-    for (var tag : aprilTagLayout.getTags())
-    {
+    for (var tag : aprilTagLayout.getTags()) {
       switch (tag.ID) {
         case 3:
         case 4:
@@ -179,8 +178,9 @@ public class RobotContainer {
       }
     }
 
-    aprilTagLayout = new AprilTagFieldLayout(goodTags, aprilTagLayout.getFieldLength(), aprilTagLayout.getFieldWidth());
-
+    aprilTagLayout =
+        new AprilTagFieldLayout(
+            goodTags, aprilTagLayout.getFieldLength(), aprilTagLayout.getFieldWidth());
 
     if (mode == Mode.REPLAY) {
       drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
@@ -520,7 +520,14 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .whileTrue(
-        ShooterScoreSpeakerStateMachine.getAsCommand(drivetrainWrapper, shooter, endEffector, intake, 1000, driverController.a(), (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)));
+            ShooterScoreSpeakerStateMachine.getAsCommand(
+                drivetrainWrapper,
+                shooter,
+                endEffector,
+                intake,
+                1000,
+                driverController.a(),
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)));
 
     // driverController
     //     .leftBumper()
@@ -713,9 +720,9 @@ public class RobotContainer {
         .povUp()
         .onTrue(
             MechanismActions.climbPrepPosition(elevator, arm)
-                // .alongWith(
-                //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
-                    );
+            // .alongWith(
+            //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
+            );
     // operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
     // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));

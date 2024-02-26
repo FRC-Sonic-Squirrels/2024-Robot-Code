@@ -16,4 +16,8 @@ public class TunableNumberGroup {
   public LoggedTunableNumber build(String name, double defaultValue) {
     return new LoggedTunableNumber(root + "/" + name, defaultValue);
   }
+
+  public TunableNumberGroup subgroup(String name) {
+    return new TunableNumberGroup(root + "/" + name);
+  }
 }

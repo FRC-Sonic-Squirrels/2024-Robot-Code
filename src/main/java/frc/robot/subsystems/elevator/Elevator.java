@@ -5,7 +5,6 @@
 package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
@@ -96,17 +95,17 @@ public class Elevator extends SubsystemBase {
                 closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
       }
 
-      if(Constants.unusedCode){
-        if(Timer.getFPGATimestamp() >= lastServoActivationTime + 2.0){
+      if (Constants.unusedCode) {
+        if (Timer.getFPGATimestamp() >= lastServoActivationTime + 2.0) {
           lastServoActivationTime = Timer.getFPGATimestamp();
-          if(rightServoActive){
+          if (rightServoActive) {
             io.setLeftServoAngle(targetServoAngle);
             rightServoActive = false;
-          } else{
+          } else {
             io.setRightServoAngle(targetServoAngle);
             rightServoActive = true;
           }
-        } 
+        }
       }
     }
   }
@@ -152,7 +151,7 @@ public class Elevator extends SubsystemBase {
     io.setNeutralMode(value);
   }
 
-  public void deployReactionArms(){
+  public void deployReactionArms() {
     targetServoAngle = Rotation2d.fromDegrees(180.0);
   }
 }

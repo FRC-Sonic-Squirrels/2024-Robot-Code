@@ -15,14 +15,14 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.robot.autonomous.AutosManager.Auto;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -42,9 +42,9 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
-  private Auto lastAuto = null;
-  private String lastAutoName = null;
-  private Alliance lastAlliance = null;
+  private Auto selectedAuto;
+  private Pose2d selectedInitialPose;
+  private Command autoCommand;
   private boolean hasEnteredTeleAtSomePoint = false;
 
   /**
@@ -149,33 +149,31 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // handle choosing autonomous
-    boolean shouldUpdateAutonomousCommand = false;
     if (autonomousChooser == null) {
       autonomousChooser = robotContainer.getAutonomousChooser();
     }
 
-    var currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-    if (lastAlliance == null || lastAlliance != currentAlliance) {
-      shouldUpdateAutonomousCommand = true;
-    }
-
     var currentChooserSelectedName = autonomousChooser.get();
-    if (lastAutoName == null
-        || currentChooserSelectedName == null
-        || !lastAutoName.equals(currentChooserSelectedName)) {
-      shouldUpdateAutonomousCommand = true;
+    if (currentChooserSelectedName != null) {
+      Pose2d initialPose;
+
+      selectedAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
+      if (selectedAuto != null) {
+        initialPose = selectedAuto.initPose();
+        if (initialPose != null && Constants.isRedAlliance()) {
+          initialPose = AllianceFlipUtil.mirrorPose2DOverCenterLine(initialPose);
+        }
+
+        Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);
+        Logger.recordOutput("Auto/SelectedAuto", selectedAuto.name());
+      } else {
+        initialPose = null;
+      }
+
+      selectedInitialPose = initialPose;
     }
 
-    if (shouldUpdateAutonomousCommand) {
-      // b/c chooser returns a supplier when we call get() on the supplier we get a update
-      // trajectory & initial position for if our alliance has changed
-      lastAutoName = currentChooserSelectedName;
-      lastAlliance = currentAlliance;
-      lastAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
-
-      // if FMS: only reset if we haven't entered tele. I.E only reset poses before match starts
-      // if no FMS: always reset pose to auto pose.
+    if (selectedInitialPose != null) {
       boolean shouldResetPose = false;
       if (DriverStation.isFMSAttached()) {
         if (!hasEnteredTeleAtSomePoint) {
@@ -185,26 +183,9 @@ public class Robot extends LoggedRobot {
         shouldResetPose = true;
       }
 
-      if (lastAuto.initPose() == null) {
-        shouldResetPose = false;
-      }
-
       if (shouldResetPose) {
-        var pose =
-            lastAlliance == Alliance.Blue
-                ? lastAuto.initPose()
-                : new Pose2d(
-                    Constants.FieldConstants.FIELD_LENGTH - lastAuto.initPose().getX(),
-                    lastAuto.initPose().getY(),
-                    new Rotation2d(
-                        -lastAuto.initPose().getRotation().getCos(),
-                        lastAuto.initPose().getRotation().getSin()));
-
-        robotContainer.setPose(pose);
+        robotContainer.setPose(selectedInitialPose);
       }
-
-      Logger.recordOutput("Auto/SelectedAuto", lastAuto.name());
-      Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);
     }
   }
 
@@ -214,8 +195,9 @@ public class Robot extends LoggedRobot {
     robotContainer.setBrakeMode();
 
     // schedule the autonomous command (example)
-    if (lastAuto != null) {
-      lastAuto.command().schedule();
+    if (selectedAuto != null) {
+      autoCommand = selectedAuto.command();
+      autoCommand.schedule();
     }
   }
 
@@ -231,8 +213,9 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (lastAuto != null) {
-      lastAuto.command().cancel();
+    if (autoCommand != null) {
+      autoCommand.cancel();
+      autoCommand = null;
     }
 
     hasEnteredTeleAtSomePoint = true;

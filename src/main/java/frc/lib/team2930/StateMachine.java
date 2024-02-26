@@ -54,6 +54,7 @@ public class StateMachine {
   private Status status;
   private StateHandler currentState;
   private double startTime;
+  private double startTimeOfState;
   private EventState nextEvent;
 
   protected StateMachine() {
@@ -84,9 +85,14 @@ public class StateMachine {
   }
 
   protected void setInitialState(StateHandler initialState) {
-    this.currentState = initialState;
-    this.status = Status.Running;
-    this.startTime = Timer.getFPGATimestamp();
+    status = Status.Running;
+    startTime = Timer.getFPGATimestamp();
+    setNextState(initialState);
+  }
+
+  private void setNextState(StateHandler nextState) {
+    currentState = nextState;
+    startTimeOfState = Timer.getFPGATimestamp();
   }
 
   public Command asCommand() {
@@ -114,8 +120,12 @@ public class StateMachine {
       var nextState = currentState.advance();
       if (nextState == null) break;
 
-      currentState = nextState;
+      setNextState(nextState);
     }
+  }
+
+  public void logCurrentState(String name) {
+    Logger.recordOutput(name, currentState.getClass().getName());
   }
 
   private void processEvents() {
@@ -130,7 +140,7 @@ public class StateMachine {
       try {
         var nextState = (StateHandler) event.md.invoke(this);
         if (nextState != null) {
-          this.currentState = nextState;
+          setNextState(nextState);
         }
       } catch (Throwable e) {
         e.printStackTrace();
@@ -140,6 +150,14 @@ public class StateMachine {
 
   public double timeFromStart() {
     return Timer.getFPGATimestamp() - startTime;
+  }
+
+  public double timeFromStartOfState() {
+    return Timer.getFPGATimestamp() - startTimeOfState;
+  }
+
+  public boolean stateRunningLongerThan(double time) {
+    return timeFromStartOfState() > time;
   }
 
   public boolean isRunning() {
@@ -164,7 +182,6 @@ public class StateMachine {
       StateMachine subStateMachine, ResumeStateHandler handler) {
     return () -> {
       subStateMachine.advance();
-      Logger.recordOutput("Autonomous/subStateStatus", subStateMachine.status);
       if (subStateMachine.isRunning()) return null;
 
       return handler.advance(subStateMachine);
@@ -189,7 +206,7 @@ public class StateMachine {
 
               var nextState = handler.advance(command);
               if (nextState != null) {
-                this.currentState = nextState;
+                setNextState(nextState);
               }
             });
 

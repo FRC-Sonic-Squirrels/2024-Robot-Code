@@ -4,12 +4,10 @@
 
 package frc.robot.commands.shooter;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -72,16 +70,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final ShootingSolver solver =
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
-          new Translation3d(Units.inchesToMeters(-1.0), 0, Units.inchesToMeters(9.0)),
-          new Translation3d(0, -10, 0),
+          GeometryUtil.translation3dFromMeasures(
+              Units.Inches.of(-1.0), Units.Inches.of(0), Units.Inches.of(9.0)),
+          GeometryUtil.translation3dFromMeasures(
+              Units.Inches.of(0), Units.Inches.of(-10), Units.Inches.of(0.0)),
           Constants.ShooterConstants.SHOOTING_SPEED,
           Constants.ShooterConstants.SHOOTING_TIME);
 
-  private boolean loadGamepieceCommandFinished = false;
-
   private final PIDController rotationController;
-
-  private double shotTime;
 
   private Solution solverResult;
   private Rotation2d desiredShootingPitch;
@@ -235,7 +231,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       atThetaTarget = false;
     }
 
-    var forceShoot = timeFromStart() >= forceShotIn;
+    var forceShoot = stateRunningLongerThan(forceShotIn);
 
     log("shootingConfimation/launcherAtRPM", launcherAtRpm);
     log("shootingConfimation/pivotAtAngle", pivotAtAngle);
@@ -263,8 +259,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     shooter.setKickerPercentOut(shootingKickerPercent.get());
 
     if (!shooter.noteInShooter()) {
-
-      shotTime = this.timeFromStart();
       return this::shootEnding;
     }
     return null;
@@ -274,7 +268,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     log("state", 4);
     updateSolver();
     rotateToSpeaker();
-    if (timeFromStart() < shotTime + 0.2) return null;
+    if (!stateRunningLongerThan(0.2)) return null;
     // visualize gamepiece
 
     return visualizeGamepiece();
@@ -334,10 +328,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     return true;
   }
 
-  public StateHandler skipToShootIfForceShot() {
-    return timeFromStart() >= forceShotIn ? this::shoot : null;
-  }
-
   public void updateSolver() {
     solverResult =
         solver.computeAngles(
@@ -348,12 +338,15 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     double offset = tunablePitchOffset.get();
 
     if (solverResult != null) {
-        double distance = solverResult.xyDistance();
+      double distance = solverResult.xyDistance();
       if (Math.abs(offset) < 0.1) {
-        offset = Constants.ShooterConstants.Pivot.getPitchOffset(edu.wpi.first.units.Units.Meters.of(distance));
+        offset = Constants.ShooterConstants.Pivot.getPitchOffset(Units.Meters.of(distance));
       }
       double desirePitchDegrees = solverResult.pitch().getDegrees() + offset;
-      desiredShootingPitch = Rotation2d.fromDegrees(Math.min(desirePitchDegrees, Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
+      desiredShootingPitch =
+          Rotation2d.fromDegrees(
+              Math.min(
+                  desirePitchDegrees, Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
       desiredShootingHeading = solverResult.heading();
 
       log("headingTargetDegrees", desiredShootingHeading);
