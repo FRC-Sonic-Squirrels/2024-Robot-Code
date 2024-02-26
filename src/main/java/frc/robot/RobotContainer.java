@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
@@ -671,6 +673,13 @@ public class RobotContainer {
                     arm)
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
+
+    SmartDashboard.putData(
+        "PV Restart SW 10.29.30.13",
+        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.13")));
+    SmartDashboard.putData(
+        "PV REBOOT 10.29.30.13",
+        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.13")));
   }
 
   /**
