@@ -55,7 +55,7 @@ public class MechanismPositions {
   private static LoggedTunableNumber climbDownElevatorHeightInches =
       group.build("climbDownElevatorHeightInches", 0.0);
   private static LoggedTunableNumber climbDownArmAngleDegrees =
-      group.build("climbDownArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+      group.build("climbDownArmAngleDegrees", 90.0);
 
   private static LoggedTunableNumber climbTrapElevatorHeightInches =
       group.build(

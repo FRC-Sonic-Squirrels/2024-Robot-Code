@@ -173,6 +173,8 @@ public class RobotContainer {
         case 3:
         case 4:
         case 5:
+        case 7:
+        case 8:
           goodTags.add(tag);
           break;
       }
@@ -322,7 +324,9 @@ public class RobotContainer {
                   config.getVisionModuleObjects());
 
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(new VisionGamepieceIO() {
+                
+              }, drivetrain::getPoseEstimatorPose);
 
           // intake = new Intake(new IntakeIO() {});
           elevator = new Elevator(new ElevatorIOReal());
@@ -723,7 +727,7 @@ public class RobotContainer {
             // .alongWith(
             //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
             );
-    // operatorController.povRight().onTrue(MechanismActions.climbDownPosition(elevator, arm));
+    operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
     // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
     operatorController

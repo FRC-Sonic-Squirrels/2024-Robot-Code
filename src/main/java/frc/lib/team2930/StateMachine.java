@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.littletonrobotics.junction.Logger;
 
 public class StateMachine {
@@ -189,10 +191,14 @@ public class StateMachine {
   }
 
   protected StateHandler suspendForCommand(Command command, ResumeStateHandlerFromCommand handler) {
-    command.schedule();
+    AtomicBoolean done = new AtomicBoolean();
+
+    spawnCommand(command, (c) -> {
+      done.set(true);
+      return null; });
 
     return () -> {
-      if (command.isScheduled()) return null;
+      if (!done.get()) return null;
 
       return handler.advance(command);
     };

@@ -2,6 +2,7 @@ package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.team2930.StateMachine;
