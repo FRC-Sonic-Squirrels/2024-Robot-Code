@@ -88,6 +88,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double forceShotIn,
       BooleanSupplier externalConfirmation,
       Consumer<Double> rumbleConsumer) {
+    super("ShooterScoreSpeaker");
+
     this.drivetrainWrapper = drivetrainWrapper;
     this.shooter = shooter;
     this.endEffector = endEffector;
@@ -99,8 +101,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
-    log("state", 0);
-    setInitialState(this::prepWhileLoadingGamepiece);
+    setInitialState(stateWithName("prepWhileLoadingGamepiece", this::prepWhileLoadingGamepiece));
   }
 
   public static Command getAsCommand(
@@ -159,7 +160,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   public StateHandler prepWhileLoadingGamepiece() {
     // aim towards speaker
-    log("state", 1);
 
     updateSolver();
     rotateToSpeaker();
@@ -174,7 +174,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       shooter.setKickerPercentOut(0.0);
       endEffector.setPercentOut(0.0);
       intake.setPercentOut(0.0);
-      return this::finalConfirmationsBeforeShooting;
+      return stateWithName(
+          "finalConfirmationsBeforeShooting", this::finalConfirmationsBeforeShooting);
     }
 
     // FIXME: look into calculating gear ratio to make it so kicker and EE spin at same speed
@@ -198,7 +199,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   public StateHandler finalConfirmationsBeforeShooting() {
-    log("state", 2);
     updateSolver();
 
     // still be continuously aiming towards speaker
@@ -242,7 +242,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if ((launcherAtRpm && pivotAtAngle && validShootingPosition() && atThetaTarget) || forceShoot) {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
-        return this::shoot;
+        return stateWithName("shoot", this::shoot);
       }
     }
 
@@ -250,7 +250,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   public StateHandler shoot() {
-    log("state", 3);
     rumbleConsumer.accept(0.0);
 
     updateSolver();
@@ -262,13 +261,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     shooter.setKickerPercentOut(shootingKickerPercent.get());
 
     if (!shooter.noteInShooter()) {
-      return this::shootEnding;
+      return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
   }
 
   public StateHandler shootEnding() {
-    log("state", 4);
     updateSolver();
     rotateToSpeaker();
     if (!stateRunningLongerThan(0.2)) return null;
@@ -278,7 +276,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   public StateHandler visualizeGamepiece() {
-    log("state", 5);
     GamepieceVisualization.getInstance()
         .updateVisualization(
             drivetrainWrapper.getPoseEstimatorPose(),
@@ -360,10 +357,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private static void log(String key, boolean value) {
-    Logger.recordOutput("ShooterScoreSpeaker/" + key, value);
-  }
-
-  private static void log(String key, int value) {
     Logger.recordOutput("ShooterScoreSpeaker/" + key, value);
   }
 

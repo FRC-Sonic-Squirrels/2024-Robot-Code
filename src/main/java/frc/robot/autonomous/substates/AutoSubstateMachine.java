@@ -18,7 +18,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class AutoSubstateMachine extends StateMachine {
   private final DrivetrainWrapper drive;
@@ -26,8 +25,6 @@ public class AutoSubstateMachine extends StateMachine {
   private final EndEffector endEffector;
   private final Intake intake;
   private final RobotConfig config;
-  private final String trajToGamepieceName;
-  private final String trajToShootName;
   private final ChoreoTrajectory trajToGamePiece;
   private final ChoreoTrajectory trajToShoot;
   private final Supplier<ProcessedGamepieceData> closestGamepiece;
@@ -45,18 +42,18 @@ public class AutoSubstateMachine extends StateMachine {
       String trajToGP,
       String trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
+    super(String.format("AutoSub %s / %s", trajToGP, trajToShoot));
+
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
     this.config = config;
-    this.trajToGamepieceName = trajToGP;
-    this.trajToShootName = trajToShoot;
     this.trajToGamePiece = Choreo.getTrajectory(trajToGP);
     this.trajToShoot = Choreo.getTrajectory(trajToShoot);
     this.closestGamepiece = closestGamepiece;
 
-    setInitialState(this::initFollowPathToGamePiece);
+    setInitialState(stateWithName("initFollowPathToGamePiece", this::initFollowPathToGamePiece));
   }
 
   private StateHandler initFollowPathToGamePiece() {
@@ -70,11 +67,11 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
-    return this::followPathToGamePiece;
+
+    return stateWithName("followPathToGamePiece", this::followPathToGamePiece);
   }
 
   private StateHandler followPathToGamePiece() {
-    Logger.recordOutput("Autonomous/path", trajToGamepieceName);
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
     if (chassisSpeeds != null) {
@@ -109,19 +106,19 @@ public class AutoSubstateMachine extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
 
-    return this::followPathToShooter;
+    return stateWithName("followPathToShooter", this::followPathToShooter);
   }
 
   private StateHandler followPathToShooter() {
-    Logger.recordOutput("Autonomous/path", trajToShootName);
-
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
+
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);
     } else {
       drive.resetVelocityOverride();
     }
+
     return null;
   }
 }

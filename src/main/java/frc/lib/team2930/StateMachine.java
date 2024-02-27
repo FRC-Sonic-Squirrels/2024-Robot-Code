@@ -31,6 +31,10 @@ public class StateMachine {
     StateHandler advance();
   }
 
+  public interface StateHandlerWithName extends StateHandler {
+    String getName();
+  }
+
   @FunctionalInterface
   public interface ResumeStateHandler {
     StateHandler advance(StateMachine subStateMachine);
@@ -52,13 +56,16 @@ public class StateMachine {
     }
   }
 
+  private final String name;
   private Status status;
   private StateHandler currentState;
   private double startTime;
   private double startTimeOfState;
   private EventState nextEvent;
 
-  protected StateMachine() {
+  protected StateMachine(String name) {
+    this.name = name;
+
     var events = new ArrayList<EventState>();
 
     for (Method md : this.getClass().getDeclaredMethods()) {
@@ -91,9 +98,31 @@ public class StateMachine {
     setNextState(initialState);
   }
 
+  protected StateHandlerWithName stateWithName(String name, StateHandler handler) {
+    return new StateHandlerWithName() {
+      @Override
+      public String getName() {
+        return name;
+      }
+
+      @Override
+      public StateHandler advance() {
+        return handler.advance();
+      }
+    };
+  }
+
   private void setNextState(StateHandler nextState) {
     currentState = nextState;
     startTimeOfState = Timer.getFPGATimestamp();
+
+    var key = "StateMachine/" + name;
+
+    if (currentState instanceof StateHandlerWithName stateWithName) {
+      Logger.recordOutput(key, stateWithName.getName());
+    } else {
+      Logger.recordOutput(key, nextState.getClass().getName());
+    }
   }
 
   public Command asCommand() {
@@ -181,12 +210,14 @@ public class StateMachine {
 
   protected StateHandler suspendForSubStateMachine(
       StateMachine subStateMachine, ResumeStateHandler handler) {
-    return () -> {
-      subStateMachine.advance();
-      if (subStateMachine.isRunning()) return null;
+    return stateWithName(
+        "waitForSm " + subStateMachine.name,
+        () -> {
+          subStateMachine.advance();
+          if (subStateMachine.isRunning()) return null;
 
-      return handler.advance(subStateMachine);
-    };
+          return handler.advance(subStateMachine);
+        });
   }
 
   protected StateHandler suspendForCommand(Command command, ResumeStateHandlerFromCommand handler) {
@@ -199,11 +230,14 @@ public class StateMachine {
           return null;
         });
 
-    return () -> {
-      if (!done.get()) return null;
+    var name = command.getName();
+    return stateWithName(
+        "waitForCmd " + name,
+        () -> {
+          if (!done.get()) return null;
 
-      return handler.advance(command);
-    };
+          return handler.advance(command);
+        });
   }
 
   protected void spawnCommand(Command command, ResumeStateHandlerFromCommand handler) {

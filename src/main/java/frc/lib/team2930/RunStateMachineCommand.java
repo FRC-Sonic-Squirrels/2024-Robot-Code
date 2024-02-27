@@ -9,10 +9,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.Supplier;
 
 public class RunStateMachineCommand extends Command {
-  /** Creates a new RunStateMachineCommand. */
-  Supplier<StateMachine> supplier;
-
-  StateMachine stateMachine = new StateMachine();
+  private final Supplier<StateMachine> supplier;
+  private StateMachine stateMachine;
 
   public RunStateMachineCommand(
       Supplier<StateMachine> stateMachineSupplier, Subsystem... subsystems) {
@@ -36,11 +34,13 @@ public class RunStateMachineCommand extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    stateMachine = null;
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !stateMachine.isRunning();
+    return stateMachine == null || !stateMachine.isRunning();
   }
 }

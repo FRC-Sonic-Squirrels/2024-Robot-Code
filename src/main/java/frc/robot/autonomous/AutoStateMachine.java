@@ -13,7 +13,6 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
-import org.littletonrobotics.junction.Logger;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
@@ -38,6 +37,8 @@ public class AutoStateMachine extends StateMachine {
       Intake intake,
       StateMachine[] subStates,
       double initShootDeadline) {
+    super("Auto");
+
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
@@ -46,8 +47,9 @@ public class AutoStateMachine extends StateMachine {
     this.intake = intake;
     this.subStates = subStates;
     this.initShootDeadline = initShootDeadline;
+    this.currentSubState = -1;
 
-    setInitialState(this::autoInitialState);
+    setInitialState(stateWithName("autoInitialState", this::autoInitialState));
   }
 
   private StateHandler autoInitialState() {
@@ -58,17 +60,19 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler shotDone(Command command) {
-    Logger.recordOutput("Autonomous/initialShotMade", true);
-    return this::nextSubState;
+    shootingDone = true;
+    return nextSubState();
   }
 
   private StateHandler nextSubState() {
-    Logger.recordOutput("Autonomous/currentSubState", currentSubState);
-    if (currentSubState >= subStates.length) {
+    if (currentSubState++ >= subStates.length) {
       return setDone();
     }
 
-    return suspendForSubStateMachine(
-        subStates[currentSubState++], subStateMachine -> this::nextSubState);
+    StateHandler nextState =
+        suspendForSubStateMachine(
+            subStates[currentSubState], subStateMachine -> this::nextSubState);
+
+    return stateWithName(String.format("State %d", currentSubState), nextState);
   }
 }

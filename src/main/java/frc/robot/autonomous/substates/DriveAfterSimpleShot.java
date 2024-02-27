@@ -18,12 +18,14 @@ public class DriveAfterSimpleShot extends StateMachine {
   Pose2d initialPose;
 
   public DriveAfterSimpleShot(DrivetrainWrapper drive) {
+    super("DriveAfterSimpleShot");
+
     this.drive = drive;
-    setInitialState(this::startTimer);
+
+    setInitialState(stateWithName("startTimer", this::startTimer));
   }
 
   private StateHandler startTimer() {
-    Logger.recordOutput("Autonomous/SimpleShot/startTimer", true);
     initialPose = drive.getPoseEstimatorPose();
     driveToPose =
         new DriveToPose(
@@ -37,10 +39,6 @@ public class DriveAfterSimpleShot extends StateMachine {
               Logger.recordOutput("Autonomous/SimpleShot/targetPose", targetPose);
               return targetPose;
             });
-    return suspendForCommand(
-        driveToPose,
-        (command) -> {
-          return setDone();
-        });
+    return suspendForCommand(driveToPose, (command) -> setDone());
   }
 }

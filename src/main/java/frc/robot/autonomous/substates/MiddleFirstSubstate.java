@@ -42,6 +42,8 @@ public class MiddleFirstSubstate extends StateMachine {
       Intake intake,
       RobotConfig config,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
+    super("MiddleFirstSub");
+
     this.drive = drive;
     this.shooter = shooter;
     this.endEffector = endEffector;
@@ -50,7 +52,7 @@ public class MiddleFirstSubstate extends StateMachine {
     this.traj = Choreo.getTrajectory("middleAuto.1");
     this.closestGamepiece = closestGamepiece;
 
-    setInitialState(this::initFollowPath);
+    setInitialState(stateWithName("initFollowPath", this::initFollowPath));
   }
 
   private StateHandler initFollowPath() {
@@ -63,7 +65,7 @@ public class MiddleFirstSubstate extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
 
-    return this::followPath;
+    return stateWithName("followPath", this::followPath);
   }
 
   private StateHandler followPath() {

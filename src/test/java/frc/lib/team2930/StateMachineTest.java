@@ -17,13 +17,15 @@ public class StateMachineTest {
     boolean gotState3;
 
     SM1() {
-      setInitialState(this::state1);
+      super("SM1");
+
+      setInitialState(stateWithName("state1", this::state1));
     }
 
     StateHandler state1() {
       gotState1 = true;
       System.out.printf("SM1:state1: %s\n", timeFromStart());
-      return this::state2;
+      return stateWithName("state2", this::state2);
     }
 
     StateHandler state2() {
@@ -46,12 +48,14 @@ public class StateMachineTest {
 
   static class SM2 extends StateMachine {
     SM2() {
-      setInitialState(this::state1);
+      super("SM2");
+
+      setInitialState(stateWithName("state1", this::state1));
     }
 
     StateHandler state1() {
       System.out.println("SM2:State1");
-      return this::state2;
+      return stateWithName("state2", this::state2);
     }
 
     StateHandler state2() {
@@ -67,7 +71,9 @@ public class StateMachineTest {
     boolean gotEvent2;
 
     SM3() {
-      setInitialState(this::state1);
+      super("SM3");
+
+      setInitialState(stateWithName("state1", this::state1));
     }
 
     StateHandler state1() {
@@ -98,7 +104,7 @@ public class StateMachineTest {
     StateHandler event2() {
       gotEvent2 = true;
       System.out.printf("SM3:event2: %s\n", timeFromStart());
-      return this::state2;
+      return stateWithName("state2", this::state2);
     }
   }
 
@@ -108,7 +114,9 @@ public class StateMachineTest {
     boolean gotCmd;
 
     SM4() {
-      setInitialState(this::state1);
+      super("SM4");
+
+      setInitialState(stateWithName("state1", this::state1));
     }
 
     StateHandler state1() {
