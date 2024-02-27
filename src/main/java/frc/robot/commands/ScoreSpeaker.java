@@ -136,11 +136,15 @@ public class ScoreSpeaker extends Command {
       // aiming
       //
 
-      endEffector.setPercentOut(shooter.noteInShooter() ? 0.0 : 0.1);
       if (!shooter.noteInShooter()) {
+        shooter.markStartOfNoteLoading();
         shooter.setKickerPercentOut(0.1 * 1.42);
+
+        endEffector.markStartOfNoteDropping();
+        endEffector.setPercentOut(0.1);
       } else if (!prevNoteInShoot) {
         shooter.setKickerPercentOut(0.0);
+        endEffector.setPercentOut(0.0);
         gamepieceLoaded = true;
       }
 
@@ -226,6 +230,7 @@ public class ScoreSpeaker extends Command {
         rotationController.setD(rotationKd.get());
       }
 
+      shooter.markStartOfNoteShooting();
       shooter.setLauncherVoltage(tunableVoltage.get());
 
       shooter.setPivotPosition(

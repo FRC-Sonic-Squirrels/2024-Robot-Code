@@ -222,6 +222,14 @@ public class Shooter extends SubsystemBase {
         <= Math.toRadians(pivotToleranceDegrees.get());
   }
 
+  public void markStartOfNoteLoading() {
+    io.markStartOfNoteLoading();
+  }
+
+  public void markStartOfNoteShooting() {
+    io.markStartOfNoteShooting();
+  }
+
   public void setKickerPercentOut(double percent) {
     io.setKickerVoltage(percent * Constants.MAX_VOLTAGE);
   }

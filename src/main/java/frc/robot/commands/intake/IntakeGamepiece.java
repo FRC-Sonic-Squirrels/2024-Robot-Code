@@ -58,6 +58,7 @@ public class IntakeGamepiece extends Command {
     var rumbleValue = rumbleIntensityPercent.get();
     if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
       intake.setPercentOut(intakingPercent.get());
+      endEffector.markStartOfNoteIntaking();
       endEffector.setPercentOut(intakingPercent.get());
       shooter.setKickerPercentOut(0.0);
 

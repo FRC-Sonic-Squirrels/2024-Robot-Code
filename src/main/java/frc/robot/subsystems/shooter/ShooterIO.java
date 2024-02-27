@@ -55,4 +55,8 @@ public interface ShooterIO {
   public default void setKickerVoltage(double volts) {}
 
   public default void setNeutralMode(NeutralModeValue value) {}
+
+  public default void markStartOfNoteLoading() {}
+
+  public default void markStartOfNoteShooting() {}
 }

@@ -35,6 +35,14 @@ public class EndEffector extends SubsystemBase {
     }
   }
 
+  public void markStartOfNoteIntaking() {
+    io.markStartOfNoteIntaking();
+  }
+
+  public void markStartOfNoteDropping() {
+    io.markStartOfNoteDropping();
+  }
+
   public void setPercentOut(double percent) {
     io.setVoltage(percent * Constants.MAX_VOLTAGE);
   }

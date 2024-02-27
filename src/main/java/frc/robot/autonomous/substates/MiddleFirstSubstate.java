@@ -85,7 +85,9 @@ public class MiddleFirstSubstate extends StateMachine {
               intake,
               gamepieceCounter == 4 ? 3.0 : (gamepieceCounter == 3 ? 0.75 : 0.93));
 
-      intakeGamepiece.cancel();
+      if (intakeGamepiece != null) {
+        intakeGamepiece.cancel();
+      }
 
       spawnCommand(
           scoreSpeaker,

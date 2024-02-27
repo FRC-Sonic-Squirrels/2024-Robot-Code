@@ -7,9 +7,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
 import org.littletonrobotics.junction.Logger;
@@ -40,7 +40,7 @@ public class ShooterIOSim implements ShooterIO {
           Constants.ShooterConstants.Kicker.MOI);
 
   private final ProfiledPIDController pivotFeedback =
-      new ProfiledPIDController(5.0, 0, 0.0, new Constraints(0.5, 1.0));
+      new ProfiledPIDController(50.0, 0, 0.0, new Constraints(5, 10.0));
 
   private final PIDController pivotVelController = new PIDController(60, 0, 0);
   private final double pivotTargetVelRadPerSec = 0.0;
@@ -51,11 +51,12 @@ public class ShooterIOSim implements ShooterIO {
   private double pivotKg = 0.0;
   private double kickerVolts = 0.0;
 
-  private LoggedTunableNumber timeOfFlightDistance = Shooter.group.build("ToFDistance", 18);
-
   private double launcherOpenLoopVolts = 0.0;
 
   private double targetRPM = 0.0;
+
+  private double timeMarkForNoteLoadingDone = Double.NaN;
+  private double timeMarkForNoteShootingDone = Double.NaN;
 
   public ShooterIOSim() {}
 
@@ -74,7 +75,22 @@ public class ShooterIOSim implements ShooterIO {
 
     inputs.kickerAppliedVolts = kickerVolts;
 
-    inputs.timeOfFlightDistance = timeOfFlightDistance.get();
+    var now = Timer.getFPGATimestamp();
+
+    inputs.timeOfFlightDistance = 16;
+
+    // Simulate note movements.
+    if (Double.isFinite(timeMarkForNoteLoadingDone)) {
+      if (now > timeMarkForNoteLoadingDone) {
+        inputs.timeOfFlightDistance = 0;
+      }
+    } else if (Double.isFinite(timeMarkForNoteShootingDone)) {
+      if (now < timeMarkForNoteShootingDone) {
+        inputs.timeOfFlightDistance = 0;
+      } else {
+        timeMarkForNoteShootingDone = Double.NaN; // Shooting done, reset marks.
+      }
+    }
 
     // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
     double ff = 0.0;
@@ -150,5 +166,21 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setLauncherRPM(double rpm) {
     targetRPM = rpm;
+  }
+
+  @Override
+  public void markStartOfNoteLoading() {
+    if (Double.isNaN(timeMarkForNoteLoadingDone)) {
+      timeMarkForNoteLoadingDone = Timer.getFPGATimestamp() + 0.2;
+      timeMarkForNoteShootingDone = Double.NaN;
+    }
+  }
+
+  @Override
+  public void markStartOfNoteShooting() {
+    if (Double.isNaN(timeMarkForNoteShootingDone)) {
+      timeMarkForNoteLoadingDone = Double.NaN;
+      timeMarkForNoteShootingDone = Timer.getFPGATimestamp() + 0.2;
+    }
   }
 }

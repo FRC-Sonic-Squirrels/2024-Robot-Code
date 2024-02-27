@@ -80,6 +80,8 @@ public class ShooterSimpleShoot extends Command {
 
     if (validShot) {
       shooter.setKickerPercentOut(kickerPercentOutSupplier.getAsDouble());
+
+      endEffector.markStartOfNoteDropping();
       endEffector.setPercentOut(endEffectorPercentOutSupplier.getAsDouble());
     } else {
       shooter.setKickerPercentOut(0.0);
