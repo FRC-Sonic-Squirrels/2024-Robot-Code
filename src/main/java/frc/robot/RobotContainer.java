@@ -324,9 +324,7 @@ public class RobotContainer {
                   config.getVisionModuleObjects());
 
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {
-                
-              }, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
           // intake = new Intake(new IntakeIO() {});
           elevator = new Elevator(new ElevatorIOReal());

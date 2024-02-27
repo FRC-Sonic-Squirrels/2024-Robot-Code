@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
+import org.littletonrobotics.junction.inputs.LoggedDriverStation;
 
 public class StateMachineTest {
   static class SM1 extends StateMachine {
@@ -177,6 +178,9 @@ public class StateMachineTest {
   public void testSubCommands() throws InterruptedException {
     var scheduler = CommandScheduler.getInstance();
     var quit = new AtomicBoolean();
+
+    LoggedDriverStation.getDSData().enabled = true;
+    LoggedDriverStation.getDSData().dsAttached = true;
 
     var thread =
         new Thread(

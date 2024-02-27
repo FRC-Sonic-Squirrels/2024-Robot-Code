@@ -21,21 +21,19 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoSubstateMachine extends StateMachine {
-  private DrivetrainWrapper drive;
-  private Shooter shooter;
-  private EndEffector endEffector;
-  private Intake intake;
-  private RobotConfig config;
-  private String trajToGamepieceName;
-  private String trajToShootName;
-  private ChoreoTrajectory trajToGamePiece;
-  private ChoreoTrajectory trajToShoot;
-  private Supplier<ProcessedGamepieceData> closestGamepiece;
+  private final DrivetrainWrapper drive;
+  private final Shooter shooter;
+  private final EndEffector endEffector;
+  private final Intake intake;
+  private final RobotConfig config;
+  private final String trajToGamepieceName;
+  private final String trajToShootName;
+  private final ChoreoTrajectory trajToGamePiece;
+  private final ChoreoTrajectory trajToShoot;
+  private final Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
   public Command scoreSpeaker;
   private IntakeGamepiece intakeCommand;
-
-  private boolean hasShootGP = false;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachine(
@@ -98,8 +96,8 @@ public class AutoSubstateMachine extends StateMachine {
     spawnCommand(
         scoreSpeaker,
         (command) -> {
-          hasShootGP = true;
-          return null;
+          drive.resetVelocityOverride();
+          return setDone();
         });
 
     choreoHelper =
@@ -116,19 +114,14 @@ public class AutoSubstateMachine extends StateMachine {
 
   private StateHandler followPathToShooter() {
     Logger.recordOutput("Autonomous/path", trajToShootName);
-    if (hasShootGP) {
-      drive.resetVelocityOverride();
-      return setDone();
-    }
 
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);
-      return null;
+    } else {
+      drive.resetVelocityOverride();
     }
-
-    drive.resetVelocityOverride();
     return null;
   }
 }

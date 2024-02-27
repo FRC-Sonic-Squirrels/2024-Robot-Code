@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.littletonrobotics.junction.Logger;
 
 public class StateMachine {
@@ -193,9 +192,12 @@ public class StateMachine {
   protected StateHandler suspendForCommand(Command command, ResumeStateHandlerFromCommand handler) {
     AtomicBoolean done = new AtomicBoolean();
 
-    spawnCommand(command, (c) -> {
-      done.set(true);
-      return null; });
+    spawnCommand(
+        command,
+        (c) -> {
+          done.set(true);
+          return null;
+        });
 
     return () -> {
       if (!done.get()) return null;
