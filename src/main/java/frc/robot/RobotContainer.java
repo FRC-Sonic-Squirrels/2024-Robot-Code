@@ -675,15 +675,33 @@ public class RobotContainer {
             () -> brakeModeTriggered));
 
     // Add Reset and Reboot buttons to SmartDashboard
-    for (int ip = 11; ip <= 14; ip++) {
-      String ipString = "10.29.30." + ip;
-      SmartDashboard.putData(
-          "PV Restart SW ." + ip,
-          new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision(ipString)));
-      SmartDashboard.putData(
-          "PV REBOOT ." + ip,
-          new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision(ipString)));
-    }
+    SmartDashboard.putData(
+        "PV Restart SW 1_Shooter_Left",
+        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.11")));
+    SmartDashboard.putData(
+        "PV REBOOT 1_Shooter_Left",
+        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.11")));
+
+    SmartDashboard.putData(
+        "PV Restart SW 2_Shooter_Right",
+        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.12")));
+    SmartDashboard.putData(
+        "PV REBOOT 2_Shooter_Right",
+        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.12")));
+
+    SmartDashboard.putData(
+        "PV Restart SW 3_Intake_Left",
+        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.13")));
+    SmartDashboard.putData(
+        "PV REBOOT 3_Intake_Left",
+        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.13")));
+
+    SmartDashboard.putData(
+        "PV Restart SW 4_Intake_Right",
+        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.14")));
+    SmartDashboard.putData(
+        "PV REBOOT 4_Intake_Right",
+        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
   }
 
   /**
