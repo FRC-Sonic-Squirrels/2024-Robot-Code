@@ -14,13 +14,12 @@ import java.awt.Color;
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
   AddressableLED leftLed1 = new AddressableLED(Constants.LEDConstants.PWM_PORT_1);
-
   AddressableLED leftLed2 = new AddressableLED(Constants.LEDConstants.PWM_PORT_2);
   AddressableLED rightLed1 = new AddressableLED(Constants.LEDConstants.PWM_PORT_3);
   AddressableLED rightLed2 = new AddressableLED(Constants.LEDConstants.PWM_PORT_4);
 
   int ledLength = 60;
-
+  
   AddressableLEDBuffer leftLedBuffer1 = new AddressableLEDBuffer(ledLength);
   AddressableLEDBuffer leftLedBuffer2 = new AddressableLEDBuffer(ledLength);
   AddressableLEDBuffer rightLedBuffer1 = new AddressableLEDBuffer(ledLength);
@@ -82,9 +81,8 @@ public class LED extends SubsystemBase {
         break;
       case AMP_LINING_UP:
         setAllBlinking(Color.YELLOW, Color.BLACK, 0.5, leftLedBuffer1);
+
         break;
-      case TEST:
-        setAllSnake(Color.GREEN);
     }
 
     leftLed1.setData(leftLedBuffer1);
@@ -145,8 +143,8 @@ public class LED extends SubsystemBase {
 
       snakeShade += 3;
       snakeShade %= 255;
+      }
     }
-  }
 
   private void setSingleStripRainbow(int startingLED, int endingLED) {
     for (var i = startingLED; i <= endingLED; i++) {
@@ -174,6 +172,7 @@ public class LED extends SubsystemBase {
     }
   }
 
+  
   private class individualLED {
     int start;
     int end;
@@ -199,11 +198,11 @@ public class LED extends SubsystemBase {
     AUTO_MODE, //
     NOTHING, //
     TWENTY_SECOND_WARNING, //
-    AMP_LINING_UP,
-    TEST;
+    AMP_LINING_UP;
   }
 
   public void setRobotState(robotStates robotState) {
     this.robotState = robotState;
   }
 }
+
