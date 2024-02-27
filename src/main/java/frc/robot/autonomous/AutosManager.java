@@ -1,7 +1,10 @@
 package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.team2930.StateMachine;
@@ -32,6 +35,8 @@ public class AutosManager {
   private VisionGamepiece visionGamepiece;
 
   private RobotConfig config;
+
+  private boolean includeDebugPaths = true;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
@@ -67,6 +72,14 @@ public class AutosManager {
     list.add(this::middleAuto);
     list.add(this::ampAuto);
     list.add(this::simpleShootAuto);
+
+    if (includeDebugPaths) {
+      list.add(() -> testPath("TestDrive1Meter"));
+      list.add(() -> testPath("TestDrive2Meters"));
+      list.add(() -> testPath("TestDrive2MetersRotating"));
+      list.add(() -> testPath("TestDrive2MetersThenLeft"));
+      list.add(() -> testPath("TestDrive2MetersThenLeftRotating"));
+    }
 
     return list;
   }
@@ -176,6 +189,47 @@ public class AutosManager {
             10.0);
 
     return new Auto("simpleShootAuto", state.asCommand(), null);
+  }
+
+  private Auto testPath(String pathName) {
+    ChoreoTrajectory traj = Choreo.getTrajectory(pathName);
+    return new Auto(
+        pathName,
+        new Command() {
+          ChoreoHelper helper;
+          ChassisSpeeds speeds;
+
+          @Override
+          public void initialize() {
+            helper =
+                new ChoreoHelper(
+                    Timer.getFPGATimestamp(),
+                    drivetrain.getPoseEstimatorPose(),
+                    traj,
+                    config.getAutoTranslationPidController(),
+                    config.getAutoTranslationPidController(),
+                    config.getAutoThetaPidController());
+          }
+
+          @Override
+          public void execute() {
+            speeds =
+                helper.calculateChassisSpeeds(
+                    drivetrain.getPoseEstimatorPose(), Timer.getFPGATimestamp());
+            drivetrain.setVelocityOverride(speeds);
+          }
+
+          @Override
+          public void end(boolean interrupted) {
+            drivetrain.resetVelocityOverride();
+          }
+
+          @Override
+          public boolean isFinished() {
+            return speeds == null;
+          }
+        },
+        traj.getInitialPose());
   }
 
   private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {
