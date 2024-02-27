@@ -250,11 +250,8 @@ public final class Constants {
   }
 
   public class LEDConstants {
-    // TODO: get actual pwm ports for 3 and 4
-    public static final int PWM_PORT_1 = 8;
-    public static final int PWM_PORT_2 = 1;
-    public static final int PWM_PORT_3 = 10;
-    public static final int PWM_PORT_4 = 11;
+    public static final int LEFT_PWM_PORT = 8;
+    public static final int RIGHT_PWM_PORT = 1;
   }
 
   public class CanIDs {
