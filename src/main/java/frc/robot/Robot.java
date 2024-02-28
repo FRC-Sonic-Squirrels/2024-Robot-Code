@@ -160,8 +160,8 @@ public class Robot extends LoggedRobot {
       selectedAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
       if (selectedAuto != null) {
         initialPose = selectedAuto.initPose();
-        if (initialPose != null && Constants.isRedAlliance()) {
-          initialPose = AllianceFlipUtil.mirrorPose2DOverCenterLine(initialPose);
+        if (initialPose != null) {
+          initialPose = AllianceFlipUtil.flipPoseForAlliance(initialPose);
         }
 
         Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);

@@ -304,24 +304,20 @@ public class ScoreSpeaker extends Command {
   }
 
   private boolean shootingPosition() {
-    Pose2d currentPose = drive.getPoseEstimatorPose();
-    Pose2d reflectedPose =
-        Constants.isRedAlliance()
-            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(currentPose)
-            : currentPose;
+    Pose2d reflectedPose = AllianceFlipUtil.flipPoseForAlliance(drive.getPoseEstimatorPose());
+    double x = reflectedPose.getX();
+    double y = reflectedPose.getY();
+
     // look at constraints: https://www.desmos.com/calculator/dvrwcfwnz8
     // check if shot is legal
-    if ((DriverStation.isAutonomous() && reflectedPose.getX() >= 6.2697529792785645)
-        || reflectedPose.getX() >= 10.257804870605469) {
+    if ((DriverStation.isAutonomous() && x >= 6.2697529792785645) || x >= 10.257804870605469) {
       return false;
     }
     // y <= 0.808x + 0.793
     // y >= -0.64x + 6.1
     // y <= 6.103558540344238
     // check if stage is blocking
-    if (reflectedPose.getY() <= 0.808 * reflectedPose.getX() + 0.3
-        && reflectedPose.getY() >= -0.64 * reflectedPose.getX() + 6.1
-        && reflectedPose.getY() <= 6.103558540344238) {
+    if (y <= 0.808 * x + 0.3 && y >= -0.64 * x + 6.1 && y <= 6.103558540344238) {
       return false;
     }
     return true;

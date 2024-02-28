@@ -154,10 +154,7 @@ public class AutoClimb extends Command {
   }
 
   public Pose2d getTargetPose(Pose2d robotPose) {
-    Pose2d flippedPose =
-        Constants.isRedAlliance()
-            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(robotPose)
-            : robotPose;
+    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
     Logger.recordOutput("AutoClimb/poses", poses);
     Pose2d closestPose = null;
@@ -174,18 +171,14 @@ public class AutoClimb extends Command {
       }
     }
 
-    if (Constants.isRedAlliance())
-      closestPose = AllianceFlipUtil.mirrorPose2DOverCenterLine(closestPose);
+    closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 
     Logger.recordOutput("AutoClimb/ClosestPose", closestPose);
     return closestPose;
   }
 
   public boolean underStage(Pose2d robotPose) {
-    Pose2d flippedPose =
-        Constants.isRedAlliance()
-            ? AllianceFlipUtil.mirrorPose2DOverCenterLine(robotPose)
-            : robotPose;
+    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     /*
      * Corners:
      * 1: (5.814887046813965, 5.759140968322754)
