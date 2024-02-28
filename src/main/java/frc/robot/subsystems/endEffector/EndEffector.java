@@ -51,11 +51,11 @@ public class EndEffector extends SubsystemBase {
     return inputs.velocityRPM;
   }
 
-  public Boolean intakeSideTOFDetectGamepiece() {
+  public boolean intakeSideTOFDetectGamepiece() {
     return intakeSideTOFDistanceInches() <= distanceToTriggerNoteDetection.get();
   }
 
-  public Boolean shooterSideTOFDetectGamepiece() {
+  public boolean shooterSideTOFDetectGamepiece() {
     return shooterSideTOFDistanceInches() <= distanceToTriggerNoteDetection.get();
   }
 

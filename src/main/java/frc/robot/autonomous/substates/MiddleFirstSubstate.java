@@ -2,7 +2,6 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
@@ -18,21 +17,15 @@ import org.littletonrobotics.junction.Logger;
 
 public class MiddleFirstSubstate extends StateMachine {
 
-  private DrivetrainWrapper drive;
-  private Shooter shooter;
-  private EndEffector endEffector;
-  private Intake intake;
-  private RobotConfig config;
-  private ChoreoTrajectory traj;
-  private Supplier<ProcessedGamepieceData> closestGamepiece;
+  private final DrivetrainWrapper drive;
+  private final Shooter shooter;
+  private final EndEffector endEffector;
+  private final Intake intake;
+  private final RobotConfig config;
+  private final ChoreoTrajectory traj;
+  private final Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
-  private Command scoreSpeaker;
-  private IntakeGamepiece intakeGamepiece;
-  private boolean prevEndEffectorBeamBreak = false;
-  private boolean prevNoteInRobot = true;
   private int gamepieceCounter = 0;
-  private boolean reachedCenter = false;
-  private boolean hasShotGP[] = new boolean[] {false, false, false, false, false};
 
   public MiddleFirstSubstate(
       DrivetrainWrapper drive,
@@ -68,11 +61,10 @@ public class MiddleFirstSubstate extends StateMachine {
   }
 
   private StateHandler initIntake() {
-    spawnCommand(
-        new IntakeGamepiece(intake, endEffector, shooter).until(endEffector::noteInEndEffector),
-        (c) -> {
-          return this::initShoot;
-        });
+    var cmd =
+        new IntakeGamepiece(intake, endEffector, shooter).until(endEffector::noteInEndEffector);
+
+    spawnCommand(cmd, (c) -> this::initShoot);
 
     return this::driveWhileOtherCommandRuns;
   }
@@ -85,9 +77,9 @@ public class MiddleFirstSubstate extends StateMachine {
       // TODO: Check for note in intake.
       drive.setVelocityOverride(chassisSpeeds);
       return null;
-    } else {
-      drive.resetVelocityOverride();
     }
+
+    drive.resetVelocityOverride();
     Logger.recordOutput("Autonomous/gamepieceCount", gamepieceCounter);
     if (gamepieceCounter == 3) {
       return setDone();
@@ -97,13 +89,16 @@ public class MiddleFirstSubstate extends StateMachine {
   }
 
   private StateHandler initShoot() {
+    var cmd =
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 0.5);
+
     spawnCommand(
-        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 0.5),
+        cmd,
         (c) -> {
           gamepieceCounter++;
           return this::initIntake;
         });
 
-    return this::driveWhileOtherCommandRuns;
+    return null;
   }
 }

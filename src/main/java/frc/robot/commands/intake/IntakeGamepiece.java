@@ -51,35 +51,38 @@ public class IntakeGamepiece extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
     var intakeSideTofSeenGamepiece = endEffector.intakeSideTOFDetectGamepiece();
     var shooterSideTofSeenGamepiece = endEffector.shooterSideTOFDetectGamepiece();
-
     var rumbleValue = rumbleIntensityPercent.get();
-    if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-      intake.setPercentOut(intakingPercent.get());
-      endEffector.markStartOfNoteIntaking();
-      endEffector.setPercentOut(intakingPercent.get());
+
+    if (!shooterSideTofSeenGamepiece) {
       shooter.setKickerPercentOut(0.0);
 
-      // dont rumble if we dont see gamepiece
-      rumbleValue = 0.0;
+      if (!intakeSideTofSeenGamepiece) {
+        endEffector.markStartOfNoteIntaking();
 
-      // if we see the game piece slow down system to maintain better control over the note
-    } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-      intake.setPercentOut(intakingPercentWithGamepiece.get());
-      endEffector.setPercentOut(intakingPercentWithGamepiece.get());
-      shooter.setKickerPercentOut(0.0);
+        double percent = intakingPercent.get();
+        intake.setPercentOut(percent);
+        endEffector.setPercentOut(percent);
 
-    } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
+        // dont rumble if we dont see gamepiece
+        rumbleValue = 0.0;
+
+        // if we see the game piece slow down system to maintain better control over the note
+      } else {
+        double percent = intakingPercentWithGamepiece.get();
+        intake.setPercentOut(percent);
+        endEffector.setPercentOut(percent);
+      }
+    } else {
       intake.setPercentOut(0.0);
-      endEffector.setPercentOut(EndEffectorConstants.CENTERING_NOTE_REVERSE);
-      shooter.setKickerPercentOut(-0.1);
-
-    } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-      intake.setPercentOut(0.0);
-      endEffector.setPercentOut(0.0);
-      shooter.setKickerPercentOut(0.0);
+      if (!intakeSideTofSeenGamepiece) {
+        endEffector.setPercentOut(EndEffectorConstants.CENTERING_NOTE_REVERSE);
+        shooter.setKickerPercentOut(-0.1);
+      } else {
+        endEffector.setPercentOut(0.0);
+        shooter.setKickerPercentOut(0.0);
+      }
     }
 
     rumbleConsumer.accept(rumbleValue);
