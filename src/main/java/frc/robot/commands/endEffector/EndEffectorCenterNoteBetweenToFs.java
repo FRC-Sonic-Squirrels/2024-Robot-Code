@@ -63,18 +63,14 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
       }
     }
     // New Centering Code
-    boolean gamepieceDetected =
-        endEffector.intakeSideTOFDetectGamepiece() || endEffector.shooterSideTOFDetectGamepiece();
-    if (!gamepieceDetected) {
-      endEffector.setPercentOut(0.3);
-    } else {
-      double intakeSideDist = endEffector.intakeSideTOFDistanceInches();
-      double shooterSideDist = endEffector.shooterSideTOFDistanceInches();
-      double difference = intakeSideDist - shooterSideDist;
+    double difference = endEffector.noteOffsetInches();
+    if (Double.isFinite(difference)) {
       double percent = controller.calculate(difference, 0.0);
       percent = MathUtil.clamp(percent, -0.85, 0.85);
       Logger.recordOutput("EndEffectorCenter/percent", percent);
       endEffector.setPercentOut(percent);
+    } else {
+      endEffector.setPercentOut(0.3);
     }
   }
 

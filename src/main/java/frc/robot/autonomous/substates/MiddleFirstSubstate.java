@@ -61,8 +61,7 @@ public class MiddleFirstSubstate extends StateMachine {
   }
 
   private StateHandler initIntake() {
-    var cmd =
-        new IntakeGamepiece(intake, endEffector, shooter).until(endEffector::noteInEndEffector);
+    var cmd = new IntakeGamepiece(intake, endEffector, shooter);
 
     spawnCommand(cmd, (c) -> this::initShoot);
 

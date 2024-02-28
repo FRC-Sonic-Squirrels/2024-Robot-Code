@@ -76,7 +76,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public boolean noteInEndEffector() {
-    return intakeSideTOFDetectGamepiece() || shooterSideTOFDetectGamepiece();
+    return intakeSideTOFDetectGamepiece() && shooterSideTOFDetectGamepiece();
   }
 
   public Command stopCmd() {
