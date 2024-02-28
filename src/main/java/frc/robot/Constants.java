@@ -255,6 +255,7 @@ public final class Constants {
     public static final double SHOOTING_PERCENT_OUT = 0.95;
     public static final Measure<Distance> SHOOTER_BASE_HEIGHT = Units.Inches.of(4.0);
     public static final Measure<Distance> SHOOTER_LENGTH = Units.Inches.of(12.0);
+    public static final Measure<Distance> MAX_SHOOTING_DISTANCE = Units.Inches.of(180.0);
 
     public static final double SHOOTING_SPEED =
         SHOOTING_RPM / 60.0 * Launcher.WHEEL_DIAMETER.in(Units.Meters) * Math.PI;

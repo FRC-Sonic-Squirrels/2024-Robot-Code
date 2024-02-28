@@ -327,9 +327,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     }
 
     // check if distance is less than max shooting distance
-    if (GeometryUtil.getDist(
-            reflectedPose.getTranslation(), Constants.FieldConstants.BLUE_SPEAKER_TRANSLATION)
-        <= Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters)) {
+    var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
+    if (solverResult == null || solverResult.xyDistance() > maxDistance) {
       return false;
     }
 

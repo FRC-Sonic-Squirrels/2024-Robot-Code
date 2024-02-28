@@ -66,16 +66,15 @@ public class ChoreoHelper {
 
     ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
 
-    Pose2d currentRobotPose = robotPose;
-
-    double x = currentRobotPose.getX();
-    double y = currentRobotPose.getY();
-    double theta = currentRobotPose.getRotation().getRadians();
+    double x = robotPose.getX();
+    double y = robotPose.getY();
+    Rotation2d rotation = robotPose.getRotation();
 
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
 
     Logger.recordOutput("Autonomous/stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
+    double theta = rotation.getRadians();
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
     Logger.recordOutput("Autonomous/optimalPose", state.getPose());
@@ -84,8 +83,7 @@ public class ChoreoHelper {
 
     if (timestamp > traj.getTotalTime()) return null;
 
-    return ChassisSpeeds.fromFieldRelativeSpeeds(
-        new ChassisSpeeds(xVel, yVel, omegaVel), robotPose.getRotation());
+    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
   }
 
   private ChoreoTrajectoryState calculateNewClosestState(
