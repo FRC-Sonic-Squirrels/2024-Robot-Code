@@ -233,6 +233,7 @@ public final class Constants {
     public static final double PULLEY_DIAMETER = 2.256;
     public static final double CARRIAGE_MASS = 10.0; // arbitrary
     public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(26.2);
+    public static final Measure<Distance> MAX_LEGAL_HEIGHT = Units.Inches.of(26.2); // FIXME
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
@@ -398,6 +399,8 @@ public final class Constants {
     public static final Rotation2d ARM_SAFE_ANGLE = Rotation2d.fromDegrees(-87);
 
     public static final Rotation2d TRAP_SCORE_ANGLE = Rotation2d.fromDegrees(15.0);
+
+    public static final Measure<Distance> ARM_LENGTH = Units.Inches.of(10.0); // FIXME
   }
 
   public static class VisionGamepieceConstants {
