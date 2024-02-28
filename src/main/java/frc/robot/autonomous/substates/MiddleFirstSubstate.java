@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
-import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
@@ -52,10 +51,10 @@ public class MiddleFirstSubstate extends StateMachine {
     this.traj = Choreo.getTrajectory("middleAuto.1");
     this.closestGamepiece = closestGamepiece;
 
-    setInitialState(stateWithName("initFollowPath", this::initFollowPath));
+    setInitialState(stateWithName("init", this::init));
   }
 
-  private StateHandler initFollowPath() {
+  private StateHandler init() {
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
@@ -65,55 +64,22 @@ public class MiddleFirstSubstate extends StateMachine {
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
 
-    return stateWithName("followPath", this::followPath);
+    return stateWithName("initIntake", this::initIntake);
   }
 
-  private StateHandler followPath() {
+  private StateHandler initIntake() {
+    spawnCommand(
+        new IntakeGamepiece(intake, endEffector, shooter).until(endEffector::noteInEndEffector),
+        (c) -> {
+          return this::initShoot;
+        });
+
+    return this::driveWhileOtherCommandRuns;
+  }
+
+  private StateHandler driveWhileOtherCommandRuns() {
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
-
-    if (!endEffector.noteInEndEffector() && !shooter.noteInShooter() && prevNoteInRobot) {
-      intakeGamepiece = new IntakeGamepiece(intake, endEffector, shooter);
-      intakeGamepiece.schedule();
-    }
-
-    if (endEffector.noteInEndEffector() && !prevEndEffectorBeamBreak) {
-      gamepieceCounter++;
-      scoreSpeaker =
-          ShooterScoreSpeakerStateMachine.getAsCommand(
-              drive,
-              shooter,
-              endEffector,
-              intake,
-              gamepieceCounter == 4 ? 3.0 : (gamepieceCounter == 3 ? 0.75 : 0.93));
-
-      if (intakeGamepiece != null) {
-        intakeGamepiece.cancel();
-      }
-
-      spawnCommand(
-          scoreSpeaker,
-          (command) -> {
-            hasShotGP[gamepieceCounter] = true;
-            return null;
-          });
-    }
-
-    Logger.recordOutput("Autonomous/middlePathGamepieceCount", gamepieceCounter);
-
-    prevEndEffectorBeamBreak = endEffector.noteInEndEffector();
-    prevNoteInRobot = endEffector.noteInEndEffector() || shooter.noteInShooter();
-
-    if (drive.getPoseEstimatorPose().getX() >= 8.1) {
-      reachedCenter = true;
-    }
-    if (Constants.unusedCode) {
-      if (reachedCenter
-          && drive.getPoseEstimatorPose().getX() <= 8.05
-          && !endEffector.noteInEndEffector()) {
-        return setStopped();
-      }
-    }
 
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.
@@ -122,11 +88,22 @@ public class MiddleFirstSubstate extends StateMachine {
     } else {
       drive.resetVelocityOverride();
     }
-
-    if (hasShotGP[4]) {
+    Logger.recordOutput("Autonomous/gamepieceCount", gamepieceCounter);
+    if (gamepieceCounter == 3) {
       return setDone();
     }
 
     return null;
+  }
+
+  private StateHandler initShoot() {
+    spawnCommand(
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 0.5),
+        (c) -> {
+          gamepieceCounter++;
+          return this::initIntake;
+        });
+
+    return this::driveWhileOtherCommandRuns;
   }
 }
