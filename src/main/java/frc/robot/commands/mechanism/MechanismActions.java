@@ -86,8 +86,10 @@ public class MechanismActions {
 
               boolean runningElevatorSafety =
                   targetPosition.elevatorHeight().lte(safeHeight)
-                      && arm.getAngle().getRadians()
-                          >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians();
+                      && (arm.getAngle().getRadians()
+                              >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()
+                          && targetPosition.armAngle().getRadians()
+                              <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians());
               //  && targetPosition.armAngle().getRadians() >= Math.toRadians(60.0)
 
               if (runningElevatorSafety) {
