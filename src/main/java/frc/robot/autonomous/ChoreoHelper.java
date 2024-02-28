@@ -82,10 +82,10 @@ public class ChoreoHelper {
     Logger.recordOutput(
         "Autonomous/desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
 
-    if (GeometryUtil.getDist(currentRobotPose, traj.getFinalPose()) <= allowedDist
-        || timestamp >= traj.getTotalTime() + allowedExtraTime) return null;
+    if (timestamp > traj.getTotalTime()) return null;
 
-    return new ChassisSpeeds(xVel, yVel, omegaVel);
+    return ChassisSpeeds.fromFieldRelativeSpeeds(
+        new ChassisSpeeds(xVel, yVel, omegaVel), robotPose.getRotation());
   }
 
   private ChoreoTrajectoryState calculateNewClosestState(

@@ -14,6 +14,10 @@
 package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
@@ -358,6 +362,25 @@ public class RobotContainer {
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
+    AutoBuilder.configureHolonomic(
+        drivetrain::getPoseEstimatorPose,
+        drivetrain::setPose,
+        drivetrain::getChassisSpeeds,
+        drivetrainWrapper::setVelocityOverride,
+        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in
+            // your Constants class
+            new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(0.0, 0.0, 0.0), // Rotation PID constants
+            4.5, // Max module speed, in m/s
+            config
+                .getDriveBaseRadius(), // Drive base radius in meters. Distance from robot center to
+            // furthest module.
+            new ReplanningConfig() // Default path replanning config. See the API for the options
+            // here
+            ),
+        () -> false,
+        drivetrain);
+
     autoManager =
         new AutosManager(
             drivetrainWrapper,
@@ -559,6 +582,21 @@ public class RobotContainer {
         .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
+
+    if (Constants.unusedCode) {
+      driverController
+          .y()
+          .onTrue(
+              Commands.runOnce(
+                  () ->
+                      drivetrain.setPose(
+                          new Pose2d(
+                              Constants.FieldConstants.getSpeakerTranslation()
+                                  .plus(
+                                      new Translation2d(
+                                          Units.Inches.of(tunableX.get()).in(Units.Meters), 0.0)),
+                              new Rotation2d()))));
+    }
 
     // driverController
     //     .rightTrigger()

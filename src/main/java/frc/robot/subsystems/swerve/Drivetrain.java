@@ -319,7 +319,7 @@ public class Drivetrain extends SubsystemBase {
     return states;
   }
 
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 

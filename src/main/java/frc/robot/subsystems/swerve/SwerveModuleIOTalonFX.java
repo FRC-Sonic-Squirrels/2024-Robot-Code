@@ -107,7 +107,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     // driveMotorCurrentLimitConfig = globalConfig.getDriveTalonCurrentLimitConfig();
     driveMotorCurrentLimitConfig =
-        new CurrentLimitsConfigs().withStatorCurrentLimit(60).withStatorCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withStatorCurrentLimit(100).withStatorCurrentLimitEnable(true);
     steerMotorCurrentLimitConfig = globalConfig.getSteerTalonCurrentLimitConfig();
     // --- define constants ---
 

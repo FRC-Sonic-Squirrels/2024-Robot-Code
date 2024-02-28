@@ -94,12 +94,12 @@ public class RobotConfig2024 extends RobotConfig {
   private static final LoggedTunableNumber ANGLE_KD = group.build("ANGLE_KD", 0.0);
 
   // ---------- SWERVE DRIVE MOTOR PID + KS + KV + KA CONSTANTS -------------
-  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.1);
+  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.0);
   private static final LoggedTunableNumber DRIVE_KD = group.build("DRIVE_KD", 0.0);
 
-  private static final LoggedTunableNumber DRIVE_KS = group.build("DRIVE_KS", 0.189);
-  private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.128);
-  private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 0.0);
+  private static final LoggedTunableNumber DRIVE_KS = group.build("DRIVE_KS", 0.0);
+  private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.13);
+  private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 1.6);
 
   // -------- GYRO CAN ID ---------
   private static final int GYRO_CAN_ID = 5;
@@ -132,12 +132,12 @@ public class RobotConfig2024 extends RobotConfig {
       group.build("AUTO_MAX_ACCEL", 2.0);
 
   private static final LoggedTunableNumber AUTO_TRANSLATION_KP =
-      group.build("AUTO_TRANSLATION_KP", 6.0);
+      group.build("AUTO_TRANSLATION_KP", 0.2);
   private static final LoggedTunableNumber AUTO_TRANSLATION_KI =
       group.build("AUTO_TRANSLATION_KI", 0.0);
   private static final LoggedTunableNumber AUTO_TRANSLATION_KD =
       group.build("AUTO_TRANSLATION_KD", 0.0);
-  private static final LoggedTunableNumber AUTO_THETA_KP = group.build("AUTO_THETA_KP", 4.9);
+  private static final LoggedTunableNumber AUTO_THETA_KP = group.build("AUTO_THETA_KP", 0.5);
   private static final LoggedTunableNumber AUTO_THETA_KI = group.build("AUTO_THETA_KI", 0.0);
   private static final LoggedTunableNumber AUTO_THETA_KD = group.build("AUTO_THETA_KD", 0.0);
 

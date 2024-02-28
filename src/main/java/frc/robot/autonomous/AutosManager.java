@@ -2,6 +2,8 @@ package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
@@ -75,10 +77,12 @@ public class AutosManager {
 
     if (includeDebugPaths) {
       list.add(() -> testPath("TestDrive1Meter"));
+      list.add(() -> testPath("TestDrive10Meter"));
       list.add(() -> testPath("TestDrive2Meters"));
       list.add(() -> testPath("TestDrive2MetersRotating"));
       list.add(() -> testPath("TestDrive2MetersThenLeft"));
       list.add(() -> testPath("TestDrive2MetersThenLeftRotating"));
+      list.add(this::characterization);
     }
 
     return list;
@@ -242,5 +246,13 @@ public class AutosManager {
         trajToGP,
         trajToShoot,
         visionGamepiece::getClosestGamepiece);
+  }
+
+  private Auto characterization() {
+    PathPlannerPath path = PathPlannerPath.fromPathFile("Characterization");
+    return new Auto(
+        "Characterization",
+        AutoBuilder.followPath(path).finallyDo(drivetrain::resetVelocityOverride),
+        new Pose2d());
   }
 }

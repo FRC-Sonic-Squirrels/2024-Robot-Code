@@ -30,7 +30,7 @@ public class MiddleFirstSubstate extends StateMachine {
   private Command scoreSpeaker;
   private IntakeGamepiece intakeGamepiece;
   private boolean prevEndEffectorBeamBreak = false;
-  private boolean prevNoteInRobot = false;
+  private boolean prevNoteInRobot = true;
   private int gamepieceCounter = 0;
   private boolean reachedCenter = false;
   private boolean hasShotGP[] = new boolean[] {false, false, false, false, false};
