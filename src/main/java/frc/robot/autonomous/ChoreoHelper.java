@@ -12,21 +12,20 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class ChoreoHelper {
-
-  private ChoreoTrajectory traj;
-  private PIDController xFeedback;
-  private PIDController yFeedback;
-  private PIDController rotationalFeedback;
-  private double initialTime;
+  private final ChoreoTrajectory traj;
+  private final PIDController xFeedback;
+  private final PIDController yFeedback;
+  private final PIDController rotationalFeedback;
+  private final double initialTime;
   private double timeOffset;
-  private double allowedDist = 0.03;
-  private double allowedExtraTime = 1.0;
+  private double pausedTime = Double.NaN;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
    * @param traj trajectory to follow
-   * @param translationalFeedback pid in x and y directions
+   * @param translationalFeedbackX pid in x directions
+   * @param translationalFeedbackY pid in y directions
    * @param rotationalFeedback pid for angular velocity
    */
   public ChoreoHelper(
@@ -43,15 +42,44 @@ public class ChoreoHelper {
     this.rotationalFeedback.enableContinuousInput(-Math.PI, Math.PI);
 
     ChoreoTrajectoryState closestState = null;
-    List<ChoreoTrajectoryState> states = getStates();
-    for (int i = 0; i < traj.getPoses().length; i++) {
-      closestState = calculateNewClosestState(closestState, states.get(i), initialPose);
+    double closestDistance = Double.MAX_VALUE;
+    double lastDistance = Double.MAX_VALUE;
+
+    for (ChoreoTrajectoryState state : getStates()) {
+      double stateDistance = GeometryUtil.getDist(initialPose, state.getPose());
+
+      if (stateDistance > lastDistance) {
+        // Moving away, give up.
+        break;
+      }
+
+      if (closestState == null || stateDistance < closestDistance) {
+        closestState = state;
+        closestDistance = stateDistance;
+      }
+
+      lastDistance = stateDistance;
     }
+
     if (closestState != null) {
       this.timeOffset = closestState.timestamp;
-      Logger.recordOutput("Autonomous/closestPose", closestState.getPose());
+      log("closestPose", closestState.getPose());
     }
+
     this.initialTime = initialTime;
+  }
+
+  public void pause(double timestamp) {
+    if (Double.isNaN(pausedTime)) {
+      pausedTime = timestamp;
+    }
+  }
+
+  public void resume(double timestamp) {
+    if (!Double.isNaN(pausedTime)) {
+      timeOffset += (timestamp - pausedTime);
+      pausedTime = Double.NaN;
+    }
   }
 
   /**
@@ -61,8 +89,12 @@ public class ChoreoHelper {
    * @param timestamp time of path
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
+    if (Double.isNaN(pausedTime)) {
+      return null;
+    }
+
     timestamp -= initialTime;
-    // timestamp += timeOffset;
+    timestamp += timeOffset;
 
     ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
 
@@ -73,30 +105,16 @@ public class ChoreoHelper {
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
 
-    Logger.recordOutput("Autonomous/stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
+    log("stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
     double theta = rotation.getRadians();
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
-    Logger.recordOutput("Autonomous/optimalPose", state.getPose());
-    Logger.recordOutput(
-        "Autonomous/desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
+    log("optimalPose", state.getPose());
+    log("desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
 
     if (timestamp > traj.getTotalTime()) return null;
 
     return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
-  }
-
-  private ChoreoTrajectoryState calculateNewClosestState(
-      ChoreoTrajectoryState closestState, ChoreoTrajectoryState state, Pose2d pose) {
-    if (closestState == null) {
-      return state;
-    }
-    if (GeometryUtil.getDist(pose, state.getPose())
-        <= GeometryUtil.getDist(pose, closestState.getPose())) {
-      return state;
-    } else {
-      return closestState;
-    }
   }
 
   private List<ChoreoTrajectoryState> getStates() {
@@ -108,5 +126,13 @@ public class ChoreoHelper {
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private static void log(String key, double value) {
+    Logger.recordOutput("ChoreoHelper/" + key, value);
+  }
+
+  private static void log(String key, Pose2d value) {
+    Logger.recordOutput("ChoreoHelper/" + key, value);
   }
 }

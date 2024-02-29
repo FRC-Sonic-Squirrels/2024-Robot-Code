@@ -124,36 +124,32 @@ public class VisionGamepiece extends SubsystemBase {
 
       seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
 
-      Logger.recordOutput("VisionGamepiece/totalLatencyMs", inputs.totalLatencyMs);
+      log("totalLatencyMs", inputs.totalLatencyMs);
 
       seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
 
       var closestGamepiece = getClosestGamepiece();
       if (closestGamepiece != null) {
+        Pose3d pose =
+            new Pose3d(
+                closestGamepiece.pose.getX(),
+                closestGamepiece.pose.getY(),
+                (double) 0.0254,
+                new Rotation3d());
 
-      Logger.recordOutput("VisionGamepiece/ClosestGamepiece/distance", closestGamepiece.distance);
-      Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/targetYawDegrees",
-          closestGamepiece.targetYaw.getDegrees());
-      Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/targetPitchDegrees",
-          closestGamepiece.targetPitch.getDegrees());
-      Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/poseRobotCentric",
-          new Pose3d(
-              closestGamepiece.pose.getX(),
-              closestGamepiece.pose.getY(),
-              (double) 0.0254,
-              new Rotation3d()));
-      Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/pose",
-          new Pose3d(
-              closestGamepiece.globalPose.getX(),
-              closestGamepiece.globalPose.getY(),
-              (double) 0.0254,
-              new Rotation3d()));
-      Logger.recordOutput(
-          "VisionGamepiece/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
+        Pose3d globalPose =
+            new Pose3d(
+                closestGamepiece.globalPose.getX(),
+                closestGamepiece.globalPose.getY(),
+                (double) 0.0254,
+                new Rotation3d());
+
+        log("ClosestGamepiece/distance", closestGamepiece.distance);
+        log("ClosestGamepiece/targetYawDegrees", closestGamepiece.targetYaw.getDegrees());
+        log("ClosestGamepiece/targetPitchDegrees", closestGamepiece.targetPitch.getDegrees());
+        log("ClosestGamepiece/poseRobotCentric", pose);
+        log("ClosestGamepiece/pose", globalPose);
+        log("ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
       }
     }
   }
@@ -230,22 +226,28 @@ public class VisionGamepiece extends SubsystemBase {
 
   private void logGamepieceData(
       double yam, double pitch, ProcessedGamepieceData processedGamepieceData, int index) {
-    String baseName = "VisionGamepiece/Gamepieces/Gamepiece: " + index;
+    String baseName = "Gamepieces/Gamepiece" + index;
+    double distance = Units.Meters.of(processedGamepieceData.distance).in(Units.Inches);
 
-    Logger.recordOutput(baseName + "/Raw/yaw", Math.toDegrees(yam));
-    Logger.recordOutput(baseName + "/Raw/pitch", Math.toDegrees(pitch));
-    Logger.recordOutput(baseName + "/Processed/distance", processedGamepieceData.distance);
-    Logger.recordOutput(
-        baseName + "/Processed/distanceInches",
-        Units.Meters.of(processedGamepieceData.distance).in(Units.Inches));
-    Logger.recordOutput(
-        baseName + "/Processed/targetYaw", processedGamepieceData.targetYaw.getDegrees());
-    Logger.recordOutput(
-        baseName + "/Processed/targetPitch", processedGamepieceData.targetPitch.getDegrees());
-    Logger.recordOutput(baseName + "/Processed/pose", processedGamepieceData.pose);
-    // Logger.recordOutput(baseName + "/Processed/globalPose", new
-    // Pose3d(processedGamepieceData.globalPose.getX(), processedGamepieceData.globalPose.getY(),
-    // (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS -
-    // Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS) /2.0);
+    log(baseName + "/Raw/yaw", Math.toDegrees(yam));
+    log(baseName + "/Raw/pitch", Math.toDegrees(pitch));
+    log(baseName + "/Processed/distance", processedGamepieceData.distance);
+    log(baseName + "/Processed/distanceInches", distance);
+    log(baseName + "/Processed/targetYaw", processedGamepieceData.targetYaw.getDegrees());
+    log(baseName + "/Processed/targetPitch", processedGamepieceData.targetPitch.getDegrees());
+    log(baseName + "/Processed/pose", processedGamepieceData.pose);
+    log(baseName + "/Processed/globalPose", processedGamepieceData.globalPose);
+  }
+
+  private static void log(String key, double value) {
+    Logger.recordOutput("VisionGamepiece/" + key, value);
+  }
+
+  private static void log(String key, Pose2d value) {
+    Logger.recordOutput("VisionGamepiece/" + key, value);
+  }
+
+  private static void log(String key, Pose3d value) {
+    Logger.recordOutput("VisionGamepiece/" + key, value);
   }
 }

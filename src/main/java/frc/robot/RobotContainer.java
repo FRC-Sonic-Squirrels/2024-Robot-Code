@@ -51,7 +51,6 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.Shimmy;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -173,16 +172,16 @@ public class RobotContainer {
     // BUGBUG: practice field usable tags
     ArrayList<AprilTag> goodTags = new ArrayList<>();
     for (var tag : aprilTagLayout.getTags()) {
-    //   switch (tag.ID) {
-    //     case 3:
-    //     case 4:
-    //     case 5:
-    //     case 7:
-    //     case 8:
-    //       goodTags.add(tag);
-    //       break;
-    //   }
-    goodTags.add(tag);
+      //   switch (tag.ID) {
+      //     case 3:
+      //     case 4:
+      //     case 5:
+      //     case 7:
+      //     case 8:
+      //       goodTags.add(tag);
+      //       break;
+      //   }
+      goodTags.add(tag);
     }
 
     aprilTagLayout =
@@ -534,14 +533,14 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(
             new IntakeGamepiece(
-                    intake,
-                    endEffector,
-                    shooter,
-                    (rumble) -> {
-                      driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
-                    }));
-                // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
-                // .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
+                intake,
+                endEffector,
+                shooter,
+                (rumble) -> {
+                  driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
+                }));
+    // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
+    // .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
     driverController
         .rightTrigger()

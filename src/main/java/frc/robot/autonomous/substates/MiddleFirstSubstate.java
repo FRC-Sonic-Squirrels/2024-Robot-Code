@@ -2,8 +2,6 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
@@ -28,7 +26,6 @@ public class MiddleFirstSubstate extends StateMachine {
   private final Supplier<ProcessedGamepieceData> closestGamepiece;
   private ChoreoHelper choreoHelper;
   private int gamepieceCounter = 0;
-  private Timer timer = new Timer();
   private boolean shooting;
 
   public MiddleFirstSubstate(
@@ -52,30 +49,23 @@ public class MiddleFirstSubstate extends StateMachine {
   }
 
   private StateHandler init() {
-    timer.reset();
-    timer.start();
     choreoHelper =
         new ChoreoHelper(
-            timer.get(),
+            timeFromStart(),
             drive.getPoseEstimatorPose(),
             this.traj,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
             config.getAutoThetaPidController());
 
-            initIntake();
+    initIntake();
 
     return this::driveWhileOtherCommandRuns;
   }
 
   private StateHandler driveWhileOtherCommandRuns() {
-    if (shooting) {
-    drive.resetVelocityOverride();
-    return null;
-
-    }
     var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(),             timer.get());
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.
@@ -84,6 +74,11 @@ public class MiddleFirstSubstate extends StateMachine {
     }
 
     drive.resetVelocityOverride();
+
+    if (shooting) {
+      return null;
+    }
+
     Logger.recordOutput("Autonomous/gamepieceCount", gamepieceCounter);
     if (gamepieceCounter == 3) {
       return setDone();
@@ -93,28 +88,32 @@ public class MiddleFirstSubstate extends StateMachine {
   }
 
   private void initIntake() {
-        var cmd = new IntakeGamepiece(intake, endEffector, shooter);
-
-    spawnCommand(cmd, (c) -> { this.initShoot(); return null;});
-
-  }
-  private void initShoot() {
-    timer.stop();
-    shooting = true;
-    drive.resetVelocityOverride();
-    var cmd =
-        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 15);
+    var cmd = new IntakeGamepiece(intake, endEffector, shooter);
 
     spawnCommand(
         cmd,
         (c) -> {
-          timer.start();
-    shooting = false;
-          gamepieceCounter++;
-          if (gamepieceCounter < 3)
-          this.initIntake();
+          this.initShoot();
           return null;
         });
+  }
 
+  private void initShoot() {
+    choreoHelper.pause(timeFromStart());
+    shooting = true;
+
+    var cmd = ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 15);
+
+    spawnCommand(
+        cmd,
+        (c) -> {
+          shooting = false;
+          choreoHelper.resume(timeFromStart());
+          gamepieceCounter++;
+          if (gamepieceCounter < 3) {
+            this.initIntake();
+          }
+          return null;
+        });
   }
 }

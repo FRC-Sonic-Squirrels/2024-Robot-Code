@@ -43,8 +43,9 @@ public class Robot extends LoggedRobot {
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
   private Auto selectedAuto;
-  private Pose2d selectedInitialPose;
   private Command autoCommand;
+  private Pose2d selectedInitialPose;
+  private Pose2d desiredInitialPose;
   private boolean hasEnteredTeleAtSomePoint = false;
 
   /**
@@ -170,10 +171,10 @@ public class Robot extends LoggedRobot {
         initialPose = null;
       }
 
-      selectedInitialPose = initialPose;
+      desiredInitialPose = initialPose;
     }
 
-    if (selectedInitialPose != null) {
+    if (desiredInitialPose != null && !desiredInitialPose.equals(selectedInitialPose)) {
       boolean shouldResetPose = false;
       if (DriverStation.isFMSAttached()) {
         if (!hasEnteredTeleAtSomePoint) {
@@ -184,6 +185,7 @@ public class Robot extends LoggedRobot {
       }
 
       if (shouldResetPose) {
+        selectedInitialPose = desiredInitialPose;
         robotContainer.setPose(selectedInitialPose);
       }
     }

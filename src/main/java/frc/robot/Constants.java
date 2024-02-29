@@ -402,7 +402,7 @@ public final class Constants {
 
     public static final Rotation2d TRAP_SCORE_ANGLE = Rotation2d.fromDegrees(15.0);
 
-    public static final Measure<Distance> ARM_LENGTH = Units.Inches.of(10.0); // FIXME
+    public static final Measure<Distance> ARM_LENGTH = Units.Inches.of(15.5);
   }
 
   public static class VisionGamepieceConstants {

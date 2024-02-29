@@ -105,8 +105,7 @@ public class Vision extends SubsystemBase {
       // process vision
       if (processVision) {
         for (VisionModule visionModule : visionModules) {
-          var fieldsToLog = processVision(visionModule);
-          visionModule.loggedFields = fieldsToLog;
+          visionModule.loggedFields = processVision(visionModule);
         }
       }
 
@@ -200,19 +199,18 @@ public class Vision extends SubsystemBase {
     visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime = currentResultTimeStampCTRETime;
 
     // remove any tags that are not part of the field layout
-    ArrayList<PhotonTrackedTarget> cleanTargets = new ArrayList<PhotonTrackedTarget>();
+    var now = Timer.getFPGATimestamp();
+    var cleanTargets = new ArrayList<PhotonTrackedTarget>();
     for (PhotonTrackedTarget target : cameraResult.getTargets()) {
-      if (aprilTagLayout.getTagPose(target.getFiducialId()).isPresent()) {
-        cleanTargets.add(target);
-      }
+      int fiducialId = target.getFiducialId();
+      Optional<Pose3d> optTagPose = aprilTagLayout.getTagPose(fiducialId);
+      if (optTagPose.isEmpty()) continue;
+
+      cleanTargets.add(target);
+      lastTagDetectionTimes.put(fiducialId, now);
     }
 
-    cleanTargets.forEach(
-        (PhotonTrackedTarget tag) ->
-            lastTagDetectionTimes.put(tag.getFiducialId(), Timer.getFPGATimestamp()));
-
     var numTargetsSeen = cleanTargets.size();
-
     if (numTargetsSeen == 0) {
       return VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.NO_TARGETS_VISIBLE);
     }
