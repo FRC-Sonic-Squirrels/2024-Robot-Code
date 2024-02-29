@@ -129,6 +129,7 @@ public class VisionGamepiece extends SubsystemBase {
       seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
 
       var closestGamepiece = getClosestGamepiece();
+      if (closestGamepiece != null) {
 
       Logger.recordOutput("VisionGamepiece/ClosestGamepiece/distance", closestGamepiece.distance);
       Logger.recordOutput(
@@ -153,6 +154,7 @@ public class VisionGamepiece extends SubsystemBase {
               new Rotation3d()));
       Logger.recordOutput(
           "VisionGamepiece/ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
+      }
     }
   }
 
