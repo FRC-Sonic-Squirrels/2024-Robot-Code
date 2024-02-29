@@ -163,10 +163,10 @@ public class VisionGamepiece extends SubsystemBase {
   public ProcessedGamepieceData getClosestGamepiece() {
     ProcessedGamepieceData closestGamepiece = null;
     double closestDistance = Double.MAX_VALUE;
-    var robotPose = robotPoseSupplier.get().getTranslation();
+    var robotPose = robotPoseSupplier.get();
 
     for (var gamepiece : seenGamePieces) {
-      var distance = gamepiece.distance(robotPose);
+      var distance = gamepiece.getDistance(robotPose).magnitude();
       if (distance < closestDistance) {
         closestDistance = distance;
         closestGamepiece = gamepiece;
