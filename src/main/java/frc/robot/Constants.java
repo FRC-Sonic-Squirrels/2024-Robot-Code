@@ -190,6 +190,8 @@ public final class Constants {
     public static class Gamepieces {
       public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
       public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
+      public static final Measure<Distance> NOTE_TOLERANCE = Units.Meters.of(0.1);
+      public static final double NOTE_PERSISTENCE = 5;
     }
   }
 

@@ -4,17 +4,13 @@
 
 package frc.robot.subsystems.visionGamepiece;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.robot.Constants;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -22,15 +18,8 @@ public class VisionGamepiece extends SubsystemBase {
   private final VisionGamepieceIO io;
   private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
 
-  private Supplier<Pose2d> robotPoseSupplier;
-
-  private RawGamepieceData[] rawGamepieceData;
-  private ProcessedGamepieceData[] processedGamepieceData;
-  private ProcessedGamepieceData closestGamepiece =
-      new ProcessedGamepieceData(
-          new Rotation2d(), new Rotation2d(), 0, new Pose2d(), new Pose2d(), 0);
-
-  private static ObjectMapper mapper;
+  private final Supplier<Pose2d> robotPoseSupplier;
+  private final ArrayList<ProcessedGamepieceData> seenGamePieces = new ArrayList<>();
 
   /** Creates a new VisionGamepiece. */
   public VisionGamepiece(VisionGamepieceIO io, Supplier<Pose2d> robotPose) {
@@ -116,29 +105,30 @@ public class VisionGamepiece extends SubsystemBase {
       // Rotation2d(0));
 
       if (inputs.validTarget) {
-        rawGamepieceData = new RawGamepieceData[inputs.targetCount];
-        processedGamepieceData = new ProcessedGamepieceData[inputs.targetCount];
         for (int index = 0; index < inputs.targetCount; index++) {
-          rawGamepieceData[index] =
-              new RawGamepieceData(inputs.yaw[index], inputs.pitch[index], inputs.timestamp);
-          processedGamepieceData[index] = processGamepieceData(rawGamepieceData[index]);
-          if (index == 0) {
-            closestGamepiece = processedGamepieceData[0];
-          } else {
-            if (processedGamepieceData[index].distance < closestGamepiece.distance) {
-              closestGamepiece = processedGamepieceData[index];
-            }
-          }
-          logGamepieceData(rawGamepieceData[index], processedGamepieceData[index], index);
+          double pitch = inputs.pitch[index];
+          double yaw = inputs.yaw[index];
+
+          var processedGamepieceData = processGamepieceData(yaw, pitch, inputs.timestamp);
+
+          seenGamePieces.removeIf(
+              previousSeenGamePiece -> previousSeenGamePiece.sameGamepiece(processedGamepieceData));
+
+          seenGamePieces.add(processedGamepieceData);
+
+          logGamepieceData(yaw, pitch, processedGamepieceData, index);
         }
-      } else {
-        closestGamepiece.targetYaw =
-            new Rotation2d(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
-        closestGamepiece.distance =
-            Math.hypot(closestGamepiece.pose.getX(), closestGamepiece.pose.getY());
       }
 
+      var timestamp = Timer.getFPGATimestamp();
+
+      seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
+
       Logger.recordOutput("VisionGamepiece/totalLatencyMs", inputs.totalLatencyMs);
+
+      seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
+
+      var closestGamepiece = getClosestGamepiece();
 
       Logger.recordOutput("VisionGamepiece/ClosestGamepiece/distance", closestGamepiece.distance);
       Logger.recordOutput(
@@ -171,6 +161,18 @@ public class VisionGamepiece extends SubsystemBase {
   }
 
   public ProcessedGamepieceData getClosestGamepiece() {
+    ProcessedGamepieceData closestGamepiece = null;
+    double closestDistance = Double.MAX_VALUE;
+    var robotPose = robotPoseSupplier.get().getTranslation();
+
+    for (var gamepiece : seenGamePieces) {
+      var distance = gamepiece.distance(robotPose);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestGamepiece = gamepiece;
+      }
+    }
+
     return closestGamepiece;
   }
 
@@ -208,9 +210,9 @@ public class VisionGamepiece extends SubsystemBase {
     return new Pose2d(new Translation2d(distanceMeters, targetYaw), new Rotation2d());
   }
 
-  private ProcessedGamepieceData processGamepieceData(RawGamepieceData rawGamepieceData) {
-    Rotation2d targetYaw = targetYaw(rawGamepieceData.yaw());
-    Rotation2d targetPitch = targetPitch(rawGamepieceData.pitch());
+  private ProcessedGamepieceData processGamepieceData(double yaw, double pitch, double timestamp) {
+    Rotation2d targetYaw = targetYaw(yaw);
+    Rotation2d targetPitch = targetPitch(pitch);
     double distance = groundGamepieceDistance(targetPitch);
     Pose2d pose = groundGamepiecePose(distance, targetYaw);
     Pose2d robotPose = robotPoseSupplier.get();
@@ -221,15 +223,15 @@ public class VisionGamepiece extends SubsystemBase {
         distance,
         pose,
         robotPose.transformBy(new Transform2d(pose.getX(), pose.getY(), pose.getRotation())),
-        rawGamepieceData.timestamp());
+        timestamp);
   }
 
   private void logGamepieceData(
-      RawGamepieceData rawGamepieceData, ProcessedGamepieceData processedGamepieceData, int index) {
+      double yam, double pitch, ProcessedGamepieceData processedGamepieceData, int index) {
     String baseName = "VisionGamepiece/Gamepieces/Gamepiece: " + index;
 
-    Logger.recordOutput(baseName + "/Raw/yaw", Math.toDegrees(rawGamepieceData.yaw()));
-    Logger.recordOutput(baseName + "/Raw/pitch", Math.toDegrees(rawGamepieceData.pitch()));
+    Logger.recordOutput(baseName + "/Raw/yaw", Math.toDegrees(yam));
+    Logger.recordOutput(baseName + "/Raw/pitch", Math.toDegrees(pitch));
     Logger.recordOutput(baseName + "/Processed/distance", processedGamepieceData.distance);
     Logger.recordOutput(
         baseName + "/Processed/distanceInches",
