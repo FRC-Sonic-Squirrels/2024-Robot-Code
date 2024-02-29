@@ -259,6 +259,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     shooter.setPivotPosition(desiredShootingPitch);
     // run kicker for X seconds
     shooter.setKickerPercentOut(shootingKickerPercent.get());
+    endEffector.setPercentOut(0.5);
 
     if (!shooter.noteInShooter()) {
       return stateWithName("shootEnding", this::shootEnding);

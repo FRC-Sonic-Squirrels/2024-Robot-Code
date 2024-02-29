@@ -169,11 +169,11 @@ public class AutosManager {
                   endEffector,
                   intake,
                   config,
-                  visionGamepiece::getClosestGamepiece),
-              generateSubstateMachine("S1G2", "G2S2"),
-              generateSubstateMachine("S2G3", "G3S3"),
-              generateSubstateMachine("S3G4", "G4S3"),
-              generateSubstateMachine("S3G5", "G5S3")
+                  visionGamepiece::getClosestGamepiece)
+              // generateSubstateMachine("MiddleG1", "G2S2"),
+              // generateSubstateMachine("S2G3", "G3S3"),
+              // generateSubstateMachine("S3G4", "G4S3"),
+              // generateSubstateMachine("S3G5", "G5S3")
             },
             0.47);
     return new Auto(

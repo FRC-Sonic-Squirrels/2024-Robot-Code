@@ -33,9 +33,7 @@ public class DriveAfterSimpleShot extends StateMachine {
             () -> {
               double distance =
                   Constants.isRedAlliance() ? -driveDistance.get() : driveDistance.get();
-              Pose2d targetPose =
-                  initialPose.plus(
-                      GeomUtil.poseToTransform(new Pose2d(distance, 0.0, new Rotation2d())));
+              Pose2d targetPose = new Pose2d(initialPose.getX() + distance, initialPose.getY(), new Rotation2d());
               Logger.recordOutput("Autonomous/SimpleShot/targetPose", targetPose);
               return targetPose;
             });

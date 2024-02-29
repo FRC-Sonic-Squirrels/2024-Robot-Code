@@ -62,7 +62,7 @@ public class ChoreoHelper {
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     timestamp -= initialTime;
-    timestamp += timeOffset;
+    // timestamp += timeOffset;
 
     ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
 

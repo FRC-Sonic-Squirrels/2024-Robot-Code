@@ -218,6 +218,8 @@ public class Robot extends LoggedRobot {
       autoCommand = null;
     }
 
+    robotContainer.resetDrivetrainResetOverrides();
+
     hasEnteredTeleAtSomePoint = true;
   }
 

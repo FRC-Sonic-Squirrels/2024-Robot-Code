@@ -27,6 +27,8 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
   public EndEffectorCenterNoteBetweenToFs(EndEffector endEffector) {
     this.endEffector = endEffector;
 
+    controller = new PIDController(0, 0, 0);
+
     addRequirements(endEffector);
     setName("EndEffectorCenterNoteBetweenToFs");
   }
