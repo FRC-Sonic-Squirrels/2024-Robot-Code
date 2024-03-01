@@ -192,7 +192,7 @@ public class MechanismActionsSafe {
         boolean belowMaximumHeight =
             currentElevatorHeightInches + maxArmExtensionDuringRotation < maxLegalHeightInches;
 
-          // We are not going to exceed the maximum legal height, start rotation.
+        // We are not going to exceed the maximum legal height, start rotation.
         if (aboveMinimumHeight && belowMaximumHeight) {
           arm.setAngle(targetArmAngle);
           Logger.recordOutput("MechanismActionsSafe/state", actionName + "Arm");

@@ -85,25 +85,27 @@ public class AutosManager {
       list.add(() -> testPath("TestDrive2MetersThenLeft"));
       list.add(() -> testPath("TestDrive2MetersThenLeftRotating"));
       list.add(this::characterization);
-      list.add(() -> {
-        var cmd = MechanismActions.loadingPosition(elevator, arm);
+      list.add(
+          () -> {
+            var cmd = MechanismActions.loadingPosition(elevator, arm);
 
-        cmd = cmd.andThen(MechanismActions.ampPosition(elevator,arm));
+            cmd = cmd.andThen(MechanismActions.ampPosition(elevator, arm));
 
-        cmd = cmd.andThen(MechanismActions.ampPositionToLoadPosition(elevator,arm));
+            cmd = cmd.andThen(MechanismActions.ampPositionToLoadPosition(elevator, arm));
 
-        return new Auto("MechanismActions - Home to Amp to Home", cmd, null);
-      });
+            return new Auto("MechanismActions - Home to Amp to Home", cmd, null);
+          });
 
-      list.add(() -> {
-        var cmd = MechanismActionsSafe.loadingPosition(elevator, arm);
+      list.add(
+          () -> {
+            var cmd = MechanismActionsSafe.loadingPosition(elevator, arm);
 
-        cmd = cmd.andThen(MechanismActionsSafe.ampPosition(elevator,arm));
+            cmd = cmd.andThen(MechanismActionsSafe.ampPosition(elevator, arm));
 
-        cmd = cmd.andThen(MechanismActionsSafe.ampPositionToLoadPosition(elevator,arm));
+            cmd = cmd.andThen(MechanismActionsSafe.ampPositionToLoadPosition(elevator, arm));
 
-        return new Auto("MechanismActionsSafe - Home to Amp to Home", cmd, null);
-      });
+            return new Auto("MechanismActionsSafe - Home to Amp to Home", cmd, null);
+          });
     }
 
     return list;
