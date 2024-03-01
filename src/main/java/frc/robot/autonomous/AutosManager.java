@@ -123,7 +123,7 @@ public class AutosManager {
             arm,
             intake,
             new AutoSubstateMachine[] {
-              generateSubstateMachine("sourceAuto.1", "G5S3"),
+              generateSubstateMachine("sourceAuto", "G5S3"),
               generateSubstateMachine("S3G4", "G4S2"),
               generateSubstateMachine("S2G3", "G3S1"),
               generateSubstateMachine("S1G2", "G2S1"),
@@ -255,4 +255,18 @@ public class AutosManager {
         AutoBuilder.followPath(path).finallyDo(drivetrain::resetVelocityOverride),
         new Pose2d());
   }
+
+  /* Copy these to get waypoints for choreo. If pasted in choreo, they will automatically be turned into waypoints
+
+  G1: {"dataType":"choreo/waypoint","x":8.273,"y":7.474,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":17}
+  G2: {"dataType":"choreo/waypoint","x":8.273,"y":5.792,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  G3: {"dataType":"choreo/waypoint","x":8.273,"y":4.11,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  G4: {"dataType":"choreo/waypoint","x":8.273,"y":2.428,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  G5: {"dataType":"choreo/waypoint","x":8.273,"y":0.742,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+
+  S1: {"dataType":"choreo/waypoint","x":4.241904258728027,"y":6.103699207305908,"heading":0.185945735814592,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  S2: {"dataType":"choreo/waypoint","x":4.60924768447876,"y":4.741092681884766,"heading":-0.1594733550343424,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  S3: {"dataType":"choreo/waypoint","x":3.2595736980438232,"y":2.54587984085083,"heading":-0.5838703049653,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+
+  */
 }
