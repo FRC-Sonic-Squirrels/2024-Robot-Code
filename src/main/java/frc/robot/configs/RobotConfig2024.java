@@ -137,7 +137,7 @@ public class RobotConfig2024 extends RobotConfig {
       group.build("AUTO_TRANSLATION_KI", 0.0);
   private static final LoggedTunableNumber AUTO_TRANSLATION_KD =
       group.build("AUTO_TRANSLATION_KD", 0.0);
-  private static final LoggedTunableNumber AUTO_THETA_KP = group.build("AUTO_THETA_KP", 0.5);
+  private static final LoggedTunableNumber AUTO_THETA_KP = group.build("AUTO_THETA_KP", 1.0);
   private static final LoggedTunableNumber AUTO_THETA_KI = group.build("AUTO_THETA_KI", 0.0);
   private static final LoggedTunableNumber AUTO_THETA_KD = group.build("AUTO_THETA_KD", 0.0);
 
