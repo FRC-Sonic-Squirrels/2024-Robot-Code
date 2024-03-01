@@ -725,7 +725,7 @@ public class RobotContainer {
         () -> MathUtil.applyDeadband(operatorController.getRightY() * -1, 0.3) * 10.0;
 
     operatorController
-        .x()
+        .leftTrigger()
         .whileTrue(
             Commands.parallel(
                 new ElevatorSetHeight(
@@ -756,20 +756,20 @@ public class RobotContainer {
           .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
     }
 
-    operatorController
-        .povUp()
-        .onTrue(
-            MechanismActions.climbPrepPosition(elevator, arm)
-            // .alongWith(
-            //     Commands.runOnce(() -> elevator.deployReactionArms(), elevator).asProxy())
-            );
+    operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
+    operatorController.povLeft().onTrue(MechanismActions.climbChainCheck(elevator, arm));
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
+
+    operatorController.y().onTrue(MechanismActions.deployReactionArms(elevator, arm));
+    operatorController.x().onTrue(MechanismActions.climbFinalRestPosition(elevator, arm));
     // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator, arm));
     operatorController
         .b()
         .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
         .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
+
+    // -- buttons on robot
 
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)

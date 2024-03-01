@@ -10,7 +10,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.TunableNumberGroup;
@@ -33,6 +32,10 @@ public class Elevator extends SubsystemBase {
 
   private final LoggedTunableNumber tolerance = group.build("toleranceInches", 0.1);
 
+  private static Constraints motionMagicDefaultConstraints;
+
+  private Constraints currentMotionMagicConstraints = new Constraints(0.0, 0.0);
+
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
       kP.initDefault(1.0);
@@ -41,6 +44,7 @@ public class Elevator extends SubsystemBase {
 
       closedLoopMaxVelocityConstraint.initDefault(640.0);
       closedLoopMaxAccelerationConstraint.initDefault(640.0);
+      motionMagicDefaultConstraints = new Constraints(640.0, 640.0);
 
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
       kP.initDefault(12.0);
@@ -49,6 +53,8 @@ public class Elevator extends SubsystemBase {
 
       closedLoopMaxVelocityConstraint.initDefault(1000.0);
       closedLoopMaxAccelerationConstraint.initDefault(2000.0);
+
+      motionMagicDefaultConstraints = new Constraints(1000.0, 2000.0);
     }
   }
 
@@ -64,7 +70,7 @@ public class Elevator extends SubsystemBase {
   public Elevator(ElevatorIO io) {
     this.io = io;
 
-    io.setPIDConstraints(
+    setClosedLoopConstraints(
         kP.get(),
         kD.get(),
         kG.get(),
@@ -87,25 +93,12 @@ public class Elevator extends SubsystemBase {
           || kG.hasChanged(hc)
           || closedLoopMaxVelocityConstraint.hasChanged(hc)
           || closedLoopMaxAccelerationConstraint.hasChanged(hc)) {
-        io.setPIDConstraints(
+        setClosedLoopConstraints(
             kP.get(),
             kD.get(),
             kG.get(),
             new Constraints(
                 closedLoopMaxVelocityConstraint.get(), closedLoopMaxAccelerationConstraint.get()));
-      }
-
-      if (Constants.unusedCode) {
-        if (Timer.getFPGATimestamp() >= lastServoActivationTime + 2.0) {
-          lastServoActivationTime = Timer.getFPGATimestamp();
-          if (rightServoActive) {
-            io.setLeftServoAngle(targetServoAngle);
-            rightServoActive = false;
-          } else {
-            io.setRightServoAngle(targetServoAngle);
-            rightServoActive = true;
-          }
-        }
       }
     }
   }
@@ -151,7 +144,22 @@ public class Elevator extends SubsystemBase {
     io.setNeutralMode(value);
   }
 
-  public void deployReactionArms() {
-    targetServoAngle = Rotation2d.fromDegrees(180.0);
+  private void setClosedLoopConstraints(double kp, double kd, double kg, Constraints constraints) {
+    currentMotionMagicConstraints =
+        new Constraints(constraints.maxVelocity, constraints.maxAcceleration);
+
+    io.setPIDConstraints(kp, kd, kg, constraints);
+  }
+
+  public void setMotionMagicConstraints(Constraints constraints) {
+    setClosedLoopConstraints(kP.get(), kD.get(), kG.get(), constraints);
+  }
+
+  public Constraints getDefaultMotionMagicConstraints() {
+    return motionMagicDefaultConstraints;
+  }
+
+  public Constraints getCurrentMotionMagicConstraints() {
+    return currentMotionMagicConstraints;
   }
 }

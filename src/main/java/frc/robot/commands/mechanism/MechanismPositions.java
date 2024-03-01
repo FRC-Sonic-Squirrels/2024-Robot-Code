@@ -40,12 +40,6 @@ public class MechanismPositions {
   private static final LoggedTunableNumber ampStage3ArmAngleDegrees =
       group.build("ampStage3ArmAngleDegrees", -90.0);
 
-  private static final LoggedTunableNumber trapElevatorHeightInches =
-      group.build("trapElevatorHeightInches", 26.2);
-
-  private static final LoggedTunableNumber trapArmAngleDegrees =
-      group.build("trapArmAngleDegrees", 23.0);
-
   private static final LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
       group.build(
           "climbPrepUnderStageElevatorHeightInches",
@@ -69,19 +63,35 @@ public class MechanismPositions {
       group.build("climbDownArmAngleDegrees", 90.0);
 
   private static final LoggedTunableNumber climbTrapElevatorHeightInches =
-      group.build(
-          "climbTrapElevatorHeightInches", Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
+      group.build("climbTrapElevatorHeightInches", 26.2);
 
   private static final LoggedTunableNumber climbTrapArmAngleDegrees =
-      group.build("climbTrapArmAngleDegrees", 45.0);
+      group.build("climbTrapArmAngleDegrees", 23.0);
 
-  private static final LoggedTunableNumber climbTrapPushElevatorHeightInches =
+  private static final LoggedTunableNumber climbChainCheckElevatorHeightInches =
+      group.build("climbChainCheckElevatorHeightInches", 24);
+
+  private static final LoggedTunableNumber climbChainCheckArmAngleDegrees =
       group.build(
-          "climbTrapPushElevatorHeightInches",
-          Constants.ElevatorConstants.MAX_HEIGHT.in(Units.Inches));
+          "climbChainCheckArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
 
-  private static final LoggedTunableNumber climbTrapPushArmAngleDegrees =
-      group.build("climbTrapPushArmAngleDegrees", 30.0);
+  private static final LoggedTunableNumber climbFinalRestPositionElevatorHeightInches =
+      group.build("climbFinalRestPositionElevatorHeightInches", 18);
+
+  private static final LoggedTunableNumber climbFinalRestPositionArmAngleDegrees =
+      group.build("climbFinalRestPositionArmAngleDegrees", 23.0);
+
+  private static final LoggedTunableNumber deployReactionArms1ElevatorHeightInches =
+      group.build("deployReactionArms1ElevatorHeightInches", 18);
+
+  private static final LoggedTunableNumber deployReactionArms1ArmAngleDegrees =
+      group.build("deployReactionArms1ArmAngleDegrees", -20);
+
+  private static final LoggedTunableNumber deployReactionArms2ElevatorHeightInches =
+      group.build("deployReactionArms2ElevatorHeightInches", 5);
+
+  private static final LoggedTunableNumber deployReactionArms2ArmAngleDegrees =
+      group.build("deployReactionArms2ArmAngleDegrees", -20);
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
@@ -114,11 +124,11 @@ public class MechanismPositions {
         Rotation2d.fromDegrees(ampStage3ArmAngleDegrees.get()));
   }
 
-  public static MechanismPosition trapPosition() {
-    return new MechanismPosition(
-        Units.Inches.of(trapElevatorHeightInches.get()),
-        Rotation2d.fromDegrees(trapArmAngleDegrees.get()));
-  }
+  //   public static MechanismPosition trapPosition() {
+  //     return new MechanismPosition(
+  //         Units.Inches.of(trapElevatorHeightInches.get()),
+  //         Rotation2d.fromDegrees(trapArmAngleDegrees.get()));
+  //   }
 
   public static MechanismPosition climbPrepUnderStagePosition() {
     return new MechanismPosition(
@@ -144,9 +154,27 @@ public class MechanismPositions {
         Rotation2d.fromDegrees(climbTrapArmAngleDegrees.get()));
   }
 
-  public static MechanismPosition climbTrapPushPosition() {
+  public static MechanismPosition climbChainCheck() {
     return new MechanismPosition(
-        Units.Inches.of(climbTrapPushElevatorHeightInches.get()),
-        Rotation2d.fromDegrees(climbTrapPushArmAngleDegrees.get()));
+        Units.Inches.of(climbChainCheckElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbChainCheckArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbFinalRestPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(climbFinalRestPositionElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbFinalRestPositionArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition deployReactionArmsStep1() {
+    return new MechanismPosition(
+        Units.Inches.of(deployReactionArms1ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(deployReactionArms1ArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition deployReactionArmsStep2() {
+    return new MechanismPosition(
+        Units.Inches.of(deployReactionArms2ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(deployReactionArms2ArmAngleDegrees.get()));
   }
 }

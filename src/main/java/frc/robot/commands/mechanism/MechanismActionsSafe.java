@@ -29,9 +29,9 @@ public class MechanismActionsSafe {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
   }
 
-  public static Command climbPrepUnderStagePosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepUnderStagePosition);
-  }
+  // public static Command climbPrepUnderStagePosition(Elevator elevator, Arm arm) {
+  //   return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepUnderStagePosition);
+  // }
 
   public static Command climbPrepPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition);
@@ -41,13 +41,13 @@ public class MechanismActionsSafe {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbDownPosition);
   }
 
-  public static Command climbTrapPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::trapPosition);
-  }
+  // public static Command climbTrapPosition(Elevator elevator, Arm arm) {
+  //   return goToPositionParallel(elevator, arm, MechanismPositions::trapPosition);
+  // }
 
-  public static Command climbTrapPushPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPushPosition);
-  }
+  // public static Command climbTrapPushPosition(Elevator elevator, Arm arm) {
+  //   return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPushPosition);
+  // }
 
   private static Command goToPositionParallel(
       Elevator elevator, Arm arm, Supplier<MechanismPosition> position) {

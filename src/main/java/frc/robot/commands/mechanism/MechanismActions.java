@@ -1,19 +1,27 @@
 package frc.robot.commands.mechanism;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class MechanismActions {
+
+  public static LoggedTunableNumber climbDownElevatorVelocity =
+      new LoggedTunableNumber("MechanismActions/climbDownElevatorVelocity", 500);
+  public static LoggedTunableNumber climbDownElevatorAcceleration =
+      new LoggedTunableNumber("MechanismActions/climbDownElevatorAcceleration", 500);
 
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
@@ -57,15 +65,36 @@ public class MechanismActions {
   }
 
   public static Command climbDownPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbDownPosition);
+    return goToPositionParallelSetMotionConstraints(
+            elevator,
+            arm,
+            () -> new MechanismPosition(Units.Inches.of(16), Constants.ArmConstants.MAX_ARM_ANGLE),
+            () -> climbDownElevatorVelocity.get(),
+            () -> climbDownElevatorAcceleration.get())
+        .andThen(
+            goToPositionParallelSetMotionConstraints(
+                elevator,
+                arm,
+                MechanismPositions::climbDownPosition,
+                () -> climbDownElevatorVelocity.get(),
+                () -> climbDownElevatorAcceleration.get()));
   }
 
   public static Command climbTrapPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::trapPosition);
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition);
   }
 
-  public static Command climbTrapPushPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPushPosition);
+  public static Command climbChainCheck(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbChainCheck);
+  }
+
+  public static Command climbFinalRestPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition);
+  }
+
+  public static Command deployReactionArms(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::deployReactionArmsStep1)
+        .andThen(goToPositionParallel(elevator, arm, MechanismPositions::deployReactionArmsStep2));
   }
 
   private static Command goToPositionParallel(
@@ -106,5 +135,40 @@ public class MechanismActions {
             () ->
                 elevator.isAtTarget(position.get().elevatorHeight())
                     && arm.isAtTargetAngle(position.get().armAngle(), Rotation2d.fromDegrees(5.0)));
+  }
+
+  private static Command goToPositionParallelSetMotionConstraints(
+      Elevator elevator,
+      Arm arm,
+      Supplier<MechanismPosition> position,
+      DoubleSupplier maxElevatorVelocity,
+      DoubleSupplier maxElevatorAcceleration) {
+    return Commands.sequence(
+        setElevatorMotionMagicCommand(elevator, maxElevatorVelocity, maxElevatorAcceleration),
+        goToPositionParallel(elevator, arm, position),
+        setElevatorMotionMagicCommand(
+            elevator,
+            () -> elevator.getDefaultMotionMagicConstraints().maxVelocity,
+            () -> elevator.getDefaultMotionMagicConstraints().maxAcceleration));
+  }
+
+  private static Command setElevatorMotionMagicCommand(
+      Elevator elevator,
+      DoubleSupplier maxElevatorVelocity,
+      DoubleSupplier maxElevatorAcceleration) {
+    return Commands.runOnce(
+        () -> {
+          double vel = maxElevatorVelocity.getAsDouble();
+          double acc = maxElevatorAcceleration.getAsDouble();
+
+          if (vel != elevator.getCurrentMotionMagicConstraints().maxVelocity
+              || acc != elevator.getCurrentMotionMagicConstraints().maxAcceleration) {
+
+            elevator.setMotionMagicConstraints(
+                new Constraints(
+                    maxElevatorVelocity.getAsDouble(), maxElevatorAcceleration.getAsDouble()));
+          }
+        },
+        elevator);
   }
 }

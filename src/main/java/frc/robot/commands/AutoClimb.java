@@ -117,7 +117,7 @@ public class AutoClimb extends Command {
         }
         break;
       case 4:
-        MechanismPosition position = MechanismPositions.trapPosition();
+        MechanismPosition position = MechanismPositions.climbTrapPosition();
         elevator.setHeight(position.elevatorHeight());
         arm.setAngle(position.armAngle());
         Logger.recordOutput("AutoClimb/armIsAtPosition", arm.isAtTargetAngle(position.armAngle()));
