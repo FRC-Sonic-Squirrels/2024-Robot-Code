@@ -84,6 +84,8 @@ public class AutosManager {
       list.add(() -> testPath("TestDrive2MetersRotating"));
       list.add(() -> testPath("TestDrive2MetersThenLeft"));
       list.add(() -> testPath("TestDrive2MetersThenLeftRotating"));
+      list.add(() -> testPath("TestCircle"));
+      list.add(() -> testPath("TestZigZag"));
       list.add(this::characterization);
       list.add(
           () -> {
