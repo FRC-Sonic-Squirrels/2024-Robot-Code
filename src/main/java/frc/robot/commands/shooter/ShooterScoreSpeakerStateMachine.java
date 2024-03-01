@@ -325,11 +325,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return false;
     }
 
-    // check if distance is less than max shooting distance
-    var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
-    if (solverResult == null || solverResult.xyDistance() > maxDistance) {
-      return false;
-    }
+    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS
+    // var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
+    // if (solverResult == null || solverResult.xyDistance() > maxDistance) {
+    //   return false;
+    // }
 
     return true;
   }
