@@ -7,6 +7,11 @@
       "window": {
         "visible": true
       }
+    },
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
     }
   },
   "NTProvider": {
@@ -49,5 +54,8 @@
   },
   "NetworkTables Info": {
     "visible": true
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

@@ -1,5 +1,15 @@
 {
+  "Joysticks": {
+    "window": {
+      "visible": false
+    }
+  },
   "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
+  "Keyboard 1 Settings": {
     "window": {
       "visible": true
     }
@@ -15,24 +25,24 @@
           "decKey": 87,
           "incKey": 83
         },
-        {
-          "decKey": 69,
-          "decayRate": 0.0,
-          "incKey": 82,
-          "keyRate": 0.009999999776482582
-        },
+        {},
+        {},
         {
           "decKey": 88,
           "incKey": 90
         }
       ],
-      "axisCount": 4,
-      "buttonCount": 4,
+      "axisCount": 5,
+      "buttonCount": 8,
       "buttonKeys": [
         -1,
         -1,
         67,
-        86
+        86,
+        -1,
+        -1,
+        -1,
+        -1
       ],
       "povConfig": [
         {
@@ -59,13 +69,17 @@
           "incKey": 75
         }
       ],
-      "axisCount": 2,
-      "buttonCount": 4,
+      "axisCount": 4,
+      "buttonCount": 8,
       "buttonKeys": [
         77,
         44,
         46,
-        47
+        47,
+        -1,
+        -1,
+        -1,
+        -1
       ],
       "povCount": 0
     },
@@ -100,11 +114,10 @@
   ],
   "robotJoysticks": [
     {
-      "guid": "78696e70757401000000000000000000",
-      "useGamepad": true
+      "guid": "Keyboard0"
     },
     {
-      "useGamepad": true
+      "guid": "Keyboard1"
     }
   ]
 }
