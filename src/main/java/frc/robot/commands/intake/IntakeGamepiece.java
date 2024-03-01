@@ -4,8 +4,6 @@
 
 package frc.robot.commands.intake;
 
-import java.util.function.Consumer;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.TunableNumberGroup;
@@ -14,6 +12,7 @@ import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import java.util.function.Consumer;
 
 public class IntakeGamepiece extends Command {
   private Intake intake;

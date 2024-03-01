@@ -32,7 +32,7 @@ public class Elevator extends SubsystemBase {
 
   private final LoggedTunableNumber tolerance = group.build("toleranceInches", 0.1);
 
-  private static Constraints motionMagicDefaultConstraints;
+  private static final Constraints motionMagicDefaultConstraints;
 
   private Constraints currentMotionMagicConstraints = new Constraints(0.0, 0.0);
 
@@ -55,6 +55,8 @@ public class Elevator extends SubsystemBase {
       closedLoopMaxAccelerationConstraint.initDefault(2000.0);
 
       motionMagicDefaultConstraints = new Constraints(1000.0, 2000.0);
+    } else {
+      motionMagicDefaultConstraints = new Constraints(640.0, 640.0);
     }
   }
 
