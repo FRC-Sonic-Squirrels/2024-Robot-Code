@@ -133,38 +133,6 @@ public class MechanismActionsSafe {
         Logger.recordOutput(
             "MechanismActionsSafe/armCanRotateFreelyAtThisHeight", armCanRotateFreelyAtThisHeight);
 
-        if (targetArmAngleDegrees < safeAngleIntakeDegrees) {
-          //
-          // Arm moving to the home position, more or less.
-          //
-          if (currentArmAngleDegrees < safeAngleIntakeDegrees) {
-            //
-            // Safe to move to target position directly
-            //
-            Logger.recordOutput("MechanismActionsSafe/state", "HomeDirectly");
-            elevator.setHeight(targetElevatorHeight);
-            arm.setAngle(targetArmAngle);
-            return;
-          }
-
-          //
-          // Move elevator at most to the safe height.
-          //
-          double safeHeight =
-              Math.max(safeElevatorHeightInchesForIntake, targetElevatorHeightInches);
-          elevator.setHeight(Units.Inches.of(safeHeight));
-
-          if (armCanRotateFreelyAtThisHeight) {
-            // Only rotate if we don't exceed the maximum height.
-            arm.setAngle(targetArmAngle);
-            Logger.recordOutput("MechanismActionsSafe/state", "HomeArm");
-          } else {
-            Logger.recordOutput("MechanismActionsSafe/state", "HomeNoArm");
-          }
-
-          return;
-        }
-
         //
         // Compute the maximum vertical extension of the arm during rotation.
         //
@@ -190,14 +158,46 @@ public class MechanismActionsSafe {
         var currentSafeHeight =
             Math.min(maxElevatorHeadroom - elevatorToleranceInches, targetElevatorHeightInches);
 
+        String actionName;
+
+        if (targetArmAngleDegrees < safeAngleIntakeDegrees) {
+          //
+          // Arm moving to the home position, more or less.
+          //
+          if (currentArmAngleDegrees < safeAngleIntakeDegrees) {
+            //
+            // Safe to move to target position directly
+            //
+            Logger.recordOutput("MechanismActionsSafe/state", "HomeDirectly");
+            elevator.setHeight(targetElevatorHeight);
+            arm.setAngle(targetArmAngle);
+            return;
+          }
+
+          //
+          // Move elevator at most to the safe height.
+          //
+          currentSafeHeight = Math.max(safeElevatorHeightInchesForIntake, currentSafeHeight);
+
+          actionName = "Home";
+        } else {
+          actionName = "Target";
+        }
+
         Logger.recordOutput("MechanismActionsSafe/currentSafeHeight", currentSafeHeight);
 
-        // We are not going to exceed the maximum legal height, start rotation.
-        if (currentElevatorHeightInches + maxArmExtensionDuringRotation < maxLegalHeightInches) {
+        boolean aboveMinimumHeight =
+            currentElevatorHeightInches > currentSafeHeight - elevatorToleranceInches;
+
+        boolean belowMaximumHeight =
+            currentElevatorHeightInches + maxArmExtensionDuringRotation < maxLegalHeightInches;
+
+          // We are not going to exceed the maximum legal height, start rotation.
+        if (aboveMinimumHeight && belowMaximumHeight) {
           arm.setAngle(targetArmAngle);
-          Logger.recordOutput("MechanismActionsSafe/state", "TargetArm");
+          Logger.recordOutput("MechanismActionsSafe/state", actionName + "Arm");
         } else {
-          Logger.recordOutput("MechanismActionsSafe/state", "TargetNoArm");
+          Logger.recordOutput("MechanismActionsSafe/state", actionName + "NoArm");
         }
 
         elevator.setHeight(Units.Inches.of(currentSafeHeight));

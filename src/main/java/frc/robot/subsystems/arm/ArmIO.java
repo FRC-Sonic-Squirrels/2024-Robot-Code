@@ -9,6 +9,7 @@ public interface ArmIO {
   @AutoLog
   public static class ArmIOInputs {
     public Rotation2d armPosition = new Rotation2d();
+    public double armAngleDegrees;
     public double armAppliedVolts;
     public double armCurrentAmps;
     public double armTempCelsius;

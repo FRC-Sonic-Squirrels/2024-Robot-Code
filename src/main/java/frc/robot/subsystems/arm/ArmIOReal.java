@@ -72,6 +72,7 @@ public class ArmIOReal implements ArmIO {
     BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius, velocity);
     // could look into latency compensating this value
     inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());
+    inputs.armAngleDegrees = inputs.armPosition.getDegrees();
     inputs.armAppliedVolts = appliedVols.getValueAsDouble();
     inputs.armCurrentAmps = currentAmps.getValueAsDouble();
     inputs.armTempCelsius = tempCelsius.getValueAsDouble();
