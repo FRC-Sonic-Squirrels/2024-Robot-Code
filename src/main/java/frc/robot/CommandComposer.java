@@ -10,11 +10,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.DriveToPose;
+import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -79,6 +82,8 @@ public class CommandComposer {
       DrivetrainWrapper drivetrainWrapper,
       Elevator elevator,
       Arm arm,
+      Intake intake,
+      Shooter shooter,
       boolean doDrive,
       Command confirmation) {
     /*
@@ -109,6 +114,7 @@ public class CommandComposer {
         new ConditionalCommand(driveToAmp.until(driveToAmp::atGoal), Commands.none(), () -> doDrive)
             .alongWith(MechanismActions.ampFast(elevator, arm))
             .andThen(confirmation)
+            .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE))
             .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 

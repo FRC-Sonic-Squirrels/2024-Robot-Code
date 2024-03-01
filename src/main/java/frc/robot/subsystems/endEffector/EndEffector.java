@@ -20,7 +20,7 @@ public class EndEffector extends SubsystemBase {
   private static final TunableNumberGroup group = new TunableNumberGroup("EndEffector");
 
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
-      group.build("distanceToTriggerNote", 8.0);
+      group.build("distanceToTriggerNote", 11.0);
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
@@ -68,11 +68,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public double noteOffsetInches() {
-    if (intakeSideTOFDetectGamepiece() || shooterSideTOFDetectGamepiece()) {
-      return shooterSideTOFDistanceInches() - intakeSideTOFDistanceInches();
-    }
-
-    return Double.NaN;
+    return shooterSideTOFDistanceInches() - intakeSideTOFDistanceInches();
   }
 
   public boolean noteInEndEffector() {

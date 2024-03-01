@@ -51,6 +51,7 @@ import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.Shimmy;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -572,6 +573,8 @@ public class RobotContainer {
                 drivetrainWrapper,
                 elevator,
                 arm,
+                intake,
+                shooter,
                 false,
                 new ControllerRumbleUntilButtonPress(
                     (r) -> {
@@ -768,6 +771,10 @@ public class RobotContainer {
         .b()
         .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
         .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
+
+    operatorController
+        .a()
+        .whileTrue(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter));
 
     // -- buttons on robot
 
