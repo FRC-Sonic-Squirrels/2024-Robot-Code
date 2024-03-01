@@ -159,6 +159,7 @@ public class MechanismActionsSafe {
             Math.min(maxElevatorHeadroom - elevatorToleranceInches, targetElevatorHeightInches);
 
         String actionName;
+        var safeArmAngle = targetArmAngle;
 
         if (targetArmAngleDegrees < safeAngleIntakeDegrees) {
           //
@@ -182,6 +183,14 @@ public class MechanismActionsSafe {
           actionName = "Home";
         } else {
           actionName = "Target";
+
+          if (targetArmAngleDegrees > 90 && currentArmAngleDegrees < 90) {
+            if (currentElevatorHeightInches
+                < MechanismPositions.ampStage3ElevatorHeightInches.get()) {
+              // Elevator too low to move arm all the way back.
+              safeArmAngle = Rotation2d.fromDegrees(90);
+            }
+          }
         }
 
         Logger.recordOutput("MechanismActionsSafe/currentSafeHeight", currentSafeHeight);
@@ -194,7 +203,7 @@ public class MechanismActionsSafe {
 
         // We are not going to exceed the maximum legal height, start rotation.
         if (aboveMinimumHeight && belowMaximumHeight) {
-          arm.setAngle(targetArmAngle);
+          arm.setAngle(safeArmAngle);
           Logger.recordOutput("MechanismActionsSafe/state", actionName + "Arm");
         } else {
           Logger.recordOutput("MechanismActionsSafe/state", actionName + "NoArm");
