@@ -4,14 +4,16 @@
 
 package frc.robot.commands.intake;
 
+import java.util.function.Consumer;
+
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import java.util.function.Consumer;
 
 public class IntakeGamepiece extends Command {
   private Intake intake;
@@ -26,6 +28,8 @@ public class IntakeGamepiece extends Command {
   private LoggedTunableNumber intakingPercentWithGamepiece =
       group.build("intakingPercentWithGamepiece", 0.3);
 
+  private final Trigger noteInEEDebounced;
+
   private final Consumer<Double> rumbleConsumer;
 
   /** Creates a new IntakeDefaultIdleRPM. */
@@ -35,6 +39,8 @@ public class IntakeGamepiece extends Command {
     this.endEffector = endEffector;
     this.shooter = shooter;
     this.rumbleConsumer = rumbleConsumer;
+
+    noteInEEDebounced = new Trigger(() -> endEffector.noteInEndEffector()).debounce(0.15);
 
     addRequirements(intake);
     setName("IntakeGamepiece");
@@ -101,6 +107,6 @@ public class IntakeGamepiece extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return endEffector.noteInEndEffector();
+    return noteInEEDebounced.getAsBoolean();
   }
 }

@@ -77,7 +77,7 @@ public class ChoreoHelper {
 
   public void resume(double timestamp) {
     if (!Double.isNaN(pausedTime)) {
-      timeOffset += (timestamp - pausedTime);
+      timeOffset += (pausedTime - timestamp);
       pausedTime = Double.NaN;
     }
   }
@@ -89,7 +89,7 @@ public class ChoreoHelper {
    * @param timestamp time of path
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
-    if (Double.isNaN(pausedTime)) {
+    if (!Double.isNaN(pausedTime)) {
       return null;
     }
 

@@ -60,10 +60,11 @@ public class MiddleFirstSubstate extends StateMachine {
 
     initIntake();
 
-    return this::driveWhileOtherCommandRuns;
+    return stateWithName("driveWhileOtherCommandRuns", this::driveWhileOtherCommandRuns);
   }
 
   private StateHandler driveWhileOtherCommandRuns() {
+    Logger.recordOutput("Autonomous/driveWhileOtherCommandRuns", true);
     var chassisSpeeds =
         choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
 
