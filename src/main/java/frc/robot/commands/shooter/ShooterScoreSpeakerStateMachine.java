@@ -266,7 +266,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     endEffector.setPercentOut(0.5);
 
     if (!shooter.noteInShooter()) {
-      Logger.recordOutput("ShooterScoreSpeaker/TimeToShoot",  Timer.getFPGATimestamp() - startOfShooting);
+      Logger.recordOutput(
+          "ShooterScoreSpeaker/TimeToShoot", Timer.getFPGATimestamp() - startOfShooting);
       return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
