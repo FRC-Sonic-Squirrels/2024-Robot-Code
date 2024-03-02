@@ -1,6 +1,7 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.geometry.*;
+import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
   public static final int DebugSpew = 0;
@@ -78,6 +79,7 @@ public class ShootingSolver {
 
     // Direction of the note to face the speaker.
     var thetaNote = Math.atan2(dPspeaker.getY(), dPspeaker.getX());
+    Logger.recordOutput("ShootingSolver/thetaNote", Math.toDegrees(thetaNote));
 
     // Robot relative translation of axis of rotation of shooter
     var Paxis = PaxisOfRotationShooter.rotateBy(new Rotation3d(0.0, 0.0, thetaNote));
@@ -93,6 +95,8 @@ public class ShootingSolver {
 
     // Direction to the speaker from the note.
     double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
+
+    Logger.recordOutput("ShootingSolver/speakerHeading", Math.toDegrees(speakerHeading));
 
     // Horizontal dist to speaker
     var xyDistToSpeaker = Math.hypot(dPspeakerAxisX, dPspeakerAxisY);
@@ -119,6 +123,8 @@ public class ShootingSolver {
     // We need to compute this, which depends on shooterPitch, so we need to use successive
     // approximations
     double yawInNewFrame;
+
+    robotVel = new Translation2d();
 
     while (true) {
       //

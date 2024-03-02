@@ -82,16 +82,28 @@ public class MechanismPositions {
       group.build("climbFinalRestPositionArmAngleDegrees", 23.0);
 
   private static final LoggedTunableNumber deployReactionArms1ElevatorHeightInches =
-      group.build("deployReactionArms1ElevatorHeightInches", 18);
+      group.build("deployReactionArms1ElevatorHeightInches", 14.13);
 
   private static final LoggedTunableNumber deployReactionArms1ArmAngleDegrees =
-      group.build("deployReactionArms1ArmAngleDegrees", -20);
+      group.build("deployReactionArms1ArmAngleDegrees", -90);
 
   private static final LoggedTunableNumber deployReactionArms2ElevatorHeightInches =
-      group.build("deployReactionArms2ElevatorHeightInches", 5);
+      group.build("deployReactionArms2ElevatorHeightInches", 14.13);
 
   private static final LoggedTunableNumber deployReactionArms2ArmAngleDegrees =
-      group.build("deployReactionArms2ArmAngleDegrees", -20);
+      group.build("deployReactionArms2ArmAngleDegrees", -59);
+
+  private static final LoggedTunableNumber deployReactionArms3ElevatorHeightInches =
+      group.build("deployReactionArms3ElevatorHeightInches", 11.1);
+
+  private static final LoggedTunableNumber deployReactionArms3ArmAngleDegrees =
+      group.build("deployReactionArms3ArmAngleDegrees", 140);
+
+  private static final LoggedTunableNumber deployReactionArms4ElevatorHeightInches =
+      group.build("deployReactionArms4ElevatorHeightInches", 11.1);
+
+  private static final LoggedTunableNumber deployReactionArms4ArmAngleDegrees =
+      group.build("deployReactionArms4ArmAngleDegrees", 140);
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
@@ -176,5 +188,17 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(deployReactionArms2ElevatorHeightInches.get()),
         Rotation2d.fromDegrees(deployReactionArms2ArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition deployReactionArmsStep3() {
+    return new MechanismPosition(
+        Units.Inches.of(deployReactionArms3ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(deployReactionArms3ArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition deployReactionArmsStep4() {
+    return new MechanismPosition(
+        Units.Inches.of(deployReactionArms4ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(deployReactionArms4ArmAngleDegrees.get()));
   }
 }

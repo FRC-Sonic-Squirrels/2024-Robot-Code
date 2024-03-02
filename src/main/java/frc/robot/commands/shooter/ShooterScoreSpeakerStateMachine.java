@@ -33,7 +33,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final LoggedTunableNumber tunablePitchOffset =
       group.build("tunablePitchOffset", 0.0);
 
-  private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 10.0);
+  private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
   private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
 
   private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);

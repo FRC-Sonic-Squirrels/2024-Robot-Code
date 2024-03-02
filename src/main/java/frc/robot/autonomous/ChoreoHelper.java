@@ -62,7 +62,7 @@ public class ChoreoHelper {
     }
 
     if (closestState != null) {
-      this.timeOffset = closestState.timestamp;
+      // this.timeOffset = closestState.timestamp;
       log("closestPose", closestState.getPose());
     }
 

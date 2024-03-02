@@ -78,14 +78,14 @@ public class AutosManager {
     list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
-      list.add(() -> testPath("TestDrive1Meter"));
-      list.add(() -> testPath("TestDrive10Meter"));
-      list.add(() -> testPath("TestDrive2Meters"));
-      list.add(() -> testPath("TestDrive2MetersRotating"));
-      list.add(() -> testPath("TestDrive2MetersThenLeft"));
-      list.add(() -> testPath("TestDrive2MetersThenLeftRotating"));
-      list.add(() -> testPath("TestCircle"));
-      list.add(() -> testPath("TestZigZag"));
+      list.add(() -> testPath("TestDrive1Meter", true));
+      list.add(() -> testPath("TestDrive10Meter", true));
+      list.add(() -> testPath("TestDrive2Meters", true));
+      list.add(() -> testPath("TestDrive2MetersRotating", true));
+      list.add(() -> testPath("TestDrive2MetersThenLeft", true));
+      list.add(() -> testPath("TestDrive2MetersThenLeftRotating", true));
+      list.add(() -> testPath("TestCircle", false));
+      list.add(() -> testPath("TestZigZag", false));
       list.add(this::characterization);
       list.add(
           () -> {
@@ -148,11 +148,10 @@ public class AutosManager {
             arm,
             intake,
             new AutoSubstateMachine[] {
-              generateSubstateMachine("sourceAuto", "G5S3"),
-              generateSubstateMachine("S3G4", "G4S2"),
-              generateSubstateMachine("S2G3", "G3S1"),
-              generateSubstateMachine("S1G2", "G2S1"),
-              generateSubstateMachine("S1G1", "G1S1")
+              generateSubstateMachine("sourceAuto", "G5S3"), generateSubstateMachine("S3G4", "G4S2")
+              // generateSubstateMachine("S2G3", "G3S1"),
+              // generateSubstateMachine("S1G2", "G2S1"),
+              // generateSubstateMachine("S1G1", "G1S1")
             },
             1.31);
     return new Auto(
@@ -220,7 +219,7 @@ public class AutosManager {
     return new Auto("simpleShootAuto", state.asCommand(), null);
   }
 
-  private Auto testPath(String pathName) {
+  private Auto testPath(String pathName, boolean useInitialPose) {
     ChoreoTrajectory traj = Choreo.getTrajectory(pathName);
     return new Auto(
         pathName,
@@ -258,7 +257,7 @@ public class AutosManager {
             return speeds == null;
           }
         },
-        traj.getInitialPose());
+        useInitialPose ? traj.getInitialPose() : null);
   }
 
   private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {

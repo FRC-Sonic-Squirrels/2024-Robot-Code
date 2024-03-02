@@ -65,7 +65,7 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler nextSubState() {
-    if (currentSubState++ >= subStates.length) {
+    if (++currentSubState >= subStates.length) {
       return setDone();
     }
 

@@ -137,9 +137,6 @@ public class Arm extends SubsystemBase {
   }
 
   public boolean isAtTargetAngle(Rotation2d target, Rotation2d tolerance) {
-    if (currentControlMode == ControlMode.OPEN_LOOP) {
-      return false;
-    }
     var error = inputs.armPosition.minus(target).getRadians();
     return Math.abs(error) <= tolerance.getRadians();
   }
