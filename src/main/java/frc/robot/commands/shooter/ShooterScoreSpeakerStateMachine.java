@@ -11,6 +11,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.*;
 import frc.lib.team2930.ShootingSolver.Solution;
 import frc.lib.team6328.LoggedTunableNumber;
@@ -63,6 +64,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final BooleanSupplier externalConfirmation;
   private final double forceShotIn;
 
+  private final boolean simpleShot;
+  private final Rotation2d simpleShotShooterPitch;
+
+  private final Trigger noNoteInRobot;
+
   private double startOfShooting;
 
   // FIXME: are these constants correct?
@@ -91,6 +97,28 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double forceShotIn,
       BooleanSupplier externalConfirmation,
       Consumer<Double> rumbleConsumer) {
+    this(
+        drivetrainWrapper,
+        shooter,
+        endEffector,
+        intake,
+        forceShotIn,
+        externalConfirmation,
+        rumbleConsumer,
+        false,
+        new Rotation2d());
+  }
+
+  public ShooterScoreSpeakerStateMachine(
+      DrivetrainWrapper drivetrainWrapper,
+      Shooter shooter,
+      EndEffector endEffector,
+      Intake intake,
+      double forceShotIn,
+      BooleanSupplier externalConfirmation,
+      Consumer<Double> rumbleConsumer,
+      boolean simpleShot,
+      Rotation2d shooterPitch) {
     super("ShooterScoreSpeaker");
 
     this.drivetrainWrapper = drivetrainWrapper;
@@ -100,9 +128,19 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     this.rumbleConsumer = rumbleConsumer;
     this.externalConfirmation = externalConfirmation;
     this.forceShotIn = forceShotIn;
+    this.simpleShot = simpleShot;
+    this.simpleShotShooterPitch = shooterPitch;
 
     rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
+
+    noNoteInRobot =
+        new Trigger(
+                () ->
+                    !(endEffector.shooterSideTOFDetectGamepiece()
+                        || endEffector.intakeSideTOFDetectGamepiece()
+                        || shooter.getToFActivated()))
+            .debounce(0.2);
 
     setInitialState(stateWithName("prepWhileLoadingGamepiece", this::prepWhileLoadingGamepiece));
   }
@@ -114,7 +152,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Intake intake,
       double forceShotIn,
       BooleanSupplier externalSupplier,
-      Consumer<Double> rumbleConsumer) {
+      Consumer<Double> rumbleConsumer,
+      boolean simpleShot,
+      Rotation2d shooterPitch) {
 
     Command command =
         new RunStateMachineCommand(
@@ -126,7 +166,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                     intake,
                     forceShotIn,
                     externalSupplier,
-                    rumbleConsumer),
+                    rumbleConsumer,
+                    simpleShot,
+                    shooterPitch),
             shooter,
             endEffector);
 
@@ -156,9 +198,37 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      double forceShotIn,
+      BooleanSupplier externalSupplier,
+      Consumer<Double> rumbleConsumer) {
+    return getAsCommand(
+        drivetrainWrapper,
+        shooter,
+        endEffector,
+        intake,
+        forceShotIn,
+        externalSupplier,
+        rumbleConsumer,
+        false,
+        new Rotation2d());
+  }
+
+  public static Command getAsCommand(
+      DrivetrainWrapper drivetrainWrapper,
+      Shooter shooter,
+      EndEffector endEffector,
+      Intake intake,
       double forceShotIn) {
     return getAsCommand(
-        drivetrainWrapper, shooter, endEffector, intake, forceShotIn, () -> true, (ignore) -> {});
+        drivetrainWrapper,
+        shooter,
+        endEffector,
+        intake,
+        forceShotIn,
+        () -> true,
+        (ignore) -> {},
+        false,
+        new Rotation2d());
   }
 
   public StateHandler prepWhileLoadingGamepiece() {
@@ -166,6 +236,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     updateSolver();
     rotateToSpeaker();
+    Logger.recordOutput("ShooterScoreSpeaker/cancelled", false);
+    if (noNoteInRobot.getAsBoolean()) {
+      Logger.recordOutput("ShooterScoreSpeaker/cancelled", true);
+      return setDone();
+    }
 
     // ramp up rpm
     shooter.setLauncherRPM(
@@ -224,18 +299,23 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     var externalConfirmation = this.externalConfirmation.getAsBoolean();
     boolean atThetaTarget;
 
-    if (solverResult != null) {
-      var thetaError =
-          desiredShootingHeading.getRadians() - drivetrainWrapper.getRotation().getRadians();
-      while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
-      while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
-      atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
+    if (simpleShot) {
+      atThetaTarget = true;
     } else {
-      atThetaTarget = false;
+      if (solverResult != null) {
+        var thetaError =
+            desiredShootingHeading.getRadians() - drivetrainWrapper.getRotation().getRadians();
+        while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
+        while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
+        atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
+      } else {
+        atThetaTarget = false;
+      }
     }
 
     var forceShoot = stateRunningLongerThan(forceShotIn);
 
+    log("ShooterScoreSpeakerStateMachine/simpleShot", simpleShot);
     log("shootingConfimation/launcherAtRPM", launcherAtRpm);
     log("shootingConfimation/pivotAtAngle", pivotAtAngle);
     log("shootingConfimation/shootingPosition", validShootingPosition());
@@ -300,7 +380,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double currentRotation = drivetrainWrapper.getRotation().getRadians();
       double omega =
           rotationController.calculate(currentRotation, desiredShootingHeading.getRadians());
-      drivetrainWrapper.setRotationOverride(omega);
+      if (!simpleShot) {
+        drivetrainWrapper.setRotationOverride(omega);
+      }
 
       log("omega", omega);
       log("rotationalError", Math.toDegrees(rotationController.getPositionError()));
@@ -312,6 +394,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private boolean validShootingPosition() {
+    if (simpleShot) return true;
     Pose2d reflectedPose =
         AllianceFlipUtil.flipPoseForAlliance(drivetrainWrapper.getPoseEstimatorPose());
 
@@ -356,9 +439,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       }
       double desirePitchDegrees = solverResult.pitch().getDegrees() + offset;
       desiredShootingPitch =
-          Rotation2d.fromDegrees(
-              Math.min(
-                  desirePitchDegrees, Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
+          simpleShot
+              ? simpleShotShooterPitch
+              : Rotation2d.fromDegrees(
+                  Math.min(
+                      desirePitchDegrees,
+                      Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
       desiredShootingHeading = solverResult.heading();
 
       log("headingTargetDegrees", desiredShootingHeading);

@@ -326,6 +326,14 @@ public class Vision extends SubsystemBase {
     }
   }
 
+  public void setUsingVision(boolean value) {
+    useVisionForPoseEstimation = value;
+  }
+
+  public boolean isUsingVision() {
+    return useVisionForPoseEstimation;
+  }
+
   private void logVisionModule(VisionModule visionModule) {
 
     String ROOT_TABLE_PATH = "Vision/VisionModules/" + visionModule.name + "/";

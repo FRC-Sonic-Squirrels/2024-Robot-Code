@@ -23,10 +23,13 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Robot;
@@ -50,6 +53,8 @@ public class Drivetrain extends SubsystemBase {
   private Rotation2d lastGyroRotation = new Rotation2d();
 
   private final PoseEstimator poseEstimator;
+
+  private final Field2d field2d = new Field2d();
 
   RobotConfig config;
 
@@ -99,6 +104,7 @@ public class Drivetrain extends SubsystemBase {
     //     (targetPose) -> {
     //       Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
     //     });
+
   }
 
   private Translation2d simulatedAcceleration = new Translation2d();
@@ -177,6 +183,9 @@ public class Drivetrain extends SubsystemBase {
       Logger.recordOutput("Drivetrain/simualedAcceleration", simulatedAcceleration);
 
       lastVel = getFieldRelativeVelocities().getTranslation();
+
+      field2d.setRobotPose(poseEstimator.getLatestPose());
+      SmartDashboard.putData("Localization/field2d", field2d);
     }
   }
 
@@ -346,6 +355,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
+    for (TimestampedVisionUpdate v : visionData) {
+      if (GeometryUtil.isPoseOutsideField(v.pose())) return;
+    }
     poseEstimator.addVisionData(visionData);
   }
 
@@ -388,6 +400,10 @@ public class Drivetrain extends SubsystemBase {
 
   public Rotation2d getRotation() {
     return getPoseEstimatorPose().getRotation();
+  }
+
+  public Rotation2d getRotationGyroOnly() {
+    return rawOdometryPose.getRotation();
   }
 
   /** Resets the current odometry pose. */

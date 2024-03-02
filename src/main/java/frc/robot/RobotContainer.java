@@ -786,11 +786,16 @@ public class RobotContainer {
                 shooter,
                 endEffector,
                 intake,
-                3.0,
+                5.0,
                 () -> true,
                 (r) -> {},
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD));
+
+    operatorController
+        .rightBumper()
+        .onTrue(Commands.runOnce(() -> vision.setUsingVision(false), vision))
+        .onFalse(Commands.runOnce(() -> vision.setUsingVision(true), vision));
 
     // -- buttons on robot
 

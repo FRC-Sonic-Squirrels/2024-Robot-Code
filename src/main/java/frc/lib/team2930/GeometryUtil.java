@@ -34,4 +34,13 @@ public class GeometryUtil {
       Measure<Distance> x, Measure<Distance> y, Measure<Distance> z) {
     return new Translation3d(x.in(Units.Meters), y.in(Units.Meters), z.in(Units.Meters));
   }
+
+  public static boolean isPoseOutsideField(Pose2d pose) {
+    double poseX = pose.getX();
+    double poseY = pose.getY();
+    if (poseX < 0.0 || poseY < 0.0 || poseX > 16.534 || poseY > 8.21) {
+      return true;
+    }
+    return false;
+  }
 }
