@@ -238,7 +238,7 @@ public final class Constants {
     public static final Measure<Distance> MAX_LEGAL_HEIGHT = Units.Inches.of(26.2); // FIXME
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
-    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
+    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(14.0);
     public static final Measure<Distance> SUPPLY_CURRENT_LIMIT = Units.Inches.of(40.0);
 
     public static final Measure<Distance> SAFE_HEIGHT_INCHES = Units.Inches.of(11.0);
@@ -394,7 +394,7 @@ public final class Constants {
   public static class ArmConstants {
     public static final double GEAR_RATIO = (50.0 / 12.0) * (50.0 / 20.0) * (42.0 / 18.0);
 
-    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(160);
+    public static final Rotation2d MAX_ARM_ANGLE = Rotation2d.fromDegrees(170);
     public static final Rotation2d MIN_ARM_ANGLE = Rotation2d.fromDegrees(-90);
     public static final Rotation2d HOME_POSITION = MIN_ARM_ANGLE;
 

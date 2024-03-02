@@ -19,10 +19,11 @@ public class EndEffectorPrepareNoteForTrap extends Command {
     this.endEffector = endEffector;
 
     gamepieceNotInIntakeSideTOF =
-        new Trigger(() -> endEffector.intakeSideTOFDetectGamepiece())
+        new Trigger(() -> !endEffector.shooterSideTOFDetectGamepiece())
             .debounce(1.0, DebounceType.kRising);
 
     addRequirements(endEffector);
+    setName("endEffectorPrepareForTrap");
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -33,8 +34,8 @@ public class EndEffectorPrepareNoteForTrap extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (endEffector.intakeSideTOFDetectGamepiece()) {
-      endEffector.setPercentOut(0.1);
+    if (endEffector.shooterSideTOFDetectGamepiece()) {
+      endEffector.setPercentOut(-0.05);
     } else {
       endEffector.setPercentOut(0.0);
     }

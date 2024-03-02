@@ -94,13 +94,13 @@ public class MechanismPositions {
       group.build("deployReactionArms2ArmAngleDegrees", -59);
 
   private static final LoggedTunableNumber deployReactionArms3ElevatorHeightInches =
-      group.build("deployReactionArms3ElevatorHeightInches", 11.1);
+      group.build("deployReactionArms3ElevatorHeightInches", 10.9);
 
   private static final LoggedTunableNumber deployReactionArms3ArmAngleDegrees =
-      group.build("deployReactionArms3ArmAngleDegrees", 140);
+      group.build("deployReactionArms3ArmAngleDegrees", -59);
 
   private static final LoggedTunableNumber deployReactionArms4ElevatorHeightInches =
-      group.build("deployReactionArms4ElevatorHeightInches", 11.1);
+      group.build("deployReactionArms4ElevatorHeightInches", 10.9);
 
   private static final LoggedTunableNumber deployReactionArms4ArmAngleDegrees =
       group.build("deployReactionArms4ArmAngleDegrees", 140);
