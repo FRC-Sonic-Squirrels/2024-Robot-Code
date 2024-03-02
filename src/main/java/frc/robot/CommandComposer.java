@@ -24,7 +24,12 @@ import java.util.function.Supplier;
 
 public class CommandComposer {
   public static Command autoClimb(
-      DrivetrainWrapper drivetrainWrapper, Elevator elevator, Arm arm, EndEffector endEffector) {
+      DrivetrainWrapper drivetrainWrapper,
+      Elevator elevator,
+      Arm arm,
+      EndEffector endEffector,
+      Shooter shooter,
+      Intake intake) {
     /*
      * Step 1: drive to in front of the chain,
      * at the same time, if the robot is within 2 meters of the stage:
@@ -58,8 +63,10 @@ public class CommandComposer {
             new ConditionalCommand(
                 MechanismActions.climbPrepUnderStagePosition(elevator, arm)
                     .until(() -> !underStage.getAsBoolean())
-                    .andThen(MechanismActions.climbPrepPosition(elevator, arm)),
-                MechanismActions.climbPrepPosition(elevator, arm),
+                    .andThen(
+                        MechanismActions.climbPrepPosition(
+                            elevator, arm, endEffector, shooter, intake)),
+                MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake),
                 underStage);
 
     Command climbCommand =

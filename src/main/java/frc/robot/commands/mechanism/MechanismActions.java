@@ -9,9 +9,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
+import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -60,8 +65,11 @@ public class MechanismActions {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepUnderStagePosition);
   }
 
-  public static Command climbPrepPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition);
+  public static Command climbPrepPosition(
+      Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition)
+        .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+        .andThen(new EndEffectorPrepareNoteForTrap(endEffector));
   }
 
   public static Command climbDownPosition(Elevator elevator, Arm arm) {

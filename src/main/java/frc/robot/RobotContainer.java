@@ -759,7 +759,9 @@ public class RobotContainer {
           .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
     }
 
-    operatorController.povUp().onTrue(MechanismActions.climbPrepPosition(elevator, arm));
+    operatorController
+        .povUp()
+        .onTrue(MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake));
     operatorController.povLeft().onTrue(MechanismActions.climbChainCheck(elevator, arm));
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
