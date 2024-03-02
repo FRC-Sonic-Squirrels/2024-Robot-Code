@@ -19,7 +19,7 @@ public class MechanismPositions {
   private static final LoggedTunableNumber homeArmAngleDegrees =
       group.build("homeArmAngleDegrees", -92.0);
 
-  private static final LoggedTunableNumber ampFastElevator = group.build("ampFastElevator", 12.0);
+  private static final LoggedTunableNumber ampFastElevator = group.build("ampFastElevator", 14.0);
   private static final LoggedTunableNumber ampFastArm = group.build("ampFastArm", 50.0);
 
   private static final LoggedTunableNumber ampElevatorHeightInches =
@@ -100,10 +100,10 @@ public class MechanismPositions {
       group.build("deployReactionArms3ArmAngleDegrees", -59);
 
   private static final LoggedTunableNumber deployReactionArms4ElevatorHeightInches =
-      group.build("deployReactionArms4ElevatorHeightInches", 10.9);
+      group.build("deployReactionArms4ElevatorHeightInches", 11.0);
 
   private static final LoggedTunableNumber deployReactionArms4ArmAngleDegrees =
-      group.build("deployReactionArms4ArmAngleDegrees", 140);
+      group.build("deployReactionArms4ArmAngleDegrees", -46);
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
