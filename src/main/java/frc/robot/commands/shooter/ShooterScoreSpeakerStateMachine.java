@@ -72,7 +72,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           GeometryUtil.translation3dFromMeasures(
               Units.Inches.of(0), Units.Inches.of(-10), Units.Inches.of(0.0)),
           Constants.ShooterConstants.SHOOTING_SPEED,
-          Constants.ShooterConstants.SHOOTING_TIME);
+          Constants.ShooterConstants.SHOOTING_TIME,
+          false);
 
   private final PIDController rotationController;
 

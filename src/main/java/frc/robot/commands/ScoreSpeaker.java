@@ -54,7 +54,8 @@ public class ScoreSpeaker extends Command {
           new Translation3d(0, 0, 0),
           new Translation3d(0, -10, 0),
           Constants.ShooterConstants.SHOOTING_SPEED,
-          Constants.ShooterConstants.SHOOTING_TIME);
+          Constants.ShooterConstants.SHOOTING_TIME,
+          false);
 
   private BooleanSupplier shootGamepiece;
 

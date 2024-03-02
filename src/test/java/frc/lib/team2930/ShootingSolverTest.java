@@ -25,7 +25,7 @@ public class ShootingSolverTest {
     for (double shooterSpeed = 10; shooterSpeed < 60; shooterSpeed += 10) {
       var solver =
           new ShootingSolver(
-              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime);
+              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime, true);
 
       for (double angle = 0; angle < 360; angle += 45) {
         var rot = Rotation2d.fromDegrees(angle);
@@ -40,10 +40,10 @@ public class ShootingSolverTest {
 
         double VnoteHorizontal = shooterSpeed * Math.cos(Math.toRadians(45));
         if (VnoteHorizontal < 10) {
-          // assertNull(res);
+          assertNull(res);
         } else {
 
-          // assertNotNull(res);
+          assertNotNull(res);
 
           if (debugCode) {
             System.out.printf("Result robotPose: %s\n", robotPose);
@@ -77,8 +77,7 @@ public class ShootingSolverTest {
 
           var noteHorizontalReal = Math.hypot(noteVelTotal.getX(), noteVelTotal.getY());
           var noteVerticalReal = noteVelTotal.getZ();
-          // assertEquals(45, Math.toDegrees(Math.atan2(noteVerticalReal, noteHorizontalReal)),
-          // 0.1);
+          assertEquals(45, Math.toDegrees(Math.atan2(noteVerticalReal, noteHorizontalReal)), 0.1);
         }
       }
     }
@@ -93,7 +92,7 @@ public class ShootingSolverTest {
     for (double shooterSpeed = 10; shooterSpeed <= 50; shooterSpeed += 10) {
       var solver =
           new ShootingSolver(
-              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime);
+              Pspeaker, PaxisOfRotationShooter, PfrontOfShooter, shooterSpeed, shootingTime, true);
       for (double i = -10; i <= 10; i += 0.1) {
         var res =
             solver.computeAngles(0, new Pose2d(-i, 10, new Rotation2d(0)), new Translation2d(i, 0));
