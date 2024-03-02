@@ -63,6 +63,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final BooleanSupplier externalConfirmation;
   private final double forceShotIn;
 
+  private double startOfShooting;
+
   // FIXME: are these constants correct?
   private final ShootingSolver solver =
       new ShootingSolver(
@@ -243,6 +245,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if ((launcherAtRpm && pivotAtAngle && validShootingPosition() && atThetaTarget) || forceShoot) {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
+        startOfShooting = Timer.getFPGATimestamp();
         return stateWithName("shoot", this::shoot);
       }
     }
@@ -263,6 +266,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     endEffector.setPercentOut(0.5);
 
     if (!shooter.noteInShooter()) {
+      Logger.recordOutput("ShooterScoreSpeaker/TimeToShoot",  Timer.getFPGATimestamp() - startOfShooting);
       return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
