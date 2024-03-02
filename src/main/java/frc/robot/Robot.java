@@ -79,7 +79,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.RobotMode.getMode()) {
       case REAL:
         // Running on a real robot, log to a USB stick
-        // Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));
+        Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -145,6 +145,7 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {
     // FIXME: need to remove max distance away from current estimate restriction for vision
     robotContainer.resetSubsystems();
+    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(false);
   }
 
   /** This function is called periodically when disabled. */
@@ -195,6 +196,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     robotContainer.setBrakeMode();
+    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
 
     // schedule the autonomous command (example)
     if (selectedAuto != null) {
@@ -211,6 +213,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     robotContainer.setBrakeMode();
+    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

@@ -110,7 +110,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   private final Drivetrain drivetrain;
   private final DrivetrainWrapper drivetrainWrapper;
-  private final Vision vision;
+  public final Vision vision;
   private final Arm arm;
   private final Elevator elevator;
   private final Intake intake;
@@ -677,19 +677,19 @@ public class RobotContainer {
                           Units.Degrees.of(90.0).in(Units.Radians)));
                 }));
 
-    driverController
-        .y()
-        .whileTrue(
-            new DriveToPose(
-                drivetrainWrapper,
-                () ->
-                    new Pose2d(
-                        Constants.FieldConstants.getSpeakerTranslation()
-                            .plus(
-                                new Translation2d(
-                                    Units.Inches.of(tunableX.get()).in(Units.Meters),
-                                    Units.Inches.of(tunableY.get()).in(Units.Meters))),
-                        new Rotation2d())));
+    // driverController
+    //     .y()
+    //     .whileTrue(
+    //         new DriveToPose(
+    //             drivetrainWrapper,
+    //             () ->
+    //                 new Pose2d(
+    //                     Constants.FieldConstants.getSpeakerTranslation()
+    //                         .plus(
+    //                             new Translation2d(
+    //                                 Units.Inches.of(tunableX.get()).in(Units.Meters),
+    //                                 Units.Inches.of(tunableY.get()).in(Units.Meters))),
+    //                     new Rotation2d())));
     // driverController
     //     .povUp()
     //     .onTrue(
@@ -777,6 +777,20 @@ public class RobotContainer {
     operatorController
         .a()
         .whileTrue(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter));
+
+    driverController
+        .y()
+        .whileTrue(
+            ShooterScoreSpeakerStateMachine.getAsCommand(
+                drivetrainWrapper,
+                shooter,
+                endEffector,
+                intake,
+                3.0,
+                () -> true,
+                (r) -> {},
+                true,
+                Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD));
 
     // -- buttons on robot
 
