@@ -797,7 +797,7 @@ public class RobotContainer {
                 () -> true,
                 (r) -> {},
                 true,
-                Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD));
+                Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
     operatorController
         .rightBumper()
