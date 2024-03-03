@@ -173,16 +173,17 @@ public class RobotContainer {
     // BUGBUG: practice field usable tags
     ArrayList<AprilTag> goodTags = new ArrayList<>();
     for (var tag : aprilTagLayout.getTags()) {
-      //   switch (tag.ID) {
-      //     case 3:
-      //     case 4:
-      //     case 5:
-      //     case 7:
-      //     case 8:
-      //       goodTags.add(tag);
-      //       break;
-      //   }
-      goodTags.add(tag);
+      switch (tag.ID) {
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+          goodTags.add(tag);
+          break;
+      }
+      // goodTags.add(tag);
     }
 
     aprilTagLayout =

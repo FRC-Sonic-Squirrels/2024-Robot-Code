@@ -356,8 +356,12 @@ public class Drivetrain extends SubsystemBase {
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     for (TimestampedVisionUpdate v : visionData) {
-      if (GeometryUtil.isPoseOutsideField(v.pose())) return;
+      if (GeometryUtil.isPoseOutsideField(v.pose())) {
+        Logger.recordOutput("Vision/ingorePoseBecauseOutOfBounds", true);
+        return;
+      }
     }
+    Logger.recordOutput("Vision/ingorePoseBecauseOutOfBounds", false);
     poseEstimator.addVisionData(visionData);
   }
 
