@@ -544,17 +544,18 @@ public class RobotContainer {
     // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
     // .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
 
-    driverController
-        .rightTrigger()
-        .whileTrue(
-            ShooterScoreSpeakerStateMachine.getAsCommand(
-                drivetrainWrapper,
-                shooter,
-                endEffector,
-                intake,
-                1000,
-                driverController.a(),
-                (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble)));
+    // driverController
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         ShooterScoreSpeakerStateMachine.getAsCommand(
+    //             drivetrainWrapper,
+    //             shooter,
+    //             endEffector,
+    //             intake,
+    //             1000,
+    //             driverController.a(),
+    //             (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble,
+    // rumble)));
 
     // driverController
     //     .leftBumper()
