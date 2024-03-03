@@ -48,7 +48,7 @@ public class MiddleFirstSubstate extends StateMachine {
     this.endEffector = endEffector;
     this.intake = intake;
     this.elevator = elevator;
-    this.arm =arm;
+    this.arm = arm;
     this.config = config;
     this.traj = Choreo.getTrajectory("middleAuto");
     this.closestGamepiece = closestGamepiece;
