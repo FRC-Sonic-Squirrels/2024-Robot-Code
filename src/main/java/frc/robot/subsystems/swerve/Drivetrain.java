@@ -55,6 +55,7 @@ public class Drivetrain extends SubsystemBase {
   private final PoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
+  private final Field2d rawOdometryField2d = new Field2d();
 
   RobotConfig config;
 
@@ -186,6 +187,9 @@ public class Drivetrain extends SubsystemBase {
 
       field2d.setRobotPose(poseEstimator.getLatestPose());
       SmartDashboard.putData("Localization/field2d", field2d);
+
+      rawOdometryField2d.setRobotPose(rawOdometryPose);
+      SmartDashboard.putData("Localization/rawOdometryField2d", rawOdometryField2d);
     }
   }
 
