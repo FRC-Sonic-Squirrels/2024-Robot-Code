@@ -538,6 +538,8 @@ public class RobotContainer {
                 intake,
                 endEffector,
                 shooter,
+                arm,
+                elevator,
                 (rumble) -> {
                   driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
                 }));

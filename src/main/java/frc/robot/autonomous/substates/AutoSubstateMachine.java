@@ -12,6 +12,8 @@ import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -24,6 +26,8 @@ public class AutoSubstateMachine extends StateMachine {
   private final Shooter shooter;
   private final EndEffector endEffector;
   private final Intake intake;
+  private final Elevator elevator;
+  private final Arm arm;
   private final RobotConfig config;
   private final ChoreoTrajectory trajToGamePiece;
   private final ChoreoTrajectory trajToShoot;
@@ -39,6 +43,8 @@ public class AutoSubstateMachine extends StateMachine {
       EndEffector endEffector,
       Intake intake,
       RobotConfig config,
+      Elevator elevator,
+      Arm arm,
       String trajToGP,
       String trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
@@ -48,6 +54,8 @@ public class AutoSubstateMachine extends StateMachine {
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
+    this.elevator = elevator;
+    this.arm = arm;
     this.config = config;
     this.trajToGamePiece = Choreo.getTrajectory(trajToGP);
     this.trajToShoot = Choreo.getTrajectory(trajToShoot);
@@ -57,7 +65,7 @@ public class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler initFollowPathToGamePiece() {
-    intakeCommand = new IntakeGamepiece(intake, endEffector, shooter);
+    intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
     intakeCommand.schedule();
     choreoHelper =
         new ChoreoHelper(

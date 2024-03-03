@@ -192,6 +192,8 @@ public class AutosManager {
                   shooter,
                   endEffector,
                   intake,
+                  elevator,
+                  arm,
                   config,
                   visionGamepiece::getClosestGamepiece)
               // generateSubstateMachine("MiddleG1", "G2S2"),
@@ -267,6 +269,8 @@ public class AutosManager {
         endEffector,
         intake,
         config,
+        elevator,
+        arm,
         trajToGP,
         trajToShoot,
         visionGamepiece::getClosestGamepiece);
