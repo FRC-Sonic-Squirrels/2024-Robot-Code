@@ -42,7 +42,7 @@ public class Vision extends SubsystemBase {
       group.build("MaxSingleTargetAmbiguity", 0.08);
 
   private static LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
-      group.build("MaxValidDistanceFromCurrentEstimateMeters", 3.0);
+      group.build("MaxValidDistanceFromCurrentEstimateMeters", 30.0);
 
   private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
 
