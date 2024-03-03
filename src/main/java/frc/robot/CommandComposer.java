@@ -119,7 +119,7 @@ public class CommandComposer {
 
     Command scoreAmp =
         new ConditionalCommand(driveToAmp.until(driveToAmp::atGoal), Commands.none(), () -> doDrive)
-            .alongWith(MechanismActions.ampFast(elevator, arm))
+            .alongWith(MechanismActions.ampPosition(elevator, arm))
             .andThen(confirmation)
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE));
@@ -133,15 +133,15 @@ public class CommandComposer {
   public static Command cancelScoreAmp(
       DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
-        Commands.waitUntil(
-                () ->
-                    GeometryUtil.getDist(
-                            drivetrainWrapper.getPoseEstimatorPose(),
-                            Constants.FieldConstants.getAmpScoringPose())
-                        >= 0.5)
-            .andThen(
-                MechanismActions.loadingPosition(elevator, arm)
-                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0)));
+        // Commands.waitUntil(
+        //         () ->
+        //             GeometryUtil.getDist(
+        //                     drivetrainWrapper.getPoseEstimatorPose(),
+        //                     Constants.FieldConstants.getAmpScoringPose())
+        //                 >= 0.5)
+        //     .andThen(
+        MechanismActions.ampPositionToLoadPosition(elevator, arm)
+            .alongWith(new EndEffectorPercentOut(endEffector, 0.0));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
