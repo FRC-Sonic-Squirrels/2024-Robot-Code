@@ -30,6 +30,8 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -134,6 +136,7 @@ public class RobotContainer {
 
   public DigitalInput breakModeButton = new DigitalInput(0);
   public DigitalInput homeSensorsButton = new DigitalInput(1);
+  public PowerDistribution powerDistribution = new PowerDistribution(1, ModuleType.kRev);
 
   Trigger breakModeButtonTrigger =
       new Trigger(() -> !breakModeButton.get() && !DriverStation.isEnabled());
@@ -836,31 +839,24 @@ public class RobotContainer {
     // Add Reset and Reboot buttons to SmartDashboard
     SmartDashboard.putData(
         "PV Restart SW 1_Shooter_Left",
-        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.11")));
-    SmartDashboard.putData(
-        "PV REBOOT 1_Shooter_Left",
-        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.11")));
-
-    SmartDashboard.putData(
-        "PV Restart SW 2_Shooter_Right",
-        new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.12")));
-    SmartDashboard.putData(
-        "PV REBOOT 2_Shooter_Right",
-        new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.12")));
-
-    SmartDashboard.putData(
-        "PV Restart SW 3_Intake_Left",
         new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.13")));
     SmartDashboard.putData(
-        "PV REBOOT 3_Intake_Left",
+        "PV REBOOT 1_Shooter_Left",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.13")));
 
     SmartDashboard.putData(
-        "PV Restart SW 4_Intake_Right",
+        "PV Restart SW 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.14")));
     SmartDashboard.putData(
-        "PV REBOOT 4_Intake_Right",
+        "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
+
+    SmartDashboard.putData(
+        "PV power OFF",
+        new RunsWhenDisabledInstantCommand(() -> powerDistribution.setSwitchableChannel(false)));
+    SmartDashboard.putData(
+        "PV power ON",
+        new RunsWhenDisabledInstantCommand(() -> powerDistribution.setSwitchableChannel(true)));
   }
 
   /**
