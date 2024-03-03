@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.EndEffectorConstants;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -18,6 +20,8 @@ public class IntakeGamepiece extends Command {
   private Intake intake;
   private EndEffector endEffector;
   private Shooter shooter;
+  private Arm arm;
+  private Elevator elevator;
 
   private static final TunableNumberGroup group = new TunableNumberGroup("IntakeGamepiece");
 
@@ -33,10 +37,17 @@ public class IntakeGamepiece extends Command {
 
   /** Creates a new IntakeDefaultIdleRPM. */
   public IntakeGamepiece(
-      Intake intake, EndEffector endEffector, Shooter shooter, Consumer<Double> rumbleConsumer) {
+      Intake intake,
+      EndEffector endEffector,
+      Shooter shooter,
+      Arm arm,
+      Elevator elevator,
+      Consumer<Double> rumbleConsumer) {
     this.intake = intake;
     this.endEffector = endEffector;
     this.shooter = shooter;
+    this.arm = arm;
+    this.elevator = elevator;
     this.rumbleConsumer = rumbleConsumer;
 
     noteInEEDebounced = new Trigger(() -> endEffector.noteInEndEffector()).debounce(0.15);
@@ -45,8 +56,9 @@ public class IntakeGamepiece extends Command {
     setName("IntakeGamepiece");
   }
 
-  public IntakeGamepiece(Intake intake, EndEffector endEffector, Shooter shooter) {
-    this(intake, endEffector, shooter, (ignore) -> {});
+  public IntakeGamepiece(
+      Intake intake, EndEffector endEffector, Shooter shooter, Arm arm, Elevator elevator) {
+    this(intake, endEffector, shooter, arm, elevator, (ignore) -> {});
   }
 
   // Called when the command is initially scheduled.
@@ -66,7 +78,11 @@ public class IntakeGamepiece extends Command {
       if (!intakeSideTofSeenGamepiece) {
         endEffector.markStartOfNoteIntaking();
 
-        double percent = intakingPercent.get();
+        double percent =
+            arm.getAngle().getDegrees() > -88 || elevator.getHeightInches() > 8.0
+                ? 0.0
+                : intakingPercent.get();
+
         intake.setPercentOut(percent);
         endEffector.setPercentOut(percent);
 
