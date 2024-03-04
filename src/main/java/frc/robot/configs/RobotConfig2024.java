@@ -83,7 +83,8 @@ public class RobotConfig2024 extends RobotConfig {
 
   // --------- SWERVE GEAR RATIO ---------
   private static final double SWERVE_DRIVE_GEAR_RATIO =
-      SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
+      // SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
+      5.9;
   private static final double SWERVE_STEER_GEAR_RATIO =
       SwerveModuleConstants.MK4I.GEARING_TURN_GEAR_RATIO;
 
@@ -222,8 +223,8 @@ public class RobotConfig2024 extends RobotConfig {
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
     return new VisionModuleConfiguration[] {
-      // VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
-      // VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
     };
