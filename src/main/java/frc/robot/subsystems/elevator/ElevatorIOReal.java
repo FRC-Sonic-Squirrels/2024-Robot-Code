@@ -63,6 +63,8 @@ public class ElevatorIOReal implements ElevatorIO {
 
     config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
+    config.Voltage.SupplyVoltageTimeConstant = 0.02;
+
     motor.getConfigurator().apply(config);
 
     rotorPosition = motor.getRotorPosition();

@@ -60,6 +60,7 @@ public class GyroIOPigeon2 implements GyroIO {
     xAcceleration.setUpdateFrequency(100.0);
     yAcceleration.setUpdateFrequency(100.0);
     zAcceleration.setUpdateFrequency(100.0);
+
     pigeon.optimizeBusUtilization();
     yawPositionQueue =
         PhoenixOdometryThread.getInstance()

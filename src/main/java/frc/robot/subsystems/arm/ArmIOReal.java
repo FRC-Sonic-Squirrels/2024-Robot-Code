@@ -50,6 +50,8 @@ public class ArmIOReal implements ArmIO {
 
     config.Feedback.SensorToMechanismRatio = Constants.ArmConstants.GEAR_RATIO;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+    config.Voltage.SupplyVoltageTimeConstant = 0.02;
     // other closed loop configuration is handled by setClosedLoopConstants()
 
     motor.getConfigurator().apply(config);

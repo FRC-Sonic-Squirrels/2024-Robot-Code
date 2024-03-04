@@ -77,6 +77,7 @@ public class ShooterIOReal implements ShooterIO {
     launcherConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Launcher.GEARING;
 
     launcherConfig.Voltage.PeakReverseVoltage = 0.0;
+    launcherConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
 
     launcher_lead.getConfigurator().apply(launcherConfig);
     launcher_follower.getConfigurator().apply(launcherConfig);

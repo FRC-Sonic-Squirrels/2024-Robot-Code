@@ -35,6 +35,8 @@ public class IntakeIOReal implements IntakeIO {
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
+    config.Voltage.SupplyVoltageTimeConstant = 0.02;
+
     motor.getConfigurator().apply(config);
 
     currentAmps = motor.getStatorCurrent();

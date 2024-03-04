@@ -107,7 +107,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     // driveMotorCurrentLimitConfig = globalConfig.getDriveTalonCurrentLimitConfig();
     driveMotorCurrentLimitConfig =
-        new CurrentLimitsConfigs().withStatorCurrentLimit(100).withStatorCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withStatorCurrentLimit(80).withStatorCurrentLimitEnable(true);
     steerMotorCurrentLimitConfig = globalConfig.getSteerTalonCurrentLimitConfig();
     // --- define constants ---
 
@@ -119,6 +119,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     var driveTalonConfig = new TalonFXConfiguration();
     driveTalonConfig.CurrentLimits = driveMotorCurrentLimitConfig;
     driveTalonConfig.MotorOutput.Inverted = driveMotorInverted;
+    driveTalonConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
     driveTalon.getConfigurator().apply(driveTalonConfig);
 
     setDriveBrakeMode(true);
@@ -127,6 +128,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     var turnTalonConfig = new TalonFXConfiguration();
     turnTalonConfig.CurrentLimits = steerMotorCurrentLimitConfig;
     turnTalonConfig.MotorOutput.Inverted = steerMotorInverted;
+    // turnTalonConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
     turnTalon.getConfigurator().apply(turnTalonConfig);
 
     setTurnBrakeMode(true);
