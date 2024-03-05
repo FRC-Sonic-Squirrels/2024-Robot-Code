@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.GeometryUtil;
@@ -424,11 +423,11 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double[] getCurrentDrawAmps() {
-    double[] current = new double[] {0};
-    current = ArrayUtil.concatWithArrayCopy(current, modules.front_left.getCurrentAmps());
-    current = ArrayUtil.concatWithArrayCopy(current, modules.front_right.getCurrentAmps());
-    current = ArrayUtil.concatWithArrayCopy(current, modules.back_left.getCurrentAmps());
-    current = ArrayUtil.concatWithArrayCopy(current, modules.back_right.getCurrentAmps());
+    double[] current = new double[8];
+    modules.front_left.getCurrentAmps(current, 0);
+    modules.front_right.getCurrentAmps(current, 2);
+    modules.back_left.getCurrentAmps(current, 4);
+    modules.back_right.getCurrentAmps(current, 6);
     return current;
   }
 }

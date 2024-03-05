@@ -19,16 +19,16 @@ import org.littletonrobotics.junction.AutoLog;
 public interface SwerveModuleIO {
   @AutoLog
   public static class ModuleIOInputs {
-    public double drivePositionRad = 0.0;
-    public double driveVelocityRadPerSec = 0.0;
-    public double driveAppliedVolts = 0.0;
-    public double[] driveCurrentAmps = new double[] {};
+    public double drivePositionRad;
+    public double driveVelocityRadPerSec;
+    public double driveAppliedVolts;
+    public double driveCurrentAmps;
 
     public Rotation2d turnAbsolutePosition = new Rotation2d();
     public Rotation2d turnPosition = new Rotation2d();
-    public double turnVelocityRadPerSec = 0.0;
-    public double turnAppliedVolts = 0.0;
-    public double[] turnCurrentAmps = new double[] {};
+    public double turnVelocityRadPerSec;
+    public double turnAppliedVolts;
+    public double turnCurrentAmps;
 
     // FIXME: timestamp these for pose estimator
     public double[] odometryDrivePositionsRad = new double[] {};

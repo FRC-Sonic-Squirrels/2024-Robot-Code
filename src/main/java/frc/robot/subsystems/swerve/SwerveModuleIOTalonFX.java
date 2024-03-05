@@ -195,7 +195,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     inputs.driveVelocityRadPerSec =
         Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / DRIVE_GEAR_RATIO;
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
-    inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
+    inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
     inputs.turnAbsolutePosition =
         Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
@@ -205,7 +205,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     inputs.turnVelocityRadPerSec =
         Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-    inputs.turnCurrentAmps = new double[] {turnCurrent.getValueAsDouble()};
+    inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
 
     inputs.odometryDrivePositionsRad =
         drivePositionQueue.stream()
