@@ -10,7 +10,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public abstract class RobotConfig {
@@ -161,9 +161,9 @@ public abstract class RobotConfig {
   // --------- Build IO layers for subsystems -------------
 
   // return IO layers needed for subsystems
-  public abstract SwerveModule[] getSwerveModuleObjects();
+  public abstract SwerveModules getSwerveModuleObjects();
 
-  public abstract SwerveModule[] getReplaySwerveModuleObjects();
+  public abstract SwerveModules getReplaySwerveModuleObjects();
 
   public abstract VisionModuleConfiguration[] getVisionModuleObjects();
 

@@ -14,7 +14,7 @@ import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
-import frc.robot.subsystems.swerve.SwerveModuleIOSim;
+import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class SimulatorRobotConfig extends RobotConfig {
@@ -131,25 +131,23 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   // FIXME: define your swerve module objects here
   @Override
-  public SwerveModule[] getSwerveModuleObjects() {
-
-    SwerveModule fl = new SwerveModule(0, this, new SwerveModuleIOSim());
-    SwerveModule fr = new SwerveModule(1, this, new SwerveModuleIOSim());
-    SwerveModule bl = new SwerveModule(2, this, new SwerveModuleIOSim());
-    SwerveModule br = new SwerveModule(3, this, new SwerveModuleIOSim());
-
-    SwerveModule[] modules = {fl, fr, bl, br};
+  public SwerveModules getSwerveModuleObjects() {
+    var modules = new SwerveModules();
+    modules.front_left = new SwerveModule(0, this, new SwerveModuleIO() {});
+    modules.front_right = new SwerveModule(1, this, new SwerveModuleIO() {});
+    modules.back_left = new SwerveModule(2, this, new SwerveModuleIO() {});
+    modules.back_right = new SwerveModule(3, this, new SwerveModuleIO() {});
     return modules;
   }
 
   @Override
-  public SwerveModule[] getReplaySwerveModuleObjects() {
-    return new SwerveModule[] {
-      new SwerveModule(0, this, new SwerveModuleIO() {}),
-      new SwerveModule(1, this, new SwerveModuleIO() {}),
-      new SwerveModule(2, this, new SwerveModuleIO() {}),
-      new SwerveModule(3, this, new SwerveModuleIO() {}),
-    };
+  public SwerveModules getReplaySwerveModuleObjects() {
+    var modules = new SwerveModules();
+    modules.front_left = new SwerveModule(0, this, new SwerveModuleIO() {});
+    modules.front_right = new SwerveModule(1, this, new SwerveModuleIO() {});
+    modules.back_left = new SwerveModule(2, this, new SwerveModuleIO() {});
+    modules.back_right = new SwerveModule(3, this, new SwerveModuleIO() {});
+    return modules;
   }
 
   //

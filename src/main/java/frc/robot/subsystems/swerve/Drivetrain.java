@@ -46,7 +46,7 @@ public class Drivetrain extends SubsystemBase {
   private final GyroIO gyroIO;
   // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private final SwerveModule[] modules = new SwerveModule[4]; // FL, FR, BL, BR
+  private final SwerveModules modules;
 
   private final SwerveDriveKinematics kinematics;
   private Pose2d rawOdometryPose = new Pose2d();
@@ -59,21 +59,12 @@ public class Drivetrain extends SubsystemBase {
 
   RobotConfig config;
 
-  public Drivetrain(RobotConfig config, GyroIO gyroIO, SwerveModule[] swerveModules) {
-
-    if (swerveModules.length > 4) {
-      throw new RuntimeException("more than 4 modules given to drivetrain");
-    }
-
+  public Drivetrain(RobotConfig config, GyroIO gyroIO, SwerveModules swerveModules) {
     this.config = config;
+    this.modules = swerveModules;
+    this.gyroIO = gyroIO;
 
     kinematics = config.getSwerveDriveKinematics();
-
-    this.gyroIO = gyroIO;
-    this.modules[0] = swerveModules[0];
-    this.modules[1] = swerveModules[1];
-    this.modules[2] = swerveModules[2];
-    this.modules[3] = swerveModules[3];
 
     // FIXME: values copied from 6328, learn how to calculate these values
     poseEstimator = new PoseEstimator(0.1, 0.1, 0.3);
@@ -116,21 +107,15 @@ public class Drivetrain extends SubsystemBase {
       try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
       {
         gyroIO.updateInputs(gyroInputs);
-        for (var module : modules) {
-          module.updateInputs();
-        }
+        modules.updateInputs();
       }
 
       Logger.processInputs("Drive/Gyro", gyroInputs);
-      for (var module : modules) {
-        module.periodic();
-      }
+      modules.periodic();
 
       // Stop moving when disabled
       if (DriverStation.isDisabled()) {
-        for (var module : modules) {
-          module.stop();
-        }
+        modules.stop();
       }
       // Log empty setpoint states when disabled
       if (DriverStation.isDisabled()) {
@@ -141,15 +126,18 @@ public class Drivetrain extends SubsystemBase {
       // Update odometry
       int deltaCount =
           gyroInputs.connected ? gyroInputs.odometryYawPositions.length : Integer.MAX_VALUE;
-      for (int i = 0; i < 4; i++) {
-        deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
-      }
+      deltaCount = Math.min(deltaCount, modules.front_left.getPositionDeltas().length);
+      deltaCount = Math.min(deltaCount, modules.front_right.getPositionDeltas().length);
+      deltaCount = Math.min(deltaCount, modules.back_left.getPositionDeltas().length);
+      deltaCount = Math.min(deltaCount, modules.back_right.getPositionDeltas().length);
+
       for (int deltaIndex = 0; deltaIndex < deltaCount; deltaIndex++) {
         // Read wheel deltas from each module
         SwerveModulePosition[] wheelDeltas = new SwerveModulePosition[4];
-        for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-          wheelDeltas[moduleIndex] = modules[moduleIndex].getPositionDeltas()[deltaIndex];
-        }
+        wheelDeltas[0] = modules.front_left.getPositionDeltas()[deltaIndex];
+        wheelDeltas[1] = modules.front_right.getPositionDeltas()[deltaIndex];
+        wheelDeltas[2] = modules.back_left.getPositionDeltas()[deltaIndex];
+        wheelDeltas[3] = modules.back_right.getPositionDeltas()[deltaIndex];
 
         // The twist represents the motion of the robot since the last
         // sample in x, y, and theta based only on the modules, without
@@ -168,7 +156,7 @@ public class Drivetrain extends SubsystemBase {
         rawOdometryPose = rawOdometryPose.exp(twist);
 
         // fixme: all the modules should have the same timestamp so taking from 0 should be fine
-        var timestamp = modules[0].getOdometryTimestamps()[deltaIndex];
+        var timestamp = modules.front_left.getOdometryTimestamps()[deltaIndex];
         poseEstimator.addDriveData(timestamp, twist);
       }
 
@@ -276,10 +264,11 @@ public class Drivetrain extends SubsystemBase {
 
     // Send setpoints to modules
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
-      optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
-    }
+    // The module returns the optimized state, useful for logging
+    optimizedSetpointStates[0] = modules.front_left.runSetpoint(setpointStates[0]);
+    optimizedSetpointStates[1] = modules.front_right.runSetpoint(setpointStates[1]);
+    optimizedSetpointStates[2] = modules.back_left.runSetpoint(setpointStates[2]);
+    optimizedSetpointStates[3] = modules.back_right.runSetpoint(setpointStates[3]);
 
     // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -308,28 +297,32 @@ public class Drivetrain extends SubsystemBase {
 
   /** Runs forwards at the commanded voltage. */
   public void runCharacterizationVolts(double volts) {
-    for (int i = 0; i < 4; i++) {
-      modules[i].runCharacterization(volts);
-    }
+    modules.front_left.runCharacterization(volts);
+    modules.front_right.runCharacterization(volts);
+    modules.back_left.runCharacterization(volts);
+    modules.back_right.runCharacterization(volts);
   }
 
   /** Returns the average drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
-    double driveVelocityAverage = 0.0;
-    for (var module : modules) {
-      driveVelocityAverage += module.getCharacterizationVelocity();
-    }
+    double driveVelocityAverage =
+        modules.front_left.getCharacterizationVelocity()
+            + modules.front_right.getCharacterizationVelocity()
+            + modules.back_left.getCharacterizationVelocity()
+            + modules.back_right.getCharacterizationVelocity();
+
     return driveVelocityAverage / 4.0;
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
-    SwerveModuleState[] states = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
-      states[i] = modules[i].getState();
-    }
-    return states;
+    return new SwerveModuleState[] {
+      modules.front_left.getState(),
+      modules.front_right.getState(),
+      modules.back_left.getState(),
+      modules.back_right.getState()
+    };
   }
 
   public ChassisSpeeds getChassisSpeeds() {
@@ -432,9 +425,10 @@ public class Drivetrain extends SubsystemBase {
 
   public double[] getCurrentDrawAmps() {
     double[] current = new double[] {0};
-    for (int i = 0; i < 4; i++) {
-      current = ArrayUtil.concatWithArrayCopy(current, modules[i].getCurrentAmps());
-    }
+    current = ArrayUtil.concatWithArrayCopy(current, modules.front_left.getCurrentAmps());
+    current = ArrayUtil.concatWithArrayCopy(current, modules.front_right.getCurrentAmps());
+    current = ArrayUtil.concatWithArrayCopy(current, modules.back_left.getCurrentAmps());
+    current = ArrayUtil.concatWithArrayCopy(current, modules.back_right.getCurrentAmps());
     return current;
   }
 }

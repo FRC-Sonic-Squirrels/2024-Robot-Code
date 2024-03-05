@@ -17,6 +17,7 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
+import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
 
 public class RobotConfig2024 extends RobotConfig {
@@ -196,27 +197,27 @@ public class RobotConfig2024 extends RobotConfig {
 
   // FIXME: define your swerve module objects here
   @Override
-  public SwerveModule[] getSwerveModuleObjects() {
-    SwerveModule fl =
+  public SwerveModules getSwerveModuleObjects() {
+    var modules = new SwerveModules();
+    modules.front_left =
         new SwerveModule(0, this, new SwerveModuleIOTalonFX(this, FRONT_LEFT_MODULE_CONFIG));
-    SwerveModule fr =
+    modules.front_right =
         new SwerveModule(1, this, new SwerveModuleIOTalonFX(this, FRONT_RIGHT_MODULE_CONFIG));
-    SwerveModule bl =
+    modules.back_left =
         new SwerveModule(2, this, new SwerveModuleIOTalonFX(this, BACK_LEFT_MODULE_CONFIG));
-    SwerveModule br =
+    modules.back_right =
         new SwerveModule(3, this, new SwerveModuleIOTalonFX(this, BACK_RIGHT_MODULE_CONFIG));
-
-    return new SwerveModule[] {fl, fr, bl, br};
+    return modules;
   }
 
   @Override
-  public SwerveModule[] getReplaySwerveModuleObjects() {
-    return new SwerveModule[] {
-      new SwerveModule(0, this, new SwerveModuleIO() {}),
-      new SwerveModule(1, this, new SwerveModuleIO() {}),
-      new SwerveModule(2, this, new SwerveModuleIO() {}),
-      new SwerveModule(3, this, new SwerveModuleIO() {}),
-    };
+  public SwerveModules getReplaySwerveModuleObjects() {
+    var modules = new SwerveModules();
+    modules.front_left = new SwerveModule(0, this, new SwerveModuleIO() {});
+    modules.front_right = new SwerveModule(1, this, new SwerveModuleIO() {});
+    modules.back_left = new SwerveModule(2, this, new SwerveModuleIO() {});
+    modules.back_right = new SwerveModule(3, this, new SwerveModuleIO() {});
+    return modules;
   }
 
   // FIXME: define vision modules here
