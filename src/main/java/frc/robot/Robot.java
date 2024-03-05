@@ -16,13 +16,17 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.robot.autonomous.AutosManager.Auto;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -47,6 +51,9 @@ public class Robot extends LoggedRobot {
   private Pose2d selectedInitialPose;
   private Pose2d desiredInitialPose;
   private boolean hasEnteredTeleAtSomePoint = false;
+
+  // Enables power distribution logging
+  private PowerDistribution powerDistribution = new PowerDistribution(1, ModuleType.kRev);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -116,6 +123,14 @@ public class Robot extends LoggedRobot {
     commandScheduler.onCommandFinish(
         command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
     robotContainer.resetSubsystems();
+
+    // Dashboard buttons to turn off/on cameras
+    SmartDashboard.putData(
+        "PV Camera power OFF",
+        new RunsWhenDisabledInstantCommand(() -> powerDistribution.setSwitchableChannel(false)));
+    SmartDashboard.putData(
+        "PV Camera power ON",
+        new RunsWhenDisabledInstantCommand(() -> powerDistribution.setSwitchableChannel(true)));
   }
 
   /** This function is called periodically during all modes. */
