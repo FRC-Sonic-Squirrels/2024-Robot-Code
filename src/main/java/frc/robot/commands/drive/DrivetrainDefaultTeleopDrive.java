@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -62,8 +63,8 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
     // Calcaulate new linear velocity
     Translation2d linearVelocity =
-        new Pose2d(new Translation2d(), linearDirection)
-            .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+        new Pose2d(Constants.zeroTranslation2d, linearDirection)
+            .transformBy(new Transform2d(linearMagnitude, 0.0, Constants.zeroRotation2d))
             .getTranslation();
 
     var correctedLinearVelocity = AllianceFlipUtil.flipVelocitiesForAlliance(linearVelocity);

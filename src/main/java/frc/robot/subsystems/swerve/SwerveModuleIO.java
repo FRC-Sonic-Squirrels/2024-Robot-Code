@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface SwerveModuleIO {
@@ -24,8 +25,8 @@ public interface SwerveModuleIO {
     public double driveAppliedVolts;
     public double driveCurrentAmps;
 
-    public Rotation2d turnAbsolutePosition = new Rotation2d();
-    public Rotation2d turnPosition = new Rotation2d();
+    public Rotation2d turnAbsolutePosition = Constants.zeroRotation2d;
+    public Rotation2d turnPosition = Constants.zeroRotation2d;
     public double turnVelocityRadPerSec;
     public double turnAppliedVolts;
     public double turnCurrentAmps;

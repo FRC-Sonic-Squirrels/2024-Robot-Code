@@ -20,8 +20,8 @@ public class GamepieceVisualization {
   private static double gamepieceSpacing = 0.7;
   private static double timeout = 12.0;
   private static Pose2d robotPoseOfShot = new Pose2d();
-  private static Translation2d robotVelOfShot = new Translation2d();
-  private static Rotation2d shooterAngleOfShot = new Rotation2d();
+  private static Translation2d robotVelOfShot = Constants.zeroTranslation2d;
+  private static Rotation2d shooterAngleOfShot = Constants.zeroRotation2d;
   private static double shooterRPMofShot = 0.0;
   private static boolean shootingPrev = false;
   private static boolean gamepieceShot = false;

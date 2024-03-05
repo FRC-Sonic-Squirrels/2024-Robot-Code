@@ -1,7 +1,6 @@
 package frc.robot.autonomous.substates;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -33,7 +32,8 @@ public class DriveAfterSimpleShot extends StateMachine {
               double distance =
                   Constants.isRedAlliance() ? -driveDistance.get() : driveDistance.get();
               Pose2d targetPose =
-                  new Pose2d(initialPose.getX() + distance, initialPose.getY(), new Rotation2d());
+                  new Pose2d(
+                      initialPose.getX() + distance, initialPose.getY(), Constants.zeroRotation2d);
               Logger.recordOutput("Autonomous/SimpleShot/targetPose", targetPose);
               return targetPose;
             });

@@ -86,7 +86,7 @@ public class Shooter extends SubsystemBase {
 
   private double pivotPidLatency = 0.0;
 
-  private Rotation2d targetPivotPosition = new Rotation2d();
+  private Rotation2d targetPivotPosition = Constants.zeroRotation2d;
   private double targetLauncherRPM = 0.0;
 
   /** Creates a new ShooterSubsystem. */

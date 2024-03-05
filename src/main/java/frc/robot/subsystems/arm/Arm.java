@@ -52,7 +52,7 @@ public class Arm extends SubsystemBase {
   private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
 
   private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
-  private Rotation2d closedLoopTargetAngle = new Rotation2d();
+  private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;
   // FIXME: tune this value
   private final Rotation2d closedLoopTolerance = Rotation2d.fromDegrees(1);
   private final double MAX_VOLTAGE = 12;

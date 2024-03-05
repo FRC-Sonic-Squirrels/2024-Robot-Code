@@ -3,6 +3,7 @@ package frc.lib.team2930;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.math.geometry.*;
+import frc.robot.Constants;
 import org.junit.jupiter.api.Test;
 
 public class ShootingSolverTest {
@@ -34,7 +35,7 @@ public class ShootingSolverTest {
         var robotVelRotated = robotVel.rotateBy(rot);
 
         var robotPosRotatedAndTranslated = robotPosRotated.minus(robotVelRotated);
-        var robotPose = new Pose2d(robotPosRotatedAndTranslated, new Rotation2d());
+        var robotPose = new Pose2d(robotPosRotatedAndTranslated, Constants.zeroRotation2d);
 
         var res = solver.computeAngles(0, robotPose, robotVelRotated);
 

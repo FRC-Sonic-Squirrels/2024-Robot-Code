@@ -44,6 +44,8 @@ import java.util.function.Supplier;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final Translation2d zeroTranslation2d = new Translation2d();
+  public static final Rotation2d zeroRotation2d = new Rotation2d();
 
   public static boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();
@@ -266,7 +268,7 @@ public final class Constants {
     public static final double SHOOTING_TIME = 0.2;
 
     public static final Transform2d SHOOTER_OFFSET =
-        new Transform2d(0, -Units.Inches.of(12).in(Units.Meters), new Rotation2d());
+        new Transform2d(0, -Units.Inches.of(12).in(Units.Meters), Constants.zeroRotation2d);
 
     public static final Translation3d SHOOTER_AXIS_OF_ROTATION =
         new Translation3d(

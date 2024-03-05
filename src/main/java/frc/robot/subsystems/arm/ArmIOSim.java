@@ -32,7 +32,7 @@ public class ArmIOSim implements ArmIO {
   private double kG;
 
   private boolean closedLoop = false;
-  private Rotation2d closedLoopTargetAngle = new Rotation2d();
+  private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;
   private double openLoopVolts = 0.0;
 
   public ArmIOSim() {

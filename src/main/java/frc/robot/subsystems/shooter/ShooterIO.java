@@ -2,13 +2,14 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ShooterIO {
   /** Contains all of the input data received from hardware. */
   @AutoLog
   public static class ShooterIOInputs {
-    public Rotation2d pivotPosition = new Rotation2d();
+    public Rotation2d pivotPosition = Constants.zeroRotation2d;
     public double pivotVelocityRadsPerSec = 0.0;
     public double pivotAppliedVolts = 0.0;
     public double pivotCurrentAmps = 0.0;

@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
+import frc.robot.Constants;
 
 /** Geometry utilities for working with translations, rotations, transforms, and poses. */
 public class GeomUtil {
@@ -25,7 +26,7 @@ public class GeomUtil {
    * @return The resulting transform
    */
   public static Transform2d translationToTransform(Translation2d translation) {
-    return new Transform2d(translation, new Rotation2d());
+    return new Transform2d(translation, Constants.zeroRotation2d);
   }
 
   /**
@@ -36,7 +37,7 @@ public class GeomUtil {
    * @return The resulting transform
    */
   public static Transform2d translationToTransform(double x, double y) {
-    return new Transform2d(new Translation2d(x, y), new Rotation2d());
+    return new Transform2d(new Translation2d(x, y), Constants.zeroRotation2d);
   }
 
   /**
@@ -46,7 +47,7 @@ public class GeomUtil {
    * @return The resulting transform
    */
   public static Transform2d rotationToTransform(Rotation2d rotation) {
-    return new Transform2d(new Translation2d(), rotation);
+    return new Transform2d(Constants.zeroTranslation2d, rotation);
   }
 
   /**
@@ -77,7 +78,7 @@ public class GeomUtil {
    * @return The resulting pose
    */
   public static Pose2d translationToPose(Translation2d translation) {
-    return new Pose2d(translation, new Rotation2d());
+    return new Pose2d(translation, Constants.zeroRotation2d);
   }
 
   /**
@@ -87,7 +88,7 @@ public class GeomUtil {
    * @return The resulting pose
    */
   public static Pose2d rotationToPose(Rotation2d rotation) {
-    return new Pose2d(new Translation2d(), rotation);
+    return new Pose2d(Constants.zeroTranslation2d, rotation);
   }
 
   /**

@@ -18,6 +18,7 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.PIDTargetMeasurement;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.Drivetrain;
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
@@ -218,8 +219,8 @@ public class RotateToTranslation extends Command {
 
     // Calcaulate new linear velocity
     Translation2d linearVelocity =
-        new Pose2d(new Translation2d(), linearDirection)
-            .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+        new Pose2d(Constants.zeroTranslation2d, linearDirection)
+            .transformBy(new Transform2d(linearMagnitude, 0.0, Constants.zeroRotation2d))
             .getTranslation();
 
     var currentRot = drive.getRotation();

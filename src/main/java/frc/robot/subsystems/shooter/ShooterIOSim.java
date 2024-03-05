@@ -45,7 +45,7 @@ public class ShooterIOSim implements ShooterIO {
   private final PIDController pivotVelController = new PIDController(60, 0, 0);
   private final double pivotTargetVelRadPerSec = 0.0;
   private ControlMode pivotControlMode = ControlMode.VELOCITY;
-  private Rotation2d pivotClosedLoopTargetAngle = new Rotation2d();
+  private Rotation2d pivotClosedLoopTargetAngle = Constants.zeroRotation2d;
   private double pivotControlEffort = 0.0;
   private double pivotOpenLoopVolts = 0.0;
   private double pivotKg = 0.0;

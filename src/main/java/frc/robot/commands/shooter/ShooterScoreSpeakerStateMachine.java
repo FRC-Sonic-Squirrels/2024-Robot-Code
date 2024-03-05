@@ -106,7 +106,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         externalConfirmation,
         rumbleConsumer,
         false,
-        new Rotation2d());
+        Constants.zeroRotation2d);
   }
 
   public ShooterScoreSpeakerStateMachine(
@@ -210,7 +210,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         externalSupplier,
         rumbleConsumer,
         false,
-        new Rotation2d());
+        Constants.zeroRotation2d);
   }
 
   public static Command getAsCommand(
@@ -228,7 +228,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         () -> true,
         (ignore) -> {},
         false,
-        new Rotation2d());
+        Constants.zeroRotation2d);
   }
 
   public StateHandler prepWhileLoadingGamepiece() {

@@ -524,7 +524,7 @@ public class RobotContainer {
                         new Pose2d(
                             drivetrain.getPoseEstimatorPose().getX(),
                             drivetrain.getPoseEstimatorPose().getY(),
-                            new Rotation2d())),
+                            Constants.zeroRotation2d)),
                 drivetrain));
 
     driverController
@@ -605,7 +605,7 @@ public class RobotContainer {
                                   .plus(
                                       new Translation2d(
                                           Units.Inches.of(tunableX.get()).in(Units.Meters), 0.0)),
-                              new Rotation2d()))));
+                              Constants.zeroRotation2d))));
     }
 
     // driverController
@@ -696,7 +696,7 @@ public class RobotContainer {
     //                             new Translation2d(
     //                                 Units.Inches.of(tunableX.get()).in(Units.Meters),
     //                                 Units.Inches.of(tunableY.get()).in(Units.Meters))),
-    //                     new Rotation2d())));
+    //                     Constants.zeroRotation2d)));
     // driverController
     //     .povUp()
     //     .onTrue(
@@ -897,7 +897,7 @@ public class RobotContainer {
 
   public void updateVisualization() {
     SimpleMechanismVisualization.updateVisualization(
-        new Rotation2d(),
+        Constants.zeroRotation2d,
         shooter.getPitch(),
         Math.hypot(
             GeometryUtil.getDist(

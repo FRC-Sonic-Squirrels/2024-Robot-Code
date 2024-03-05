@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,7 +37,8 @@ public class SwerveModule {
   private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
+  private Rotation2d turnRelativeOffset = Constants.zeroRotation2d; // Relative + Offset = Absolute
+  private boolean turnRelativeOffsetInitialized; // Relative + Offset = Absolute
   private double lastPositionMeters = 0.0; // Used for delta calculation
   private SwerveModulePosition[] positionDeltas = new SwerveModulePosition[] {};
   private double[] odometryTimestamps = new double[] {};
@@ -144,9 +146,7 @@ public class SwerveModule {
       positionDeltas = new SwerveModulePosition[deltaCount];
       for (int i = 0; i < deltaCount; i++) {
         double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
-        Rotation2d angle =
-            inputs.odometryTurnPositions[i].plus(
-                turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
+        Rotation2d angle = inputs.odometryTurnPositions[i].plus(turnRelativeOffset);
         positionDeltas[i] = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
         lastPositionMeters = positionMeters;
 
@@ -172,7 +172,7 @@ public class SwerveModule {
   /** Runs the module with the specified voltage while controlling to zero degrees. */
   public void runCharacterization(double volts) {
     // Closed loop turn control
-    angleSetpoint = new Rotation2d();
+    angleSetpoint = Constants.zeroRotation2d;
 
     // Open loop drive control
     io.setDriveVoltage(volts);
@@ -197,11 +197,9 @@ public class SwerveModule {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    if (turnRelativeOffset == null) {
-      return new Rotation2d();
-    } else {
-      return inputs.turnPosition.plus(turnRelativeOffset);
-    }
+    return turnRelativeOffsetInitialized
+        ? inputs.turnPosition.plus(turnRelativeOffset)
+        : Constants.zeroRotation2d;
   }
 
   /** Returns the current drive position of the module in meters. */

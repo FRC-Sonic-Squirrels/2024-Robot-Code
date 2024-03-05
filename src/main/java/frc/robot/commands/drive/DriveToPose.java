@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.GeomUtil;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -183,7 +184,7 @@ public class DriveToPose extends Command {
     // Command speeds
     var driveVelocity =
         new Pose2d(
-                new Translation2d(),
+                Constants.zeroTranslation2d,
                 currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
             .transformBy(GeomUtil.translationToTransform(driveVelocityScalar, 0.0))
             .getTranslation();

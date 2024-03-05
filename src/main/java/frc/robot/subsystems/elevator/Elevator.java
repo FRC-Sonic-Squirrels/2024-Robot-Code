@@ -62,7 +62,7 @@ public class Elevator extends SubsystemBase {
 
   private double lastServoActivationTime = 0.0;
   private boolean rightServoActive = false;
-  private Rotation2d targetServoAngle = new Rotation2d();
+  private Rotation2d targetServoAngle = Constants.zeroRotation2d;
 
   private final ElevatorIO io;
   private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();

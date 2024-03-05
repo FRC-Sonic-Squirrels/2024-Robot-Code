@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
@@ -49,9 +50,9 @@ public class DriveToGamepiece extends Command {
   private LoggedTunableNumber advancedMode = group.build("advancedMode/doAdvancedMotion", 1);
 
   private double rotVelCorrection = 0;
-  private Rotation2d gamepieceDirection = new Rotation2d();
+  private Rotation2d gamepieceDirection = Constants.zeroRotation2d;
 
-  private Rotation2d sourceAngle = new Rotation2d();
+  private Rotation2d sourceAngle = Constants.zeroRotation2d;
 
   /** Drives robot to gamepiece, intended for ground gamepieces only */
   public DriveToGamepiece(

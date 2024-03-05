@@ -43,45 +43,45 @@ public class VisionGamepiece extends SubsystemBase {
       //  G4: yMeters = 2.428
       //  G5: yMeters = 0.742
 
-      // Pose2d g1 = new Pose2d(8.273, 7.474, new Rotation2d());
-      // Pose2d g2 = new Pose2d(8.273, 5.792, new Rotation2d());
-      // Pose2d g3 = new Pose2d(8.273, 4.11, new Rotation2d());
-      // Pose2d g4 = new Pose2d(8.273, 2.428, new Rotation2d());
-      // Pose2d g5 = new Pose2d(8.273, 2.428, new Rotation2d());
+      // Pose2d g1 = new Pose2d(8.273, 7.474, Constants.zeroRotation2d);
+      // Pose2d g2 = new Pose2d(8.273, 5.792, Constants.zeroRotation2d);
+      // Pose2d g3 = new Pose2d(8.273, 4.11, Constants.zeroRotation2d);
+      // Pose2d g4 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
+      // Pose2d g5 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
 
       // processedGamepieceData =
       //     new ProcessedGamepieceData[] {
       //       new ProcessedGamepieceData(
-      //           new Rotation2d(),
-      //           new Rotation2d(),
+      //           Constants.zeroRotation2d,
+      //           Constants.zeroRotation2d,
       //           GeometryUtil.getDist(robotPoseSupplier.get(), g1),
       //           robotPoseSupplier.get().relativeTo(g1),
       //           g1,
       //           Timer.getFPGATimestamp()),
       //       new ProcessedGamepieceData(
-      //           new Rotation2d(),
-      //           new Rotation2d(),
+      //           Constants.zeroRotation2d,
+      //           Constants.zeroRotation2d,
       //           GeometryUtil.getDist(robotPoseSupplier.get(), g2),
       //           robotPoseSupplier.get().relativeTo(g2),
       //           g2,
       //           Timer.getFPGATimestamp()),
       //       new ProcessedGamepieceData(
-      //           new Rotation2d(),
-      //           new Rotation2d(),
+      //           Constants.zeroRotation2d,
+      //           Constants.zeroRotation2d,
       //           GeometryUtil.getDist(robotPoseSupplier.get(), g3),
       //           robotPoseSupplier.get().relativeTo(g3),
       //           g3,
       //           Timer.getFPGATimestamp()),
       //       new ProcessedGamepieceData(
-      //           new Rotation2d(),
-      //           new Rotation2d(),
+      //           Constants.zeroRotation2d,
+      //           Constants.zeroRotation2d,
       //           GeometryUtil.getDist(robotPoseSupplier.get(), g4),
       //           robotPoseSupplier.get().relativeTo(g4),
       //           g4,
       //           Timer.getFPGATimestamp()),
       //       new ProcessedGamepieceData(
-      //           new Rotation2d(),
-      //           new Rotation2d(),
+      //           Constants.zeroRotation2d,
+      //           Constants.zeroRotation2d,
       //           GeometryUtil.getDist(robotPoseSupplier.get(), g5),
       //           robotPoseSupplier.get().relativeTo(g5),
       //           g5,
@@ -205,7 +205,7 @@ public class VisionGamepiece extends SubsystemBase {
   }
 
   private Pose2d groundGamepiecePose(double distanceMeters, Rotation2d targetYaw) {
-    return new Pose2d(new Translation2d(distanceMeters, targetYaw), new Rotation2d());
+    return new Pose2d(new Translation2d(distanceMeters, targetYaw), Constants.zeroRotation2d);
   }
 
   private ProcessedGamepieceData processGamepieceData(double yaw, double pitch, double timestamp) {

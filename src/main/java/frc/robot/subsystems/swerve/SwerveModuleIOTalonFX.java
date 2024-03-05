@@ -155,7 +155,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     turnPosition = turnTalon.getPosition();
     turnPositionQueue =
         PhoenixOdometryThread.getInstance()
-            .registerSignal(turnTalon, turnTalon.getPosition(), globalConfig.getCANBusName());
+            .registerSignal(turnTalon, turnPosition, globalConfig.getCANBusName());
     turnVelocity = turnTalon.getVelocity();
     turnAppliedVolts = turnTalon.getMotorVoltage();
     turnCurrent = turnTalon.getStatorCurrent();

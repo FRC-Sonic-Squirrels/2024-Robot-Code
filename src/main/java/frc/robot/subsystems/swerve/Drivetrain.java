@@ -31,6 +31,7 @@ import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -49,7 +50,7 @@ public class Drivetrain extends SubsystemBase {
 
   private final SwerveDriveKinematics kinematics;
   private Pose2d rawOdometryPose = new Pose2d();
-  private Rotation2d lastGyroRotation = new Rotation2d();
+  private Rotation2d lastGyroRotation = Constants.zeroRotation2d;
 
   private final PoseEstimator poseEstimator;
 
@@ -98,8 +99,8 @@ public class Drivetrain extends SubsystemBase {
 
   }
 
-  private Translation2d simulatedAcceleration = new Translation2d();
-  private Translation2d lastVel = new Translation2d();
+  private Translation2d simulatedAcceleration = Constants.zeroTranslation2d;
+  private Translation2d lastVel = Constants.zeroTranslation2d;
 
   public void periodic() {
     try (var ignored = new ExecutionTiming("Drivetrain")) {
