@@ -188,6 +188,46 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+  public void updateOdometry(double timestamp) {
+    //    // Update odometry
+    //    int deltaCount =
+    //            gyroInputs.connected ? gyroInputs.odometryYawPositions.length : Integer.MAX_VALUE;
+    //    deltaCount = Math.min(deltaCount, modules.front_left.getPositionDeltas().length);
+    //    deltaCount = Math.min(deltaCount, modules.front_right.getPositionDeltas().length);
+    //    deltaCount = Math.min(deltaCount, modules.back_left.getPositionDeltas().length);
+    //    deltaCount = Math.min(deltaCount, modules.back_right.getPositionDeltas().length);
+    //
+    //    for (int deltaIndex = 0; deltaIndex < deltaCount; deltaIndex++) {
+    //      // Read wheel deltas from each module
+    //      SwerveModulePosition[] wheelDeltas = new SwerveModulePosition[4];
+    //      wheelDeltas[0] = modules.front_left.getPositionDeltas()[deltaIndex];
+    //      wheelDeltas[1] = modules.front_right.getPositionDeltas()[deltaIndex];
+    //      wheelDeltas[2] = modules.back_left.getPositionDeltas()[deltaIndex];
+    //      wheelDeltas[3] = modules.back_right.getPositionDeltas()[deltaIndex];
+    //
+    //      // The twist represents the motion of the robot since the last
+    //      // sample in x, y, and theta based only on the modules, without
+    //      // the gyro. The gyro is always disconnected in simulation.
+    //      var twist = kinematics.toTwist2d(wheelDeltas);
+    //      if (gyroInputs.connected) {
+    //        // If the gyro is connected, replace the theta component of the twist
+    //        // with the change in angle since the last sample.
+    //        Rotation2d gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
+    //        twist =
+    //                new Twist2d(twist.dx, twist.dy,
+    // gyroRotation.minus(lastGyroRotation).getRadians());
+    //        lastGyroRotation = gyroRotation;
+    //      }
+    //      // Apply the twist (change since last sample) to the current pose
+    //
+    //      rawOdometryPose = rawOdometryPose.exp(twist);
+    //
+    //      // fixme: all the modules should have the same timestamp so taking from 0 should be fine
+    //      var timestamp = modules.front_left.getOdometryTimestamps()[deltaIndex];
+    //      poseEstimator.addDriveData(timestamp, twist);
+    //    }
+  }
+
   /**
    * Runs the drive at the desired velocity.
    *
@@ -270,12 +310,14 @@ public class Drivetrain extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, config.getRobotMaxLinearVelocity());
 
     // Send setpoints to modules
-    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
     // The module returns the optimized state, useful for logging
-    optimizedSetpointStates[0] = modules.front_left.runSetpoint(setpointStates[0]);
-    optimizedSetpointStates[1] = modules.front_right.runSetpoint(setpointStates[1]);
-    optimizedSetpointStates[2] = modules.back_left.runSetpoint(setpointStates[2]);
-    optimizedSetpointStates[3] = modules.back_right.runSetpoint(setpointStates[3]);
+    var optimizedSetpointStates =
+        new SwerveModuleState[] {
+          modules.front_left.runSetpoint(setpointStates[0]),
+          modules.front_right.runSetpoint(setpointStates[1]),
+          modules.back_left.runSetpoint(setpointStates[2]),
+          modules.back_right.runSetpoint(setpointStates[3])
+        };
 
     // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);

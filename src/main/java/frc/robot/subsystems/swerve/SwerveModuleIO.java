@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -38,18 +39,21 @@ public interface SwerveModuleIO {
     public double[] odometryTimestamps = new double[] {};
   }
 
+  /** Updates the odometry position. */
+  SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius);
+
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ModuleIOInputs inputs) {}
+  void updateInputs(ModuleIOInputs inputs);
 
   /** Run the drive motor at the specified voltage. */
-  public default void setDriveVoltage(double volts) {}
+  void setDriveVoltage(double volts);
 
   /** Run the turn motor at the specified voltage. */
-  public default void setTurnVoltage(double volts) {}
+  void setTurnVoltage(double volts);
 
   /** Enable or disable brake mode on the drive motor. */
-  public default void setDriveBrakeMode(boolean enable) {}
+  void setDriveBrakeMode(boolean enable);
 
   /** Enable or disable brake mode on the turn motor. */
-  public default void setTurnBrakeMode(boolean enable) {}
+  void setTurnBrakeMode(boolean enable);
 }

@@ -15,7 +15,7 @@ import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.swerve.SwerveModuleIOFake;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -213,10 +213,10 @@ public class RobotConfig2024 extends RobotConfig {
   @Override
   public SwerveModules getReplaySwerveModuleObjects() {
     var modules = new SwerveModules();
-    modules.front_left = new SwerveModule(0, this, new SwerveModuleIO() {});
-    modules.front_right = new SwerveModule(1, this, new SwerveModuleIO() {});
-    modules.back_left = new SwerveModule(2, this, new SwerveModuleIO() {});
-    modules.back_right = new SwerveModule(3, this, new SwerveModuleIO() {});
+    modules.front_left = new SwerveModule(0, this, new SwerveModuleIOFake());
+    modules.front_right = new SwerveModule(1, this, new SwerveModuleIOFake());
+    modules.back_left = new SwerveModule(2, this, new SwerveModuleIOFake());
+    modules.back_right = new SwerveModule(3, this, new SwerveModuleIOFake());
     return modules;
   }
 

@@ -117,15 +117,6 @@ public abstract class RobotConfig {
   // FIXME: is this correct?
   public SwerveDriveKinematics getSwerveDriveKinematics() {
     return new SwerveDriveKinematics(getModuleTranslations());
-    // return new SwerveDriveKinematics(
-    //     // Front left
-    //     new Translation2d(getWheelbase() / 2.0, getTrackwidth() / 2.0),
-    //     // Front right
-    //     new Translation2d(getWheelbase() / 2.0, -getTrackwidth() / 2.0),
-    //     // Back left
-    //     new Translation2d(-getWheelbase() / 2.0, getTrackwidth() / 2.0),
-    //     // Back right
-    //     new Translation2d(-getWheelbase() / 2.0, -getTrackwidth() / 2.0));
   }
 
   public Translation2d[] getModuleTranslations() {

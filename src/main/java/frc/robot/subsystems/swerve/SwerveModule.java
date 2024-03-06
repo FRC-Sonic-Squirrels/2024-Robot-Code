@@ -157,6 +157,10 @@ public class SwerveModule {
     }
   }
 
+  public SwerveModulePosition updateOdometry() {
+    return io.updateOdometry(inputs, WHEEL_RADIUS);
+  }
+
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
   public SwerveModuleState runSetpoint(SwerveModuleState state) {
     // Optimize state based on current angle

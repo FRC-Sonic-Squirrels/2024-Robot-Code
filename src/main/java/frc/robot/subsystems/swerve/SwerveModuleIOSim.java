@@ -16,6 +16,7 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
@@ -29,12 +30,23 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class SwerveModuleIOSim implements SwerveModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), 5.357, 0.025);
-  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500(1), 150.0 / 7.0, 0.004);
+  private final DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), 5.91, 0.025);
+  private final DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500(1), 150.0 / 7.0, 0.004);
 
-  private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
-  private double driveAppliedVolts = 0.0;
-  private double turnAppliedVolts = 0.0;
+  private double lastPositionMeters;
+  private double driveAppliedVolts;
+  private double turnAppliedVolts;
+
+  @Override
+  public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+    double positionMeters = inputs.drivePositionRad * wheelRadius;
+
+    var angleRelative = inputs.turnPosition;
+    var res = new SwerveModulePosition(positionMeters - lastPositionMeters, angleRelative);
+    lastPositionMeters = positionMeters;
+
+    return res;
+  }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
@@ -46,8 +58,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 
-    inputs.turnAbsolutePosition =
-        new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
+    inputs.turnAbsolutePosition = new Rotation2d(turnSim.getAngularPositionRad());
     inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
     inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
@@ -70,4 +81,10 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     turnSim.setInputVoltage(turnAppliedVolts);
   }
+
+  @Override
+  public void setDriveBrakeMode(boolean enable) {}
+
+  @Override
+  public void setTurnBrakeMode(boolean enable) {}
 }

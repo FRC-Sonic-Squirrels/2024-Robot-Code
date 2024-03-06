@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -25,6 +26,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
@@ -85,6 +87,9 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   private final RobotConfig globalConfig;
   private final IndividualSwerveModuleConfig moduleSpecificConfig;
+
+  private Rotation2d turnRelativeOffset; // Relative + Offset = Absolute
+  private double lastPositionMeters;
 
   public SwerveModuleIOTalonFX(
       RobotConfig globalConfig, IndividualSwerveModuleConfig moduleSpecificConfig) {
@@ -222,6 +227,37 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     odometryTimestampsQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
+  }
+
+  @Override
+  public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+    // On first cycle, reset relative turn encoder
+    // Wait until absolute angle is nonzero in case it wasn't initialized yet
+    if (turnRelativeOffset == null) {
+      if (BaseStatusSignal.waitForAll(0.02, turnAbsolutePosition) != StatusCode.OK) {
+        return null;
+      }
+
+      var turnAbsolutePositionRotations = turnAbsolutePosition.getValueAsDouble();
+      var turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePositionRotations);
+      inputs.turnAbsolutePosition = turnAbsolutePosition.minus(absoluteEncoderOffset);
+
+      turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
+    }
+
+    var drivePositionRotations = drivePosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
+    var drivePositionRaw = Units.rotationsToRadians(drivePositionRotations);
+    inputs.drivePositionRad = drivePositionRaw;
+
+    var turnPositionAngle = turnPosition.getValueAsDouble() / TURN_GEAR_RATIO;
+    var angleRelative = Rotation2d.fromRotations(turnPositionAngle);
+    var angle = angleRelative.plus(turnRelativeOffset);
+
+    var positionMeters = drivePositionRaw * wheelRadius;
+    var res = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
+    lastPositionMeters = positionMeters;
+
+    return res;
   }
 
   @Override
