@@ -304,7 +304,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     } else {
       if (solverResult != null) {
         var thetaError =
-            desiredShootingHeading.getRadians() - drivetrainWrapper.getRotation().getRadians();
+            desiredShootingHeading.getRadians()
+                - drivetrainWrapper.getRotationGyroOnly().getRadians();
         while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
         while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
         atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
@@ -365,7 +366,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   public StateHandler visualizeGamepiece() {
     GamepieceVisualization.getInstance()
         .updateVisualization(
-            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation(),
             drivetrainWrapper.getFieldRelativeVelocities().getTranslation(),
             shooter.getPitch(),
             shooter.getRPM());
@@ -377,7 +378,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (solverResult != null) {
       log("shooterSolver", true);
 
-      double currentRotation = drivetrainWrapper.getRotation().getRadians();
+      double currentRotation = drivetrainWrapper.getRotationGyroOnly().getRadians();
       double omega =
           rotationController.calculate(currentRotation, desiredShootingHeading.getRadians());
       if (!simpleShot) {
@@ -390,13 +391,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       log("shooterSolver", false);
     }
 
-    log("headingDegreesEstimator", drivetrainWrapper.getPoseEstimatorPose().getRotation());
+    log("CurrentHeadingDegrees", drivetrainWrapper.getRotationGyroOnly().getDegrees());
   }
 
   private boolean validShootingPosition() {
     if (simpleShot) return true;
     Pose2d reflectedPose =
-        AllianceFlipUtil.flipPoseForAlliance(drivetrainWrapper.getPoseEstimatorPose());
+        AllianceFlipUtil.flipPoseForAlliance(
+            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation());
 
     double x = reflectedPose.getX();
     double y = reflectedPose.getY();
@@ -427,7 +429,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     solverResult =
         solver.computeAngles(
             Timer.getFPGATimestamp(),
-            drivetrainWrapper.getPoseEstimatorPose(),
+            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation(),
             drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
 
     double offset = tunablePitchOffset.get();

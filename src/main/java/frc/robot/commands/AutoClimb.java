@@ -78,14 +78,14 @@ public class AutoClimb extends Command {
         if (elevator.isAtTarget(Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN)
             && arm.isAtTargetAngle()) {
           stage++;
-          initialPose = drive.getPoseEstimatorPose();
+          initialPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
         }
 
         break;
       case 2:
         Translation2d centerToRobot =
             drive
-                .getPoseEstimatorPose()
+                .getPoseEstimatorPoseWithGyroOnlyRotation()
                 .getTranslation()
                 .minus(Constants.FieldConstants.getStageCenter());
         double speedMetersPerSecond = 0.4;
@@ -96,9 +96,10 @@ public class AutoClimb extends Command {
             flippedSpeedMetersPerSecond
                 / Math.sqrt(1.0 + Math.pow(centerToRobot.getY() / centerToRobot.getX(), 2.0));
         double vy = centerToRobot.getY() * vx / centerToRobot.getX();
-        if (GeometryUtil.getDist(initialPose, drive.getPoseEstimatorPose()) <= travelDist) {
+        if (GeometryUtil.getDist(initialPose, drive.getPoseEstimatorPoseWithGyroOnlyRotation())
+            <= travelDist) {
           drive.setVelocityOverride(
-              ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, 0.0, drive.getRotation()));
+              ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, 0.0, drive.getRotationGyroOnly()));
         } else {
           drive.resetVelocityOverride();
           stage++;

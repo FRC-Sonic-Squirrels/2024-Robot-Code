@@ -154,19 +154,21 @@ public class ScoreSpeaker extends Command {
       prevNoteInShoot = shooter.noteInShooter();
 
       var currentTime = Timer.getFPGATimestamp();
-      var poseEstimatorPose = drive.getPoseEstimatorPose();
-      var currentRot = drive.getPoseEstimatorPose().getRotation();
+      var poseEstimatorPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
+      var currentRot = drive.getRotationGyroOnly();
 
       var result =
           solver.computeAngles(
-              currentTime, poseEstimatorPose, drive.getFieldRelativeVelocities().getTranslation());
+              currentTime,
+              new Pose2d(poseEstimatorPose.getTranslation(), drive.getRotationGyroOnly()),
+              drive.getFieldRelativeVelocities().getTranslation());
 
       double targetRotation;
       double targetAngularSpeed;
       Rotation2d targetPitch;
 
       if (result == null) {
-        targetRotation = poseEstimatorPose.getRotation().getRadians();
+        targetRotation = currentRot.getRadians();
         targetAngularSpeed = 0.0;
         targetPitch = shooter.getPitch();
       } else {
@@ -222,8 +224,7 @@ public class ScoreSpeaker extends Command {
           Math.toDegrees(rotationController.getPositionError()));
       Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
       Logger.recordOutput(
-          "ScoreSpeaker/robotRotationDegrees",
-          drive.getPoseEstimatorPose().getRotation().getDegrees());
+          "ScoreSpeaker/robotRotationDegrees", drive.getRotationGyroOnly().getDegrees());
       Logger.recordOutput("ScoreSpeaker/atSetpoint", rotationController.atSetpoint());
 
       if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
@@ -240,7 +241,8 @@ public class ScoreSpeaker extends Command {
               : Constants.ShooterConstants.Pivot.LOADING_POSITION);
 
       var speakerDistance =
-          Constants.FieldConstants.getDistanceToSpeaker(drive.getPoseEstimatorPose());
+          Constants.FieldConstants.getDistanceToSpeaker(
+              drive.getPoseEstimatorPoseWithGyroOnlyRotation());
       rotationController.setTolerance(
           Math.toDegrees(Units.Feet.of(15.0).in(Units.Meters) / speakerDistance.in(Units.Meters)));
 
@@ -305,7 +307,8 @@ public class ScoreSpeaker extends Command {
   }
 
   private boolean shootingPosition() {
-    Pose2d reflectedPose = AllianceFlipUtil.flipPoseForAlliance(drive.getPoseEstimatorPose());
+    Pose2d reflectedPose =
+        AllianceFlipUtil.flipPoseForAlliance(drive.getPoseEstimatorPoseWithGyroOnlyRotation());
     double x = reflectedPose.getX();
     double y = reflectedPose.getY();
 

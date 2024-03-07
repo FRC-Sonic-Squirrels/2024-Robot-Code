@@ -79,8 +79,8 @@ public class DrivetrainWrapper {
     return drivetrain;
   }
 
-  public Pose2d getPoseEstimatorPose() {
-    return drivetrain.getPoseEstimatorPose();
+  public Pose2d getPoseEstimatorPoseWithGyroOnlyRotation() {
+    return new Pose2d(drivetrain.getPoseEstimatorPose().getTranslation(), getRotationGyroOnly());
   }
 
   public double getMaxLinearSpeedMetersPerSec() {
@@ -89,10 +89,6 @@ public class DrivetrainWrapper {
 
   public double getMaxAngularSpeedRadPerSec() {
     return drivetrain.getMaxAngularSpeedRadPerSec();
-  }
-
-  public Rotation2d getRotation() {
-    return drivetrain.getRotation();
   }
 
   public Pose2d getFieldRelativeVelocities() {

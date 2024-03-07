@@ -407,9 +407,9 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  public Rotation2d getRotation() {
-    return getPoseEstimatorPose().getRotation();
-  }
+  // public Rotation2d getRotation() {
+  //   return getPoseEstimatorPose().getRotation();
+  // }
 
   public Rotation2d getRotationGyroOnly() {
     return rawOdometryPose.getRotation();
@@ -422,6 +422,10 @@ public class Drivetrain extends SubsystemBase {
       this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.rawOdometryPose = pose;
     }
+  }
+
+  public void setRawOdometryPose(Pose2d pose) {
+    this.rawOdometryPose = pose;
   }
 
   /** Returns the maximum linear speed in meters per sec. */

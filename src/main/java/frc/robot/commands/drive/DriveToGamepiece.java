@@ -86,7 +86,7 @@ public class DriveToGamepiece extends Command {
     var closestGamepiece = targetGamepiece.get();
     if (closestGamepiece == null) return;
 
-    var poseEstimatorPose = drive.getPoseEstimatorPose();
+    var poseEstimatorPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
 
     rotationalErrorDegrees =
         Math.abs(

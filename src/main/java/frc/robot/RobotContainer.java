@@ -717,7 +717,7 @@ public class RobotContainer {
                 () -> {
                   drivetrainWrapper.setRotationOverride(
                       rotationController.calculate(
-                          drivetrainWrapper.getRotation().getRadians(),
+                          drivetrainWrapper.getRotationGyroOnly().getRadians(),
                           Units.Degrees.of(90.0).in(Units.Radians)));
                 }));
 
@@ -981,7 +981,7 @@ public class RobotContainer {
 
     GamepieceVisualization.getInstance().logTraj();
 
-    ClimbVisualization.getInstance().updateVisualization(drivetrainWrapper.getPoseEstimatorPose());
+    ClimbVisualization.getInstance().updateVisualization(drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation());
     ClimbVisualization.getInstance().logPose();
   }
 

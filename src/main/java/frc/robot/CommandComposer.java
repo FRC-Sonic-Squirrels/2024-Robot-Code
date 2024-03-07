@@ -46,17 +46,17 @@ public class CommandComposer {
     DriveToPose driveToClimbPos =
         new DriveToPose(
             drivetrainWrapper,
-            () -> autoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose()));
+            () -> autoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation()));
 
     BooleanSupplier withinRangeOfStage =
         () ->
             GeometryUtil.getDist(
                     Constants.FieldConstants.getStageCenter(),
-                    drivetrainWrapper.getPoseEstimatorPose().getTranslation())
+                    drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation().getTranslation())
                 <= 2.0;
 
     BooleanSupplier underStage =
-        () -> autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose());
+        () -> autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation());
 
     Supplier<Command> prepForClimb =
         () ->
@@ -113,7 +113,7 @@ public class CommandComposer {
     BooleanSupplier withinRangeOfAmp =
         () ->
             GeometryUtil.getDist(
-                    drivetrainWrapper.getPoseEstimatorPose(),
+                    drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation(),
                     Constants.FieldConstants.getAmpScoringPose())
                 <= distToElevateMech.in(Units.Meters);
 

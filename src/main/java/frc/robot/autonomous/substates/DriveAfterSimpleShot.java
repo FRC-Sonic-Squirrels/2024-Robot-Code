@@ -24,7 +24,7 @@ public class DriveAfterSimpleShot extends StateMachine {
   }
 
   private StateHandler startTimer() {
-    initialPose = drive.getPoseEstimatorPose();
+    initialPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
     driveToPose =
         new DriveToPose(
             drive,
