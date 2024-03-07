@@ -34,7 +34,6 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -63,9 +62,6 @@ public class Drivetrain extends SubsystemBase {
 
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
-
-  private Translation2d simulatedAcceleration = Constants.zeroTranslation2d;
-  private Translation2d lastVel = Constants.zeroTranslation2d;
 
   public Drivetrain(
       RobotConfig config,
@@ -136,18 +132,6 @@ public class Drivetrain extends SubsystemBase {
       }
 
       Logger.recordOutput("SwerveStates/Measured", getModuleStates());
-
-      var fieldRelativeVelocities = getFieldRelativeVelocities().getTranslation();
-      double deltaX = fieldRelativeVelocities.getX() - lastVel.getX();
-      double deltaY = fieldRelativeVelocities.getY() - lastVel.getY();
-      simulatedAcceleration =
-          new Translation2d(
-              accelerationFilterX.calculate(deltaX / 0.02),
-              accelerationFilterY.calculate(deltaY / 0.02));
-
-      Logger.recordOutput("Drivetrain/simualedAcceleration", simulatedAcceleration);
-
-      lastVel = fieldRelativeVelocities;
 
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
@@ -232,8 +216,9 @@ public class Drivetrain extends SubsystemBase {
       SwerveModuleState[] justRotationSetpointStates =
           kinematics.toSwerveModuleStates(
               new ChassisSpeeds(0.0, 0.0, speeds.omegaRadiansPerSecond));
+
       SwerveModuleState[] calculatedSetpointStates = kinematics.toSwerveModuleStates(speeds);
-      ChassisSpeeds newSpeeds;
+
       double realMaxSpeed = 0;
       for (SwerveModuleState moduleState : calculatedSetpointStates) {
         realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
@@ -257,6 +242,7 @@ public class Drivetrain extends SubsystemBase {
 
         */
 
+        double rotationSpeedMetersPerSecond = justRotationSetpointStates[0].speedMetersPerSecond;
         double vxMetersPerSecond =
             (speeds.vxMetersPerSecond
                     / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond))
@@ -264,7 +250,7 @@ public class Drivetrain extends SubsystemBase {
                     Math.max(
                         0.0,
                         config.getRobotMaxLinearVelocity()
-                            - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)));
+                            - Math.abs(rotationSpeedMetersPerSecond)));
 
         // double vxMetersPerSecond =
         //     Math.copySign(
@@ -284,8 +270,7 @@ public class Drivetrain extends SubsystemBase {
             new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
         Logger.recordOutput(
             "Drivetrain/leftoverVelocity",
-            config.getRobotMaxLinearVelocity()
-                - justRotationSetpointStates[0].speedMetersPerSecond);
+            config.getRobotMaxLinearVelocity() - rotationSpeedMetersPerSecond);
       }
     }
 
@@ -362,16 +347,6 @@ public class Drivetrain extends SubsystemBase {
   private LinearFilter accelerationFilterX = LinearFilter.movingAverage(3);
   private LinearFilter accelerationFilterY = LinearFilter.movingAverage(3);
 
-  @AutoLogOutput(key = "Robot/FieldRelativeAcceleration")
-  public Translation2d getFieldRelativeAccelerations() {
-    if (Robot.isReal()) {
-      return new Translation2d(gyroInputs.xAcceleration, gyroInputs.yAcceleration)
-          .rotateBy(new Rotation2d(-getRawOdometryPose().getRotation().getRadians()));
-    } else {
-      return simulatedAcceleration;
-    }
-  }
-
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     for (TimestampedVisionUpdate v : visionData) {
       if (GeometryUtil.isPoseOutsideField(v.pose())) {
@@ -402,29 +377,6 @@ public class Drivetrain extends SubsystemBase {
     {
       return poseEstimator.getLatestPose();
     }
-  }
-
-  public Pose2d getFutureEstimatedPose(double sec, String userClassName) {
-    Translation2d velocityContribution = getFieldRelativeVelocities().getTranslation().times(sec);
-    Translation2d accelerationContribution =
-        getFieldRelativeAccelerations().times(Math.pow(sec, 2) * 0.5);
-    Pose2d pose =
-        new Pose2d(
-            getPoseEstimatorPose().getX()
-                + velocityContribution.getX()
-                + accelerationContribution.getX(),
-            getPoseEstimatorPose().getY()
-                + velocityContribution.getY()
-                + accelerationContribution.getY(),
-            new Rotation2d(
-                getPoseEstimatorPose().getRotation().getRadians()
-                    + gyroInputs.yawVelocityRadPerSec * sec));
-    Logger.recordOutput(
-        userClassName + "/futureEstimatedPose/velocityContribution", velocityContribution);
-    Logger.recordOutput(
-        userClassName + "/futureEstimatedPose/accelerationContribution", accelerationContribution);
-    Logger.recordOutput(userClassName + "/futureEstimatedPose/pose", pose);
-    return pose;
   }
 
   public Rotation2d getRotation() {
