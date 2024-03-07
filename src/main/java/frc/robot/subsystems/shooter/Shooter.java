@@ -206,7 +206,8 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtTargetRPM(double rpm) {
-    return Math.abs(inputs.launcherRPM[0] - rpm) <= launcherToleranceRPM.get();
+    var minThreshold = rpm - launcherToleranceRPM.get();
+    return inputs.launcherRPM[0] >= minThreshold && inputs.launcherRPM[1] >= minThreshold;
   }
 
   public double getPivotPIDLatency() {
