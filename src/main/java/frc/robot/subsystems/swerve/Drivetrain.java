@@ -33,7 +33,6 @@ import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
-import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -153,7 +152,7 @@ public class Drivetrain extends SubsystemBase {
     modules.registerSignalForOdometry(signals);
 
     var signalsArray = signals.toArray(new BaseStatusSignal[0]);
-    var lastGyroRotation = Constants.zeroRotation2d;
+    Rotation2d lastGyroRotation = null;
     StatusCode lastStatusCode = null;
 
     while (true) {
@@ -200,7 +199,7 @@ public class Drivetrain extends SubsystemBase {
           timestamp = Utils.getCurrentTimeSeconds();
         }
 
-        gyroIO.updateOdometry(gyroInputs);
+        var gyroRotation = gyroIO.updateOdometry(gyroInputs);
         var wheelDeltas = modules.updateOdometry();
 
         // The twist represents the motion of the robot since the last
@@ -208,9 +207,14 @@ public class Drivetrain extends SubsystemBase {
         // the gyro. The gyro is always disconnected in simulation.
         var twist = kinematics.toTwist2d(wheelDeltas);
 
-        Rotation2d gyroRotation = gyroInputs.yawPosition;
-        twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
-        lastGyroRotation = gyroRotation;
+        if (gyroRotation != null) {
+          if (lastGyroRotation != null) {
+            var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
+            twist = new Twist2d(twist.dx, twist.dy, dtheta);
+          }
+
+          lastGyroRotation = gyroRotation;
+        }
 
         try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
         {

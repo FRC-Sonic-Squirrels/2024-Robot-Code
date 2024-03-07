@@ -35,7 +35,9 @@ public interface GyroIO {
     public void registerSignalForOdometry(List<BaseStatusSignal> signal) {}
 
     @Override
-    public void updateOdometry(GyroIOInputs inputs) {}
+    public Rotation2d updateOdometry(GyroIOInputs inputs) {
+      return null;
+    }
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {}
@@ -43,7 +45,7 @@ public interface GyroIO {
 
   void registerSignalForOdometry(List<BaseStatusSignal> signal);
 
-  void updateOdometry(GyroIOInputs inputs);
+  Rotation2d updateOdometry(GyroIOInputs inputs);
 
   void updateInputs(GyroIOInputs inputs);
 }

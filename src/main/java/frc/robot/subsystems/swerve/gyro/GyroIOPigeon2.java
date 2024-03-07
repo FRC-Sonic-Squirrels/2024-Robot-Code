@@ -33,6 +33,8 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<Double> yAcceleration;
   private final StatusSignal<Double> zAcceleration;
 
+  private final BaseStatusSignal[] refreshSet;
+
   public GyroIOPigeon2(RobotConfig config) {
     Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
     pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
@@ -60,6 +62,8 @@ public class GyroIOPigeon2 implements GyroIO {
     zAcceleration.setUpdateFrequency(100.0);
 
     pigeon.optimizeBusUtilization();
+
+    refreshSet = new BaseStatusSignal[] {yawVelocity, xAcceleration, yAcceleration, zAcceleration};
   }
 
   @Override
@@ -68,14 +72,15 @@ public class GyroIOPigeon2 implements GyroIO {
   }
 
   @Override
-  public void updateOdometry(GyroIOInputs inputs) {
-    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
+  public Rotation2d updateOdometry(GyroIOInputs inputs) {
+    var gyroRotation = Rotation2d.fromDegrees(yaw.getValueAsDouble());
+    inputs.yawPosition = gyroRotation;
+    return gyroRotation;
   }
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    var statusCode =
-        BaseStatusSignal.refreshAll(yawVelocity, xAcceleration, yAcceleration, zAcceleration);
+    var statusCode = BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.connected = statusCode == StatusCode.OK;
     inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
