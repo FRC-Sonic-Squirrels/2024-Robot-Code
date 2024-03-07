@@ -159,9 +159,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    // FIXME: need to remove max distance away from current estimate restriction for vision
-    robotContainer.resetSubsystems();
-    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(false);
+    robotContainer.enterDisabled();
   }
 
   /** This function is called periodically when disabled. */
@@ -211,8 +209,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    robotContainer.setBrakeMode();
-    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
+    robotContainer.enterAutonomous();
 
     // schedule the autonomous command (example)
     if (selectedAuto != null) {
@@ -239,7 +236,7 @@ public class Robot extends LoggedRobot {
       autoCommand = null;
     }
 
-    robotContainer.resetDrivetrainResetOverrides();
+    robotContainer.enterTeleop();
 
     hasEnteredTeleAtSomePoint = true;
   }

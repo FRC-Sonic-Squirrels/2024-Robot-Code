@@ -37,6 +37,7 @@ import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import java.util.List;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -57,12 +58,18 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
 
-  RobotConfig config;
+  private final RobotConfig config;
+  private final Supplier<Boolean> isAutonomous;
 
-  public Drivetrain(RobotConfig config, GyroIO gyroIO, SwerveModules swerveModules) {
+  public Drivetrain(
+      RobotConfig config,
+      GyroIO gyroIO,
+      SwerveModules swerveModules,
+      Supplier<Boolean> isAutonomous) {
     this.config = config;
     this.modules = swerveModules;
     this.gyroIO = gyroIO;
+    this.isAutonomous = isAutonomous;
 
     kinematics = config.getSwerveDriveKinematics();
 

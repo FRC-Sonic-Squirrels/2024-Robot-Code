@@ -151,6 +151,9 @@ public class RobotContainer {
   ScoreSpeaker scoreSpeaker;
   AutoClimb autoClimb;
 
+  private boolean is_teleop;
+  private boolean is_autonomous;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -167,23 +170,22 @@ public class RobotContainer {
       aprilTagLayout = config.getAprilTagFieldLayout();
     } catch (Exception e) {
       // FIXME: throw an error.
-      aprilTagLayout = new AprilTagFieldLayout(new ArrayList<AprilTag>(), 0.0, 0.0);
+      aprilTagLayout = new AprilTagFieldLayout(new ArrayList<>(), 0.0, 0.0);
     }
 
     // BUGBUG: practice field usable tags
     ArrayList<AprilTag> goodTags = new ArrayList<>();
     for (var tag : aprilTagLayout.getTags()) {
-      // switch (tag.ID) {
-      //   case 3:
-      //   case 4:
-      //   case 5:
-      //   case 6:
-      //   case 7:
-      //   case 8:
-      //     goodTags.add(tag);
-      //     break;
-      // }
-      goodTags.add(tag);
+      switch (tag.ID) {
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+          goodTags.add(tag);
+          break;
+      }
     }
 
     aprilTagLayout =
@@ -191,7 +193,9 @@ public class RobotContainer {
             goodTags, aprilTagLayout.getFieldLength(), aprilTagLayout.getFieldWidth());
 
     if (mode == Mode.REPLAY) {
-      drivetrain = new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+      drivetrain =
+          new Drivetrain(
+              config, new GyroIO() {}, config.getReplaySwerveModuleObjects(), () -> is_autonomous);
 
       vision =
           new Vision(
@@ -215,7 +219,9 @@ public class RobotContainer {
         case ROBOT_SIMBOT:
           com.ctre.phoenix6.unmanaged.Unmanaged.setPhoenixDiagnosticsStartTime(0.0);
 
-          drivetrain = new Drivetrain(config, new GyroIO() {}, config.getSwerveModuleObjects());
+          drivetrain =
+              new Drivetrain(
+                  config, new GyroIO() {}, config.getSwerveModuleObjects(), () -> is_autonomous);
 
           if (robotType == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
             // Sim Robot, Real Cameras
@@ -274,7 +280,11 @@ public class RobotContainer {
 
         case ROBOT_2023_RETIRED_ROBER:
           drivetrain =
-              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+              new Drivetrain(
+                  config,
+                  new GyroIOPigeon2(config),
+                  config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
 
           vision =
               new Vision(
@@ -299,7 +309,11 @@ public class RobotContainer {
 
           // -- All real IO's
           drivetrain =
-              new Drivetrain(config, new GyroIOPigeon2(config), config.getSwerveModuleObjects());
+              new Drivetrain(
+                  config,
+                  new GyroIOPigeon2(config),
+                  config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
 
           // vision =
           //     new Vision(
@@ -343,7 +357,11 @@ public class RobotContainer {
 
         default:
           drivetrain =
-              new Drivetrain(config, new GyroIO() {}, config.getReplaySwerveModuleObjects());
+              new Drivetrain(
+                  config,
+                  new GyroIO() {},
+                  config.getReplaySwerveModuleObjects(),
+                  () -> is_autonomous);
           vision =
               new Vision(
                   aprilTagLayout,
@@ -878,6 +896,30 @@ public class RobotContainer {
 
   public void applyToDrivetrain() {
     drivetrainWrapper.apply();
+  }
+
+  public void enterDisabled() {
+    // FIXME: need to remove max distance away from current estimate restriction for vision
+    resetSubsystems();
+    vision.useMaxDistanceAwayFromExistingEstimate(false);
+
+    is_teleop = false;
+    is_autonomous = false;
+  }
+
+  public void enterAutonomous() {
+    setBrakeMode();
+    vision.useMaxDistanceAwayFromExistingEstimate(true);
+
+    is_teleop = false;
+    is_autonomous = true;
+  }
+
+  public void enterTeleop() {
+    resetDrivetrainResetOverrides();
+
+    is_teleop = true;
+    is_autonomous = false;
   }
 
   public void resetDrivetrainResetOverrides() {
