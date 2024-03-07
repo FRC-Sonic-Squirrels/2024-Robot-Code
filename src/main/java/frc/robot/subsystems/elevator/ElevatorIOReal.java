@@ -41,6 +41,8 @@ public class ElevatorIOReal implements ElevatorIO {
   private Servo leftServo = new Servo(0);
   private Servo rightServo = new Servo(1);
 
+  private final BaseStatusSignal[] refreshSet;
+
   public ElevatorIOReal() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
@@ -81,12 +83,15 @@ public class ElevatorIOReal implements ElevatorIO {
 
     // leftServo.setAlwaysHighMode();
     // rightServo.setAlwaysHighMode();
+    refreshSet =
+        new BaseStatusSignal[] {
+          rotorPosition, rotorVelocity, appliedVolts, currentAmps, tempCelsius
+        };
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        rotorPosition, rotorVelocity, appliedVolts, currentAmps, tempCelsius);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.heightInches = rotorPosition.getValueAsDouble() / inchesToMotorRot;
     inputs.velocityInchesPerSecond = rotorVelocity.getValueAsDouble() / inchesToMotorRot;

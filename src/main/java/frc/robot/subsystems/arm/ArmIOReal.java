@@ -28,6 +28,8 @@ public class ArmIOReal implements ArmIO {
 
   private final TalonFX motor;
 
+  private final BaseStatusSignal[] refreshSet;
+
   public ArmIOReal() {
     motor = new TalonFX(Constants.CanIDs.ARM_CAN_ID);
 
@@ -67,11 +69,15 @@ public class ArmIOReal implements ArmIO {
     BaseStatusSignal.setUpdateFrequencyForAll(1, tempCelsius);
 
     motor.optimizeBusUtilization();
+
+    refreshSet =
+        new BaseStatusSignal[] {appliedVols, positionRotations, currentAmps, tempCelsius, velocity};
   }
 
   @Override
   public void updateInputs(ArmIOInputs inputs) {
-    BaseStatusSignal.refreshAll(appliedVols, positionRotations, currentAmps, tempCelsius, velocity);
+    BaseStatusSignal.refreshAll(refreshSet);
+
     // could look into latency compensating this value
     inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());
     inputs.armAngleDegrees = inputs.armPosition.getDegrees();
@@ -90,8 +96,7 @@ public class ArmIOReal implements ArmIO {
   @Override
   public void setClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
-
-    Slot0Configs pidConfig = new Slot0Configs();
+    var pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
     motor.getConfigurator().refresh(pidConfig);

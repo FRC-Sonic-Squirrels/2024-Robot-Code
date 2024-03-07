@@ -15,7 +15,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.EndEffectorConstants;
 
 public class EndEffectorIOReal implements EndEffectorIO {
-  private TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
+  private final TalonFX motor = new TalonFX(Constants.CanIDs.END_EFFECTOR_CAN_ID);
 
   TimeOfFlight intake_tof = new TimeOfFlight(Constants.CanIDs.END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID);
   TimeOfFlight shooter_tof =
@@ -27,6 +27,8 @@ public class EndEffectorIOReal implements EndEffectorIO {
   private final StatusSignal<Double> velocityRPS;
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
+
+  private final BaseStatusSignal[] refreshSet;
 
   public EndEffectorIOReal() {
 
@@ -60,11 +62,13 @@ public class EndEffectorIOReal implements EndEffectorIO {
     BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
 
     motor.optimizeBusUtilization();
+
+    refreshSet = new BaseStatusSignal[] {deviceTemp, appliedVolts, currentAmps, velocityRPS};
   }
 
   @Override
   public void updateInputs(EndEffectorIOInputs inputs) {
-    BaseStatusSignal.refreshAll(deviceTemp, appliedVolts, currentAmps, velocityRPS);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.velocityRPM = velocityRPS.getValueAsDouble() * 60.0;
     inputs.currentAmps = currentAmps.getValueAsDouble();

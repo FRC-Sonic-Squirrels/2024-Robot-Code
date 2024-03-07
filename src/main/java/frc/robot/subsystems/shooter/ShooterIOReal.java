@@ -46,6 +46,8 @@ public class ShooterIOReal implements ShooterIO {
   private final StatusSignal<Double> pivotTempCelsius;
   private final StatusSignal<Double> kickerTempCelsius;
 
+  private final BaseStatusSignal[] refreshSet;
+
   // FIX: add FOC
   private final MotionMagicVoltage pivotClosedLoopControl =
       new MotionMagicVoltage(0).withEnableFOC(true);
@@ -154,30 +156,34 @@ public class ShooterIOReal implements ShooterIO {
 
     timeOfFlight.setRangeOfInterest(0, 16, 16, 0);
     timeOfFlight.setRangingMode(RangingMode.Short, 40);
+
+    refreshSet =
+        new BaseStatusSignal[] {
+          pivotPosition,
+          pivotVelocity,
+          pivotVoltage,
+          pivotCurrentAmps,
+          // --
+          launcherLeadVelocity,
+          launcherLeadVoltage,
+          launcherLeadCurrentAmps,
+          launcherFollowVelocity,
+          launcherFollowerVoltage,
+          launcherFollowerCurrentAmps,
+          // --
+          kickerAppliedVolts,
+          kickerCurrentAmps,
+          // --
+          launcherLeadTempCelsius,
+          launcherFollowTempCelsius,
+          pivotTempCelsius,
+          kickerTempCelsius
+        };
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        pivotPosition,
-        pivotVelocity,
-        pivotVoltage,
-        pivotCurrentAmps,
-        // --
-        launcherLeadVelocity,
-        launcherLeadVoltage,
-        launcherLeadCurrentAmps,
-        launcherFollowVelocity,
-        launcherFollowerVoltage,
-        launcherFollowerCurrentAmps,
-        // --
-        kickerAppliedVolts,
-        kickerCurrentAmps,
-        // --
-        launcherLeadTempCelsius,
-        launcherFollowTempCelsius,
-        pivotTempCelsius,
-        kickerTempCelsius);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.pivotPosition = Rotation2d.fromRotations(pivotPosition.getValueAsDouble());
     // rotations to rads = mult by 2pi. 1 full rot = 2pi rads
@@ -185,31 +191,23 @@ public class ShooterIOReal implements ShooterIO {
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrentAmps.getValueAsDouble();
 
-    inputs.launcherRPM =
-        new double[] {
-          launcherLeadVelocity.getValueAsDouble() * 60.0,
-          launcherFollowVelocity.getValueAsDouble() * 60.0
-        };
+    inputs.launcherRPM[0] = launcherLeadVelocity.getValueAsDouble() * 60.0;
+    inputs.launcherRPM[1] = launcherFollowVelocity.getValueAsDouble() * 60.0;
+
     // rps to rpm = mult by 60
-    inputs.launcherAppliedVolts =
-        new double[] {
-          launcherLeadVoltage.getValueAsDouble(), launcherFollowerVoltage.getValueAsDouble()
-        };
-    inputs.launcherCurrentAmps =
-        new double[] {
-          launcherLeadCurrentAmps.getValueAsDouble(), launcherFollowerCurrentAmps.getValueAsDouble()
-        };
+    inputs.launcherAppliedVolts[0] = launcherLeadVoltage.getValueAsDouble();
+    inputs.launcherAppliedVolts[1] = launcherFollowerVoltage.getValueAsDouble();
+
+    inputs.launcherCurrentAmps[0] = launcherLeadCurrentAmps.getValueAsDouble();
+    inputs.launcherCurrentAmps[1] = launcherFollowerCurrentAmps.getValueAsDouble();
 
     inputs.kickerAppliedVolts = kickerAppliedVolts.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrentAmps.getValueAsDouble();
 
-    inputs.tempsCelcius =
-        new double[] {
-          launcherLeadTempCelsius.getValueAsDouble(),
-          launcherFollowTempCelsius.getValueAsDouble(),
-          pivotTempCelsius.getValueAsDouble(),
-          kickerTempCelsius.getValueAsDouble()
-        };
+    inputs.tempsCelcius[0] = launcherLeadTempCelsius.getValueAsDouble();
+    inputs.tempsCelcius[1] = launcherFollowTempCelsius.getValueAsDouble();
+    inputs.tempsCelcius[2] = pivotTempCelsius.getValueAsDouble();
+    inputs.tempsCelcius[3] = kickerTempCelsius.getValueAsDouble();
 
     inputs.timeOfFlightDistance = Units.Millimeters.of(timeOfFlight.getRange()).in(Units.Inches);
   }

@@ -14,15 +14,15 @@ public interface ShooterIO {
     public double pivotAppliedVolts = 0.0;
     public double pivotCurrentAmps = 0.0;
 
-    public double[] launcherRPM = new double[] {};
-    public double[] launcherAppliedVolts = new double[] {};
-    public double[] launcherCurrentAmps = new double[] {};
+    public double[] launcherRPM = new double[2];
+    public double[] launcherAppliedVolts = new double[2];
+    public double[] launcherCurrentAmps = new double[2];
 
     public double kickerAppliedVolts = 0.0;
     public double kickerCurrentAmps = 0.0;
 
     // launcher lead, launcher follower, pivot, kicker
-    public double[] tempsCelcius = new double[] {};
+    public double[] tempsCelcius = new double[4];
 
     public double timeOfFlightDistance = 18.0;
   }

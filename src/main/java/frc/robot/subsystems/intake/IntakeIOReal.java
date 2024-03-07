@@ -21,6 +21,8 @@ public class IntakeIOReal implements IntakeIO {
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
+  private final BaseStatusSignal[] refreshSet;
+
   public IntakeIOReal() {
 
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -48,11 +50,12 @@ public class IntakeIOReal implements IntakeIO {
     BaseStatusSignal.setUpdateFrequencyForAll(1, deviceTemp);
 
     motor.optimizeBusUtilization();
+    refreshSet = new BaseStatusSignal[] {currentAmps, deviceTemp, appliedVolts, velocityRPS};
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    BaseStatusSignal.refreshAll(currentAmps, deviceTemp, appliedVolts, velocityRPS);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();
