@@ -13,12 +13,39 @@
 
 package frc.robot.subsystems.swerve;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.Constants;
+import java.util.List;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface SwerveModuleIO {
+  public class Fake implements SwerveModuleIO {
+    @Override
+    public void registerSignalForOdometry(List<BaseStatusSignal> signals) {}
+
+    @Override
+    public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+      return new SwerveModulePosition();
+    }
+
+    @Override
+    public void updateInputs(ModuleIOInputs inputs) {}
+
+    @Override
+    public void setDriveVoltage(double volts) {}
+
+    @Override
+    public void setTurnVoltage(double volts) {}
+
+    @Override
+    public void setDriveBrakeMode(boolean enable) {}
+
+    @Override
+    public void setTurnBrakeMode(boolean enable) {}
+  }
+
   @AutoLog
   public static class ModuleIOInputs {
     public double drivePositionRad;
@@ -31,13 +58,9 @@ public interface SwerveModuleIO {
     public double turnVelocityRadPerSec;
     public double turnAppliedVolts;
     public double turnCurrentAmps;
-
-    // FIXME: timestamp these for pose estimator
-    public double[] odometryDrivePositionsRad = new double[] {};
-    public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
-
-    public double[] odometryTimestamps = new double[] {};
   }
+
+  void registerSignalForOdometry(List<BaseStatusSignal> signals);
 
   /** Updates the odometry position. */
   SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius);

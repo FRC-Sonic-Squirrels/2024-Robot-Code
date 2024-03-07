@@ -13,7 +13,7 @@ import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
-import frc.robot.subsystems.swerve.SwerveModuleIOFake;
+import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -133,22 +133,20 @@ public class SimulatorRobotConfig extends RobotConfig {
   // FIXME: define your swerve module objects here
   @Override
   public SwerveModules getSwerveModuleObjects() {
-    var modules = new SwerveModules();
-    modules.front_left = new SwerveModule(0, this, new SwerveModuleIOSim());
-    modules.front_right = new SwerveModule(1, this, new SwerveModuleIOSim());
-    modules.back_left = new SwerveModule(2, this, new SwerveModuleIOSim());
-    modules.back_right = new SwerveModule(3, this, new SwerveModuleIOSim());
-    return modules;
+    return new SwerveModules(
+        new SwerveModule(0, this, new SwerveModuleIOSim()),
+        new SwerveModule(1, this, new SwerveModuleIOSim()),
+        new SwerveModule(2, this, new SwerveModuleIOSim()),
+        new SwerveModule(3, this, new SwerveModuleIOSim()));
   }
 
   @Override
   public SwerveModules getReplaySwerveModuleObjects() {
-    var modules = new SwerveModules();
-    modules.front_left = new SwerveModule(0, this, new SwerveModuleIOFake());
-    modules.front_right = new SwerveModule(1, this, new SwerveModuleIOFake());
-    modules.back_left = new SwerveModule(2, this, new SwerveModuleIOFake());
-    modules.back_right = new SwerveModule(3, this, new SwerveModuleIOFake());
-    return modules;
+    return new SwerveModules(
+        new SwerveModule(0, this, new SwerveModuleIO.Fake()),
+        new SwerveModule(1, this, new SwerveModuleIO.Fake()),
+        new SwerveModule(2, this, new SwerveModuleIO.Fake()),
+        new SwerveModule(3, this, new SwerveModuleIO.Fake()));
   }
 
   //

@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.swerve;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +24,7 @@ import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
@@ -30,7 +32,7 @@ public class SwerveModule {
 
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-  private final int index;
+  private final String index;
 
   private SimpleMotorFeedforward driveFeedforward;
   private final PIDController driveFeedback;
@@ -39,9 +41,6 @@ public class SwerveModule {
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Rotation2d turnRelativeOffset = Constants.zeroRotation2d; // Relative + Offset = Absolute
   private boolean turnRelativeOffsetInitialized; // Relative + Offset = Absolute
-  private double lastPositionMeters = 0.0; // Used for delta calculation
-  private SwerveModulePosition[] positionDeltas = new SwerveModulePosition[] {};
-  private double[] odometryTimestamps = new double[] {};
 
   private final double WHEEL_RADIUS;
 
@@ -59,7 +58,7 @@ public class SwerveModule {
 
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
-    this.index = index;
+    this.index = String.format("SwerveModule%d", index);
 
     this.config = config;
 
@@ -83,6 +82,10 @@ public class SwerveModule {
     setBrakeMode(true);
   }
 
+  public void registerSignalForOdometry(List<BaseStatusSignal> signals) {
+    io.registerSignalForOdometry(signals);
+  }
+
   /**
    * Update inputs without running the rest of the periodic logic. This is useful since these
    * updates need to be properly thread-locked.
@@ -93,8 +96,8 @@ public class SwerveModule {
   }
 
   public void periodic() {
-    try (var ignored = new ExecutionTiming("SwerveModule" + Integer.toString(index))) {
-      Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+    try (var ignored = new ExecutionTiming(index)) {
+      Logger.processInputs(index, inputs);
 
       // update Tuneable PID and FF values
       int hc = hashCode();
@@ -139,20 +142,6 @@ public class SwerveModule {
               driveFeedforward.calculate(velocityRadPerSec)
                   + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
         }
-      }
-
-      // Calculate position deltas for odometry
-      int deltaCount =
-          Math.min(inputs.odometryDrivePositionsRad.length, inputs.odometryTurnPositions.length);
-      positionDeltas = new SwerveModulePosition[deltaCount];
-      for (int i = 0; i < deltaCount; i++) {
-        double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
-        Rotation2d angle = inputs.odometryTurnPositions[i].plus(turnRelativeOffset);
-        positionDeltas[i] = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
-        lastPositionMeters = positionMeters;
-
-        odometryTimestamps = new double[deltaCount];
-        System.arraycopy(inputs.odometryTimestamps, 0, odometryTimestamps, 0, deltaCount);
       }
     }
   }
@@ -225,15 +214,6 @@ public class SwerveModule {
   /** Returns the module state (turn angle and drive velocity). */
   public SwerveModuleState getState() {
     return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
-  }
-
-  /** Returns the module position deltas received this cycle. */
-  public SwerveModulePosition[] getPositionDeltas() {
-    return positionDeltas;
-  }
-
-  public double[] getOdometryTimestamps() {
-    return odometryTimestamps;
   }
 
   /** Returns the drive velocity in radians/sec. */

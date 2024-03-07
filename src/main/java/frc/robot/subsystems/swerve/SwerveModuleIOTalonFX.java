@@ -30,7 +30,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
-import java.util.Queue;
+import java.util.List;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -68,19 +68,15 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   private final CANcoder cancoder;
 
   private final StatusSignal<Double> drivePosition;
-  private final Queue<Double> drivePositionQueue;
   private final StatusSignal<Double> driveVelocity;
   private final StatusSignal<Double> driveAppliedVolts;
   private final StatusSignal<Double> driveCurrent;
 
   private final StatusSignal<Double> turnAbsolutePosition;
   private final StatusSignal<Double> turnPosition;
-  private final Queue<Double> turnPositionQueue;
   private final StatusSignal<Double> turnVelocity;
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
-
-  private final Queue<Double> odometryTimestampsQueue;
 
   private VoltageOut driveVoltageRequest;
   private VoltageOut steerVoltageRequest;
@@ -149,23 +145,15 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     steerVoltageRequest.EnableFOC = globalConfig.getPhoenix6Licensed();
 
     drivePosition = driveTalon.getPosition();
-    drivePositionQueue =
-        PhoenixOdometryThread.getInstance()
-            .registerSignal(driveTalon, driveTalon.getPosition(), globalConfig.getCANBusName());
     driveVelocity = driveTalon.getVelocity();
     driveAppliedVolts = driveTalon.getMotorVoltage();
     driveCurrent = driveTalon.getStatorCurrent();
 
     turnAbsolutePosition = cancoder.getAbsolutePosition();
     turnPosition = turnTalon.getPosition();
-    turnPositionQueue =
-        PhoenixOdometryThread.getInstance()
-            .registerSignal(turnTalon, turnPosition, globalConfig.getCANBusName());
     turnVelocity = turnTalon.getVelocity();
     turnAppliedVolts = turnTalon.getMotorVoltage();
     turnCurrent = turnTalon.getStatorCurrent();
-
-    odometryTimestampsQueue = PhoenixOdometryThread.getInstance().hookForTimestamps();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         SwerveModule.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
@@ -211,22 +199,12 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
         Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+  }
 
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
-            .toArray();
-    inputs.odometryTurnPositions =
-        turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
-            .toArray(Rotation2d[]::new);
-
-    inputs.odometryTimestamps =
-        odometryTimestampsQueue.stream().mapToDouble((Double value) -> value).toArray();
-
-    odometryTimestampsQueue.clear();
-    drivePositionQueue.clear();
-    turnPositionQueue.clear();
+  @Override
+  public void registerSignalForOdometry(List<BaseStatusSignal> signals) {
+    signals.add(drivePosition);
+    signals.add(turnPosition);
   }
 
   @Override

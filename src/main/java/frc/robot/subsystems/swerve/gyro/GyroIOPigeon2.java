@@ -20,15 +20,13 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.configs.RobotConfig;
-import frc.robot.subsystems.swerve.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.SwerveModule;
-import java.util.Queue;
+import java.util.List;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon;
   private final StatusSignal<Double> yaw;
-  private final Queue<Double> yawPositionQueue;
   private final StatusSignal<Double> yawVelocity;
 
   private final StatusSignal<Double> xAcceleration;
@@ -62,23 +60,25 @@ public class GyroIOPigeon2 implements GyroIO {
     zAcceleration.setUpdateFrequency(100.0);
 
     pigeon.optimizeBusUtilization();
-    yawPositionQueue =
-        PhoenixOdometryThread.getInstance()
-            .registerSignal(pigeon, pigeon.getYaw(), config.getCANBusName());
+  }
+
+  @Override
+  public void registerSignalForOdometry(List<BaseStatusSignal> signals) {
+    signals.add(yaw);
+  }
+
+  @Override
+  public void updateOdometry(GyroIOInputs inputs) {
+    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
   }
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected =
-        BaseStatusSignal.refreshAll(yaw, yawVelocity, xAcceleration, yAcceleration, zAcceleration)
-            .equals(StatusCode.OK);
-    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
+    var statusCode =
+        BaseStatusSignal.refreshAll(yawVelocity, xAcceleration, yAcceleration, zAcceleration);
+
+    inputs.connected = statusCode == StatusCode.OK;
     inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
-
-    inputs.odometryYawPositions =
-        yawPositionQueue.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
-    yawPositionQueue.clear();
-
     inputs.xAcceleration = xAcceleration.getValueAsDouble();
     inputs.yAcceleration = yAcceleration.getValueAsDouble();
     inputs.zAcceleration = zAcceleration.getValueAsDouble();

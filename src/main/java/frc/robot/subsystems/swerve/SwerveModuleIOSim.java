@@ -13,12 +13,13 @@
 
 package frc.robot.subsystems.swerve;
 
-import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import java.util.List;
 
 /**
  * Physics sim implementation of module IO.
@@ -36,6 +37,9 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   private double lastPositionMeters;
   private double driveAppliedVolts;
   private double turnAppliedVolts;
+
+  @Override
+  public void registerSignalForOdometry(List<BaseStatusSignal> signals) {}
 
   @Override
   public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
@@ -63,11 +67,6 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
     inputs.turnCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
-
-    inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
-    inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
-
-    inputs.odometryTimestamps = new double[] {Utils.getCurrentTimeSeconds()};
   }
 
   @Override

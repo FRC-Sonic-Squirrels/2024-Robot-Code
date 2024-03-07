@@ -195,7 +195,10 @@ public class RobotContainer {
     if (mode == Mode.REPLAY) {
       drivetrain =
           new Drivetrain(
-              config, new GyroIO() {}, config.getReplaySwerveModuleObjects(), () -> is_autonomous);
+              config,
+              new GyroIO.Fake(),
+              config.getReplaySwerveModuleObjects(),
+              () -> is_autonomous);
 
       vision =
           new Vision(
@@ -221,7 +224,7 @@ public class RobotContainer {
 
           drivetrain =
               new Drivetrain(
-                  config, new GyroIO() {}, config.getSwerveModuleObjects(), () -> is_autonomous);
+                  config, new GyroIO.Fake(), config.getSwerveModuleObjects(), () -> is_autonomous);
 
           if (robotType == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
             // Sim Robot, Real Cameras
@@ -359,7 +362,7 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
-                  new GyroIO() {},
+                  new GyroIO.Fake(),
                   config.getReplaySwerveModuleObjects(),
                   () -> is_autonomous);
           vision =

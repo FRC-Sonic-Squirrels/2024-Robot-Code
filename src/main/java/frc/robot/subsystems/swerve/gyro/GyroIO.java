@@ -13,8 +13,10 @@
 
 package frc.robot.subsystems.swerve.gyro;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
+import java.util.List;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {
@@ -22,12 +24,26 @@ public interface GyroIO {
   public static class GyroIOInputs {
     public boolean connected = false;
     public Rotation2d yawPosition = Constants.zeroRotation2d;
-    public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
-    public double yawVelocityRadPerSec = 0.0;
-    public double xAcceleration = 0.0;
-    public double yAcceleration = 0.0;
-    public double zAcceleration = 0.0;
+    public double yawVelocityRadPerSec;
+    public double xAcceleration;
+    public double yAcceleration;
+    public double zAcceleration;
   }
 
-  public default void updateInputs(GyroIOInputs inputs) {}
+  public class Fake implements GyroIO {
+    @Override
+    public void registerSignalForOdometry(List<BaseStatusSignal> signal) {}
+
+    @Override
+    public void updateOdometry(GyroIOInputs inputs) {}
+
+    @Override
+    public void updateInputs(GyroIOInputs inputs) {}
+  }
+
+  void registerSignalForOdometry(List<BaseStatusSignal> signal);
+
+  void updateOdometry(GyroIOInputs inputs);
+
+  void updateInputs(GyroIOInputs inputs);
 }
