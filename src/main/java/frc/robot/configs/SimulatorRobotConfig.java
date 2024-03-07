@@ -222,7 +222,7 @@ public class SimulatorRobotConfig extends RobotConfig {
 
   @Override
   public String getCANBusName() {
-    throw new RuntimeException("Unsupported action for SIM BOT");
+    return null;
   }
 
   @Override

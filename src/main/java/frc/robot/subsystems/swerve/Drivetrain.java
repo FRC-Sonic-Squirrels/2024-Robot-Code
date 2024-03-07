@@ -73,7 +73,13 @@ public class Drivetrain extends SubsystemBase {
     this.gyroIO = gyroIO;
     this.isAutonomous = isAutonomous;
 
-    isCANFD = com.ctre.phoenix6.CANBus.isNetworkFD(config.getCANBusName());
+    String canBusName = config.getCANBusName();
+    if (canBusName != null) {
+      isCANFD = com.ctre.phoenix6.CANBus.isNetworkFD(canBusName);
+    } else {
+      isCANFD = false;
+    }
+
     kinematics = config.getSwerveDriveKinematics();
 
     // FIXME: values copied from 6328, learn how to calculate these values
@@ -148,6 +154,7 @@ public class Drivetrain extends SubsystemBase {
 
     var signalsArray = signals.toArray(new BaseStatusSignal[0]);
     var lastGyroRotation = Constants.zeroRotation2d;
+    StatusCode lastStatusCode = null;
 
     while (true) {
       try {
@@ -157,16 +164,30 @@ public class Drivetrain extends SubsystemBase {
         if (isCANFD) {
           var statusCode =
               BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
+
+          if (statusCode != lastStatusCode) {
+            Logger.recordOutput("OdometryThread/status", statusCode);
+            lastStatusCode = statusCode;
+          }
+
           if (statusCode != StatusCode.OK) {
             continue;
           }
 
           double timeSum = 0.0;
+          double timeMin = Double.MAX_VALUE;
+          double timeMax = 0.0;
 
           for (BaseStatusSignal s : signals) {
-            timeSum += s.getTimestamp().getTime();
+            var time = s.getTimestamp().getTime();
+            timeSum += time;
+            timeMin = Math.min(timeMin, time);
+            timeMax = Math.max(timeMax, time);
           }
           timestamp = timeSum / signalsArray.length;
+          var timestampSpread =
+              Math.max(Math.abs(timeMax - timestamp), Math.abs(timeMin - timestamp));
+          Logger.recordOutput("OdometryThread/timestampSpread", timestampSpread);
 
         } else {
           // "waitForAll" does not support blocking on multiple
@@ -199,7 +220,7 @@ public class Drivetrain extends SubsystemBase {
           poseEstimator.addDriveData(timestamp, twist);
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        Logger.recordOutput("OdometryThread/crash", e.toString());
       }
     }
   }
