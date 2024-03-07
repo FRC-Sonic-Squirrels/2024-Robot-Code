@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -385,14 +384,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
-    for (TimestampedVisionUpdate v : visionData) {
-      if (GeometryUtil.isPoseOutsideField(v.pose())) {
-        Logger.recordOutput("Vision/ingorePoseBecauseOutOfBounds", true);
-        return;
-      }
-    }
-    Logger.recordOutput("Vision/ingorePoseBecauseOutOfBounds", false);
-
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
       poseEstimator.addVisionData(visionData);

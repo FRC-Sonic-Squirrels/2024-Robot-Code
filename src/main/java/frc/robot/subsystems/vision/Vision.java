@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
@@ -225,6 +226,12 @@ public class Vision extends SubsystemBase {
             : VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.INVALID_TAG);
       }
     }
+    // else if (
+    //     != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+    //       // do something when we get more than one tag, pick the best
+    //
+    //       // FIXME: shouldn't we be calling cameraResult.getMultiTagResult() somewhere
+    // }
 
     Optional<EstimatedRobotPose> photonPoseEstimatorOptionalResult =
         visionModule.photonPoseEstimator.update(cameraResult);
@@ -242,18 +249,39 @@ public class Vision extends SubsystemBase {
 
     newCalculatedRobotPose = photonPoseEstimatorOptionalResult.get().estimatedPose;
 
+    if (GeometryUtil.isPoseOutsideField(newCalculatedRobotPose.toPose2d())) {
+      return VisionResultLoggedFields.unsuccessfulResult(
+          VisionResultStatus.INVALID_POSE_OUTSIDE_FIELD);
+    }
+
     tagAmbiguity = 0.0;
     double totalDistance = 0.0;
-    for (PhotonTrackedTarget tag : cleanTargets) {
-      totalDistance +=
+
+    if (photonPoseEstimatorOptionalResult.get().strategy
+        == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+
+      // use average distance for PNP with multiple tags
+      for (PhotonTrackedTarget tag : cleanTargets) {
+        totalDistance +=
+            aprilTagLayout
+                .getTagPose(tag.getFiducialId())
+                .get()
+                .getTranslation()
+                .getDistance(newCalculatedRobotPose.getTranslation());
+      }
+
+      averageDistanceFromTags = totalDistance / (double) cleanTargets.size();
+    } else {
+      // Use single tag distance for all other methods
+      totalDistance =
           aprilTagLayout
-              .getTagPose(tag.getFiducialId())
+              .getTagPose(cameraResult.getBestTarget().getFiducialId())
               .get()
               .getTranslation()
               .getDistance(newCalculatedRobotPose.getTranslation());
-    }
 
-    averageDistanceFromTags = totalDistance / (double) cleanTargets.size();
+      averageDistanceFromTags = totalDistance;
+    }
 
     var distanceFromExistingPoseEstimate =
         prevEstimatedRobotPose
@@ -289,7 +317,10 @@ public class Vision extends SubsystemBase {
         (PhotonTrackedTarget tag) -> tagsUsedInPoseEstimation.add(tag.getFiducialId()));
 
     VisionResultStatus status;
-    if (numTargetsSeen == 1) {
+    if ((numTargetsSeen == 1)
+        || (photonPoseEstimatorOptionalResult.get().strategy
+            != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)) {
+      // single tag result
       status = VisionResultStatus.SUCCESSFUL_SINGLE_TAG;
     } else {
       status =

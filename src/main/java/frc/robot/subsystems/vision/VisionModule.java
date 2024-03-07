@@ -31,7 +31,7 @@ public class VisionModule {
     this.photonPoseEstimator =
         new PhotonPoseEstimator(
             aprilTagFieldLayout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT,
             visionIO.getCamera(),
             RobotToCamera);
     // might as well do lowest ambiguity since we this will likely only happen when only 1 target is
