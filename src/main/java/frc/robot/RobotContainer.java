@@ -204,6 +204,7 @@ public class RobotContainer {
           new Vision(
               aprilTagLayout,
               drivetrain::getPoseEstimatorPose,
+              drivetrain::getRotationGyroOnly,
               drivetrain::addVisionEstimate,
               config.getReplayVisionModules());
 
@@ -232,6 +233,7 @@ public class RobotContainer {
                 new Vision(
                     aprilTagLayout,
                     drivetrain::getPoseEstimatorPose,
+                    drivetrain::getRotationGyroOnly,
                     drivetrain::addVisionEstimate,
                     config.getVisionModuleObjects());
 
@@ -266,6 +268,7 @@ public class RobotContainer {
                 new Vision(
                     aprilTagLayout,
                     drivetrain::getPoseEstimatorPose,
+                    drivetrain::getRotationGyroOnly,
                     drivetrain::addVisionEstimate,
                     visionModules);
 
@@ -293,6 +296,7 @@ public class RobotContainer {
               new Vision(
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
+                  drivetrain::getRotationGyroOnly,
                   drivetrain::addVisionEstimate,
                   config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
@@ -343,6 +347,7 @@ public class RobotContainer {
               new Vision(
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
+                  drivetrain::getRotationGyroOnly,
                   drivetrain::addVisionEstimate,
                   config.getVisionModuleObjects());
 
@@ -369,6 +374,7 @@ public class RobotContainer {
               new Vision(
                   aprilTagLayout,
                   drivetrain::getPoseEstimatorPose,
+                  drivetrain::getRotationGyroOnly,
                   drivetrain::addVisionEstimate,
                   config.getReplayVisionModules());
           arm = new Arm(new ArmIO() {});
@@ -385,6 +391,7 @@ public class RobotContainer {
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
+    // FIXME: remove once we are happy with path planner based swerve characterization
     AutoBuilder.configureHolonomic(
         drivetrain::getPoseEstimatorPose,
         drivetrain::setPose,
@@ -899,6 +906,10 @@ public class RobotContainer {
     drivetrain.setPose(pose);
   }
 
+  public void matchRawOdometryToPoseEstimatorValue() {
+    drivetrain.setRawOdometryPose(drivetrain.getPoseEstimatorPose());
+  }
+
   public double[] getCurrentDraws() {
     double[] current =
         new double[] {
@@ -917,6 +928,7 @@ public class RobotContainer {
     // FIXME: need to remove max distance away from current estimate restriction for vision
     resetSubsystems();
     vision.useMaxDistanceAwayFromExistingEstimate(false);
+    vision.useGyroBasedFilteringForVision(false);
 
     is_teleop = false;
     is_autonomous = false;
@@ -925,6 +937,7 @@ public class RobotContainer {
   public void enterAutonomous() {
     setBrakeMode();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
+    vision.useGyroBasedFilteringForVision(true);
 
     is_teleop = false;
     is_autonomous = true;
@@ -932,6 +945,8 @@ public class RobotContainer {
 
   public void enterTeleop() {
     resetDrivetrainResetOverrides();
+    vision.useMaxDistanceAwayFromExistingEstimate(true);
+    vision.useGyroBasedFilteringForVision(true);
 
     is_teleop = true;
     is_autonomous = false;

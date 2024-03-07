@@ -5,6 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -45,12 +46,16 @@ public class Vision extends SubsystemBase {
   private static LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
       group.build("MaxValidDistanceFromCurrentEstimateMeters", 30.0);
 
+  private static LoggedTunableNumber gyroFilteringToleranceDegrees =
+      group.build("GyroFilteringToleranceDegrees", 4.0);
+
   private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
 
   private AprilTagFieldLayout aprilTagLayout;
 
   private boolean useVisionForPoseEstimation = true;
   private boolean useMaxDistanceAwayFromExistingEstimate = true;
+  private boolean useGyroBasedFilteringForVision = true;
 
   private HashMap<Integer, Double> lastTagDetectionTimes = new HashMap<Integer, Double>();
   private ArrayList<Integer> tagsUsedInPoseEstimation = new ArrayList<Integer>();
@@ -63,15 +68,18 @@ public class Vision extends SubsystemBase {
 
   private final Consumer<List<TimestampedVisionUpdate>> visionEstimatesConsumer;
   private final Supplier<Pose2d> poseEstimatorPoseSupplier;
+  private final Supplier<Rotation2d> currentGyroBasedRobotRotationSupplier;
 
   public Vision(
       AprilTagFieldLayout aprilTagLayout,
       Supplier<Pose2d> poseEstimatorPoseSupplier,
+      Supplier<Rotation2d> currentGyroBasedRobotRotationSupplier,
       Consumer<List<TimestampedVisionUpdate>> visionEstimatesConsumer,
       VisionModuleConfiguration... visionModuleConfigs) {
 
     this.visionEstimatesConsumer = visionEstimatesConsumer;
     this.poseEstimatorPoseSupplier = poseEstimatorPoseSupplier;
+    this.currentGyroBasedRobotRotationSupplier = currentGyroBasedRobotRotationSupplier;
     this.aprilTagLayout = aprilTagLayout;
 
     for (VisionModuleConfiguration config : visionModuleConfigs) {
@@ -254,6 +262,21 @@ public class Vision extends SubsystemBase {
           VisionResultStatus.INVALID_POSE_OUTSIDE_FIELD);
     }
 
+    if (useGyroBasedFilteringForVision) {
+      var absError =
+          Math.abs(
+              newCalculatedRobotPose
+                  .getRotation()
+                  .toRotation2d()
+                  .minus(currentGyroBasedRobotRotationSupplier.get())
+                  .getDegrees());
+
+      if (absError > gyroFilteringToleranceDegrees.get()) {
+        return VisionResultLoggedFields.unsuccessfulResult(
+            VisionResultStatus.NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION);
+      }
+    }
+
     tagAmbiguity = 0.0;
     double totalDistance = 0.0;
 
@@ -359,6 +382,10 @@ public class Vision extends SubsystemBase {
 
   public void setUsingVision(boolean value) {
     useVisionForPoseEstimation = value;
+  }
+
+  public void useGyroBasedFilteringForVision(boolean value) {
+    useGyroBasedFilteringForVision = value;
   }
 
   public boolean isUsingVision() {

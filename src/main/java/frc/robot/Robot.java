@@ -51,6 +51,7 @@ public class Robot extends LoggedRobot {
   private Pose2d selectedInitialPose;
   private Pose2d desiredInitialPose;
   private boolean hasEnteredTeleAtSomePoint = false;
+  private boolean hasEnteredAutoAtSomePoint = false;
 
   // Enables power distribution logging
   private PowerDistribution powerDistribution = new PowerDistribution(1, ModuleType.kRev);
@@ -204,6 +205,18 @@ public class Robot extends LoggedRobot {
         robotContainer.setPose(selectedInitialPose);
       }
     }
+
+    // set gyro zero based on vision during pre match disable. This allows for imprecise robot
+    // placement on the field to be fixed by vision
+    // fms = has ever entered auto or tele then never reset
+    // no fms = always reset
+    if (DriverStation.isFMSAttached()) {
+      if (!hasEnteredAutoAtSomePoint && !hasEnteredTeleAtSomePoint) {
+        robotContainer.matchRawOdometryToPoseEstimatorValue();
+      }
+    } else {
+      robotContainer.matchRawOdometryToPoseEstimatorValue();
+    }
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -227,6 +240,7 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     robotContainer.setBrakeMode();
     robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
+    robotContainer.vision.useGyroBasedFilteringForVision(true);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
