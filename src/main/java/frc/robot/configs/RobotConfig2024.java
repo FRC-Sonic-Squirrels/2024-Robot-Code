@@ -85,7 +85,7 @@ public class RobotConfig2024 extends RobotConfig {
   // --------- SWERVE GEAR RATIO ---------
   private static final double SWERVE_DRIVE_GEAR_RATIO =
       // SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
-      5.9;
+      5.903;
   private static final double SWERVE_STEER_GEAR_RATIO =
       SwerveModuleConstants.MK4I.GEARING_TURN_GEAR_RATIO;
 

@@ -14,7 +14,6 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -173,12 +172,12 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     BaseStatusSignal.refreshAll(
-        drivePosition,
+        // drivePosition,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
         turnAbsolutePosition,
-        turnPosition,
+        // turnPosition,
         turnVelocity,
         turnAppliedVolts,
         turnCurrent);
@@ -212,13 +211,9 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
     if (turnRelativeOffset == null) {
-      if (BaseStatusSignal.waitForAll(0.02, turnAbsolutePosition) != StatusCode.OK) {
+      if (inputs.turnAbsolutePosition.getRadians() == 0.0) {
         return null;
       }
-
-      var turnAbsolutePositionRotations = turnAbsolutePosition.getValueAsDouble();
-      var turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePositionRotations);
-      inputs.turnAbsolutePosition = turnAbsolutePosition.minus(absoluteEncoderOffset);
 
       turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
     }

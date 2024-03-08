@@ -207,6 +207,7 @@ public class Drivetrain extends SubsystemBase {
         // the gyro. The gyro is always disconnected in simulation.
         var twist = kinematics.toTwist2d(wheelDeltas);
 
+        Logger.recordOutput("OdometryThread/twist", twist);
         if (gyroRotation != null) {
           if (lastGyroRotation != null) {
             var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
