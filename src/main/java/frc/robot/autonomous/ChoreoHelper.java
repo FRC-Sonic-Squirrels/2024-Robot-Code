@@ -97,8 +97,12 @@ public class ChoreoHelper {
 
     timestamp -= initialTime;
     timestamp += timeOffset;
-
-    ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
+    ChoreoTrajectoryState state;
+    if (traj != null) {
+      state = traj.sample(timestamp, Constants.isRedAlliance());
+    } else {
+      return null;
+    }
 
     double x = robotPose.getX();
     double y = robotPose.getY();

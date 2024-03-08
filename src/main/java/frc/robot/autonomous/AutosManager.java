@@ -4,7 +4,9 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -14,9 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.team2930.StateMachine;
-import frc.robot.autonomous.substates.AutoSubstateMachine;
 import frc.robot.autonomous.substates.DriveAfterSimpleShot;
-import frc.robot.autonomous.substates.MiddleFirstSubstate;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.MechanismActionsSafe;
 import frc.robot.configs.RobotConfig;
@@ -182,6 +182,11 @@ public class AutosManager {
   }
 
   private Auto sourceAuto() {
+    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
+    paths.add(new Pair<String, String>("Ssource-G5", "G5-S3"));
+    paths.add(new Pair<String, String>("S3-G4", "G4-S2"));
+    paths.add(new Pair<String, String>("S2-G3", "G3-S1"));
+    paths.add(new Pair<String, String>("S1-G2", "G2-S1"));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -190,18 +195,20 @@ public class AutosManager {
             elevator,
             arm,
             intake,
-            new AutoSubstateMachine[] {
-              generateSubstateMachine("sourceAuto", "G5S3"), generateSubstateMachine("S3G4", "G4S2")
-              // generateSubstateMachine("S2G3", "G3S1"),
-              // generateSubstateMachine("S1G2", "G2S1"),
-              // generateSubstateMachine("S1G1", "G1S1")
-            },
-            1.31);
+            visionGamepiece,
+            paths,
+            0.47,
+            config);
     return new Auto(
-        "sourceAuto", state.asCommand(), Choreo.getTrajectory("sourceAuto.1").getInitialPose());
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG3").getInitialPose());
   }
 
   private Auto ampAuto() {
+    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
+    paths.add(new Pair<String, String>("Samp-CG1", null));
+    paths.add(new Pair<String, String>("CG1-G1", "G1-S1"));
+    paths.add(new Pair<String, String>("S1-G2", "G2-S2"));
+    paths.add(new Pair<String, String>("S2-G3", "G3-S2"));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -210,17 +217,21 @@ public class AutosManager {
             elevator,
             arm,
             intake,
-            new AutoSubstateMachine[] {
-              generateSubstateMachine("ampAuto.1", "G1S1"),
-              generateSubstateMachine("S1G2", "G2S2"),
-              generateSubstateMachine("S2G3", "G3S2")
-            },
-            1.31);
+            visionGamepiece,
+            paths,
+            0.47,
+            config);
     return new Auto(
-        "ampAuto", state.asCommand(), Choreo.getTrajectory("ampAuto.1").getInitialPose());
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG3").getInitialPose());
   }
 
   private Auto middleAuto() {
+    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
+    paths.add(new Pair<String, String>("Smiddle-CG3", "CG3-CS2"));
+    paths.add(new Pair<String, String>("CS2-CG2", "CG2-CS1"));
+    paths.add(new Pair<String, String>("CS1-CG1", null));
+    paths.add(new Pair<String, String>("CG1-G1", "G1-S1"));
+    paths.add(new Pair<String, String>("S1-G2", "G2-S1"));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -229,24 +240,12 @@ public class AutosManager {
             elevator,
             arm,
             intake,
-            new StateMachine[] {
-              new MiddleFirstSubstate(
-                  drivetrain,
-                  shooter,
-                  endEffector,
-                  intake,
-                  elevator,
-                  arm,
-                  config,
-                  visionGamepiece::getClosestGamepiece)
-              // generateSubstateMachine("MiddleG1", "G2S2"),
-              // generateSubstateMachine("S2G3", "G3S3"),
-              // generateSubstateMachine("S3G4", "G4S3"),
-              // generateSubstateMachine("S3G5", "G5S3")
-            },
-            0.47);
+            visionGamepiece,
+            paths,
+            0.47,
+            config);
     return new Auto(
-        "middleAuto", state.asCommand(), Choreo.getTrajectory("middleAuto.1").getInitialPose());
+        "middleAuto", state.asCommand(), Choreo.getTrajectory("Smiddle-CG3").getInitialPose());
   }
 
   private Auto simpleShootAuto() {
@@ -258,8 +257,10 @@ public class AutosManager {
             elevator,
             arm,
             intake,
+            visionGamepiece,
             new StateMachine[] {new DriveAfterSimpleShot(drivetrain)},
-            10.0);
+            10.0,
+            config);
 
     return new Auto("simpleShootAuto", state.asCommand(), null);
   }
@@ -309,20 +310,6 @@ public class AutosManager {
         useInitialPose ? traj.getInitialPose() : null);
   }
 
-  private AutoSubstateMachine generateSubstateMachine(String trajToGP, String trajToShoot) {
-    return new AutoSubstateMachine(
-        drivetrain,
-        shooter,
-        endEffector,
-        intake,
-        config,
-        elevator,
-        arm,
-        trajToGP,
-        trajToShoot,
-        visionGamepiece::getClosestGamepiece);
-  }
-
   private Auto characterization() {
     PathPlannerPath path = PathPlannerPath.fromPathFile("Characterization");
     return new Auto(
@@ -350,22 +337,65 @@ public class AutosManager {
   "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
   G5: {
-  "dataType":"choreo/waypoint","x":8.273,"y":0.742,"heading":0,"isInitialGuess":false,
+  "dataType":"choreo/waypoint","x":8.273,"y":0.746,"heading":0,"isInitialGuess":false,
   "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
 
   S1: {
-  "dataType":"choreo/waypoint","x":4.241904258728027,"y":6.103699207305908,"heading":0.185945735814592,
+  "dataType":"choreo/waypoint","x":4.241,"y":6.103,"heading":0.185,
   "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
   S2: {
-  "dataType":"choreo/waypoint","x":4.60924768447876,"y":4.741092681884766,"heading":-0.1594733550343424,
+  "dataType":"choreo/waypoint","x":4.609,"y":4.741,"heading":-0.159,
   "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
   S3: {
-  "dataType":"choreo/waypoint","x":3.2595736980438232,"y":2.54587984085083,"heading":-0.5838703049653,
+  "dataType":"choreo/waypoint","x":3.259,"y":2.545,"heading":-0.583,
   "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
 
+  CG1: {"dataType":"choreo/waypoint","x":2.89,"y":7.020,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":26}
+  CG2: {"dataType":"choreo/waypoint","x":2.89,"y":5.56,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CG3: {"dataType":"choreo/waypoint","x":2.89,"y":4.1,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":12}
+
+  CS1: {"dataType":"choreo/waypoint","x":2.880,"y":7.020,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":26}
+  CS2: {"dataType":"choreo/waypoint","x":1.913,"y":5.569,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CS3: {"dataType":"choreo/waypoint","x":2.110,"y":4.438,"heading":-0.390,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   */
+  public static Pose2d getPoseFromString(String string) {
+    if (string.charAt(0) == 'G') {
+      double y = string.charAt(1) * (-841.0 / 500.0) + (2289.0 / 250.0);
+      return new Pose2d(8.273, y, new Rotation2d());
+    }
+    if (string.charAt(0) == 'C' && string.charAt(1) == 'G') {
+      int index = string.charAt(2);
+      double y = index * (-73.0 / 50.0) + (212.0 / 25.0);
+      return new Pose2d(2.89, y, Rotation2d.fromRadians(index == 1 ? 0.463 : 0.0));
+    }
+    if (string.charAt(0) == 'S') {
+      int index = string.charAt(1);
+      if (index == 1) {
+        return new Pose2d(4.241, 6.103, Rotation2d.fromRadians(0.185));
+      }
+      if (index == 2) {
+        return new Pose2d(4.609, 4.741, Rotation2d.fromRadians(-0.159));
+      }
+      if (index == 3) {
+        return new Pose2d(3.259, 2.545, Rotation2d.fromRadians(-0.583));
+      }
+    }
+    if (string.charAt(0) == 'C' && string.charAt(1) == 'S') {
+      int index = string.charAt(2);
+      if (index == 1) {
+        return new Pose2d(2.880, 7.020, Rotation2d.fromRadians(0.463));
+      }
+      if (index == 2) {
+        return new Pose2d(1.913, 5.569, Rotation2d.fromRadians(0.0));
+      }
+      if (index == 3) {
+        return new Pose2d(2.110, 4.438, Rotation2d.fromRadians(-0.390));
+      }
+    }
+    return null;
+  }
 }
