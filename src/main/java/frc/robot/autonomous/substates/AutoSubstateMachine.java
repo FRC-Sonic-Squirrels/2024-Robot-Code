@@ -181,7 +181,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   private boolean useVisionForGamepiece() {
-    return closestGamepiece.get().getDistance(drive.getPoseEstimatorPose()).in(Units.Meters)
+    return closestGamepiece.get().getDistance(drive.getPoseEstimatorPose(true)).in(Units.Meters)
             <= distToBeginDriveToGamepiece.get()
         && closestGamepiece
                 .get()
