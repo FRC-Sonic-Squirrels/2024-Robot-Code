@@ -16,7 +16,6 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -370,9 +369,6 @@ public class Drivetrain extends SubsystemBase {
     return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
   }
 
-  private LinearFilter accelerationFilterX = LinearFilter.movingAverage(3);
-  private LinearFilter accelerationFilterY = LinearFilter.movingAverage(3);
-
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     for (TimestampedVisionUpdate v : visionData) {
       if (GeometryUtil.isPoseOutsideField(v.pose())) {
@@ -417,7 +413,7 @@ public class Drivetrain extends SubsystemBase {
   public void setPose(Pose2d pose) {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
-      this.poseEstimator.resetPose(pose);
+      this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.rawOdometryPose = pose;
     }
   }

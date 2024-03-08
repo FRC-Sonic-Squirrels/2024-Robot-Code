@@ -27,11 +27,12 @@ public class PoseEstimator {
   private final PoseUpdate headPoseUpdate = new PoseUpdate(-Double.MAX_VALUE, null);
   private final PoseUpdate tailPoseUpdate = new PoseUpdate(Double.MAX_VALUE, null);
   private final double[] q;
+  private double visionCutoff;
 
   public PoseEstimator(double x, double y, double theta) {
     q = new double[] {x * x, y * y, theta * theta};
 
-    resetPose(new Pose2d());
+    resetPose(new Pose2d(), Double.NaN);
   }
 
   /** Returns the latest robot pose based on drive and vision data. */
@@ -43,12 +44,13 @@ public class PoseEstimator {
   }
 
   /** Resets the odometry to a known pose. */
-  public void resetPose(Pose2d pose) {
+  public void resetPose(Pose2d pose, double visionCutoff) {
     //
     // Reset the list, setting the final pose at the head.
     //
     headPoseUpdate.finalPose = pose;
     tailPoseUpdate.previousUpdate = headPoseUpdate;
+    this.visionCutoff = visionCutoff;
   }
 
   /** Records a new drive movement. */
@@ -106,6 +108,10 @@ public class PoseEstimator {
   public void addVisionData(List<TimestampedVisionUpdate> visionData) {
     for (var timestampedVisionUpdate : visionData) {
       var timestamp = timestampedVisionUpdate.timestamp;
+      if (Double.isFinite(visionCutoff) && timestamp < visionCutoff) {
+        continue;
+      }
+
       var visionUpdate =
           new VisionUpdate(timestampedVisionUpdate.pose, timestampedVisionUpdate.stdDevs);
 
