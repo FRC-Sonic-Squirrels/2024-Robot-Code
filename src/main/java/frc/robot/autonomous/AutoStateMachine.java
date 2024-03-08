@@ -33,8 +33,8 @@ public class AutoStateMachine extends StateMachine {
   private final VisionGamepiece visionGamepiece;
   private final RobotConfig config;
   private final ArrayList<Pair<String, String>> subStateTrajNames;
-  private final ChoreoTrajectory[] intakingTrajNames;
-  private final ChoreoTrajectory[] shootingTrajNames;
+  private final ChoreoTrajectory[] intakingTrajs;
+  private final ChoreoTrajectory[] shootingTrajs;
   private final StateMachine[] overrideStateMachines;
   private int currentSubState;
   private double initShootDeadline;
@@ -118,20 +118,26 @@ public class AutoStateMachine extends StateMachine {
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
 
-    intakingTrajNames = new ChoreoTrajectory[subStateTrajNames.size()];
-    shootingTrajNames = new ChoreoTrajectory[subStateTrajNames.size()];
+    if (subStateTrajNames != null) {
 
-    for (int i = 0; i < subStateTrajNames.size(); i++) {
-      if (subStateTrajNames.get(i).getFirst() == null) {
-        intakingTrajNames[i] = null;
-      } else {
-        intakingTrajNames[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getFirst());
+      intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+      shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+
+      for (int i = 0; i < subStateTrajNames.size(); i++) {
+        if (subStateTrajNames.get(i).getFirst() == null) {
+          intakingTrajs[i] = null;
+        } else {
+          intakingTrajs[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getFirst());
+        }
+        if (subStateTrajNames.get(i).getSecond() == null) {
+          shootingTrajs[i] = null;
+        } else {
+          shootingTrajs[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getSecond());
+        }
       }
-      if (subStateTrajNames.get(i).getSecond() == null) {
-        shootingTrajNames[i] = null;
-      } else {
-        shootingTrajNames[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getSecond());
-      }
+    } else {
+      intakingTrajs = null;
+      shootingTrajs = null;
     }
 
     setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -150,7 +156,9 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler nextSubState(boolean followPath) {
-    if (++currentSubState >= subStateTrajNames.size()) {
+
+    if (++currentSubState
+        >= (subStateTrajNames == null ? overrideStateMachines.length : subStateTrajNames.size())) {
       return setDone();
     }
     StateHandler nextState;
@@ -167,10 +175,11 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     elevator,
                     arm,
-                    intakingTrajNames[currentSubState],
-                    shootingTrajNames[currentSubState],
-                    visionGamepiece::getClosestGamepiece),
-                subStateMachine -> () -> this.nextSubState(subStateMachine.wasStopped()));
+                    intakingTrajs[currentSubState],
+                    shootingTrajs[currentSubState],
+                    visionGamepiece::getClosestGamepiece,
+                    intakingTrajs[currentSubState].getFinalPose().getTranslation()),
+                subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =
             suspendForSubStateMachine(
@@ -182,10 +191,10 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     elevator,
                     arm,
-                    intakingTrajNames[currentSubState].getFinalPose().getTranslation(),
-                    shootingTrajNames[currentSubState],
+                    intakingTrajs[currentSubState].getFinalPose().getTranslation(),
+                    shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
-                subStateMachine -> () -> this.nextSubState(subStateMachine.wasStopped()));
+                subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       }
 
     } else {

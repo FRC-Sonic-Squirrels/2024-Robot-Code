@@ -11,9 +11,9 @@ import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToGamepieceHelper {
-  private PIDController xController;
-  private PIDController yController;
-  private PIDController rotController;
+  private PIDController xController = new PIDController(0, 0, 0);
+  private PIDController yController = new PIDController(0, 0, 0);
+  private PIDController rotController = new PIDController(0, 0, 0);
 
   private TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
 
@@ -59,6 +59,7 @@ public class DriveToGamepieceHelper {
   }
 
   public ChassisSpeeds calculateChassisSpeeds(Translation2d targetGamepiece, Pose2d pose) {
+    if (targetGamepiece == null) return null;
     double rotationalErrorDegrees;
     double xVel;
     double yVel;
@@ -68,8 +69,6 @@ public class DriveToGamepieceHelper {
     Rotation2d gamepieceDirection = new Rotation2d(targetGamepiece.getX(), targetGamepiece.getY());
 
     Rotation2d sourceAngle = Constants.zeroRotation2d;
-
-    if (targetGamepiece == null) return null;
 
     rotationalErrorDegrees =
         Math.abs(gamepieceDirection.getDegrees() - pose.getRotation().getDegrees());
