@@ -77,6 +77,8 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
 
+  private final BaseStatusSignal[] refreshSet;
+
   private VoltageOut driveVoltageRequest;
   private VoltageOut steerVoltageRequest;
 
@@ -167,20 +169,21 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
         turnCurrent);
     driveTalon.optimizeBusUtilization();
     turnTalon.optimizeBusUtilization();
+
+    refreshSet =
+        new BaseStatusSignal[] {
+          driveVelocity,
+          driveAppliedVolts,
+          driveCurrent,
+          turnVelocity,
+          turnAppliedVolts,
+          turnCurrent
+        };
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        // drivePosition,
-        driveVelocity,
-        driveAppliedVolts,
-        driveCurrent,
-        turnAbsolutePosition,
-        // turnPosition,
-        turnVelocity,
-        turnAppliedVolts,
-        turnCurrent);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.drivePositionRad =
         Units.rotationsToRadians(drivePosition.getValueAsDouble()) / DRIVE_GEAR_RATIO;
@@ -189,11 +192,6 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
-    inputs.turnAbsolutePosition =
-        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
-            .minus(absoluteEncoderOffset);
-    inputs.turnPosition =
-        Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
     inputs.turnVelocityRadPerSec =
         Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
@@ -204,10 +202,26 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   public void registerSignalForOdometry(List<BaseStatusSignal> signals) {
     signals.add(drivePosition);
     signals.add(turnPosition);
+    signals.add(turnAbsolutePosition);
   }
 
   @Override
   public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+    // Process drive motor position.
+    var drivePositionRotations = drivePosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
+    var drivePositionRaw = Units.rotationsToRadians(drivePositionRotations);
+    inputs.drivePositionRad = drivePositionRaw;
+
+    // Process turn motor position.
+    var turnPositionAngle = turnPosition.getValueAsDouble() / TURN_GEAR_RATIO;
+    var angleRelative = Rotation2d.fromRotations(turnPositionAngle);
+    inputs.turnPosition = angleRelative;
+
+    // Process turn encoder position.
+    double turnAbsolutePositionRaw = turnAbsolutePosition.getValueAsDouble();
+    Rotation2d turnAbsolutePositionRotations = Rotation2d.fromRotations(turnAbsolutePositionRaw);
+    inputs.turnAbsolutePosition = turnAbsolutePositionRotations.minus(absoluteEncoderOffset);
+
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
     if (turnRelativeOffset == null) {
@@ -218,16 +232,10 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
       turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
     }
 
-    var drivePositionRotations = drivePosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
-    var drivePositionRaw = Units.rotationsToRadians(drivePositionRotations);
-    inputs.drivePositionRad = drivePositionRaw;
-
-    var turnPositionAngle = turnPosition.getValueAsDouble() / TURN_GEAR_RATIO;
-    var angleRelative = Rotation2d.fromRotations(turnPositionAngle);
-    var angle = angleRelative.plus(turnRelativeOffset);
+    inputs.angle = angleRelative.plus(turnRelativeOffset);
 
     var positionMeters = drivePositionRaw * wheelRadius;
-    var res = new SwerveModulePosition(positionMeters - lastPositionMeters, angle);
+    var res = new SwerveModulePosition(positionMeters - lastPositionMeters, inputs.angle);
     lastPositionMeters = positionMeters;
 
     return res;

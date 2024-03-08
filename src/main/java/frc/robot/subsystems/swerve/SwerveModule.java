@@ -33,16 +33,13 @@ public class SwerveModule {
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final String index;
+  private final double wheelRadius;
 
   private SimpleMotorFeedforward driveFeedforward;
   private final PIDController driveFeedback;
   private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Rotation2d turnRelativeOffset = Constants.zeroRotation2d; // Relative + Offset = Absolute
-  private boolean turnRelativeOffsetInitialized; // Relative + Offset = Absolute
-
-  private final double WHEEL_RADIUS;
 
   private final LoggedTunableNumber driveKS;
   private final LoggedTunableNumber driveKV;
@@ -54,15 +51,11 @@ public class SwerveModule {
   private final LoggedTunableNumber angleKP;
   private final LoggedTunableNumber angleKD;
 
-  private final RobotConfig config;
-
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
     this.index = String.format("SwerveModule%d", index);
 
-    this.config = config;
-
-    this.WHEEL_RADIUS = config.getWheelRadius().in(Units.Meters);
+    this.wheelRadius = config.getWheelRadius().in(Units.Meters);
 
     driveKS = config.getDriveKS();
     driveKV = config.getDriveKV();
@@ -114,13 +107,6 @@ public class SwerveModule {
         turnFeedback.setPID(angleKP.get(), 0.0, angleKD.get());
       }
 
-      // On first cycle, reset relative turn encoder
-      // Wait until absolute angle is nonzero in case it wasn't initialized yet
-      if (!turnRelativeOffsetInitialized && inputs.turnAbsolutePosition.getRadians() != 0.0) {
-        turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
-        turnRelativeOffsetInitialized = true;
-      }
-
       // Run closed loop turn control
       if (angleSetpoint != null) {
         io.setTurnVoltage(
@@ -137,7 +123,7 @@ public class SwerveModule {
           double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
 
           // Run drive controller
-          double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+          double velocityRadPerSec = adjustSpeedSetpoint / wheelRadius;
           io.setDriveVoltage(
               driveFeedforward.calculate(velocityRadPerSec)
                   + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
@@ -147,7 +133,7 @@ public class SwerveModule {
   }
 
   public SwerveModulePosition updateOdometry() {
-    return io.updateOdometry(inputs, WHEEL_RADIUS);
+    return io.updateOdometry(inputs, wheelRadius);
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
@@ -191,19 +177,17 @@ public class SwerveModule {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    return turnRelativeOffsetInitialized
-        ? inputs.turnPosition.plus(turnRelativeOffset)
-        : Constants.zeroRotation2d;
+    return inputs.angle;
   }
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return inputs.drivePositionRad * WHEEL_RADIUS;
+    return inputs.drivePositionRad * wheelRadius;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return inputs.driveVelocityRadPerSec * WHEEL_RADIUS;
+    return inputs.driveVelocityRadPerSec * wheelRadius;
   }
 
   /** Returns the module position (turn angle and drive position). */

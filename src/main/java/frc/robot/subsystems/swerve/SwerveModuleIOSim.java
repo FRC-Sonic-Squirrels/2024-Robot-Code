@@ -20,7 +20,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.configs.RobotConfig2024;
-
 import java.util.List;
 
 /**
@@ -33,8 +32,10 @@ import java.util.List;
 public class SwerveModuleIOSim implements SwerveModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private final DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), RobotConfig2024.SWERVE_DRIVE_GEAR_RATIO, 0.025);
-  private final DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500(1), RobotConfig2024.SWERVE_STEER_GEAR_RATIO, 0.004);
+  private final DCMotorSim driveSim =
+      new DCMotorSim(DCMotor.getKrakenX60(1), RobotConfig2024.SWERVE_DRIVE_GEAR_RATIO, 0.025);
+  private final DCMotorSim turnSim =
+      new DCMotorSim(DCMotor.getFalcon500(1), RobotConfig2024.SWERVE_STEER_GEAR_RATIO, 0.004);
 
   private double lastPositionMeters;
   private double driveAppliedVolts;
@@ -45,11 +46,17 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
 
   @Override
   public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+    inputs.drivePositionRad = driveSim.getAngularPositionRad();
     double positionMeters = inputs.drivePositionRad * wheelRadius;
+
+    inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
+    inputs.turnAbsolutePosition = new Rotation2d(turnSim.getAngularPositionRad());
 
     var angleRelative = inputs.turnPosition;
     var res = new SwerveModulePosition(positionMeters - lastPositionMeters, angleRelative);
     lastPositionMeters = positionMeters;
+
+    inputs.angle = angleRelative;
 
     return res;
   }
@@ -59,13 +66,10 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionRad = driveSim.getAngularPositionRad();
     inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 
-    inputs.turnAbsolutePosition = new Rotation2d(turnSim.getAngularPositionRad());
-    inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
     inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
     inputs.turnCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());

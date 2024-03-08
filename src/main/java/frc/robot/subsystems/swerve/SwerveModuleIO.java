@@ -58,6 +58,8 @@ public interface SwerveModuleIO {
     public double turnVelocityRadPerSec;
     public double turnAppliedVolts;
     public double turnCurrentAmps;
+
+    public Rotation2d angle = Constants.zeroRotation2d;
   }
 
   void registerSignalForOdometry(List<BaseStatusSignal> signals);
