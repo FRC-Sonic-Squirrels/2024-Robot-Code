@@ -21,6 +21,8 @@ public class VisionGamepiece extends SubsystemBase {
   private final Supplier<Pose2d> robotPoseSupplier;
   private final ArrayList<ProcessedGamepieceData> seenGamePieces = new ArrayList<>();
 
+  private Pose3d[] gamepiecePoses = new Pose3d[] {};
+
   /** Creates a new VisionGamepiece. */
   public VisionGamepiece(VisionGamepieceIO io, Supplier<Pose2d> robotPose) {
     this.io = io;
@@ -132,8 +134,8 @@ public class VisionGamepiece extends SubsystemBase {
       if (closestGamepiece != null) {
         Pose3d pose =
             new Pose3d(
-                closestGamepiece.pose.getX(),
-                closestGamepiece.pose.getY(),
+                closestGamepiece.getRobotCentricPose(robotPoseSupplier.get()).getX(),
+                closestGamepiece.getRobotCentricPose(robotPoseSupplier.get()).getY(),
                 (double) 0.0254,
                 new Rotation3d());
 
@@ -144,13 +146,26 @@ public class VisionGamepiece extends SubsystemBase {
                 (double) 0.0254,
                 new Rotation3d());
 
-        log("ClosestGamepiece/distance", closestGamepiece.distance);
-        log("ClosestGamepiece/targetYawDegrees", closestGamepiece.targetYaw.getDegrees());
-        log("ClosestGamepiece/targetPitchDegrees", closestGamepiece.targetPitch.getDegrees());
+        log(
+            "ClosestGamepiece/distance",
+            closestGamepiece.getDistance(robotPoseSupplier.get()).in(Units.Meters));
+        log(
+            "ClosestGamepiece/targetYawDegrees",
+            closestGamepiece.getYaw(robotPoseSupplier.get()).getDegrees());
+        log(
+            "ClosestGamepiece/targetPitchDegrees",
+            closestGamepiece.getPitch(robotPoseSupplier.get()).getDegrees());
         log("ClosestGamepiece/poseRobotCentric", pose);
         log("ClosestGamepiece/pose", globalPose);
         log("ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
       }
+
+      gamepiecePoses = new Pose3d[seenGamePieces.size()];
+      for (int i = 0; i < seenGamePieces.size(); i++) {
+        Pose2d pose = seenGamePieces.get(i).globalPose;
+        gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
+      }
+      log("GamepiecePoseArray", gamepiecePoses);
     }
   }
 
@@ -227,15 +242,20 @@ public class VisionGamepiece extends SubsystemBase {
   private void logGamepieceData(
       double yam, double pitch, ProcessedGamepieceData processedGamepieceData, int index) {
     String baseName = "Gamepieces/Gamepiece" + index;
-    double distance = Units.Meters.of(processedGamepieceData.distance).in(Units.Inches);
+    double distance = processedGamepieceData.getDistance(robotPoseSupplier.get()).in(Units.Inches);
 
     log(baseName + "/Raw/yaw", Math.toDegrees(yam));
     log(baseName + "/Raw/pitch", Math.toDegrees(pitch));
-    log(baseName + "/Processed/distance", processedGamepieceData.distance);
     log(baseName + "/Processed/distanceInches", distance);
-    log(baseName + "/Processed/targetYaw", processedGamepieceData.targetYaw.getDegrees());
-    log(baseName + "/Processed/targetPitch", processedGamepieceData.targetPitch.getDegrees());
-    log(baseName + "/Processed/pose", processedGamepieceData.pose);
+    log(
+        baseName + "/Processed/targetYaw",
+        processedGamepieceData.getYaw(robotPoseSupplier.get()).getDegrees());
+    log(
+        baseName + "/Processed/targetPitch",
+        processedGamepieceData.getPitch(robotPoseSupplier.get()).getDegrees());
+    log(
+        baseName + "/Processed/pose",
+        processedGamepieceData.getRobotCentricPose(robotPoseSupplier.get()));
     log(baseName + "/Processed/globalPose", processedGamepieceData.globalPose);
   }
 
@@ -248,6 +268,10 @@ public class VisionGamepiece extends SubsystemBase {
   }
 
   private static void log(String key, Pose3d value) {
+    Logger.recordOutput("VisionGamepiece/" + key, value);
+  }
+
+  private static void log(String key, Pose3d[] value) {
     Logger.recordOutput("VisionGamepiece/" + key, value);
   }
 }
