@@ -80,9 +80,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   private final StatusSignal<Double> turnVelocity;
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
-  private final double               distanceToRotation;
-
-  private final BaseStatusSignal[] refreshSet;
+  private final double distanceToRotation;
 
   private VoltageOut driveVoltageRequest;
   private VoltageOut steerVoltageRequest;
@@ -312,7 +310,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   }
 
   @Override
-  public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV) {
+  public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV, double kA) {
     Slot0Configs pidConfig = new Slot0Configs();
 
     var configurator = driveTalon.getConfigurator();
@@ -322,6 +320,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     pidConfig.kD = kD;
     pidConfig.kS = kS;
     pidConfig.kV = kV;
+    pidConfig.kA = kA;
 
     configurator.apply(pidConfig);
   }

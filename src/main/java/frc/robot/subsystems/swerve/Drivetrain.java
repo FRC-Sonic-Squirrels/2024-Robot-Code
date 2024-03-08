@@ -46,10 +46,10 @@ public class Drivetrain extends SubsystemBase {
   public static final AutoLock odometryLock = new AutoLock();
 
   public static final LoggedTunableNumber driveMotorAccelerationAuto =
-      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationAuto", 1);
+      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationAuto", 1000);
 
   public static final LoggedTunableNumber driveMotorAccelerationTele =
-      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationTele", 1);
+      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationTele", 1000);
 
   private final RobotConfig config;
   private final Supplier<Boolean> isAutonomous;

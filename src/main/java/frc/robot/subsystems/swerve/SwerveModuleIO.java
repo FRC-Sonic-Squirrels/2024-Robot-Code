@@ -50,7 +50,8 @@ public interface SwerveModuleIO {
         double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {}
 
     @Override
-    public void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV) {}
+    public void setDriveClosedLoopConstraints(
+        double kP, double kD, double kS, double kV, double kA) {}
 
     @Override
     public void setTurnPosition(Rotation2d position) {}
@@ -89,7 +90,7 @@ public interface SwerveModuleIO {
 
   void setDriveVelocity(double velocityMetersPerSec, double accelerationMetersPerSecondSquared);
 
-  void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV);
+  void setDriveClosedLoopConstraints(double kP, double kD, double kS, double kV, double Ka);
 
   /** Run the turn motor at the specified voltage. */
   void setTurnVoltage(double volts);

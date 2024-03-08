@@ -95,11 +95,11 @@ public class RobotConfig2024 extends RobotConfig {
   private static final LoggedTunableNumber ANGLE_KD = group.build("ANGLE_KD", 2.0);
 
   // ---------- SWERVE DRIVE MOTOR PID + KS + KV + KA CONSTANTS -------------
-  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.1);
+  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 1.8);
   private static final LoggedTunableNumber DRIVE_KD = group.build("DRIVE_KD", 0.0);
 
   private static final LoggedTunableNumber DRIVE_KS = group.build("DRIVE_KS", 0.0);
-  private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.13);
+  private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.8);
   private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 0.0);
 
   // -------- GYRO CAN ID ---------

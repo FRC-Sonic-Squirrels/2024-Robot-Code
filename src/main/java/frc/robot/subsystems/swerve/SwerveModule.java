@@ -20,7 +20,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -69,7 +68,8 @@ public class SwerveModule {
     angleKP = config.getAngleKP();
     angleKD = config.getAngleKD();
 
-    io.setDriveClosedLoopConstraints(driveKP.get(), driveKD.get(), driveKS.get(), driveKV.get());
+    io.setDriveClosedLoopConstraints(
+        driveKP.get(), driveKD.get(), driveKS.get(), driveKV.get(), driveKA.get());
     io.setTurnClosedLoopConstraints(
         angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
 
@@ -108,7 +108,8 @@ public class SwerveModule {
             driveKP.get(),
             driveKD.get(),
             driveKS.get(),
-            driveKV.get()); // FIXME: do we need need ks?
+            driveKV.get(),
+            driveKA.get()); // FIXME: do we need need ks?
         io.setTurnClosedLoopConstraints(
             angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
       }
@@ -136,7 +137,7 @@ public class SwerveModule {
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     // Update setpoints, controllers run in "periodic"
-    angleSetpoint = optimizedState.angle.minus(turnRelativeOffset);
+    angleSetpoint = optimizedState.angle;
     speedSetpoint = optimizedState.speedMetersPerSecond;
 
     this.driveMotorMotionMagicAcceleration = driveMotorMotionMagicAcceleration;
