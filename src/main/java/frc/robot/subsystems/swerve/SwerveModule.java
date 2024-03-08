@@ -35,9 +35,9 @@ public class SwerveModule {
   private final double wheelRadius;
 
   public static final LoggedTunableNumber turnCruiseVelocity =
-      new LoggedTunableNumber("RobotConfig/SwerveTurnCruiseVelocity", 1600);
+      new LoggedTunableNumber("RobotConfig/SwerveTurnCruiseVelocity", 200);
   public static final LoggedTunableNumber turnAcceleration =
-      new LoggedTunableNumber("RobotConfig/SwerveTurnAcceleration", 1600);
+      new LoggedTunableNumber("RobotConfig/SwerveTurnAcceleration", 200);
 
   private final LoggedTunableNumber driveKS;
   private final LoggedTunableNumber driveKV;
@@ -136,7 +136,7 @@ public class SwerveModule {
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     // Update setpoints, controllers run in "periodic"
-    angleSetpoint = optimizedState.angle;
+    angleSetpoint = optimizedState.angle.minus(turnRelativeOffset);
     speedSetpoint = optimizedState.speedMetersPerSecond;
 
     this.driveMotorMotionMagicAcceleration = driveMotorMotionMagicAcceleration;

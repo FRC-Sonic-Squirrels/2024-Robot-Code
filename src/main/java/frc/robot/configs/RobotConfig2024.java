@@ -91,16 +91,16 @@ public class RobotConfig2024 extends RobotConfig {
   // ---------- SWERVE STEERING MOTOR PID CONSTANTS -----------
   // FIXE: RN copied from Mechanical advantage (6328) 2023 codebase. Should learn to tune
   // ourselves
-  private static final LoggedTunableNumber ANGLE_KP = group.build("ANGLE_KP", 5.0);
-  private static final LoggedTunableNumber ANGLE_KD = group.build("ANGLE_KD", 0.0);
+  private static final LoggedTunableNumber ANGLE_KP = group.build("ANGLE_KP", 200.0);
+  private static final LoggedTunableNumber ANGLE_KD = group.build("ANGLE_KD", 2.0);
 
   // ---------- SWERVE DRIVE MOTOR PID + KS + KV + KA CONSTANTS -------------
-  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.0);
+  private static final LoggedTunableNumber DRIVE_KP = group.build("DRIVE_KP", 0.1);
   private static final LoggedTunableNumber DRIVE_KD = group.build("DRIVE_KD", 0.0);
 
   private static final LoggedTunableNumber DRIVE_KS = group.build("DRIVE_KS", 0.0);
   private static final LoggedTunableNumber DRIVE_KV = group.build("DRIVE_KV", 0.13);
-  private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 1.6);
+  private static final LoggedTunableNumber DRIVE_KA = group.build("DRIVE_KA", 0.0);
 
   // -------- GYRO CAN ID ---------
   private static final int GYRO_CAN_ID = 5;
