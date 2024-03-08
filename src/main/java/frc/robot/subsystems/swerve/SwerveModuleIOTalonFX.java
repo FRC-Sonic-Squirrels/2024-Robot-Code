@@ -205,7 +205,6 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   public void updateInputs(ModuleIOInputs inputs) {
     BaseStatusSignal.refreshAll(refreshSet);
 
-    inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
@@ -225,18 +224,18 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   @Override
   public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
     // Process drive motor position.
-    var drivePositionRotations = drivePosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
+    var drivePositionRotations = drivePosition.getValueAsDouble();
     var drivePositionRaw = Units.rotationsToRadians(drivePositionRotations);
     inputs.drivePositionRad = drivePositionRaw;
 
     // Process turn motor position.
-    var turnPositionAngle = turnPosition.getValueAsDouble() / TURN_GEAR_RATIO;
+    var turnPositionAngle = turnPosition.getValueAsDouble();
     var angleRelative = Rotation2d.fromRotations(turnPositionAngle);
     inputs.turnPosition = angleRelative;
 
     // Process turn encoder position.
-    double turnAbsolutePositionRaw = turnAbsolutePosition.getValueAsDouble();
-    Rotation2d turnAbsolutePositionRotations = Rotation2d.fromRotations(turnAbsolutePositionRaw);
+    var turnAbsolutePositionRaw = turnAbsolutePosition.getValueAsDouble();
+    var turnAbsolutePositionRotations = Rotation2d.fromRotations(turnAbsolutePositionRaw);
     inputs.turnAbsolutePosition = turnAbsolutePositionRotations.minus(absoluteEncoderOffset);
 
     // On first cycle, reset relative turn encoder
@@ -286,9 +285,11 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void setTurnPosition(Rotation2d position) {
-    var rotations = position.getRotations();
+    if (turnRelativeOffset != null) {
+      position = position.minus(turnRelativeOffset);
+    }
 
-    turnTalon.setControl(turnMotionMagicVoltageRequest.withPosition(rotations));
+    turnTalon.setControl(turnMotionMagicVoltageRequest.withPosition(position.getRotations()));
   }
 
   @Override
