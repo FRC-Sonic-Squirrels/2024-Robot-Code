@@ -90,7 +90,8 @@ public class AutosManager {
       list.add(() -> testPath("TestDrive2MetersRotating", true));
       list.add(() -> testPath("TestDrive2MetersThenLeft", true));
       list.add(() -> testPath("TestDrive2MetersThenLeftRotating", true));
-      list.add(() -> testPath("TestCircle", false));
+      list.add(() -> testPath("TestCircle", true));
+      list.add(() -> testPath("TestCircle", false, "TestCircleDontResetPose"));
       list.add(() -> testPath("TestZigZag", false));
       list.add(this::characterization);
       list.add(
@@ -264,9 +265,13 @@ public class AutosManager {
   }
 
   private Auto testPath(String pathName, boolean useInitialPose) {
+    return testPath(pathName, useInitialPose, pathName);
+  }
+
+  private Auto testPath(String pathName, boolean useInitialPose, String autoName) {
     ChoreoTrajectory traj = Choreo.getTrajectory(pathName);
     return new Auto(
-        pathName,
+        autoName,
         new Command() {
           ChoreoHelper helper;
           ChassisSpeeds speeds;
