@@ -19,6 +19,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.configs.RobotConfig2024;
+
 import java.util.List;
 
 /**
@@ -31,8 +33,8 @@ import java.util.List;
 public class SwerveModuleIOSim implements SwerveModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private final DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), 5.91, 0.025);
-  private final DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500(1), 150.0 / 7.0, 0.004);
+  private final DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), RobotConfig2024.SWERVE_DRIVE_GEAR_RATIO, 0.025);
+  private final DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500(1), RobotConfig2024.SWERVE_STEER_GEAR_RATIO, 0.004);
 
   private double lastPositionMeters;
   private double driveAppliedVolts;

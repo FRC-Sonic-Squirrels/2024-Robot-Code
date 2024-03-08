@@ -83,10 +83,9 @@ public class RobotConfig2024 extends RobotConfig {
           .withSupplyCurrentLimitEnable(true);
 
   // --------- SWERVE GEAR RATIO ---------
-  private static final double SWERVE_DRIVE_GEAR_RATIO =
-      // SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
-      5.903;
-  private static final double SWERVE_STEER_GEAR_RATIO =
+  public static final double SWERVE_DRIVE_GEAR_RATIO =
+      SwerveModuleConstants.MK4I.LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT;
+  public static final double SWERVE_STEER_GEAR_RATIO =
       SwerveModuleConstants.MK4I.GEARING_TURN_GEAR_RATIO;
 
   // ---------- SWERVE STEERING MOTOR PID CONSTANTS -----------

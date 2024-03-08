@@ -12,7 +12,7 @@ public class SwerveModuleConstants {
         (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
 
     public static final double LEVEL_3_GEARING_DRIVE_GEAR_RATIO_PLUS_SPEED_KIT =
-        (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
+        (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0);
 
     public static final double GEARING_TURN_GEAR_RATIO = 150.0 / 7.0;
   }
