@@ -30,30 +30,29 @@ import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public abstract class AutoSubstateMachine extends StateMachine {
-  private final DrivetrainWrapper drive;
-  private final Shooter shooter;
-  private final EndEffector endEffector;
-  private final Intake intake;
-  private final Elevator elevator;
-  private final Arm arm;
-  private final RobotConfig config;
-  private final ChoreoTrajectory trajToGamePiece;
-  private final ChoreoTrajectory trajToShoot;
-  private final Supplier<ProcessedGamepieceData> closestGamepiece;
-  private final Translation2d gamepeiceTranslation;
-  private ChoreoHelper choreoHelper;
-  private DriveToGamepieceHelper driveToGamepieceHelper;
+  protected final DrivetrainWrapper drive;
+  protected final Shooter shooter;
+  protected final EndEffector endEffector;
+  protected final Intake intake;
+  protected final Elevator elevator;
+  protected final Arm arm;
+  protected final RobotConfig config;
+  protected final ChoreoTrajectory trajToShoot;
+  protected final Supplier<ProcessedGamepieceData> closestGamepiece;
+  protected ChoreoHelper choreoHelper;
+  protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
-  private IntakeGamepiece intakeCommand;
-  private boolean up;
+  protected IntakeGamepiece intakeCommand;
+  protected boolean startedMoving = false;
+  protected Translation2d gamepieceTranslation;
 
   private LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
 
-  private Trigger robotStopped;
+  protected Trigger robotStopped;
 
   /** Creates a new AutoSubstateMachine. */
-  public AutoSubstateMachine(
+  protected AutoSubstateMachine(
       DrivetrainWrapper drive,
       Shooter shooter,
       EndEffector endEffector,
@@ -61,11 +60,10 @@ public abstract class AutoSubstateMachine extends StateMachine {
       RobotConfig config,
       Elevator elevator,
       Arm arm,
-      ChoreoTrajectory trajToGP,
       ChoreoTrajectory trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
-      Translation2d gamepiecePose) {
-    super(String.format("AutoSub %s / %s", trajToGP, trajToShoot));
+      Translation2d gamepieceTranslation) {
+    super(String.format("AutoSub %s", trajToShoot));
 
     this.drive = drive;
     this.shooter = shooter;
@@ -74,68 +72,20 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.elevator = elevator;
     this.arm = arm;
     this.config = config;
-    this.trajToGamePiece = trajToGP;
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
-    this.gamepeiceTranslation = gamepiecePose;
+    this.gamepieceTranslation = gamepieceTranslation;
 
     robotStopped =
         new Trigger(
                 () ->
-                    (drive.getFieldRelativeVelocities().getX() <= 0.01
-                        && drive.getFieldRelativeVelocities().getY() <= 0.01
-                        && drive.getFieldRelativeVelocities().getRotation().getRadians() <= 0.01))
+                    (drive.getFieldRelativeVelocities().getX() <= 0.001
+                        && drive.getFieldRelativeVelocities().getY() <= 0.001
+                        && drive.getFieldRelativeVelocities().getRotation().getRadians() <= 0.001))
             .debounce(0.2);
-
-    setInitialState(stateWithName("initFollowPathToGamePiece", this::initFollowPathToGamePiece));
   }
 
-  private StateHandler initFollowPathToGamePiece() {
-    intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
-    intakeCommand.schedule();
-    if (trajToGamePiece != null)
-      choreoHelper =
-          new ChoreoHelper(
-              timeFromStart(),
-              drive.getPoseEstimatorPose(true),
-              this.trajToGamePiece,
-              config.getAutoTranslationPidController(),
-              config.getAutoTranslationPidController(),
-              config.getAutoThetaPidController());
-
-    driveToGamepieceHelper = new DriveToGamepieceHelper();
-
-    return stateWithName("followPathToGamePiece", this::pickupGamepiece);
-  }
-
-  private StateHandler pickupGamepiece() {
-    Translation2d targetTranslation = gamepeiceTranslation;
-
-    if (useVisionForGamepiece()) {
-      targetTranslation = closestGamepiece.get().globalPose.getTranslation();
-    } else {
-      if (gamepeiceTranslation != null) targetTranslation = gamepeiceTranslation;
-    }
-
-    ChassisSpeeds speeds =
-        driveToGamepieceHelper.calculateChassisSpeeds(
-            targetTranslation, drive.getPoseEstimatorPose(true));
-    if (!useVisionForGamepiece() && trajToGamePiece != null) {
-      speeds = choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
-    }
-
-    if (!endEffector.noteInEndEffector()) {
-      drive.setVelocityOverride(speeds);
-      if (robotStopped.getAsBoolean()) {
-        drive.resetVelocityOverride();
-        return setStopped();
-      }
-      return null;
-    }
-    return stateWithName("prepFollowPathToShooting", this::prepFollowPathToShooting);
-  }
-
-  private StateHandler prepFollowPathToShooting() {
+  protected StateHandler prepFollowPathToShooting() {
     intakeCommand.cancel();
 
     scoreSpeaker =
@@ -180,12 +130,15 @@ public abstract class AutoSubstateMachine extends StateMachine {
     return null;
   }
 
-  private boolean useVisionForGamepiece() {
+  protected boolean useVisionForGamepiece() {
+    if (closestGamepiece.get() == null) {
+      return false;
+    }
     return closestGamepiece.get().getDistance(drive.getPoseEstimatorPose(true)).in(Units.Meters)
             <= distToBeginDriveToGamepiece.get()
         && closestGamepiece
                 .get()
-                .getDistance(new Pose2d(gamepeiceTranslation, new Rotation2d()))
+                .getDistance(new Pose2d(gamepieceTranslation, new Rotation2d()))
                 .in(Units.Meters)
             <= Constants.FieldConstants.Gamepieces.NOTE_TOLERANCE.in(Units.Meters);
   }

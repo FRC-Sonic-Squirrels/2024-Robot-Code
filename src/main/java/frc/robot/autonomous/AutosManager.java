@@ -200,7 +200,7 @@ public class AutosManager {
             0.47,
             config);
     return new Auto(
-        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG3").getInitialPose());
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
 
   private Auto ampAuto() {
@@ -222,7 +222,7 @@ public class AutosManager {
             0.47,
             config);
     return new Auto(
-        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG3").getInitialPose());
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG1").getInitialPose());
   }
 
   private Auto middleAuto() {
@@ -354,11 +354,11 @@ public class AutosManager {
   "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
 
-  CG1: {"dataType":"choreo/waypoint","x":2.89,"y":7.020,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":26}
+  CG1: {"dataType":"choreo/waypoint","x":2.89,"y":7.02,"heading":0.611,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   CG2: {"dataType":"choreo/waypoint","x":2.89,"y":5.56,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   CG3: {"dataType":"choreo/waypoint","x":2.89,"y":4.1,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":12}
 
-  CS1: {"dataType":"choreo/waypoint","x":2.880,"y":7.020,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":26}
+  CS1: {"dataType":"choreo/waypoint","x":2.055,"y":6.613,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   CS2: {"dataType":"choreo/waypoint","x":1.913,"y":5.569,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   CS3: {"dataType":"choreo/waypoint","x":2.110,"y":4.438,"heading":-0.390,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   */
@@ -370,7 +370,7 @@ public class AutosManager {
     if (string.charAt(0) == 'C' && string.charAt(1) == 'G') {
       int index = string.charAt(2);
       double y = index * (-73.0 / 50.0) + (212.0 / 25.0);
-      return new Pose2d(2.89, y, Rotation2d.fromRadians(index == 1 ? 0.463 : 0.0));
+      return new Pose2d(2.89, y, Rotation2d.fromRadians(index == 1 ? 0.611 : 0.0));
     }
     if (string.charAt(0) == 'S') {
       int index = string.charAt(1);
@@ -387,7 +387,7 @@ public class AutosManager {
     if (string.charAt(0) == 'C' && string.charAt(1) == 'S') {
       int index = string.charAt(2);
       if (index == 1) {
-        return new Pose2d(2.880, 7.020, Rotation2d.fromRadians(0.463));
+        return new Pose2d(2.055, 6.613, Rotation2d.fromRadians(0.463));
       }
       if (index == 2) {
         return new Pose2d(1.913, 5.569, Rotation2d.fromRadians(0.0));
