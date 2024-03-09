@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -43,13 +42,11 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
   protected IntakeGamepiece intakeCommand;
-  protected boolean startedMoving = false;
   protected Translation2d gamepieceTranslation;
+  private Translation2d lastSeenGamepiece;
 
   private LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
-
-  protected Trigger robotStopped;
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -75,14 +72,27 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
     this.gamepieceTranslation = gamepieceTranslation;
+  }
 
-    robotStopped =
-        new Trigger(
-                () ->
-                    (drive.getFieldRelativeVelocities().getX() <= 0.001
-                        && drive.getFieldRelativeVelocities().getY() <= 0.001
-                        && drive.getFieldRelativeVelocities().getRotation().getRadians() <= 0.001))
-            .debounce(0.2);
+  protected StateHandler visionPickupGamepiece() {
+    if (closestGamepiece.get() != null)
+      lastSeenGamepiece = closestGamepiece.get().globalPose.getTranslation();
+
+    ChassisSpeeds speeds =
+        driveToGamepieceHelper.calculateChassisSpeeds(
+            lastSeenGamepiece, drive.getPoseEstimatorPose(true));
+
+    if (speeds != null) drive.setVelocityOverride(speeds);
+
+    if (!endEffector.noteInEndEffector()) {
+      if (driveToGamepieceHelper.isAtTarget()) {
+        drive.resetVelocityOverride();
+        return setStopped();
+      }
+      return null;
+    }
+    drive.resetVelocityOverride();
+    return stateWithName("prepFollowPathToShooting", this::prepFollowPathToShooting);
   }
 
   protected StateHandler prepFollowPathToShooting() {
@@ -98,28 +108,21 @@ public abstract class AutoSubstateMachine extends StateMachine {
           return setDone();
         });
 
-    if (trajToShoot != null) {
-      choreoHelper =
-          new ChoreoHelper(
-              timeFromStart(),
-              drive.getPoseEstimatorPose(true),
-              this.trajToShoot,
-              config.getAutoTranslationPidController(),
-              config.getAutoTranslationPidController(),
-              config.getAutoThetaPidController());
-    }
+    choreoHelper =
+        new ChoreoHelper(
+            timeFromStart(),
+            drive.getPoseEstimatorPose(true),
+            this.trajToShoot,
+            config.getAutoTranslationPidController(),
+            config.getAutoTranslationPidController(),
+            config.getAutoThetaPidController());
 
     return stateWithName("followPathToShooter", this::followPathToShooting);
   }
 
   private StateHandler followPathToShooting() {
-    ChassisSpeeds chassisSpeeds;
-    if (trajToShoot != null) {
-      chassisSpeeds =
-          choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
-    } else {
-      chassisSpeeds = new ChassisSpeeds();
-    }
+    ChassisSpeeds chassisSpeeds =
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
 
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);

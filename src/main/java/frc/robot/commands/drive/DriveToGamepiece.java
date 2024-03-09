@@ -8,15 +8,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class DriveToGamepiece extends Command {
   /** Creates a new DriveToGamepiece. */
   private Supplier<ProcessedGamepieceData> targetGamepiece;
 
-  private final Consumer<ChassisSpeeds> driveCommand;
+  private final DrivetrainWrapper wrapper;
 
   private Supplier<Boolean> gamepieceIntaked;
 
@@ -27,12 +27,12 @@ public class DriveToGamepiece extends Command {
   /** Drives robot to gamepiece, intended for ground gamepieces only */
   public DriveToGamepiece(
       Supplier<ProcessedGamepieceData> targetGamepiece,
-      Consumer<ChassisSpeeds> driveCommand,
+      DrivetrainWrapper wrapper,
       Supplier<Boolean> gamepieceIntaked,
       Supplier<Pose2d> pose) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.targetGamepiece = targetGamepiece;
-    this.driveCommand = driveCommand;
+    this.wrapper = wrapper;
     this.gamepieceIntaked = gamepieceIntaked;
     this.pose = pose;
 
@@ -41,7 +41,9 @@ public class DriveToGamepiece extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    helper = new DriveToGamepieceHelper();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -50,13 +52,13 @@ public class DriveToGamepiece extends Command {
         helper.calculateChassisSpeeds(
             targetGamepiece.get().globalPose.getTranslation(), pose.get());
 
-    if (speeds != null) driveCommand.accept(speeds);
+    if (speeds != null) wrapper.setVelocityOverride(speeds);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    driveCommand.accept(new ChassisSpeeds(0, 0, 0));
+    wrapper.resetVelocityOverride();
   }
 
   // Returns true when the command should end.

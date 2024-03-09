@@ -201,7 +201,7 @@ public class AutosManager {
             0.47,
             config);
     return new Auto(
-        "ampAuto", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "sourceAuto", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
 
   private Auto ampAuto() {

@@ -8,6 +8,7 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
 import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
@@ -191,7 +192,9 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     elevator,
                     arm,
-                    intakingTrajs[currentSubState].getFinalPose().getTranslation(),
+                    AllianceFlipUtil.flipPoseForAlliance(
+                            intakingTrajs[currentSubState].getFinalPose())
+                        .getTranslation(),
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));

@@ -59,19 +59,21 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
   private StateHandler pickupGamepiece() {
     ChassisSpeeds speeds =
         driveToGamepieceHelper.calculateChassisSpeeds(
-            useVisionForGamepiece()
-                ? closestGamepiece.get().globalPose.getTranslation()
-                : gamepieceTranslation,
-            drive.getPoseEstimatorPose());
+            gamepieceTranslation, drive.getPoseEstimatorPose(true));
+
+    if (useVisionForGamepiece()) {
+      return stateWithName("visionPickupGamepiece", super::visionPickupGamepiece);
+    }
 
     if (!endEffector.noteInEndEffector()) {
       drive.setVelocityOverride(speeds);
-      if (robotStopped.getAsBoolean()) {
+      if (driveToGamepieceHelper.isAtTarget()) {
         drive.resetVelocityOverride();
         return setStopped();
       }
       return null;
     }
+    drive.resetVelocityOverride();
     return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
   }
 }

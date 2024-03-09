@@ -192,7 +192,7 @@ public final class Constants {
     public static class Gamepieces {
       public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
       public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);
-      public static final Measure<Distance> NOTE_TOLERANCE = Units.Meters.of(0.1);
+      public static final Measure<Distance> NOTE_TOLERANCE = Units.Inches.of(14.0);
       public static final double NOTE_PERSISTENCE = 5;
     }
   }
@@ -409,7 +409,11 @@ public final class Constants {
 
   public static class VisionGamepieceConstants {
     public static final Pose3d GAMEPIECE_CAMERA_POSE =
-        new Pose3d(0.0, 0.0, Units.Inches.of(38).in(Units.Meters), new Rotation3d(0.0, 0.0, 0.0));
+        new Pose3d(
+            Units.Inches.of(5.3).in(Units.Meters),
+            0.0,
+            Units.Inches.of(18.725).in(Units.Meters),
+            new Rotation3d(0.0, Math.toRadians(-14.0), 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 

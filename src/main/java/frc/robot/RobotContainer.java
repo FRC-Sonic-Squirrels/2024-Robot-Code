@@ -49,6 +49,7 @@ import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.Shimmy;
+import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
@@ -352,7 +353,7 @@ public class RobotContainer {
                   config.getVisionModuleObjects());
 
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
 
           // intake = new Intake(new IntakeIO() {});
           elevator = new Elevator(new ElevatorIOReal());
@@ -532,13 +533,14 @@ public class RobotContainer {
     */
     // ----------- DRIVER CONTROLS ------------
 
-    // driverController
-    //     .leftTrigger()
-    //     .whileTrue(
-    //         new DriveToGamepiece(
-    //             visionGamepiece::getClosestGamepiece,
-    //             drivetrainWrapper,
-    //             endEffector::intakeSideTOFDetectGamepiece));
+    driverController
+        .b()
+        .whileTrue(
+            new DriveToGamepiece(
+                visionGamepiece::getClosestGamepiece,
+                drivetrainWrapper,
+                endEffector::intakeSideTOFDetectGamepiece,
+                () -> drivetrainWrapper.getPoseEstimatorPose(true)));
 
     driverController
         .back()
