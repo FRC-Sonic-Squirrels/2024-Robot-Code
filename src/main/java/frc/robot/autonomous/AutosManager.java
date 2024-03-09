@@ -81,9 +81,10 @@ public class AutosManager {
     list.add(this::middleAuto);
     list.add(this::ampAuto);
     list.add(this::simpleShootAuto);
-    list.add(this::swerveCharacterization);
 
     if (includeDebugPaths) {
+      list.add(this::portableAuto);
+      list.add(this::swerveCharacterization);
       list.add(() -> testPath("TestDrive1Meter", true));
       list.add(() -> testPath("TestDrive10Meter", true));
       list.add(() -> testPath("TestDrive2Meters", true));
@@ -246,6 +247,26 @@ public class AutosManager {
             config);
     return new Auto(
         "middleAuto", state.asCommand(), Choreo.getTrajectory("Smiddle-CG3").getInitialPose());
+  }
+
+  private Auto portableAuto() {
+    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
+    paths.add(new Pair<String, String>("TestPortable1", "TestPortable2"));
+    paths.add(new Pair<String, String>("TestPortable3", "TestPortable4"));
+    AutoStateMachine state =
+        new AutoStateMachine(
+            drivetrain,
+            shooter,
+            endEffector,
+            elevator,
+            arm,
+            intake,
+            visionGamepiece,
+            paths,
+            2.0,
+            config);
+    return new Auto(
+        "TestPortable", state.asCommand(), Choreo.getTrajectory("TestPortable1").getInitialPose());
   }
 
   private Auto simpleShootAuto() {
