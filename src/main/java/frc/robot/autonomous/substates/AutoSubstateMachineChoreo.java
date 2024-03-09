@@ -17,7 +17,7 @@ import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
-  private ChoreoTrajectory trajToGamepiece;
+  private final ChoreoTrajectory trajToGamepiece;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachineChoreo(
@@ -52,14 +52,17 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
   private StateHandler initFollowPathToGamePiece() {
     super.intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
     super.intakeCommand.schedule();
-    choreoHelper =
-        new ChoreoHelper(
-            timeFromStart(),
-            drive.getPoseEstimatorPose(true),
-            trajToGamepiece,
-            config.getAutoTranslationPidController(),
-            config.getAutoTranslationPidController(),
-            config.getAutoThetaPidController());
+
+    if (trajToGamepiece != null) {
+      choreoHelper =
+          new ChoreoHelper(
+              timeFromStart(),
+              drive.getPoseEstimatorPose(true),
+              trajToGamepiece,
+              config.getAutoTranslationPidController(),
+              config.getAutoTranslationPidController(),
+              config.getAutoThetaPidController());
+    }
 
     driveToGamepieceHelper = new DriveToGamepieceHelper();
 
@@ -67,22 +70,24 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
   }
 
   private StateHandler pickupGamepiece() {
-    ChassisSpeeds speeds =
-        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
-
     if (useVisionForGamepiece()) {
       return stateWithName("visionPickupGamepiece", super::visionPickupGamepiece);
     }
 
-    if (!endEffector.noteInEndEffector()) {
-      drive.setVelocityOverride(speeds);
-      if (speeds == null) {
-        drive.resetVelocityOverride();
-        return setStopped();
-      }
-      return null;
+    if (endEffector.noteInEndEffector()) {
+      drive.resetVelocityOverride();
+      return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
     }
-    drive.resetVelocityOverride();
-    return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
+
+    ChassisSpeeds speeds =
+        choreoHelper != null
+            ? choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart())
+            : null;
+    if (speeds == null) {
+      drive.resetVelocityOverride();
+      return setStopped();
+    }
+    drive.setVelocityOverride(speeds);
+    return null;
   }
 }

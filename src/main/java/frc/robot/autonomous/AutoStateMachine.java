@@ -33,7 +33,6 @@ public class AutoStateMachine extends StateMachine {
   private final Intake intake;
   private final VisionGamepiece visionGamepiece;
   private final RobotConfig config;
-  private final ArrayList<Pair<String, String>> subStateTrajNames;
   private final ChoreoTrajectory[] intakingTrajs;
   private final ChoreoTrajectory[] shootingTrajs;
   private final StateMachine[] overrideStateMachines;
@@ -113,32 +112,24 @@ public class AutoStateMachine extends StateMachine {
     this.arm = arm;
     this.intake = intake;
     this.visionGamepiece = visionGamepiece;
-    this.subStateTrajNames = subStateTrajNames;
     this.config = config;
     this.initShootDeadline = initShootDeadline;
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
 
-    if (subStateTrajNames != null) {
+    if (subStateTrajNames == null) {
+      subStateTrajNames = new ArrayList<>();
+    }
 
-      intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
-      shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+    intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+    shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
 
-      for (int i = 0; i < subStateTrajNames.size(); i++) {
-        if (subStateTrajNames.get(i).getFirst() == null) {
-          intakingTrajs[i] = null;
-        } else {
-          intakingTrajs[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getFirst());
-        }
-        if (subStateTrajNames.get(i).getSecond() == null) {
-          shootingTrajs[i] = null;
-        } else {
-          shootingTrajs[i] = Choreo.getTrajectory(subStateTrajNames.get(i).getSecond());
-        }
-      }
-    } else {
-      intakingTrajs = null;
-      shootingTrajs = null;
+    for (int i = 0; i < subStateTrajNames.size(); i++) {
+      var pair = subStateTrajNames.get(i);
+      String intakingTraj = pair.getFirst();
+      String shootingTraj = pair.getSecond();
+      intakingTrajs[i] = intakingTraj != null ? Choreo.getTrajectory(intakingTraj) : null;
+      shootingTrajs[i] = shootingTraj != null ? Choreo.getTrajectory(shootingTraj) : null;
     }
 
     setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -157,13 +148,11 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler nextSubState(boolean followPath) {
-
-    if (++currentSubState
-        >= (subStateTrajNames == null ? overrideStateMachines.length : subStateTrajNames.size())) {
-      return setDone();
-    }
     StateHandler nextState;
     if (overrideStateMachines == null) {
+      if (++currentSubState >= intakingTrajs.length) {
+        return setDone();
+      }
 
       if (followPath) {
         nextState =
@@ -201,6 +190,10 @@ public class AutoStateMachine extends StateMachine {
       }
 
     } else {
+      if (++currentSubState >= overrideStateMachines.length) {
+        return setDone();
+      }
+
       nextState =
           suspendForSubStateMachine(
               overrideStateMachines[currentSubState],
