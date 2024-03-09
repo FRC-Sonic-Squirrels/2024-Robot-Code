@@ -13,6 +13,8 @@ public enum VisionResultStatus {
   SUCCESSFUL_SINGLE_TAG(""),
   SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK(""),
   NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION(""),
+  Z_HEIGHT_BAD(""),
+  PITCH_OR_ROLL_BAD(""),
   INIT("start of vision code"),
 
   UNKNOWN("UNKNOWN");

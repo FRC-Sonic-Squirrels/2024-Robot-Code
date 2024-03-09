@@ -31,13 +31,13 @@ public class VisionModule {
     this.photonPoseEstimator =
         new PhotonPoseEstimator(
             aprilTagFieldLayout,
-            PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             visionIO.getCamera(),
             RobotToCamera);
     // might as well do lowest ambiguity since we this will likely only happen when only 1 target is
     // seen
     // no point filtering for the best target when there is only 1.
-    photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT);
 
     this.missingCameraAlert = new Alert("Missing Camera: " + this.name, Alert.AlertType.ERROR);
   }

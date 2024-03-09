@@ -49,6 +49,13 @@ public class Vision extends SubsystemBase {
   private static LoggedTunableNumber gyroFilteringToleranceDegrees =
       group.build("GyroFilteringToleranceDegrees", 4.0);
 
+      private static LoggedTunableNumber zHeightToleranceMeters =
+      group.build("zHeightToleranceMeters", 0.5);
+
+      private static LoggedTunableNumber pitchAndRollToleranceDegrees =
+      group.build("pitchToleranceDegrees", 10.0);
+
+
   private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
 
   private AprilTagFieldLayout aprilTagLayout;
@@ -220,6 +227,9 @@ public class Vision extends SubsystemBase {
       cleanTargets.add(target);
       lastTagDetectionTimes.put(fiducialId, now);
     }
+    var timeStampCameraResult = cameraResult.getTimestampSeconds();
+    cameraResult = new PhotonPipelineResult(cameraResult.getLatencyMillis(), cleanTargets, cameraResult.getMultiTagResult());
+    cameraResult.setTimestampSeconds(timeStampCameraResult);
 
     var numTargetsSeen = cleanTargets.size();
     if (numTargetsSeen == 0) {
@@ -243,7 +253,7 @@ public class Vision extends SubsystemBase {
     //       // FIXME: shouldn't we be calling cameraResult.getMultiTagResult() somewhere
     // }
 
-    Optional<EstimatedRobotPose> photonPoseEstimatorOptionalResult =
+        Optional<EstimatedRobotPose> photonPoseEstimatorOptionalResult =
         visionModule.photonPoseEstimator.update(cameraResult);
 
     if (photonPoseEstimatorOptionalResult.isEmpty()) {
@@ -279,6 +289,14 @@ public class Vision extends SubsystemBase {
         return VisionResultLoggedFields.unsuccessfulResult(
             VisionResultStatus.NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION);
       }
+    }
+
+    if(Math.abs(newCalculatedRobotPose.getZ()) >= zHeightToleranceMeters.get()) {
+      return VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.Z_HEIGHT_BAD);
+    }
+
+    if(Math.abs(newCalculatedRobotPose.getRotation().getY()) >= pitchAndRollToleranceDegrees.get() || Math.abs(newCalculatedRobotPose.getRotation().getX()) >= pitchAndRollToleranceDegrees.get()) {
+      return VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.PITCH_OR_ROLL_BAD);
     }
 
     tagAmbiguity = 0.0;
