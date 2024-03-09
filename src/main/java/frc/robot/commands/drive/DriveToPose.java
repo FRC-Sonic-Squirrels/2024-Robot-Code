@@ -107,7 +107,7 @@ public class DriveToPose extends Command {
     drive.resetVelocityOverride();
     // Reset all controllers
     var pose = poseSupplier.get();
-    var currentPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
+    var currentPose = drive.getPoseEstimatorPose(true);
     driveController.reset(
         currentPose.getTranslation().getDistance(pose.getTranslation()),
         Math.min(
@@ -146,7 +146,7 @@ public class DriveToPose extends Command {
   @Override
   public void execute() {
     // Get current and target pose
-    var currentPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
+    var currentPose = drive.getPoseEstimatorPose(true);
     var targetPose = poseSupplier.get();
 
     // Calculate drive speed

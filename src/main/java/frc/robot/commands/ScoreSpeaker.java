@@ -154,7 +154,7 @@ public class ScoreSpeaker extends Command {
       prevNoteInShoot = shooter.noteInShooter();
 
       var currentTime = Timer.getFPGATimestamp();
-      var poseEstimatorPose = drive.getPoseEstimatorPoseWithGyroOnlyRotation();
+      var poseEstimatorPose = drive.getPoseEstimatorPose(false);
       var currentRot = drive.getRotationGyroOnly();
 
       var result =
@@ -241,8 +241,7 @@ public class ScoreSpeaker extends Command {
               : Constants.ShooterConstants.Pivot.LOADING_POSITION);
 
       var speakerDistance =
-          Constants.FieldConstants.getDistanceToSpeaker(
-              drive.getPoseEstimatorPoseWithGyroOnlyRotation());
+          Constants.FieldConstants.getDistanceToSpeaker(drive.getPoseEstimatorPose(false));
       rotationController.setTolerance(
           Math.toDegrees(Units.Feet.of(15.0).in(Units.Meters) / speakerDistance.in(Units.Meters)));
 
@@ -307,8 +306,7 @@ public class ScoreSpeaker extends Command {
   }
 
   private boolean shootingPosition() {
-    Pose2d reflectedPose =
-        AllianceFlipUtil.flipPoseForAlliance(drive.getPoseEstimatorPoseWithGyroOnlyRotation());
+    Pose2d reflectedPose = AllianceFlipUtil.flipPoseForAlliance(drive.getPoseEstimatorPose(false));
     double x = reflectedPose.getX();
     double y = reflectedPose.getY();
 

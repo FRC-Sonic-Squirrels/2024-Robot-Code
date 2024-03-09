@@ -544,24 +544,22 @@ public class RobotContainer {
         .back()
         .onTrue(
             Commands.runOnce(
-                () ->
-                    drivetrain.setPose(
-                        new Pose2d(
-                            drivetrain.getPoseEstimatorPose().getX(),
-                            drivetrain.getPoseEstimatorPose().getY(),
-                            Constants.zeroRotation2d)),
+                () -> {
+                  Pose2d pose = drivetrain.getPoseEstimatorPose();
+                  drivetrain.setPose(
+                      new Pose2d(pose.getX(), pose.getY(), Constants.zeroRotation2d));
+                },
                 drivetrain));
 
     driverController
         .back()
         .onTrue(
             Commands.runOnce(
-                () ->
-                    drivetrain.setPose(
-                        new Pose2d(
-                            drivetrain.getPoseEstimatorPose().getX(),
-                            drivetrain.getPoseEstimatorPose().getY(),
-                            new Rotation2d())),
+                () -> {
+                  Pose2d pose = drivetrain.getPoseEstimatorPose();
+                  drivetrain.setPose(
+                      new Pose2d(pose.getX(), pose.getY(), Constants.zeroRotation2d));
+                },
                 drivetrain));
 
     driverController
@@ -981,8 +979,9 @@ public class RobotContainer {
 
     GamepieceVisualization.getInstance().logTraj();
 
-    ClimbVisualization.getInstance().updateVisualization(drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation());
-    ClimbVisualization.getInstance().logPose();
+    ClimbVisualization climbVisualization = ClimbVisualization.getInstance();
+    climbVisualization.updateVisualization(drivetrainWrapper.getPoseEstimatorPose(true));
+    climbVisualization.logPose();
   }
 
   public void resetSubsystems() {

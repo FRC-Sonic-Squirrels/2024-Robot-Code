@@ -73,14 +73,25 @@ public class DrivetrainWrapper {
     }
 
     drivetrain.runVelocity(chassisSpeeds, prioritizeRotation);
+
+    var pose1 = getPoseEstimatorPose(false);
+    var pose2 = getPoseEstimatorPose(true);
+
+    Logger.recordOutput(
+        "DrivetrainWrapper/gyroDrift", pose1.getRotation().minus(pose2.getRotation()).getDegrees());
   }
 
   public Subsystem getRequirements() {
     return drivetrain;
   }
 
-  public Pose2d getPoseEstimatorPoseWithGyroOnlyRotation() {
-    return new Pose2d(drivetrain.getPoseEstimatorPose().getTranslation(), getRotationGyroOnly());
+  public Pose2d getPoseEstimatorPose(boolean prioritizeGyro) {
+    var pose = drivetrain.getPoseEstimatorPose();
+    if (prioritizeGyro) {
+      pose = new Pose2d(pose.getTranslation(), getRotationGyroOnly());
+    }
+
+    return pose;
   }
 
   public double getMaxLinearSpeedMetersPerSec() {

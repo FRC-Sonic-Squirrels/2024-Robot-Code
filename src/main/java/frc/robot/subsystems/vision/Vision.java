@@ -274,10 +274,8 @@ public class Vision extends SubsystemBase {
                   .getDegrees());
 
       if (absError > gyroFilteringToleranceDegrees.get()) {
-        Logger.recordOutput(
-                "Vision/RejectByGyro", ++useGyroBasedFilteringForVisionCount);
-        Logger.recordOutput(
-                "Vision/RejectByGyroError", absError);
+        Logger.recordOutput("Vision/RejectByGyro", ++useGyroBasedFilteringForVisionCount);
+        Logger.recordOutput("Vision/RejectByGyroError", absError);
         return VisionResultLoggedFields.unsuccessfulResult(
             VisionResultStatus.NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION);
       }
@@ -321,10 +319,8 @@ public class Vision extends SubsystemBase {
     if (useMaxDistanceAwayFromExistingEstimate
         && (distanceFromExistingPoseEstimate
             > (maxValidDistanceAwayFromCurrentEstimateMeters.get() * numTargetsSeen))) {
-      Logger.recordOutput(
-              "Vision/RejectByDistance", ++useMaxDistanceAwayFromExistingEstimateCount);
-      Logger.recordOutput(
-              "Vision/RejectByDistanceError", distanceFromExistingPoseEstimate);
+      Logger.recordOutput("Vision/RejectByDistance", ++useMaxDistanceAwayFromExistingEstimateCount);
+      Logger.recordOutput("Vision/RejectByDistanceError", distanceFromExistingPoseEstimate);
       return VisionResultLoggedFields.unsuccessfulResult(
           VisionResultStatus.TOO_FAR_FROM_EXISTING_ESTIMATE);
     }

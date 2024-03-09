@@ -70,7 +70,7 @@ public class AutoSubstateMachine extends StateMachine {
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(),
+            drive.getPoseEstimatorPose(true),
             this.trajToGamePiece,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
@@ -81,8 +81,7 @@ public class AutoSubstateMachine extends StateMachine {
 
   private StateHandler followPathToGamePiece() {
     var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(), timeFromStart());
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.
       drive.setVelocityOverride(chassisSpeeds);
@@ -109,7 +108,7 @@ public class AutoSubstateMachine extends StateMachine {
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(),
+            drive.getPoseEstimatorPose(true),
             this.trajToShoot,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
@@ -120,8 +119,7 @@ public class AutoSubstateMachine extends StateMachine {
 
   private StateHandler followPathToShooter() {
     var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(), timeFromStart());
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
 
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);

@@ -60,7 +60,7 @@ public class MiddleFirstSubstate extends StateMachine {
     choreoHelper =
         new ChoreoHelper(
             timeFromStart(),
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(),
+            drive.getPoseEstimatorPose(false),
             this.traj,
             config.getAutoTranslationPidController(),
             config.getAutoTranslationPidController(),
@@ -74,8 +74,7 @@ public class MiddleFirstSubstate extends StateMachine {
   private StateHandler driveWhileOtherCommandRuns() {
     Logger.recordOutput("Autonomous/driveWhileOtherCommandRuns", true);
     var chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(
-            drive.getPoseEstimatorPoseWithGyroOnlyRotation(), timeFromStart());
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(false), timeFromStart());
 
     if (chassisSpeeds != null) {
       // TODO: Check for note in intake.

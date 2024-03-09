@@ -281,7 +281,7 @@ public class AutosManager {
             helper =
                 new ChoreoHelper(
                     Timer.getFPGATimestamp(),
-                    drivetrain.getPoseEstimatorPoseWithGyroOnlyRotation(),
+                    drivetrain.getPoseEstimatorPose(true),
                     traj,
                     config.getAutoTranslationPidController(),
                     config.getAutoTranslationPidController(),
@@ -292,8 +292,7 @@ public class AutosManager {
           public void execute() {
             speeds =
                 helper.calculateChassisSpeeds(
-                    drivetrain.getPoseEstimatorPoseWithGyroOnlyRotation(),
-                    Timer.getFPGATimestamp());
+                    drivetrain.getPoseEstimatorPose(true), Timer.getFPGATimestamp());
             drivetrain.setVelocityOverride(speeds);
           }
 

@@ -366,7 +366,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   public StateHandler visualizeGamepiece() {
     GamepieceVisualization.getInstance()
         .updateVisualization(
-            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation(),
+            drivetrainWrapper.getPoseEstimatorPose(false),
             drivetrainWrapper.getFieldRelativeVelocities().getTranslation(),
             shooter.getPitch(),
             shooter.getRPM());
@@ -397,8 +397,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private boolean validShootingPosition() {
     if (simpleShot) return true;
     Pose2d reflectedPose =
-        AllianceFlipUtil.flipPoseForAlliance(
-            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation());
+        AllianceFlipUtil.flipPoseForAlliance(drivetrainWrapper.getPoseEstimatorPose(false));
 
     double x = reflectedPose.getX();
     double y = reflectedPose.getY();
@@ -429,7 +428,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     solverResult =
         solver.computeAngles(
             Timer.getFPGATimestamp(),
-            drivetrainWrapper.getPoseEstimatorPoseWithGyroOnlyRotation(),
+            drivetrainWrapper.getPoseEstimatorPose(false),
             drivetrainWrapper.getFieldRelativeVelocities().getTranslation());
 
     double offset = tunablePitchOffset.get();
