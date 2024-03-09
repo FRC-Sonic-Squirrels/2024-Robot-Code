@@ -15,7 +15,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
   private ChoreoTrajectory trajToGamepiece;
@@ -68,29 +67,22 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
   }
 
   private StateHandler pickupGamepiece() {
-    ChassisSpeeds speeds;
+    ChassisSpeeds speeds =
+        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
+
     if (useVisionForGamepiece()) {
-      speeds =
-          driveToGamepieceHelper.calculateChassisSpeeds(
-              closestGamepiece.get().globalPose.getTranslation(), drive.getPoseEstimatorPose());
-    } else {
-      speeds = choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(), timeFromStart());
+      return stateWithName("visionPickupGamepiece", super::visionPickupGamepiece);
     }
 
-    if (!robotStopped.getAsBoolean()) {
-      startedMoving = true;
-    }
-
-    Logger.recordOutput("Autonomous/robotStopped", robotStopped.getAsBoolean());
-    Logger.recordOutput("Autonomous/noteInEndEffector", endEffector.noteInEndEffector());
     if (!endEffector.noteInEndEffector()) {
       drive.setVelocityOverride(speeds);
-      if (robotStopped.getAsBoolean() && startedMoving) {
+      if (speeds == null) {
         drive.resetVelocityOverride();
         return setStopped();
       }
       return null;
     }
+    drive.resetVelocityOverride();
     return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
   }
 }

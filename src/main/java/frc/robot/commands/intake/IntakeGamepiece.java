@@ -76,7 +76,7 @@ public class IntakeGamepiece extends Command {
       shooter.setKickerPercentOut(0.0);
 
       if (!intakeSideTofSeenGamepiece) {
-        endEffector.markStartOfNoteIntaking();
+        // endEffector.markStartOfNoteIntaking();
 
         double percent =
             arm.getAngle().getDegrees() > -88 || elevator.getHeightInches() > 8.0

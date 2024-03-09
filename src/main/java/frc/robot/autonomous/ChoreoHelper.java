@@ -46,7 +46,9 @@ public class ChoreoHelper {
     double lastDistance = Double.MAX_VALUE;
 
     for (ChoreoTrajectoryState state : getStates()) {
-      double stateDistance = GeometryUtil.getDist(initialPose, state.getPose());
+      var stateForAlliance = Constants.isRedAlliance() ? state.flipped() : state;
+
+      double stateDistance = GeometryUtil.getDist(initialPose, stateForAlliance.getPose());
 
       if (stateDistance > lastDistance) {
         // Moving away, give up.
@@ -62,7 +64,7 @@ public class ChoreoHelper {
     }
 
     if (closestState != null) {
-      this.timeOffset = closestState.timestamp;
+      // this.timeOffset = closestState.timestamp;
       log("closestPose", closestState.getPose());
     }
 
