@@ -69,6 +69,8 @@ public class Vision extends SubsystemBase {
   private final Consumer<List<TimestampedVisionUpdate>> visionEstimatesConsumer;
   private final Supplier<Pose2d> poseEstimatorPoseSupplier;
   private final Supplier<Rotation2d> currentGyroBasedRobotRotationSupplier;
+  private int useMaxDistanceAwayFromExistingEstimateCount;
+  private int useGyroBasedFilteringForVisionCount;
 
   public Vision(
       AprilTagFieldLayout aprilTagLayout,
@@ -272,6 +274,10 @@ public class Vision extends SubsystemBase {
                   .getDegrees());
 
       if (absError > gyroFilteringToleranceDegrees.get()) {
+        Logger.recordOutput(
+                "Vision/RejectByGyro", ++useGyroBasedFilteringForVisionCount);
+        Logger.recordOutput(
+                "Vision/RejectByGyroError", absError);
         return VisionResultLoggedFields.unsuccessfulResult(
             VisionResultStatus.NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION);
       }
@@ -315,6 +321,10 @@ public class Vision extends SubsystemBase {
     if (useMaxDistanceAwayFromExistingEstimate
         && (distanceFromExistingPoseEstimate
             > (maxValidDistanceAwayFromCurrentEstimateMeters.get() * numTargetsSeen))) {
+      Logger.recordOutput(
+              "Vision/RejectByDistance", ++useMaxDistanceAwayFromExistingEstimateCount);
+      Logger.recordOutput(
+              "Vision/RejectByDistanceError", distanceFromExistingPoseEstimate);
       return VisionResultLoggedFields.unsuccessfulResult(
           VisionResultStatus.TOO_FAR_FROM_EXISTING_ESTIMATE);
     }
