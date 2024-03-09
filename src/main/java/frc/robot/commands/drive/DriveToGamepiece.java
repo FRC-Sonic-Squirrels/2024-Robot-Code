@@ -48,11 +48,16 @@ public class DriveToGamepiece extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    ChassisSpeeds speeds =
-        helper.calculateChassisSpeeds(
-            targetGamepiece.get().globalPose.getTranslation(), pose.get());
+    ProcessedGamepieceData gamepieceData = targetGamepiece.get();
+    ChassisSpeeds speeds;
+    if (gamepieceData != null) {
+      speeds = helper.calculateChassisSpeeds(gamepieceData.globalPose.getTranslation(), pose.get());
+    } else {
+      speeds = null;
+    }
 
     if (speeds != null) wrapper.setVelocityOverride(speeds);
+    else wrapper.resetVelocityOverride();
   }
 
   // Called once the command ends or is interrupted.

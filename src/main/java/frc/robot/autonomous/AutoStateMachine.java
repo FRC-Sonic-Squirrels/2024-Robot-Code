@@ -168,7 +168,9 @@ public class AutoStateMachine extends StateMachine {
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
-                    intakingTrajs[currentSubState].getFinalPose().getTranslation()),
+                    AllianceFlipUtil.flipPoseForAlliance(
+                            intakingTrajs[currentSubState].getFinalPose())
+                        .getTranslation()),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =

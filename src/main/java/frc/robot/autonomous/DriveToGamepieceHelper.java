@@ -8,7 +8,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToGamepieceHelper {
@@ -18,14 +17,11 @@ public class DriveToGamepieceHelper {
 
   private TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
 
-  private LoggedTunableNumber kP = group.build("kP", 1.0);
+  private LoggedTunableNumber kP = group.build("kP", 4.0);
   private LoggedTunableNumber kI = group.build("kI", 0.0);
   private LoggedTunableNumber kD = group.build("kD", 0.0);
 
-  private LoggedTunableNumber rotationKp = group.build("rotationKp", 1.2);
-
-  private LoggedTunableNumber xKpSourceArea = group.build("xKpSourceArea", 0.1);
-  private LoggedTunableNumber yKpSourceArea = group.build("yKpSourceArea", 0.1);
+  private LoggedTunableNumber rotationKp = group.build("rotationKp", 4.8);
 
   private LoggedTunableNumber allowedRotationalErrorDegrees =
       group.build("allowedRotationalErrorDegrees", 20);
@@ -52,15 +48,6 @@ public class DriveToGamepieceHelper {
     rotController.setTolerance(2);
   }
 
-  private boolean isInSourceArea(Translation2d pose) {
-    return (pose.getX() >= 14.26539134979248 || pose.getX() <= 2.154930830001831)
-        && pose.getY() <= 1.803399920463562;
-  }
-
-  private boolean isInBlueSourceArea(Translation2d pose) {
-    return pose.getX() >= 14.26539134979248 && pose.getY() <= 1.803399920463562;
-  }
-
   public ChassisSpeeds calculateChassisSpeeds(Translation2d targetGamepiece, Pose2d pose) {
     if (targetGamepiece == null) return null;
     double rotationalErrorDegrees;
@@ -68,29 +55,19 @@ public class DriveToGamepieceHelper {
     double yVel;
     double rotVel;
 
-    double rotVelCorrection = 0;
-
     if (GeometryUtil.getDist(pose.getTranslation(), targetGamepiece) > 0.2) {
       gamepieceDirection =
           new Rotation2d(
               targetGamepiece.getX() - pose.getX(), targetGamepiece.getY() - pose.getY());
     }
-    Rotation2d sourceAngle = Constants.zeroRotation2d;
 
-    rotationalErrorDegrees =
-        Math.abs(gamepieceDirection.getDegrees() - pose.getRotation().getDegrees());
+    rotationalErrorDegrees = gamepieceDirection.minus(pose.getRotation()).getDegrees();
+    while (rotationalErrorDegrees <= -180) rotationalErrorDegrees += 360;
+    while (rotationalErrorDegrees >= 180) rotationalErrorDegrees -= 360;
+    rotationalErrorDegrees = Math.abs(rotationalErrorDegrees);
+
     Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
 
-    // if (isInSourceArea(targetGamepiece)) {
-    //   sourceAngle =
-    //       new Rotation2d(Constants.isRedAlliance() ? -2.103952069121958 : -1.0417663596685425);
-
-    //   xVel = xKpSourceArea.get() * Math.cos(gamepieceDirection.getRadians());
-    //   yVel = yKpSourceArea.get() * Math.sin(gamepieceDirection.getRadians());
-
-    //   rotVel = rotController.calculate(pose.getRotation().getRadians(),
-    // sourceAngle.getRadians());
-    // } else {
     double allowedRotationalErrorDegreesValue = allowedRotationalErrorDegrees.get();
     if (advancedMode.get() == 0) {
       xVel =
@@ -102,12 +79,15 @@ public class DriveToGamepieceHelper {
               ? yController.calculate(pose.getY(), targetGamepiece.getY())
               : 0.0;
     } else {
-      xVel =
-          xController.calculate(pose.getX(), targetGamepiece.getX())
-              / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
-      yVel =
-          yController.calculate(pose.getY(), targetGamepiece.getY())
-              / Math.max(rotationalErrorDegrees / allowedRotationalErrorDegreesValue, 1.0);
+      xVel = xController.calculate(pose.getX(), targetGamepiece.getX());
+      yVel = yController.calculate(pose.getY(), targetGamepiece.getY());
+
+      if (rotationalErrorDegrees > allowedRotationalErrorDegreesValue) {
+        double errorScaling =
+            Math.min(allowedRotationalErrorDegreesValue / rotationalErrorDegrees, 1.0);
+        xVel *= errorScaling;
+        yVel *= errorScaling;
+      }
     }
 
     rotVel =

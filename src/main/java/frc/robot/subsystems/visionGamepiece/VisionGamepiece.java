@@ -205,11 +205,12 @@ public class VisionGamepiece extends SubsystemBase {
 
   private double groundGamepieceDistance(Rotation2d targetPitch) {
     return (Constants.VisionGamepieceConstants.GAMEPIECE_CAMERA_POSE.getZ()
-            - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS
-                    .minus(Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS)
-                    .in(Units.Meters))
-                / 2)
-        * Math.tan(targetPitch.getRadians());
+                - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS
+                        .minus(Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS)
+                        .in(Units.Meters))
+                    / 2)
+            * Math.tan(targetPitch.getRadians())
+        + 0.2;
   }
 
   private Pose2d groundGamepiecePose(double distanceMeters, Rotation2d targetYaw) {

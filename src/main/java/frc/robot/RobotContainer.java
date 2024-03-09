@@ -596,8 +596,7 @@ public class RobotContainer {
                 intake,
                 1000,
                 driverController.a(),
-                (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble,
-    rumble)));
+                (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble)));
 
     // driverController
     //     .leftBumper()

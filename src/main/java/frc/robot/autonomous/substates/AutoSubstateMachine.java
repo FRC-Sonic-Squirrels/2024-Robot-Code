@@ -108,21 +108,24 @@ public abstract class AutoSubstateMachine extends StateMachine {
           return setDone();
         });
 
-    choreoHelper =
-        new ChoreoHelper(
-            timeFromStart(),
-            drive.getPoseEstimatorPose(true),
-            this.trajToShoot,
-            config.getAutoTranslationPidController(),
-            config.getAutoTranslationPidController(),
-            config.getAutoThetaPidController());
+    if (trajToShoot != null)
+      choreoHelper =
+          new ChoreoHelper(
+              timeFromStart(),
+              drive.getPoseEstimatorPose(true),
+              this.trajToShoot,
+              config.getAutoTranslationPidController(),
+              config.getAutoTranslationPidController(),
+              config.getAutoThetaPidController());
 
     return stateWithName("followPathToShooter", this::followPathToShooting);
   }
 
   private StateHandler followPathToShooting() {
-    ChassisSpeeds chassisSpeeds =
-        choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
+    ChassisSpeeds chassisSpeeds = null;
+    if (trajToShoot != null)
+      chassisSpeeds =
+          choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
 
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);

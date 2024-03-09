@@ -3,14 +3,19 @@ package frc.robot.subsystems.visionGamepiece;
 import frc.robot.Constants;
 import java.util.List;
 import org.photonvision.PhotonCamera;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class VisionGamepieceIOReal implements VisionGamepieceIO {
 
-  PhotonCamera camera = new PhotonCamera(Constants.VisionGamepieceConstants.CAMERA_NAME);
+  final PhotonCamera camera;
 
-  public VisionGamepieceIOReal() {}
+  public VisionGamepieceIOReal() {
+    camera = new PhotonCamera(Constants.VisionGamepieceConstants.CAMERA_NAME);
+    camera.setDriverMode(false);
+    camera.setLED(VisionLEDMode.kOff);
+  }
 
   @Override
   public void updateInputs(VisionGamepieceIOInputs inputs) {
