@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.Constants;
+import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
@@ -45,8 +46,9 @@ public class ChoreoHelper {
     double closestDistance = Double.MAX_VALUE;
     double lastDistance = Double.MAX_VALUE;
 
-    for (ChoreoTrajectoryState state : getStates()) {
-      double stateDistance = GeometryUtil.getDist(initialPose, state.getPose());
+    for (ChoreoTrajectoryState state : getStates(traj)) {
+      ChoreoTrajectoryState stateComputed = traj.sample(state.timestamp, Constants.isRedAlliance());
+      double stateDistance = GeometryUtil.getDist(initialPose, stateComputed.getPose());
 
       if (stateDistance > lastDistance) {
         // Moving away, give up.
@@ -117,7 +119,28 @@ public class ChoreoHelper {
     return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
   }
 
-  private List<ChoreoTrajectoryState> getStates() {
+  public static ChoreoTrajectory rescale(ChoreoTrajectory traj, double speedScaling) {
+    if (speedScaling == 1.0) {
+      return traj;
+    }
+
+    var newStates = new ArrayList<ChoreoTrajectoryState>();
+    for (var state : getStates(traj)) {
+      newStates.add(
+          new ChoreoTrajectoryState(
+              state.timestamp * speedScaling,
+              state.x,
+              state.y,
+              state.heading,
+              state.velocityX / speedScaling,
+              state.velocityY / speedScaling,
+              state.angularVelocity / speedScaling));
+    }
+
+    return new ChoreoTrajectory(newStates);
+  }
+
+  private static List<ChoreoTrajectoryState> getStates(ChoreoTrajectory traj) {
     try {
       var f = traj.getClass().getDeclaredField("samples");
       f.setAccessible(true);
