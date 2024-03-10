@@ -228,9 +228,9 @@ public class AutosManager {
 
   private Auto middleAuto() {
     ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
-    paths.add(new Pair<String, String>("Smiddle-CG3", "CG3-CS2"));
-    paths.add(new Pair<String, String>("CS2-CG2", "CG2-CS1"));
-    paths.add(new Pair<String, String>("CS1-CG1", null));
+    paths.add(new Pair<String, String>("Smiddle-CG3", null));
+    paths.add(new Pair<String, String>("CG3-CG2", null));
+    paths.add(new Pair<String, String>("CG2-CG1", null));
     paths.add(new Pair<String, String>("CG1-G1", "G1-S1"));
     paths.add(new Pair<String, String>("S1-G2", "G2-S1"));
     AutoStateMachine state =
