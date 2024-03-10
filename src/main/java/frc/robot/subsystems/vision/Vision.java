@@ -214,14 +214,8 @@ public class Vision extends SubsystemBase {
     PhotonPipelineResult cameraResult;
     double currentResultTimeStampCTRETime;
 
-    Pose3d newCalculatedRobotPose;
-
-    double xyStandardDeviation;
-    double thetaStandardDeviation;
     double tagAmbiguity;
     double averageDistanceFromTags;
-
-    boolean multiTagFailed = false;
 
     synchronized (visionModule.visionIOInputs) {
       cameraResult = visionModule.visionIOInputs.lastResult;
@@ -283,11 +277,9 @@ public class Vision extends SubsystemBase {
 
     // used to log if the multi tag failed
     EstimatedRobotPose photonPoseEstimatorResult = photonPoseEstimatorOptionalResult.get();
-    if (photonPoseEstimatorResult.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-      multiTagFailed = true;
-    }
-
-    newCalculatedRobotPose = photonPoseEstimatorResult.estimatedPose;
+    var newCalculatedRobotPose = photonPoseEstimatorResult.estimatedPose;
+    var multiTagFailed =
+        (photonPoseEstimatorResult.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR);
 
     if (GeometryUtil.isPoseOutsideField(newCalculatedRobotPose.toPose2d())) {
       return VisionResultLoggedFields.unsuccessfulResult(
@@ -363,15 +355,15 @@ public class Vision extends SubsystemBase {
           VisionResultStatus.TOO_FAR_FROM_EXISTING_ESTIMATE);
     }
 
-    xyStandardDeviation =
-        (xyStdDevCoefficient.get() * Math.pow(averageDistanceFromTags, 2))
-            / ((double) numTargetsSeen);
-    thetaStandardDeviation =
-        (thetaStdDevCoefficient.get() * Math.pow(averageDistanceFromTags, 2))
-            / ((double) numTargetsSeen);
+    var averageDistanceFromTagsSquared = averageDistanceFromTags * averageDistanceFromTags;
+    var xyStandardDeviation =
+        xyStdDevCoefficient.get() * averageDistanceFromTagsSquared / numTargetsSeen;
+    var thetaStandardDeviation =
+        thetaStdDevCoefficient.get() * averageDistanceFromTagsSquared / numTargetsSeen;
 
     var timestampedVisionUpdate =
         new PoseEstimator.TimestampedVisionUpdate(
+            cleanTargets,
             currentResultTimeStampCTRETime,
             newCalculatedRobotPose.toPose2d(),
             VecBuilder.fill(xyStandardDeviation, xyStandardDeviation, thetaStandardDeviation));

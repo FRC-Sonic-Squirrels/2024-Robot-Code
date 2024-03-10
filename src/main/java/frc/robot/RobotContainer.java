@@ -19,7 +19,6 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -98,7 +97,6 @@ import frc.robot.visualization.ClimbVisualization;
 import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -176,33 +174,7 @@ public class RobotContainer {
     logRobotMode.info(mode);
 
     var config = robotType.config.get();
-    AprilTagFieldLayout aprilTagLayout;
-
-    try {
-      aprilTagLayout = config.getAprilTagFieldLayout();
-    } catch (Exception e) {
-      // FIXME: throw an error.
-      aprilTagLayout = new AprilTagFieldLayout(new ArrayList<>(), 0.0, 0.0);
-    }
-
-    // BUGBUG: practice field usable tags
-    ArrayList<AprilTag> goodTags = new ArrayList<>();
-    for (var tag : aprilTagLayout.getTags()) {
-      switch (tag.ID) {
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          goodTags.add(tag);
-          break;
-      }
-    }
-
-    aprilTagLayout =
-        new AprilTagFieldLayout(
-            goodTags, aprilTagLayout.getFieldLength(), aprilTagLayout.getFieldWidth());
+    AprilTagFieldLayout aprilTagLayout = config.getAprilTagFieldLayout();
 
     if (mode == Mode.REPLAY) {
       drivetrain =
@@ -226,7 +198,8 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
       visionGamepiece =
-          new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+          new VisionGamepiece(
+              new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
     } else { // REAL and SIM robots HERE
       switch (robotType) {
@@ -249,7 +222,8 @@ public class RobotContainer {
                     config.getVisionModuleObjects());
 
             visionGamepiece =
-                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+                new VisionGamepiece(
+                    new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
 
           } else {
             VisionModuleConfiguration[] visionModules = {
@@ -284,7 +258,8 @@ public class RobotContainer {
                     visionModules);
 
             visionGamepiece =
-                new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+                new VisionGamepiece(
+                    new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
           }
 
           arm = new Arm(new ArmIOSim());
@@ -315,7 +290,8 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(
+                  new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
           break;
 
         case ROBOT_2024_MAESTRO:
@@ -362,7 +338,8 @@ public class RobotContainer {
                   config.getVisionModuleObjects());
 
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(
+                  new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
 
           // intake = new Intake(new IntakeIO() {});
           elevator = new Elevator(new ElevatorIOReal());
@@ -393,7 +370,8 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
           visionGamepiece =
-              new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
+              new VisionGamepiece(
+                  new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
           break;
       }
     }

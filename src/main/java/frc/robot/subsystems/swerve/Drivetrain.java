@@ -31,6 +31,7 @@ import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
+import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -108,6 +109,9 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d rawOdometryPose = new Pose2d();
 
   private final PoseEstimator poseEstimator;
+  private final PoseEstimator poseEstimatorStageBlue;
+  private final PoseEstimator poseEstimatorStageRed;
+  private final PoseEstimator poseEstimatorGlobal;
 
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
@@ -131,8 +135,13 @@ public class Drivetrain extends SubsystemBase {
 
     kinematics = config.getSwerveDriveKinematics();
 
-    // FIXME: values copied from 6328, learn how to calculate these values
-    poseEstimator = new PoseEstimator(0.4, 0.4, 0.3);
+    int[] tagsSpeakersAndAmps = new int[] {3, 4, 5, 6, 7, 8};
+    int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16};
+
+    poseEstimator = new PoseEstimator(0.4, 0.4, 0.3, tagsSpeakersAndAmps);
+    poseEstimatorStageBlue = new PoseEstimator(0.4, 0.4, 0.3, new int[] {14, 15, 16});
+    poseEstimatorStageRed = new PoseEstimator(0.4, 0.4, 0.3, new int[] {11, 12, 13});
+    poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
 
     // Configure AutoBuilder for PathPlanner
     // FIXME: pass in custom PID constants? Issue for this use case has been created:
@@ -282,6 +291,9 @@ public class Drivetrain extends SubsystemBase {
             rawOdometryPose = rawOdometryPose.exp(twist);
 
             poseEstimator.addDriveData(timestamp, twist);
+            poseEstimatorGlobal.addDriveData(timestamp, twist);
+            poseEstimatorStageRed.addDriveData(timestamp, twist);
+            poseEstimatorStageBlue.addDriveData(timestamp, twist);
           }
         }
       } catch (Exception e) {
@@ -440,6 +452,13 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_vision.start()) {
         poseEstimator.addVisionData(visionData);
+        poseEstimatorGlobal.addVisionData(visionData);
+
+        if (Constants.isRedAlliance()) {
+          poseEstimatorStageRed.addVisionData(visionData);
+        } else {
+          poseEstimatorStageBlue.addVisionData(visionData);
+        }
       }
     }
   }
@@ -458,6 +477,34 @@ public class Drivetrain extends SubsystemBase {
       try (var ignored2 = timing_pose.start()) {
         return poseEstimator.getLatestPose();
       }
+    }
+  }
+
+  public Pose2d getPoseEstimatorPoseAtTimestamp(double timestamp) {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      return poseEstimator.getPoseAtTime(timestamp);
+    }
+  }
+
+  public Pose2d getPoseEstimatorPoseStageRed() {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      return poseEstimatorStageRed.getLatestPose();
+    }
+  }
+
+  public Pose2d getPoseEstimatorPoseStageBlue() {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      return poseEstimatorStageBlue.getLatestPose();
+    }
+  }
+
+  public Pose2d getPoseEstimatorPoseAllTags() {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      return poseEstimatorGlobal.getLatestPose();
     }
   }
 

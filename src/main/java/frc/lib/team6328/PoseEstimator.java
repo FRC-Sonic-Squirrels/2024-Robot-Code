@@ -15,6 +15,7 @@ import edu.wpi.first.math.numbers.N3;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class PoseEstimator {
   private static final double historyLengthSecs = 0.3;
@@ -27,10 +28,17 @@ public class PoseEstimator {
   private final PoseUpdate headPoseUpdate = new PoseUpdate(-Double.MAX_VALUE, null);
   private final PoseUpdate tailPoseUpdate = new PoseUpdate(Double.MAX_VALUE, null);
   private final double[] q;
+  private final int tagsMask;
   private double visionCutoff;
 
-  public PoseEstimator(double x, double y, double theta) {
+  public PoseEstimator(double x, double y, double theta, int[] validTags) {
     q = new double[] {x * x, y * y, theta * theta};
+
+    var tagsMask = 0;
+    for (int tag : validTags) {
+      tagsMask |= 1 << tag;
+    }
+    this.tagsMask = tagsMask;
 
     resetPose(new Pose2d(), Double.NaN);
   }
@@ -41,6 +49,28 @@ public class PoseEstimator {
     // We always have two elements in the list.
     // The tail is always in the future, so the previous element is the latest real pose.
     return this.tailPoseUpdate.previousUpdate.getFinalPose();
+  }
+
+  public Pose2d getPoseAtTime(double timestamp) {
+    if (Double.isNaN(timestamp)) {
+      return getLatestPose();
+    }
+
+    var poseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
+    if (poseUpdateAfter.twist == null)
+      // This means that we have no drive data, ignore vision.
+      return new Pose2d();
+
+    var poseUpdateBefore = poseUpdateAfter.previousUpdate;
+
+    // Create partial twists
+    double timestampGap = poseUpdateAfter.timestamp - poseUpdateBefore.timestamp;
+
+    double timestampMid = (timestamp - poseUpdateBefore.timestamp) / timestampGap;
+    var twist = GeomUtil.multiplyTwist(poseUpdateAfter.twist, timestampMid);
+
+    // Apply drive twist
+    return poseUpdateBefore.getFinalPose().exp(twist);
   }
 
   /** Resets the odometry to a known pose. */
@@ -109,6 +139,15 @@ public class PoseEstimator {
     for (var timestampedVisionUpdate : visionData) {
       var timestamp = timestampedVisionUpdate.timestamp;
       if (Double.isFinite(visionCutoff) && timestamp < visionCutoff) {
+        continue;
+      }
+
+      var tagsMask = 0;
+      for (var tag : timestampedVisionUpdate.tags) {
+        tagsMask |= 1 << tag.getFiducialId();
+      }
+
+      if ((this.tagsMask & tagsMask) != tagsMask) {
         continue;
       }
 
@@ -238,5 +277,6 @@ public class PoseEstimator {
   }
 
   /** Represents a single vision pose with a timestamp and associated standard deviations. */
-  public record TimestampedVisionUpdate(double timestamp, Pose2d pose, Matrix<N3, N1> stdDevs) {}
+  public record TimestampedVisionUpdate(
+      List<PhotonTrackedTarget> tags, double timestamp, Pose2d pose, Matrix<N3, N1> stdDevs) {}
 }

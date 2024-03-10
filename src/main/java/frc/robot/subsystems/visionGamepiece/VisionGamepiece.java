@@ -15,7 +15,7 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.littletonrobotics.junction.Logger;
 
 public class VisionGamepiece extends SubsystemBase {
@@ -46,11 +46,11 @@ public class VisionGamepiece extends SubsystemBase {
   private final VisionGamepieceIO io;
   private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
 
-  private final Supplier<Pose2d> robotPoseSupplier;
+  private final Function<Double, Pose2d> robotPoseSupplier;
   private final ArrayList<ProcessedGamepieceData> seenGamePieces = new ArrayList<>();
 
   /** Creates a new VisionGamepiece. */
-  public VisionGamepiece(VisionGamepieceIO io, Supplier<Pose2d> robotPose) {
+  public VisionGamepiece(VisionGamepieceIO io, Function<Double, Pose2d> robotPose) {
     this.io = io;
     this.robotPoseSupplier = robotPose;
   }
@@ -161,7 +161,7 @@ public class VisionGamepiece extends SubsystemBase {
 
       var closestGamepiece = getClosestGamepiece();
       if (closestGamepiece != null) {
-        Pose2d robotPose = robotPoseSupplier.get();
+        Pose2d robotPose = robotPoseSupplier.apply(closestGamepiece.timestamp_RIOFPGA_capture);
         Pose3d pose =
             new Pose3d(
                 closestGamepiece.getRobotCentricPose(robotPose).getX(),
@@ -201,7 +201,7 @@ public class VisionGamepiece extends SubsystemBase {
   public ProcessedGamepieceData getClosestGamepiece() {
     ProcessedGamepieceData closestGamepiece = null;
     double closestDistance = Double.MAX_VALUE;
-    var robotPose = robotPoseSupplier.get();
+    var robotPose = robotPoseSupplier.apply(Double.NaN);
 
     for (var gamepiece : seenGamePieces) {
       var distance = gamepiece.getDistance(robotPose).magnitude();
@@ -264,7 +264,7 @@ public class VisionGamepiece extends SubsystemBase {
         groundGamepieceDistance(
             targetPitch, Rotation2d.fromDegrees(yaw), Rotation2d.fromDegrees(pitch));
     Pose2d pose = groundGamepiecePose(distance, targetYaw);
-    Pose2d robotPose = robotPoseSupplier.get();
+    Pose2d robotPose = robotPoseSupplier.apply(timestamp);
 
     return new ProcessedGamepieceData(
         targetYaw,
@@ -277,7 +277,7 @@ public class VisionGamepiece extends SubsystemBase {
 
   private void logGamepieceData(
       double yam, double pitch, ProcessedGamepieceData processedGamepieceData, int index) {
-    Pose2d robotPose = robotPoseSupplier.get();
+    Pose2d robotPose = robotPoseSupplier.apply(Double.NaN);
     var baseGroup = logGroup.subgroup("Gamepiece" + index);
     double distance = processedGamepieceData.getDistance(robotPose).in(Units.Inches);
 
