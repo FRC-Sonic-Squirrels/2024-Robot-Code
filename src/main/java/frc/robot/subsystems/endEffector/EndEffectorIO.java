@@ -19,7 +19,12 @@ public interface EndEffectorIO {
 
   public default void setVoltage(double volts) {}
 
+  public default void setVelocity(double revPerMin) {}
+
   public default void markStartOfNoteIntaking() {}
 
   public default void markStartOfNoteDropping() {}
+
+  public default void setClosedLoopConstants(
+      double kP, double kV, double kS, double maxProfiledAcceleration) {}
 }

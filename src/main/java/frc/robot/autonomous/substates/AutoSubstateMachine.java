@@ -10,7 +10,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -44,9 +46,13 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected IntakeGamepiece intakeCommand;
   protected Translation2d gamepieceTranslation;
   private Translation2d lastSeenGamepiece;
-
+  private Trigger pathEnded;
+  
   private LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
+
+  private LoggedTunableNumber useVisionForDriving =
+    new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -72,10 +78,11 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
     this.gamepieceTranslation = gamepieceTranslation;
+    pathEnded = new Trigger(pathEnded);
   }
 
   protected StateHandler visionPickupGamepiece() {
-    if (closestGamepiece.get() != null)
+    if (closestGamepiece.get() != null && useVisionForGamepiece())
       lastSeenGamepiece = closestGamepiece.get().globalPose.getTranslation();
 
     ChassisSpeeds speeds =
@@ -137,6 +144,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   protected boolean useVisionForGamepiece() {
+    if(useVisionForDriving.get() == 0.0){
+      return false;
+    }
     if (closestGamepiece.get() == null) {
       return false;
     }
@@ -146,6 +156,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
                 .get()
                 .getDistance(new Pose2d(gamepieceTranslation, new Rotation2d()))
                 .in(Units.Meters)
-            <= Constants.FieldConstants.Gamepieces.NOTE_TOLERANCE.in(Units.Meters);
+            <= 0.5;
   }
 }

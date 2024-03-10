@@ -22,9 +22,17 @@ public class EndEffector extends SubsystemBase {
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       group.build("distanceToTriggerNote", 11.0);
 
+  private static final LoggedTunableNumber kS = group.build("kS");
+  private static final LoggedTunableNumber kP = group.build("kP");
+  private static final LoggedTunableNumber kV = group.build("kV");
+  private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
+          group.build("ClosedLoopMaxAccelerationConstraint");
+
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
+
+    io.setClosedLoopConstants(kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -32,6 +40,17 @@ public class EndEffector extends SubsystemBase {
     try (var ignored = new ExecutionTiming("EndEffector")) {
       io.updateInputs(inputs);
       Logger.processInputs("EndEffector", inputs);
+      var hc = hashCode();
+      if (kS.hasChanged(hc)
+          || kP.hasChanged(hc)
+          || kV.hasChanged(hc)
+          || ClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setClosedLoopConstants(
+            kP.get(),
+            kV.get(),
+            kS.get(),
+            ClosedLoopMaxAccelerationConstraint.get());
+      }
     }
   }
 
@@ -77,5 +96,9 @@ public class EndEffector extends SubsystemBase {
 
   public Command stopCmd() {
     return Commands.runOnce(() -> setPercentOut(0.0), this);
+  }
+
+  public void setVelocity(double revPerMin){
+    io.setVelocity(revPerMin);
   }
 }

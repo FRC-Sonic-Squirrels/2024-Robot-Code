@@ -39,6 +39,11 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
       group.build("launcherClosedLoopMaxAccelerationConstraint");
 
+      private static final LoggedTunableNumber kickerkP = group.build("Kicker/kP");
+      private static final LoggedTunableNumber kickerkV = group.build("Kicker/kV");
+      private static final LoggedTunableNumber kickerClosedLoopMaxAccelerationConstraint =
+              group.build("Kicker/ClosedLoopMaxAccelerationConstraint");
+
   private static final LoggedTunableNumber pivotToleranceDegrees =
       group.build("pivotToleranceDegrees", 0.5);
   private static final LoggedTunableNumber launcherToleranceRPM =
@@ -58,6 +63,10 @@ public class Shooter extends SubsystemBase {
       launcherkP.initDefault(0.2);
       launcherkV.initDefault(0.072);
       launcherClosedLoopMaxAccelerationConstraint.initDefault(300.0);
+
+      kickerkP.initDefault(0.0);
+      kickerkV.initDefault(0.0);
+      kickerClosedLoopMaxAccelerationConstraint.initDefault(0.0);
     } else if (Constants.RobotMode.isSimBot()) {
       pivotkP.initDefault(15.0);
       pivotkD.initDefault(0.0);
@@ -69,6 +78,10 @@ public class Shooter extends SubsystemBase {
       launcherkP.initDefault(0.5);
       launcherkV.initDefault(0.13);
       launcherClosedLoopMaxAccelerationConstraint.initDefault(10.0);
+
+      kickerkP.initDefault(0.0);
+      kickerkV.initDefault(0.0);
+      kickerClosedLoopMaxAccelerationConstraint.initDefault(0.0);
     }
   }
 
@@ -105,6 +118,8 @@ public class Shooter extends SubsystemBase {
         pivotkG.get(),
         pivotClosedLoopMaxVelocityConstraint.get(),
         pivotClosedLoopMaxAccelerationConstraint.get());
+    
+    io.setKickerClosedLoopConstants(kickerkP.get(), kickerkV.get(), 0.0, kickerClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -162,6 +177,16 @@ public class Shooter extends SubsystemBase {
             pivotkG.get(),
             pivotClosedLoopMaxVelocityConstraint.get(),
             pivotClosedLoopMaxAccelerationConstraint.get());
+      }
+
+      if (kickerkP.hasChanged(hc)
+          || kickerkV.hasChanged(hc)
+          || kickerClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setKickerClosedLoopConstants(
+            kickerkP.get(),
+            kickerkV.get(),
+            0.0,
+            kickerClosedLoopMaxAccelerationConstraint.get());
       }
     }
   }
@@ -264,5 +289,9 @@ public class Shooter extends SubsystemBase {
 
   public void setNeutralMode(NeutralModeValue value) {
     io.setNeutralMode(value);
+  }
+
+  public void setKickerVelocity(double revPerMin){
+    io.setKickerVelocity(revPerMin);
   }
 }

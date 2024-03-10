@@ -6,6 +6,8 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,9 +15,19 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
+  private static final TunableNumberGroup group = new TunableNumberGroup("Intake");
+
+  private static final LoggedTunableNumber kS = group.build("kS");
+  private static final LoggedTunableNumber kP = group.build("kP");
+  private static final LoggedTunableNumber kV = group.build("kV");
+  private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
+          group.build("ClosedLoopMaxAccelerationConstraint");
+
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
+
+    io.setClosedLoopConstants(kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -24,6 +36,18 @@ public class Intake extends SubsystemBase {
       // This method will be called once per scheduler run
       io.updateInputs(inputs);
       Logger.processInputs("Intake", inputs);
+
+      var hc = hashCode();
+      if (kS.hasChanged(hc)
+          || kP.hasChanged(hc)
+          || kV.hasChanged(hc)
+          || ClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
+        io.setClosedLoopConstants(
+            kP.get(),
+            kV.get(),
+            kS.get(),
+            ClosedLoopMaxAccelerationConstraint.get());
+      }
     }
   }
 
@@ -41,5 +65,9 @@ public class Intake extends SubsystemBase {
 
   public boolean getBeamBreak() {
     return inputs.beamBreak;
+  }
+
+  public void setVelocity(double revPerMin) {
+    io.setVelocity(revPerMin);
   }
 }

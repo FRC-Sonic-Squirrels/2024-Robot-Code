@@ -7,6 +7,7 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -285,6 +286,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check robot theta correct
     // check external confirmation active
     // check are we in valid shooting position
+    // check if we are below max vel
+
+    double maxVel = 1.0;
+    boolean belowMaxSpeed = drivetrainWrapper.getFieldRelativeVelocities().getTranslation().getDistance(new Translation2d()) <= maxVel;
+
+    double maxRotVel = 0.03;
+    boolean belowMaxRotVel = drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVel;
+
     boolean pivotAtAngle;
     var launcherAtRpm = shooter.isAtTargetRPM();
     if (solverResult != null) {
@@ -323,7 +332,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     log("shootingConfimation/forceShoot", forceShoot);
     log("shootingConfimation/driverConfirmation", externalConfirmation);
     log("shootingConfimation/atThetaTarget", atThetaTarget);
-    if ((launcherAtRpm && pivotAtAngle && validShootingPosition() && atThetaTarget) || forceShoot) {
+    log("shootingConfimation/belowMaxSpeed", belowMaxSpeed);
+    log("shootingConfimation/belowMaxRotVel", belowMaxRotVel);
+
+    if ((launcherAtRpm && pivotAtAngle && validShootingPosition() && atThetaTarget && belowMaxSpeed && belowMaxRotVel) || forceShoot) {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
         startOfShooting = Timer.getFPGATimestamp();
@@ -415,11 +427,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return false;
     }
 
-    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS
-    // var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
-    // if (solverResult == null || solverResult.xyDistance() > maxDistance) {
-    //   return false;
-    // }
+    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS IN TELEOP
+    var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
+    if (solverResult == null || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
+      return false;
+    }
 
     return true;
   }

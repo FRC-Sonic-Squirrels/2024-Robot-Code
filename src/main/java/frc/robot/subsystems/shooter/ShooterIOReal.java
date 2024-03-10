@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -64,6 +65,8 @@ public class ShooterIOReal implements ShooterIO {
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
+  private final VelocityVoltage kickerClosedLoop = new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+
   public ShooterIOReal() {
     // --- launcher config ---
     TalonFXConfiguration launcherConfig = new TalonFXConfiguration();
@@ -116,6 +119,8 @@ public class ShooterIOReal implements ShooterIO {
     kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    kickerConfig.Feedback.SensorToMechanismRatio = 0.75;
 
     kicker.getConfigurator().apply(kickerConfig);
 
@@ -301,5 +306,30 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setNeutralMode(NeutralModeValue value) {
     pivot.setNeutralMode(value);
+  }
+
+  @Override
+  public void setKickerClosedLoopConstants(double kP, double kV, double kS, double maxProfiledAcceleration) {
+    Slot0Configs pidConfig = new Slot0Configs();
+    MotionMagicConfigs mmConfig = new MotionMagicConfigs();
+
+    var config = kicker.getConfigurator();
+
+    config.refresh(pidConfig);
+    config.refresh(mmConfig);
+
+    pidConfig.kP = kP;
+    pidConfig.kV = kV;
+    pidConfig.kS = kS;
+
+    mmConfig.MotionMagicAcceleration = maxProfiledAcceleration;
+
+    config.apply(pidConfig);
+    config.apply(mmConfig);
+  }
+
+  @Override
+  public void setKickerVelocity(double revPerMin) {
+      kicker.setControl(kickerClosedLoop.withVelocity(revPerMin / 60.0));
   }
 }

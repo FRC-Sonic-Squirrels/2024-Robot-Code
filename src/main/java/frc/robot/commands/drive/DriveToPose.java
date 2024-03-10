@@ -61,13 +61,13 @@ public class DriveToPose extends Command {
   private static final LoggedTunableNumber ffMaxRadius = group.build("FFMinRadius");
 
   static {
-    driveKp.initDefault(2.0);
+    driveKp.initDefault(3.0);
     driveKd.initDefault(0.0);
     thetaKp.initDefault(5.0);
     thetaKd.initDefault(0.0);
-    driveMaxVelocity.initDefault(Units.Inches.of(150.0).in(Units.Meters));
+    driveMaxVelocity.initDefault(Units.Inches.of(177.0).in(Units.Meters));
     driveMaxVelocitySlow.initDefault(Units.Inches.of(50.0).in(Units.Meters));
-    driveMaxAcceleration.initDefault(Units.Inches.of(95.0).in(Units.Meters));
+    driveMaxAcceleration.initDefault(Units.Inches.of(118.0).in(Units.Meters));
     thetaMaxVelocity.initDefault(Math.toRadians(360.0));
     thetaMaxVelocitySlow.initDefault(Math.toRadians(90.0));
     thetaMaxAcceleration.initDefault(Math.toRadians(720.0));
@@ -229,7 +229,7 @@ public class DriveToPose extends Command {
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
   public boolean withinTolerance(double driveTolerance, Rotation2d thetaTolerance) {
     return
-    // isScheduled() &&
+    isScheduled() &&
     Math.abs(driveErrorAbs) < driveTolerance
         && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
   }
