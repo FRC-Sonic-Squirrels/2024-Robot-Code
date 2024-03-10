@@ -6,7 +6,6 @@ package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.StateMachine;
@@ -22,6 +21,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
@@ -35,6 +35,7 @@ public class AutoStateMachine extends StateMachine {
   private final RobotConfig config;
   private final ChoreoTrajectory[] intakingTrajs;
   private final ChoreoTrajectory[] shootingTrajs;
+  private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
   private int currentSubState;
   private double initShootDeadline;
@@ -73,7 +74,7 @@ public class AutoStateMachine extends StateMachine {
       Arm arm,
       Intake intake,
       VisionGamepiece visionGamepiece,
-      ArrayList<Pair<String, String>> subStateTrajNames,
+      List<PathDescriptor> subStateTrajNames,
       double initShootDeadline,
       RobotConfig config) {
     this(
@@ -99,7 +100,7 @@ public class AutoStateMachine extends StateMachine {
       Arm arm,
       Intake intake,
       VisionGamepiece visionGamepiece,
-      ArrayList<Pair<String, String>> subStateTrajNames,
+      List<PathDescriptor> subStateTrajNames,
       double initShootDeadline,
       RobotConfig config,
       StateMachine[] overrideStateMachines) {
@@ -123,11 +124,13 @@ public class AutoStateMachine extends StateMachine {
 
     intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
     shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+    useVision = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
-      var pair = subStateTrajNames.get(i);
-      String intakingTraj = pair.getFirst();
-      String shootingTraj = pair.getSecond();
+      var path = subStateTrajNames.get(i);
+      String intakingTraj = path.intakingTraj();
+      String shootingTraj = path.shootingTraj();
+      useVision[i] = path.useVision();
       intakingTrajs[i] = intakingTraj != null ? Choreo.getTrajectory(intakingTraj) : null;
       shootingTrajs[i] = shootingTraj != null ? Choreo.getTrajectory(shootingTraj) : null;
     }
@@ -165,6 +168,7 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     elevator,
                     arm,
+                    useVision[currentSubState],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -183,6 +187,7 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     elevator,
                     arm,
+                    useVision[currentSubState],
                     AllianceFlipUtil.flipPoseForAlliance(
                             intakingTrajs[currentSubState].getFinalPose())
                         .getTranslation(),
@@ -203,10 +208,5 @@ public class AutoStateMachine extends StateMachine {
     }
 
     return stateWithName(String.format("State %d", currentSubState), nextState);
-  }
-
-  private Pair<String, String> seperatePoints(String pathName) {
-    String[] splitNames = pathName.split("-");
-    return new Pair<String, String>(splitNames[0], splitNames[1]);
   }
 }

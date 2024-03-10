@@ -28,6 +28,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       RobotConfig config,
       Elevator elevator,
       Arm arm,
+      boolean useVision,
       ChoreoTrajectory trajToGamepiece,
       ChoreoTrajectory trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
@@ -40,6 +41,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
         config,
         elevator,
         arm,
+        useVision,
         trajToShoot,
         closestGamepiece,
         gamepieceTranslation);

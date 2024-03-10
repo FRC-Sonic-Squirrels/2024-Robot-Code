@@ -37,6 +37,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final RobotConfig config;
   protected final ChoreoTrajectory trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
+  private final boolean useVision;
   protected ChoreoHelper choreoHelper;
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
@@ -60,6 +61,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
       RobotConfig config,
       Elevator elevator,
       Arm arm,
+      boolean useVision,
       ChoreoTrajectory trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
@@ -71,6 +73,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.intake = intake;
     this.elevator = elevator;
     this.arm = arm;
+    this.useVision = useVision;
     this.config = config;
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
@@ -144,7 +147,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   protected boolean useVisionForGamepiece() {
-    if (useVisionForDriving.get() == 0.0) {
+    if (!useVision) {
       return false;
     }
 

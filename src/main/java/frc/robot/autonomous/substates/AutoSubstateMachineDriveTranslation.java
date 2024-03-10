@@ -27,6 +27,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       RobotConfig config,
       Elevator elevator,
       Arm arm,
+      boolean useVision,
       Translation2d gamepieceTranslation,
       ChoreoTrajectory trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
@@ -38,6 +39,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         config,
         elevator,
         arm,
+        useVision,
         trajToShoot,
         closestGamepiece,
         gamepieceTranslation);

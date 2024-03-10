@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -183,11 +182,11 @@ public class AutosManager {
   }
 
   private Auto sourceAuto() {
-    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
-    paths.add(new Pair<String, String>("Ssource-G5", "G5-S3"));
-    paths.add(new Pair<String, String>("S3-G4", "G4-S2"));
-    paths.add(new Pair<String, String>("S2-G3", "G3-S1"));
-    paths.add(new Pair<String, String>("S1-G2", "G2-S1"));
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true));
+    paths.add(new PathDescriptor("S3-G4", "G4-S2", true));
+    paths.add(new PathDescriptor("S2-G3", "G3-S1", true));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -205,11 +204,11 @@ public class AutosManager {
   }
 
   private Auto ampAuto() {
-    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
-    paths.add(new Pair<String, String>("Samp-CG1", null));
-    paths.add(new Pair<String, String>("CG1-G1", "G1-S1"));
-    paths.add(new Pair<String, String>("S1-G2", "G2-S2"));
-    paths.add(new Pair<String, String>("S2-G3", "G3-S2"));
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp-CG1", null, false));
+    paths.add(new PathDescriptor("CG1-G1", "G1-S1", true));
+    paths.add(new PathDescriptor("S1-G2", "G2-S2", false));
+    paths.add(new PathDescriptor("S2-G3", "G3-S2", false));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -227,12 +226,12 @@ public class AutosManager {
   }
 
   private Auto middleAuto() {
-    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
-    paths.add(new Pair<String, String>("Smiddle-CG3", null));
-    paths.add(new Pair<String, String>("CG3-CG2", null));
-    paths.add(new Pair<String, String>("CG2-CG1", null));
-    paths.add(new Pair<String, String>("CG1-G1", "G1-S1"));
-    paths.add(new Pair<String, String>("S1-G2", "G2-S1"));
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Smiddle-CG3", null, false));
+    paths.add(new PathDescriptor("CG3-CG2", null, false));
+    paths.add(new PathDescriptor("CG2-CG1", null, false));
+    paths.add(new PathDescriptor("CG1-G1", "G1-S1", true));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
@@ -250,9 +249,9 @@ public class AutosManager {
   }
 
   private Auto portableAuto() {
-    ArrayList<Pair<String, String>> paths = new ArrayList<Pair<String, String>>();
-    paths.add(new Pair<String, String>("TestPortable1", "TestPortable2"));
-    paths.add(new Pair<String, String>("TestPortable3", "TestPortable4"));
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("TestPortable1", "TestPortable2", true));
+    paths.add(new PathDescriptor("TestPortable3", "TestPortable4", true));
     AutoStateMachine state =
         new AutoStateMachine(
             drivetrain,
