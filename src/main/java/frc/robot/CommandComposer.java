@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -92,7 +93,7 @@ public class CommandComposer {
       Intake intake,
       Shooter shooter,
       boolean doDrive,
-      Command confirmation) {
+      Trigger confirmation) {
     /*
      * Step 1: drive to amp
      * at the same time, if we are within a distance move mech into position
@@ -118,9 +119,8 @@ public class CommandComposer {
                 <= distToElevateMech.in(Units.Meters);
 
     Command scoreAmp =
-        new ConditionalCommand(driveToAmp.until(driveToAmp::atGoal), Commands.none(), () -> doDrive)
+        new ConditionalCommand(driveToAmp.until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10)) || confirmation.getAsBoolean()), Commands.none(), () -> doDrive).asProxy()
             .alongWith(MechanismActions.ampPosition(elevator, arm))
-            .andThen(confirmation)
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
