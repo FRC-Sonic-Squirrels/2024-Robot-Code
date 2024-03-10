@@ -289,10 +289,16 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check if we are below max vel
 
     double maxVel = 1.0;
-    boolean belowMaxSpeed = drivetrainWrapper.getFieldRelativeVelocities().getTranslation().getDistance(new Translation2d()) <= maxVel;
+    boolean belowMaxSpeed =
+        drivetrainWrapper
+                .getFieldRelativeVelocities()
+                .getTranslation()
+                .getDistance(new Translation2d())
+            <= maxVel;
 
     double maxRotVel = 0.03;
-    boolean belowMaxRotVel = drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVel;
+    boolean belowMaxRotVel =
+        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVel;
 
     boolean pivotAtAngle;
     var launcherAtRpm = shooter.isAtTargetRPM();
@@ -335,7 +341,13 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     log("shootingConfimation/belowMaxSpeed", belowMaxSpeed);
     log("shootingConfimation/belowMaxRotVel", belowMaxRotVel);
 
-    if ((launcherAtRpm && pivotAtAngle && validShootingPosition() && atThetaTarget && belowMaxSpeed && belowMaxRotVel) || forceShoot) {
+    if ((launcherAtRpm
+            && pivotAtAngle
+            && validShootingPosition()
+            && atThetaTarget
+            && belowMaxSpeed
+            && belowMaxRotVel)
+        || forceShoot) {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
         startOfShooting = Timer.getFPGATimestamp();
@@ -427,9 +439,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return false;
     }
 
-    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS IN TELEOP
+    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS IN
+    // TELEOP
     var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
-    if (solverResult == null || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
+    if (solverResult == null
+        || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
       return false;
     }
 

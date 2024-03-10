@@ -2,6 +2,7 @@ package frc.robot.subsystems.visionGamepiece;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -49,6 +50,10 @@ public class ProcessedGamepieceData {
 
   public Measure<Distance> getDistance(Pose2d pose) {
     return Units.Meters.of(GeometryUtil.getDist(globalPose, pose));
+  }
+
+  public Measure<Distance> getDistance(Translation2d translation2d) {
+    return Units.Meters.of(GeometryUtil.getDist(globalPose.getTranslation(), translation2d));
   }
 
   public boolean sameGamepiece(ProcessedGamepieceData gm) {

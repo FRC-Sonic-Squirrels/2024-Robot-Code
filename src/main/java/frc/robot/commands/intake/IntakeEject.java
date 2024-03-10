@@ -13,11 +13,12 @@ public class IntakeEject extends Command {
   private final Shooter shooter;
   private final EndEffector endEffector;
   private final Intake intake;
+
   /** Creates a new IntakeEject. */
   public IntakeEject(Shooter shooter, EndEffector endEffector, Intake intake) {
     this.shooter = shooter;
     this.endEffector = endEffector;
-    this.intake =intake;
+    this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooter, endEffector, intake);
   }

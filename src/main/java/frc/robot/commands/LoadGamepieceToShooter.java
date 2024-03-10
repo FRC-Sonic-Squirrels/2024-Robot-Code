@@ -13,11 +13,13 @@ import frc.robot.subsystems.shooter.Shooter;
 public class LoadGamepieceToShooter extends Command {
   /** Creates a new LoadGamepieceToShooter. */
   private final Shooter shooter;
+
   private final EndEffector endEffector;
   private final Intake intake;
+
   public LoadGamepieceToShooter(Shooter shooter, EndEffector endEffector, Intake intake) {
-    this.shooter =shooter;
-    this.endEffector =endEffector;
+    this.shooter = shooter;
+    this.endEffector = endEffector;
     this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooter, endEffector, intake);
@@ -31,8 +33,12 @@ public class LoadGamepieceToShooter extends Command {
   @Override
   public void execute() {
     shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
-    
-    double percentOut = shooter.noteInShooter() || !shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD) ? 0.0 : 0.1;
+
+    double percentOut =
+        shooter.noteInShooter()
+                || !shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)
+            ? 0.0
+            : 0.1;
     shooter.setKickerPercentOut(percentOut);
     endEffector.setPercentOut(percentOut);
     intake.setPercentOut(percentOut);

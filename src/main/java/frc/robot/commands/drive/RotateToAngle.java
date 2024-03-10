@@ -15,6 +15,7 @@ public class RotateToAngle extends Command {
   private final Rotation2d angle;
   private final PIDController rotationalPID = new PIDController(0, 0, 0);
   private final LoggedTunableNumber tunableKP = new LoggedTunableNumber("RotateToAngle/kP", 4.9);
+
   /** Creates a new RotateToAngle. */
   public RotateToAngle(DrivetrainWrapper wrapper, Rotation2d angle) {
     this.wrapper = wrapper;
@@ -31,7 +32,8 @@ public class RotateToAngle extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    wrapper.setRotationOverride(rotationalPID.calculate(angle.getRadians(), wrapper.getRotationGyroOnly().getRadians()));
+    wrapper.setRotationOverride(
+        rotationalPID.calculate(angle.getRadians(), wrapper.getRotationGyroOnly().getRadians()));
   }
 
   // Called once the command ends or is interrupted.

@@ -39,10 +39,10 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
       group.build("launcherClosedLoopMaxAccelerationConstraint");
 
-      private static final LoggedTunableNumber kickerkP = group.build("Kicker/kP");
-      private static final LoggedTunableNumber kickerkV = group.build("Kicker/kV");
-      private static final LoggedTunableNumber kickerClosedLoopMaxAccelerationConstraint =
-              group.build("Kicker/ClosedLoopMaxAccelerationConstraint");
+  private static final LoggedTunableNumber kickerkP = group.build("Kicker/kP");
+  private static final LoggedTunableNumber kickerkV = group.build("Kicker/kV");
+  private static final LoggedTunableNumber kickerClosedLoopMaxAccelerationConstraint =
+      group.build("Kicker/ClosedLoopMaxAccelerationConstraint");
 
   private static final LoggedTunableNumber pivotToleranceDegrees =
       group.build("pivotToleranceDegrees", 0.5);
@@ -118,8 +118,9 @@ public class Shooter extends SubsystemBase {
         pivotkG.get(),
         pivotClosedLoopMaxVelocityConstraint.get(),
         pivotClosedLoopMaxAccelerationConstraint.get());
-    
-    io.setKickerClosedLoopConstants(kickerkP.get(), kickerkV.get(), 0.0, kickerClosedLoopMaxAccelerationConstraint.get());
+
+    io.setKickerClosedLoopConstants(
+        kickerkP.get(), kickerkV.get(), 0.0, kickerClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -183,10 +184,7 @@ public class Shooter extends SubsystemBase {
           || kickerkV.hasChanged(hc)
           || kickerClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
         io.setKickerClosedLoopConstants(
-            kickerkP.get(),
-            kickerkV.get(),
-            0.0,
-            kickerClosedLoopMaxAccelerationConstraint.get());
+            kickerkP.get(), kickerkV.get(), 0.0, kickerClosedLoopMaxAccelerationConstraint.get());
       }
     }
   }
@@ -291,7 +289,7 @@ public class Shooter extends SubsystemBase {
     io.setNeutralMode(value);
   }
 
-  public void setKickerVelocity(double revPerMin){
+  public void setKickerVelocity(double revPerMin) {
     io.setKickerVelocity(revPerMin);
   }
 }

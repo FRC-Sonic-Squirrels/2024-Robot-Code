@@ -11,9 +11,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 
@@ -27,7 +24,8 @@ public class IntakeIOReal implements IntakeIO {
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
-  private final VelocityVoltage closedLoopControl = new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+  private final VelocityVoltage closedLoopControl =
+      new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
 
   private final BaseStatusSignal[] refreshSet;
 
@@ -78,11 +76,12 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void setVelocity(double revPerMin) {
-      motor.setControl(closedLoopControl.withVelocity(revPerMin / 60.0));
+    motor.setControl(closedLoopControl.withVelocity(revPerMin / 60.0));
   }
 
   @Override
-  public void setClosedLoopConstants(double kP, double kV, double kS, double maxProfiledAcceleration) {
+  public void setClosedLoopConstants(
+      double kP, double kV, double kS, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 

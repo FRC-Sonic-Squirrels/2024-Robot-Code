@@ -64,5 +64,5 @@ public interface ShooterIO {
   public default void setKickerClosedLoopConstants(
       double kP, double kV, double kS, double maxProfiledAcceleration) {}
 
-  public default void setKickerVelocity(double revPerMin){}
+  public default void setKickerVelocity(double revPerMin) {}
 }

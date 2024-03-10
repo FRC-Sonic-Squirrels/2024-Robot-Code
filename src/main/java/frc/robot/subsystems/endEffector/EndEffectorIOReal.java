@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -15,7 +14,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 import edu.wpi.first.units.Units;
-import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
 import frc.robot.Constants.EndEffectorConstants;
 
@@ -33,7 +31,8 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
-  private final VelocityVoltage closedLoopControl = new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+  private final VelocityVoltage closedLoopControl =
+      new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
 
   private final BaseStatusSignal[] refreshSet;
 
@@ -94,7 +93,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void setVelocity(double revPerMin) {
-      motor.setControl(closedLoopControl.withVelocity(revPerMin / 60.0));
+    motor.setControl(closedLoopControl.withVelocity(revPerMin / 60.0));
   }
 
   @Override

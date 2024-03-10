@@ -6,16 +6,13 @@ package frc.robot.autonomous.substates;
 
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
@@ -47,12 +44,12 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected Translation2d gamepieceTranslation;
   private Translation2d lastSeenGamepiece;
   private Trigger pathEnded;
-  
+
   private LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
 
   private LoggedTunableNumber useVisionForDriving =
-    new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
+      new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -82,8 +79,10 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   protected StateHandler visionPickupGamepiece() {
-    if (closestGamepiece.get() != null && useVisionForGamepiece())
-      lastSeenGamepiece = closestGamepiece.get().globalPose.getTranslation();
+    ProcessedGamepieceData gamepieceData = closestGamepiece.get();
+    if (gamepieceData != null && useVisionForGamepiece()) {
+      lastSeenGamepiece = gamepieceData.globalPose.getTranslation();
+    }
 
     ChassisSpeeds speeds =
         driveToGamepieceHelper.calculateChassisSpeeds(
@@ -115,7 +114,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
           return setDone();
         });
 
-    if (trajToShoot != null)
+    if (trajToShoot != null) {
       choreoHelper =
           new ChoreoHelper(
               timeFromStart(),
@@ -124,15 +123,16 @@ public abstract class AutoSubstateMachine extends StateMachine {
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());
+    }
 
     return stateWithName("followPathToShooter", this::followPathToShooting);
   }
 
   private StateHandler followPathToShooting() {
-    ChassisSpeeds chassisSpeeds = null;
-    if (trajToShoot != null)
-      chassisSpeeds =
-          choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
+    ChassisSpeeds chassisSpeeds =
+        choreoHelper != null
+            ? choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart())
+            : null;
 
     if (chassisSpeeds != null) {
       drive.setVelocityOverride(chassisSpeeds);
@@ -144,18 +144,18 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   protected boolean useVisionForGamepiece() {
-    if(useVisionForDriving.get() == 0.0){
+    if (useVisionForDriving.get() == 0.0) {
       return false;
     }
-    if (closestGamepiece.get() == null) {
+
+    ProcessedGamepieceData gamepieceData = closestGamepiece.get();
+    if (gamepieceData == null) {
       return false;
     }
-    return closestGamepiece.get().getDistance(drive.getPoseEstimatorPose(true)).in(Units.Meters)
-            <= distToBeginDriveToGamepiece.get()
-        && closestGamepiece
-                .get()
-                .getDistance(new Pose2d(gamepieceTranslation, new Rotation2d()))
-                .in(Units.Meters)
-            <= 0.5;
+
+    Pose2d robotPose = drive.getPoseEstimatorPose(true);
+    double distanceToRobot = gamepieceData.getDistance(robotPose).in(Units.Meters);
+    double distanceToTarget = gamepieceData.getDistance(gamepieceTranslation).in(Units.Meters);
+    return distanceToRobot <= distToBeginDriveToGamepiece.get() && distanceToTarget <= 0.5;
   }
 }

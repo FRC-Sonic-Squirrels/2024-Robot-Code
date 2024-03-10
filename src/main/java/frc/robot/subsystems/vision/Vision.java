@@ -6,6 +6,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -216,7 +217,7 @@ public class Vision extends SubsystemBase {
     visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime = currentResultTimeStampCTRETime;
 
     // remove any tags that are not part of the field layout
-    var now = Timer.getFPGATimestamp();
+    var timeStampCameraResult = cameraResult.getTimestampSeconds();
     var cleanTargets = new ArrayList<PhotonTrackedTarget>();
     for (PhotonTrackedTarget target : cameraResult.getTargets()) {
       int fiducialId = target.getFiducialId();
@@ -224,9 +225,8 @@ public class Vision extends SubsystemBase {
       if (optTagPose.isEmpty()) continue;
 
       cleanTargets.add(target);
-      lastTagDetectionTimes.put(fiducialId, now);
+      lastTagDetectionTimes.put(fiducialId, timeStampCameraResult);
     }
-    var timeStampCameraResult = cameraResult.getTimestampSeconds();
     cameraResult =
         new PhotonPipelineResult(
             cameraResult.getLatencyMillis(), cleanTargets, cameraResult.getMultiTagResult());
@@ -263,23 +263,23 @@ public class Vision extends SubsystemBase {
     }
 
     // used to log if the multi tag failed
-    if (photonPoseEstimatorOptionalResult.get().strategy
-        != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+    EstimatedRobotPose photonPoseEstimatorResult = photonPoseEstimatorOptionalResult.get();
+    if (photonPoseEstimatorResult.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
       multiTagFailed = true;
     }
 
-    newCalculatedRobotPose = photonPoseEstimatorOptionalResult.get().estimatedPose;
+    newCalculatedRobotPose = photonPoseEstimatorResult.estimatedPose;
 
     if (GeometryUtil.isPoseOutsideField(newCalculatedRobotPose.toPose2d())) {
       return VisionResultLoggedFields.unsuccessfulResult(
           VisionResultStatus.INVALID_POSE_OUTSIDE_FIELD);
     }
 
+    Rotation3d newCalculatedRobotPoseRotation = newCalculatedRobotPose.getRotation();
     if (useGyroBasedFilteringForVision) {
       var absError =
           Math.abs(
-              newCalculatedRobotPose
-                  .getRotation()
+              newCalculatedRobotPoseRotation
                   .toRotation2d()
                   .minus(currentGyroBasedRobotRotationSupplier.get())
                   .getDegrees());
@@ -296,17 +296,15 @@ public class Vision extends SubsystemBase {
       return VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.Z_HEIGHT_BAD);
     }
 
-    if (Math.abs(newCalculatedRobotPose.getRotation().getY()) >= pitchAndRollToleranceDegrees.get()
-        || Math.abs(newCalculatedRobotPose.getRotation().getX())
-            >= pitchAndRollToleranceDegrees.get()) {
+    if (Math.abs(newCalculatedRobotPoseRotation.getY()) >= pitchAndRollToleranceDegrees.get()
+        || Math.abs(newCalculatedRobotPoseRotation.getX()) >= pitchAndRollToleranceDegrees.get()) {
       return VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.PITCH_OR_ROLL_BAD);
     }
 
     tagAmbiguity = 0.0;
     double totalDistance = 0.0;
 
-    if (photonPoseEstimatorOptionalResult.get().strategy
-        == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+    if (photonPoseEstimatorResult.strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
 
       // use average distance for PNP with multiple tags
       for (PhotonTrackedTarget tag : cleanTargets) {
@@ -368,8 +366,7 @@ public class Vision extends SubsystemBase {
 
     VisionResultStatus status;
     if ((numTargetsSeen == 1)
-        || (photonPoseEstimatorOptionalResult.get().strategy
-            != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)) {
+        || (photonPoseEstimatorResult.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)) {
       // single tag result
       status = VisionResultStatus.SUCCESSFUL_SINGLE_TAG;
     } else {

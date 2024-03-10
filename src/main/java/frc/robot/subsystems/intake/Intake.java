@@ -21,13 +21,14 @@ public class Intake extends SubsystemBase {
   private static final LoggedTunableNumber kP = group.build("kP");
   private static final LoggedTunableNumber kV = group.build("kV");
   private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
-          group.build("ClosedLoopMaxAccelerationConstraint");
+      group.build("ClosedLoopMaxAccelerationConstraint");
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
     this.io = io;
 
-    io.setClosedLoopConstants(kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
+    io.setClosedLoopConstants(
+        kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
   }
 
   @Override
@@ -43,10 +44,7 @@ public class Intake extends SubsystemBase {
           || kV.hasChanged(hc)
           || ClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
         io.setClosedLoopConstants(
-            kP.get(),
-            kV.get(),
-            kS.get(),
-            ClosedLoopMaxAccelerationConstraint.get());
+            kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
       }
     }
   }

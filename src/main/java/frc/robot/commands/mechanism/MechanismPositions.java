@@ -26,7 +26,7 @@ public class MechanismPositions {
       group.build("ampElevatorHeightInches", 11.6); // 17.0
 
   private static final LoggedTunableNumber ampArmAngleDegrees =
-      group.build("ampArmAngleDegrees", 43); //35.0
+      group.build("ampArmAngleDegrees", 43); // 35.0
 
   private static final LoggedTunableNumber ampStage2ElevatorHeightInches =
       group.build("ampStage2ElevatorHeightInches", 24.0);

@@ -65,7 +65,8 @@ public class ShooterIOReal implements ShooterIO {
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
-  private final VelocityVoltage kickerClosedLoop = new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+  private final VelocityVoltage kickerClosedLoop =
+      new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
 
   public ShooterIOReal() {
     // --- launcher config ---
@@ -309,7 +310,8 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setKickerClosedLoopConstants(double kP, double kV, double kS, double maxProfiledAcceleration) {
+  public void setKickerClosedLoopConstants(
+      double kP, double kV, double kS, double maxProfiledAcceleration) {
     Slot0Configs pidConfig = new Slot0Configs();
     MotionMagicConfigs mmConfig = new MotionMagicConfigs();
 
@@ -330,6 +332,6 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setKickerVelocity(double revPerMin) {
-      kicker.setControl(kickerClosedLoop.withVelocity(revPerMin / 60.0));
+    kicker.setControl(kickerClosedLoop.withVelocity(revPerMin / 60.0));
   }
 }

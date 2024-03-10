@@ -228,9 +228,8 @@ public class DriveToPose extends Command {
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
   public boolean withinTolerance(double driveTolerance, Rotation2d thetaTolerance) {
-    return
-    isScheduled() &&
-    Math.abs(driveErrorAbs) < driveTolerance
+    return isScheduled()
+        && Math.abs(driveErrorAbs) < driveTolerance
         && Math.abs(thetaErrorAbs) < thetaTolerance.getRadians();
   }
 }
