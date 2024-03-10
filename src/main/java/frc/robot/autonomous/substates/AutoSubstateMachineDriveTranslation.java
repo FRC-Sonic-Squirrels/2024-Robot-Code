@@ -71,7 +71,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       drive.setVelocityOverride(speeds);
       if (driveToGamepieceHelper.isAtTarget()) {
         drive.resetVelocityOverride();
-        return setStopped();
+        return super::gamepieceConfirmation;
       }
       return null;
     }

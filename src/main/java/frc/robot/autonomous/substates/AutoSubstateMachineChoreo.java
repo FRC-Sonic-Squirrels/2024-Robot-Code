@@ -56,14 +56,16 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
     super.intakeCommand.schedule();
 
     if (trajToGamepiece != null) {
+      var traj = ChoreoHelper.rescale(trajToGamepiece, slowDownFactor.get());
       choreoHelper =
           new ChoreoHelper(
               timeFromStart(),
               drive.getPoseEstimatorPose(true),
-              trajToGamepiece,
+              traj,
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());
+
     }
 
     driveToGamepieceHelper = new DriveToGamepieceHelper();
@@ -87,7 +89,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
             : null;
     if (speeds == null) {
       drive.resetVelocityOverride();
-      return setStopped();
+      return stateWithName("gamepieceConfirmation", super::gamepieceConfirmation);
     }
     drive.setVelocityOverride(speeds);
     return null;

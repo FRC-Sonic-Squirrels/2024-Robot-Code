@@ -11,6 +11,8 @@ import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotMode.RobotType;
+
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
@@ -27,6 +29,19 @@ public class EndEffector extends SubsystemBase {
   private static final LoggedTunableNumber kV = group.build("kV");
   private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
       group.build("ClosedLoopMaxAccelerationConstraint");
+
+  static {
+    if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
+      kP.initDefault(0.2);
+      kV.initDefault(0.15);
+      ClosedLoopMaxAccelerationConstraint.initDefault(300.0);
+    } else if (Constants.RobotMode.isSimBot()) {
+
+      kP.initDefault(0.0);
+      kV.initDefault(0.0);
+      ClosedLoopMaxAccelerationConstraint.initDefault(0.0);
+    }
+  }
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {

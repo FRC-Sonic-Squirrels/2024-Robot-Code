@@ -20,6 +20,7 @@ public interface ShooterIO {
 
     public double kickerAppliedVolts = 0.0;
     public double kickerCurrentAmps = 0.0;
+    public double kickerVelocityRPM = 0.0;
 
     // launcher lead, launcher follower, pivot, kicker
     public double[] tempsCelcius = new double[4];

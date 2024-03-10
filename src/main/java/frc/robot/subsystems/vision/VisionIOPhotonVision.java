@@ -5,6 +5,7 @@ import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import org.photonvision.PhotonCamera;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -43,9 +44,13 @@ public class VisionIOPhotonVision implements VisionIO {
         java.util.EnumSet.of(NetworkTableEvent.Kind.kValueAll),
         event -> {
           PhotonPipelineResult result = camera.getLatestResult();
+          var timestamp = result.getTimestampSeconds();
+          var fpga = Timer.getFPGATimestamp();
+          var ctre = Utils.getCurrentTimeSeconds();
 
           // we use CTRE time here because drivetrain odometry uses CTRE time NOT FPGA
-          double timestamp = Utils.getCurrentTimeSeconds() - (result.getLatencyMillis() / 1000.0);
+          timestamp -= fpga;
+          timestamp += ctre;
 
           synchronized (VisionIOPhotonVision.this) {
             updateMedians(result.getLatencyMillis(), timestamp - lastTimestampCTRETime);

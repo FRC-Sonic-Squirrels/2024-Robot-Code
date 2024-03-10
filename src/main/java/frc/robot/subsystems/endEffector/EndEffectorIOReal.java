@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -31,8 +32,8 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
 
-  private final VelocityVoltage closedLoopControl =
-      new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+  private final MotionMagicVelocityVoltage closedLoopControl =
+      new MotionMagicVelocityVoltage(0, 0, true, 0, 0, false, false, false);
 
   private final BaseStatusSignal[] refreshSet;
 

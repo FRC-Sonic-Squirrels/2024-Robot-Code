@@ -127,6 +127,8 @@ public class RobotContainer {
   private final LoggedTunableNumber tunableX = new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
   private final LoggedTunableNumber tunableY = new LoggedTunableNumber("tunableYFromSpeaker", 0);
 
+  private final LoggedTunableNumber passThroughVel = new LoggedTunableNumber("Plop/passThroughVel", 1000);
+
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   private final LoggedDashboardChooser<String> autoChooser =
@@ -631,9 +633,9 @@ public class RobotContainer {
             Commands.runOnce(
                 () -> {
                   shooter.setLauncherRPM(1500);
-                  shooter.setKickerPercentOut(0.8);
-                  endEffector.setPercentOut(0.8);
-                  intake.setPercentOut(0.8);
+                  shooter.setKickerVelocity(passThroughVel.get());
+                  endEffector.setVelocity(passThroughVel.get());
+                  intake.setVelocity(passThroughVel.get());
                 },
                 shooter,
                 endEffector,

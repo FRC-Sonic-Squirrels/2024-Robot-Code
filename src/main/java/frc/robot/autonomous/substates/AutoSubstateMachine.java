@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.autonomous.ChoreoHelper;
@@ -44,13 +43,18 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected IntakeGamepiece intakeCommand;
   protected Translation2d gamepieceTranslation;
   private Translation2d lastSeenGamepiece;
-  private Trigger pathEnded;
 
-  private LoggedTunableNumber distToBeginDriveToGamepiece =
+  private static LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
 
-  private LoggedTunableNumber useVisionForDriving =
+  private static LoggedTunableNumber useVisionForDriving =
       new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
+
+  private static LoggedTunableNumber confirmationTime =
+      new LoggedTunableNumber("AutoSubstateMachine/confirmationTime", 0.8);
+
+      protected static LoggedTunableNumber slowDownFactor =
+      new LoggedTunableNumber("AutoSubstateMachine/slowDownFactor", 1.0);
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -78,7 +82,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
     this.gamepieceTranslation = gamepieceTranslation;
-    pathEnded = new Trigger(pathEnded);
   }
 
   protected StateHandler visionPickupGamepiece() {
@@ -118,11 +121,12 @@ public abstract class AutoSubstateMachine extends StateMachine {
         });
 
     if (trajToShoot != null) {
+      var traj = ChoreoHelper.rescale(trajToShoot, slowDownFactor.get());
       choreoHelper =
           new ChoreoHelper(
               timeFromStart(),
               drive.getPoseEstimatorPose(true),
-              this.trajToShoot,
+              traj,
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());
@@ -143,6 +147,16 @@ public abstract class AutoSubstateMachine extends StateMachine {
       drive.resetVelocityOverride();
     }
 
+    return null;
+  }
+
+  protected StateHandler gamepieceConfirmation() {
+    if (endEffector.noteInEndEffector()) {
+      return stateWithName("prepFollowPathToShooting", this::prepFollowPathToShooting);
+    }
+    if (timeFromStartOfState() >= confirmationTime.get()) {
+      return setStopped();
+    }
     return null;
   }
 

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -46,6 +48,7 @@ public class ShooterIOReal implements ShooterIO {
   private final StatusSignal<Double> launcherFollowTempCelsius;
   private final StatusSignal<Double> pivotTempCelsius;
   private final StatusSignal<Double> kickerTempCelsius;
+  private final StatusSignal<Double> kickerVelocity;
 
   private final BaseStatusSignal[] refreshSet;
 
@@ -65,8 +68,8 @@ public class ShooterIOReal implements ShooterIO {
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 
-  private final VelocityVoltage kickerClosedLoop =
-      new VelocityVoltage(0, 0, true, 0, 0, false, false, false);
+  private final MotionMagicVelocityVoltage kickerClosedLoop =
+      new MotionMagicVelocityVoltage(0, 0, true, 0, 0, false, false, false);
 
   public ShooterIOReal() {
     // --- launcher config ---
@@ -121,7 +124,7 @@ public class ShooterIOReal implements ShooterIO {
 
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    kickerConfig.Feedback.SensorToMechanismRatio = 0.75;
+    kickerConfig.Feedback.SensorToMechanismRatio = 1.42;
 
     kicker.getConfigurator().apply(kickerConfig);
 
@@ -145,18 +148,19 @@ public class ShooterIOReal implements ShooterIO {
     launcherFollowTempCelsius = launcher_lead.getDeviceTemp();
     pivotTempCelsius = pivot.getDeviceTemp();
     kickerTempCelsius = kicker.getDeviceTemp();
+    kickerVelocity = kicker.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100, pivotPosition, launcherLeadVelocity, launcherFollowVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps);
+        50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps, kickerVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
         10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(
         1, launcherLeadTempCelsius, launcherFollowTempCelsius, kickerTempCelsius, pivotTempCelsius);
 
     launcher_lead.optimizeBusUtilization();
-    // launcher_follower.optimizeBusUtilization();
+    launcher_follower.optimizeBusUtilization();
     pivot.optimizeBusUtilization();
     kicker.optimizeBusUtilization();
 
@@ -183,13 +187,14 @@ public class ShooterIOReal implements ShooterIO {
           launcherLeadTempCelsius,
           launcherFollowTempCelsius,
           pivotTempCelsius,
-          kickerTempCelsius
+          kickerTempCelsius,
+          kickerVelocity
         };
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+        BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.pivotPosition = Rotation2d.fromRotations(pivotPosition.getValueAsDouble());
     // rotations to rads = mult by 2pi. 1 full rot = 2pi rads
@@ -209,11 +214,13 @@ public class ShooterIOReal implements ShooterIO {
 
     inputs.kickerAppliedVolts = kickerAppliedVolts.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrentAmps.getValueAsDouble();
+    inputs.kickerVelocityRPM = kickerVelocity.getValueAsDouble() * 60;
 
     inputs.tempsCelcius[0] = launcherLeadTempCelsius.getValueAsDouble();
     inputs.tempsCelcius[1] = launcherFollowTempCelsius.getValueAsDouble();
     inputs.tempsCelcius[2] = pivotTempCelsius.getValueAsDouble();
     inputs.tempsCelcius[3] = kickerTempCelsius.getValueAsDouble();
+
 
     inputs.timeOfFlightDistance = Units.Millimeters.of(timeOfFlight.getRange()).in(Units.Inches);
   }

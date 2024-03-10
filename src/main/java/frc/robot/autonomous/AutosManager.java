@@ -230,7 +230,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("Smiddle-CG3", null, false));
     paths.add(new PathDescriptor("CG3-CG2", null, false));
     paths.add(new PathDescriptor("CG2-CG1", null, false));
-    paths.add(new PathDescriptor("CG1-G1", "G1-S1", true));
+    paths.add(new PathDescriptor("CG1-G1", "G1-S1", false));
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
     AutoStateMachine state =
         new AutoStateMachine(

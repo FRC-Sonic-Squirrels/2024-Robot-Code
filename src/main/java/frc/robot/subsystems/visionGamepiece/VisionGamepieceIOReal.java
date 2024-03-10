@@ -1,5 +1,7 @@
 package frc.robot.subsystems.visionGamepiece;
 
+import com.ctre.phoenix6.Utils;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import java.util.List;
 import org.photonvision.PhotonCamera;
@@ -30,7 +32,16 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
       inputs.yaw[index] = targets.get(index).getYaw();
     }
     inputs.totalLatencyMs = results.getLatencyMillis();
-    inputs.timestamp = results.getTimestampSeconds();
     inputs.targetCount = targets.size();
+
+    var timestamp = results.getTimestampSeconds();
+    var fpga = Timer.getFPGATimestamp();
+    var ctre = Utils.getCurrentTimeSeconds();
+
+    // we use CTRE time here because drivetrain odometry uses CTRE time NOT FPGA
+    timestamp -= fpga;
+    timestamp += ctre;
+
+    inputs.timestamp = timestamp;
   }
 }

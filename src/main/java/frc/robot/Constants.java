@@ -225,7 +225,7 @@ public final class Constants {
     public static final double NOTE_IN_ROBOT_WHILE_INTAKING_PERCENT_OUT = 0.5;
     public static final double CENTERING_NOTE_REVERSE = -0.1;
 
-    public static final double GEARING = 1.0;
+    public static final double GEARING = 1.33;
     public static final double MOI = 5.0;
 
     public static final double SHOOTING_PERCENT_OUT = 0.8;
