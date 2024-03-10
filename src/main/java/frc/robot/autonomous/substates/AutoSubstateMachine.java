@@ -53,7 +53,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   private static LoggedTunableNumber confirmationTime =
       new LoggedTunableNumber("AutoSubstateMachine/confirmationTime", 0.8);
 
-      protected static LoggedTunableNumber slowDownFactor =
+  protected static LoggedTunableNumber slowDownFactor =
       new LoggedTunableNumber("AutoSubstateMachine/slowDownFactor", 1.0);
 
   /** Creates a new AutoSubstateMachine. */

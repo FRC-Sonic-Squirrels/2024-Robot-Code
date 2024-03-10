@@ -65,7 +65,6 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());
-
     }
 
     driveToGamepieceHelper = new DriveToGamepieceHelper();

@@ -10,7 +10,6 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -25,7 +24,7 @@ public class Intake extends SubsystemBase {
   private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
       group.build("ClosedLoopMaxAccelerationConstraint");
 
-   static {
+  static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
       kP.initDefault(0.8);
       kV.initDefault(0.15);

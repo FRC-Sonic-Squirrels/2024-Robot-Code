@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -9,7 +7,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -153,7 +150,13 @@ public class ShooterIOReal implements ShooterIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         100, pivotPosition, launcherLeadVelocity, launcherFollowVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50, pivotVelocity, pivotVoltage, pivotCurrentAmps, kickerAppliedVolts, kickerCurrentAmps, kickerVelocity);
+        50,
+        pivotVelocity,
+        pivotVoltage,
+        pivotCurrentAmps,
+        kickerAppliedVolts,
+        kickerCurrentAmps,
+        kickerVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
         10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -194,7 +197,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-        BaseStatusSignal.refreshAll(refreshSet);
+    BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.pivotPosition = Rotation2d.fromRotations(pivotPosition.getValueAsDouble());
     // rotations to rads = mult by 2pi. 1 full rot = 2pi rads
@@ -220,7 +223,6 @@ public class ShooterIOReal implements ShooterIO {
     inputs.tempsCelcius[1] = launcherFollowTempCelsius.getValueAsDouble();
     inputs.tempsCelcius[2] = pivotTempCelsius.getValueAsDouble();
     inputs.tempsCelcius[3] = kickerTempCelsius.getValueAsDouble();
-
 
     inputs.timeOfFlightDistance = Units.Millimeters.of(timeOfFlight.getRange()).in(Units.Inches);
   }

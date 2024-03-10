@@ -127,7 +127,8 @@ public class RobotContainer {
   private final LoggedTunableNumber tunableX = new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
   private final LoggedTunableNumber tunableY = new LoggedTunableNumber("tunableYFromSpeaker", 0);
 
-  private final LoggedTunableNumber passThroughVel = new LoggedTunableNumber("Plop/passThroughVel", 1000);
+  private final LoggedTunableNumber passThroughVel =
+      new LoggedTunableNumber("Plop/passThroughVel", 1000);
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 

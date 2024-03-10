@@ -12,7 +12,6 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
