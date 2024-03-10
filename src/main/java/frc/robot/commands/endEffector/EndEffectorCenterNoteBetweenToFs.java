@@ -59,18 +59,18 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
       var shooterSideTofSeenGamepiece = endEffector.shooterSideTOFDetectGamepiece();
 
       // maybe note backed up into intake?
-      if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(0.3);
+      // if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
+      //   endEffector.setVelocity(1200);
 
-      } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(0.3);
+      // } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
+      //   endEffector.setPercentOut(0.3);
 
-      } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(-0.3);
+      // } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
+      //   endEffector.setPercentOut(-0.3);
 
-      } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(0.0);
-      }
+      // } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
+      //   endEffector.setPercentOut(0.0);
+      // }
     }
     // New Centering Code
     double difference = endEffector.noteOffsetInches();
@@ -79,13 +79,20 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
       double percent = controller.calculate(difference, 0.0);
       percent = -MathUtil.clamp(percent, -0.35, 0.35);
       Logger.recordOutput("EndEffectorCenter/percent", percent);
-      endEffector.setPercentOut(percent);
-      shooter.setKickerPercentOut(percent);
-      intake.setPercentOut(percent);
+
+      if (Math.abs(percent) <= 0.05) {
+        endEffector.setPercentOut(0.0);
+        shooter.setPercentOut(0.0);
+        intake.setPercentOut(0.0);
+      } else {
+        endEffector.setVelocity(percent * 2500);
+        shooter.setKickerVelocity(percent * 2500);
+        intake.setVelocity(percent * 2500);
+      }
     } else {
-      endEffector.setPercentOut(0.3);
-      intake.setPercentOut(0.3);
-      shooter.setKickerPercentOut(-0.3);
+      endEffector.setVelocity(2500);
+      intake.setVelocity(2500);
+      shooter.setKickerVelocity(-2500);
     }
   }
 

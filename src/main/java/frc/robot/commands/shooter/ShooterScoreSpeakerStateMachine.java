@@ -40,22 +40,13 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);
 
-  private static final LoggedTunableNumber slowLoadingEEPercent =
-      group.build("loading/slowEEPercent", 0.1);
-  private static final LoggedTunableNumber slowLoadingIntakePercent =
-      group.build("loading/slowLoadingIntakePercent", 0.1);
-  private static final LoggedTunableNumber slowLoadingKickerPercent =
-      group.build("loading/slowLoadingKickerPercent", 0.1);
+  public static final LoggedTunableNumber loadingRPM = group.build("loading/LoadingRPM", 1200);
 
-  private static final LoggedTunableNumber loadingEEPercent =
-      group.build("loading/LoadingEEPercent", 0.3);
-  private static final LoggedTunableNumber loadingIntakePercent =
-      group.build("loading/LoadingIntakePercent", 0.3);
-  private static final LoggedTunableNumber loadingKickerPercent =
-      group.build("loading/LoadingKickerPercent", 0.3);
+  public static final LoggedTunableNumber slowLoadingRPM =
+      group.build("loading/slowLoadingRPM", 500);
 
-  private static final LoggedTunableNumber shootingKickerPercent =
-      group.build("shootingKickerPercent", 1.0);
+  private static final LoggedTunableNumber shootingLoadingVelocity =
+      group.build("shootingLoadingVelocity", 3000);
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -262,15 +253,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
       shooter.markStartOfNoteLoading();
       if (endEffector.intakeSideTOFDetectGamepiece()) {
-        shooter.setKickerPercentOut(loadingKickerPercent.get());
-
+        shooter.setKickerVelocity(loadingRPM.get());
         endEffector.markStartOfNoteDropping();
-        endEffector.setPercentOut(loadingEEPercent.get());
-        intake.setPercentOut(loadingIntakePercent.get());
+        endEffector.setVelocity(loadingRPM.get());
+        intake.setVelocity(loadingRPM.get());
       } else {
-        shooter.setKickerPercentOut(slowLoadingKickerPercent.get());
-        endEffector.setPercentOut(slowLoadingEEPercent.get());
-        intake.setPercentOut(slowLoadingIntakePercent.get());
+        shooter.setKickerVelocity(slowLoadingRPM.get());
+        endEffector.setVelocity(slowLoadingRPM.get());
+        intake.setVelocity(slowLoadingRPM.get());
       }
     }
 
@@ -367,8 +357,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     shooter.markStartOfNoteShooting();
     shooter.setPivotPosition(desiredShootingPitch);
     // run kicker for X seconds
-    shooter.setKickerPercentOut(shootingKickerPercent.get());
-    endEffector.setPercentOut(0.5);
+    shooter.setKickerVelocity(shootingLoadingVelocity.get());
+    endEffector.setVelocity(shootingLoadingVelocity.get());
 
     if (!shooter.noteInShooter()) {
       Logger.recordOutput(

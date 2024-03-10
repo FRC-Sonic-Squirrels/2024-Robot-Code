@@ -30,9 +30,9 @@ public class IntakeEject extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.setKickerPercentOut(-0.3);
-    endEffector.setPercentOut(-0.3);
-    intake.setPercentOut(-0.3);
+    shooter.setKickerVelocity(-1500);
+    endEffector.setVelocity(-1500);
+    intake.setVelocity(-1500);
   }
 
   // Called once the command ends or is interrupted.

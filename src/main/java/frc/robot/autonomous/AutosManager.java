@@ -227,7 +227,7 @@ public class AutosManager {
 
   private Auto middleAuto() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Smiddle-CG3", null, false));
+    paths.add(new PathDescriptor("Smiddle-CG3", "CG3-CS2", false));
     paths.add(new PathDescriptor("CG3-CG2", null, false));
     paths.add(new PathDescriptor("CG2-CG1", null, false));
     paths.add(new PathDescriptor("CG1-G1", "G1-S1", false));

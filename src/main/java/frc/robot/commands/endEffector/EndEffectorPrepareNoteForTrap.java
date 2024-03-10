@@ -35,7 +35,7 @@ public class EndEffectorPrepareNoteForTrap extends Command {
   @Override
   public void execute() {
     if (endEffector.shooterSideTOFDetectGamepiece()) {
-      endEffector.setPercentOut(-0.05);
+      endEffector.setVelocity(-200);
     } else {
       endEffector.setPercentOut(0.0);
     }

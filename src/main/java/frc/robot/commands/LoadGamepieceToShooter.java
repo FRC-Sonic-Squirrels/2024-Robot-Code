@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -34,14 +35,17 @@ public class LoadGamepieceToShooter extends Command {
   public void execute() {
     shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
 
-    double percentOut =
-        shooter.noteInShooter()
-                || !shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)
-            ? 0.0
-            : 0.1;
-    shooter.setKickerPercentOut(percentOut);
-    endEffector.setPercentOut(percentOut);
-    intake.setPercentOut(percentOut);
+    if (shooter.noteInShooter()
+        || !shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
+      shooter.setKickerPercentOut(0.0);
+      endEffector.setPercentOut(0);
+      intake.setPercentOut(0);
+    } else {
+      double RPM = ShooterScoreSpeakerStateMachine.slowLoadingRPM.get();
+      shooter.setKickerVelocity(RPM);
+      endEffector.setVelocity(RPM);
+      intake.setVelocity(RPM);
+    }
   }
 
   // Called once the command ends or is interrupted.

@@ -134,7 +134,9 @@ public class CommandComposer {
             .asProxy()
             .alongWith(MechanismActions.ampPosition(elevator, arm))
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-            .andThen(new EndEffectorPercentOut(endEffector, 0.8).until(noGamepieceInEE));
+            .andThen(
+                Commands.run(() -> endEffector.setVelocity(2500), endEffector)
+                    .until(noGamepieceInEE));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");

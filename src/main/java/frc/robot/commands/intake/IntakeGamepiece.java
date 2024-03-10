@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -27,9 +26,7 @@ public class IntakeGamepiece extends Command {
 
   private LoggedTunableNumber rumbleIntensityPercent = group.build("rumbleIntensityPercent", 0.3);
 
-  private LoggedTunableNumber intakingPercent = group.build("intakingPercent", 0.4);
-  private LoggedTunableNumber intakingPercentWithGamepiece =
-      group.build("intakingPercentWithGamepiece", 0.3);
+  private LoggedTunableNumber intakingVelocity = group.build("intakingVelocity", 2500);
 
   private final Trigger noteInEEDebounced;
 
@@ -78,28 +75,34 @@ public class IntakeGamepiece extends Command {
       if (!intakeSideTofSeenGamepiece) {
         // endEffector.markStartOfNoteIntaking();
 
-        double percent =
-            arm.getAngle().getDegrees() > -88 || elevator.getHeightInches() > 8.0
-                ? 0.0
-                : intakingPercent.get();
+        // final final double percent =
 
-        intake.setPercentOut(percent);
-        endEffector.setPercentOut(percent);
+        //         ? 0.0
+        //         : intakingPercent.get();
+
+        if (arm.getAngle().getDegrees() > -88 || elevator.getHeightInches() > 8.0) {
+          intake.setPercentOut(0.0);
+          endEffector.setPercentOut(0.0);
+        } else {
+          intake.setVelocity(intakingVelocity.get());
+          endEffector.setVelocity(intakingVelocity.get());
+        }
 
         // dont rumble if we dont see gamepiece
         rumbleValue = 0.0;
 
         // if we see the game piece slow down system to maintain better control over the note
-      } else {
-        double percent = intakingPercentWithGamepiece.get();
-        intake.setPercentOut(percent);
-        endEffector.setPercentOut(percent);
       }
+      // else {
+      //   double percent = intakingPercentWithGamepiece.get();
+      //   intake.setPercentOut(percent);
+      //   endEffector.setPercentOut(percent);
+      // }
     } else {
       intake.setPercentOut(0.0);
       if (!intakeSideTofSeenGamepiece) {
-        endEffector.setPercentOut(EndEffectorConstants.CENTERING_NOTE_REVERSE);
-        shooter.setKickerPercentOut(-0.1);
+        endEffector.setVelocity(-500);
+        shooter.setKickerVelocity(-500);
       } else {
         endEffector.setPercentOut(0.0);
         shooter.setKickerPercentOut(0.0);

@@ -324,8 +324,8 @@ public final class Constants {
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(130.0).in(Units.Meters), 4.5); // 5.0
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(140.0).in(Units.Meters), 5.0); // 5.5
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(150.0).in(Units.Meters), 5.25); // 5.75
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 6.0 - 0.5);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 6.25 - 0.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 6.0 - 1.0);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 6.25 - 1.0);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 6.375 - 0.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.375 - 0.5);
       }
