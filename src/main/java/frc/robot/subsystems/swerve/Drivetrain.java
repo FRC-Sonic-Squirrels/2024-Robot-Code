@@ -87,7 +87,7 @@ public class Drivetrain extends SubsystemBase {
     kinematics = config.getSwerveDriveKinematics();
 
     // FIXME: values copied from 6328, learn how to calculate these values
-    poseEstimator = new PoseEstimator(0.1, 0.1, 0.3);
+    poseEstimator = new PoseEstimator(0.4, 0.4, 0.3);
 
     // Configure AutoBuilder for PathPlanner
     // FIXME: pass in custom PID constants? Issue for this use case has been created:
