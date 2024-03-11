@@ -47,6 +47,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private static final LoggedTunableNumber shootingLoadingVelocity =
       group.build("shootingLoadingVelocity", 3000);
+
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
   private final EndEffector endEffector;

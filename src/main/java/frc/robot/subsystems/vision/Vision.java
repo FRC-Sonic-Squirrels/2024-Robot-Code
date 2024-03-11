@@ -36,42 +36,41 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 public class Vision extends SubsystemBase {
   protected static final TunableNumberGroup group = new TunableNumberGroup("Vision");
 
-  private static LoggedTunableNumber thetaStdDevCoefficient =
+  private static final LoggedTunableNumber thetaStdDevCoefficient =
       group.build("thetaStdDevCoefficient", 0.075);
-  private static LoggedTunableNumber xyStdDevCoefficient =
+  private static final LoggedTunableNumber xyStdDevCoefficient =
       group.build("xyStdDevCoefficient", 0.075);
 
-  private static LoggedTunableNumber maxSingleTargetAmbiguity =
+  private static final LoggedTunableNumber maxSingleTargetAmbiguity =
       group.build("MaxSingleTargetAmbiguity", 0.08);
 
-  private static LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
+  private static final LoggedTunableNumber maxValidDistanceAwayFromCurrentEstimateMeters =
       group.build("MaxValidDistanceFromCurrentEstimateMeters", 30.0);
 
-  private static LoggedTunableNumber gyroFilteringToleranceDegrees =
+  private static final LoggedTunableNumber gyroFilteringToleranceDegrees =
       group.build("GyroFilteringToleranceDegrees", 10.0);
 
-  private static LoggedTunableNumber zHeightToleranceMeters =
+  private static final LoggedTunableNumber zHeightToleranceMeters =
       group.build("zHeightToleranceMeters", 0.5);
 
-  private static LoggedTunableNumber pitchAndRollToleranceDegrees =
+  private static final LoggedTunableNumber pitchAndRollToleranceDegrees =
       group.build("pitchToleranceDegrees", 10.0);
 
-  private ArrayList<VisionModule> visionModules = new ArrayList<VisionModule>();
+  private final List<VisionModule> visionModules = new ArrayList<>();
 
-  private AprilTagFieldLayout aprilTagLayout;
+  private final AprilTagFieldLayout aprilTagLayout;
 
   private boolean useVisionForPoseEstimation = true;
   private boolean useMaxDistanceAwayFromExistingEstimate = true;
   private boolean useGyroBasedFilteringForVision = true;
 
-  private HashMap<Integer, Double> lastTagDetectionTimes = new HashMap<Integer, Double>();
-  private ArrayList<Integer> tagsUsedInPoseEstimation = new ArrayList<Integer>();
+  private final HashMap<Integer, Double> lastTagDetectionTimes = new HashMap<>();
+  private final List<Integer> tagsUsedInPoseEstimation = new ArrayList<>();
 
-  private List<Pose3d> posesFedToPoseEstimator3D = new ArrayList<>();
-  private List<Pose2d> posesFedToPoseEstimator2D = new ArrayList<>();
+  private final List<Pose3d> posesFedToPoseEstimator3D = new ArrayList<>();
+  private final List<Pose2d> posesFedToPoseEstimator2D = new ArrayList<>();
 
-  private List<TimestampedVisionUpdate> allTimestampedVisionUpdates =
-      new ArrayList<TimestampedVisionUpdate>();
+  private final List<TimestampedVisionUpdate> allTimestampedVisionUpdates = new ArrayList<>();
 
   private final Consumer<List<TimestampedVisionUpdate>> visionEstimatesConsumer;
   private final Supplier<Pose2d> poseEstimatorPoseSupplier;
@@ -128,7 +127,7 @@ public class Vision extends SubsystemBase {
       }
 
       // send successful results to pose estimator
-      if (allTimestampedVisionUpdates.size() > 0) {
+      if (!allTimestampedVisionUpdates.isEmpty()) {
         visionEstimatesConsumer.accept(allTimestampedVisionUpdates);
         allTimestampedVisionUpdates.clear();
       }
@@ -156,12 +155,13 @@ public class Vision extends SubsystemBase {
       for (Map.Entry<Integer, Double> detectionEntry : lastTagDetectionTimes.entrySet()) {
         if (detectionEntry.getValue() == Timer.getFPGATimestamp()) {
           var tagPose = aprilTagLayout.getTagPose(detectionEntry.getKey());
-          allSeenTags.add(tagPose.get());
+          if (tagPose.isPresent()) {
+            allSeenTags.add(tagPose.get());
+          }
         }
       }
       Logger.recordOutput(
-          "Vision/visibleTags/rawAllVisibleTags",
-          allSeenTags.toArray(new Pose3d[allSeenTags.size()]));
+          "Vision/visibleTags/rawAllVisibleTags", allSeenTags.toArray(new Pose3d[0]));
 
       // logging tags actually used in pose estimation
       Pose3d[] tagsUsedInPoseEstimationPoses = new Pose3d[tagsUsedInPoseEstimation.size()];
@@ -173,11 +173,9 @@ public class Vision extends SubsystemBase {
           "Vision/visibleTags/tagsActuallyUsedInPoseEstimation", tagsUsedInPoseEstimationPoses);
 
       Logger.recordOutput(
-          "Vision/posesFedToPoseEstimator3D",
-          posesFedToPoseEstimator3D.toArray(new Pose3d[posesFedToPoseEstimator3D.size()]));
+          "Vision/posesFedToPoseEstimator3D", posesFedToPoseEstimator3D.toArray(new Pose3d[0]));
       Logger.recordOutput(
-          "Vision/posesFedToPoseEstimator2D",
-          posesFedToPoseEstimator2D.toArray(new Pose2d[posesFedToPoseEstimator2D.size()]));
+          "Vision/posesFedToPoseEstimator2D", posesFedToPoseEstimator2D.toArray(new Pose2d[0]));
 
       tagsUsedInPoseEstimation.clear();
       posesFedToPoseEstimator3D.clear();

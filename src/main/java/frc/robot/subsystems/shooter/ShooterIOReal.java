@@ -21,6 +21,9 @@ import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
+  private static final LoggedTunableNumber tunableMultiplier =
+      Shooter.group.build("tunableMultiplier", 1.0);
+
   TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
   TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
@@ -59,9 +62,6 @@ public class ShooterIOReal implements ShooterIO {
   private final VoltageOut launcherOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
 
   private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
-
-  private final LoggedTunableNumber tunableMultiplier =
-      Shooter.group.build("tunableMultiplier", 1.0);
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 

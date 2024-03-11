@@ -16,17 +16,16 @@ import frc.robot.subsystems.shooter.Shooter;
 import java.util.function.Consumer;
 
 public class IntakeGamepiece extends Command {
-  private Intake intake;
-  private EndEffector endEffector;
-  private Shooter shooter;
-  private Arm arm;
-  private Elevator elevator;
-
   private static final TunableNumberGroup group = new TunableNumberGroup("IntakeGamepiece");
+  private static final LoggedTunableNumber rumbleIntensityPercent =
+      group.build("rumbleIntensityPercent", 0.3);
+  private static final LoggedTunableNumber intakingVelocity = group.build("intakingVelocity", 2500);
 
-  private LoggedTunableNumber rumbleIntensityPercent = group.build("rumbleIntensityPercent", 0.3);
-
-  private LoggedTunableNumber intakingVelocity = group.build("intakingVelocity", 2500);
+  private final Intake intake;
+  private final EndEffector endEffector;
+  private final Shooter shooter;
+  private final Arm arm;
+  private final Elevator elevator;
 
   private final Trigger noteInEEDebounced;
 
@@ -47,7 +46,7 @@ public class IntakeGamepiece extends Command {
     this.elevator = elevator;
     this.rumbleConsumer = rumbleConsumer;
 
-    noteInEEDebounced = new Trigger(() -> endEffector.noteInEndEffector()).debounce(0.15);
+    noteInEEDebounced = new Trigger(endEffector::noteInEndEffector).debounce(0.15);
 
     addRequirements(intake);
     setName("IntakeGamepiece");

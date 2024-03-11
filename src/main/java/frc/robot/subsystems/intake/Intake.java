@@ -13,9 +13,6 @@ import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
-  private final IntakeIO io;
-  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
-
   private static final TunableNumberGroup group = new TunableNumberGroup("Intake");
 
   private static final LoggedTunableNumber kS = group.build("kS");
@@ -36,6 +33,9 @@ public class Intake extends SubsystemBase {
       ClosedLoopMaxAccelerationConstraint.initDefault(0.0);
     }
   }
+
+  private final IntakeIO io;
+  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {

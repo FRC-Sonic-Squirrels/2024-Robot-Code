@@ -7,7 +7,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
 import frc.robot.subsystems.arm.Arm;
@@ -17,12 +16,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class MechanismActionsSafe {
-
-  public static LoggedTunableNumber climbDownElevatorVelocity =
-      new LoggedTunableNumber("MechanismActionsSafe/climbDownElevatorVelocity", 500);
-  public static LoggedTunableNumber climbDownElevatorAcceleration =
-      new LoggedTunableNumber("MechanismActionsSafe/climbDownElevatorAcceleration", 500);
-
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
   }
@@ -64,8 +57,8 @@ public class MechanismActionsSafe {
         elevator,
         arm,
         MechanismPositions::climbDownPosition,
-        () -> climbDownElevatorVelocity.get(),
-        () -> climbDownElevatorAcceleration.get());
+        () -> MechanismActions.climbDownElevatorVelocity.get(),
+        () -> MechanismActions.climbDownElevatorAcceleration.get());
   }
 
   public static Command climbTrapPosition(Elevator elevator, Arm arm) {

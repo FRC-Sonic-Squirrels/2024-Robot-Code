@@ -15,9 +15,6 @@ import frc.robot.Constants.RobotMode.RobotType;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
-  private final EndEffectorIO io;
-  private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
-
   private static final TunableNumberGroup group = new TunableNumberGroup("EndEffector");
 
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
@@ -42,12 +39,14 @@ public class EndEffector extends SubsystemBase {
     }
   }
 
+  private final EndEffectorIO io;
+  private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
+
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
     this.io = io;
 
-    io.setClosedLoopConstants(
-        kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
+    updateConstants(io);
   }
 
   @Override
@@ -60,10 +59,14 @@ public class EndEffector extends SubsystemBase {
           || kP.hasChanged(hc)
           || kV.hasChanged(hc)
           || ClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
-        io.setClosedLoopConstants(
-            kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
+        updateConstants(io);
       }
     }
+  }
+
+  private void updateConstants(EndEffectorIO io) {
+    io.setClosedLoopConstants(
+        kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
   }
 
   public void markStartOfNoteIntaking() {

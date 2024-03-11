@@ -7,6 +7,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
@@ -22,11 +23,12 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class MechanismActions {
+  private static final TunableNumberGroup group = new TunableNumberGroup("MechanismActions");
 
-  public static LoggedTunableNumber climbDownElevatorVelocity =
-      new LoggedTunableNumber("MechanismActions/climbDownElevatorVelocity", 500);
-  public static LoggedTunableNumber climbDownElevatorAcceleration =
-      new LoggedTunableNumber("MechanismActions/climbDownElevatorAcceleration", 500);
+  public static final LoggedTunableNumber climbDownElevatorVelocity =
+      group.build("MechanismActions/climbDownElevatorVelocity", 500);
+  public static final LoggedTunableNumber climbDownElevatorAcceleration =
+      group.build("climbDownElevatorAcceleration", 500);
 
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);

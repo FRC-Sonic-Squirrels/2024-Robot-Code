@@ -21,34 +21,29 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.visualization.GamepieceVisualization;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ScoreSpeaker extends Command {
-  private DrivetrainWrapper drive;
-  private Shooter shooter;
-  private EndEffector endEffector;
-
   private static final TunableNumberGroup group = new TunableNumberGroup("RotateToSpeaker");
+  private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
+  private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
+  private static final LoggedTunableNumber tunableVoltage = group.build("tunableVoltage", 0.5);
 
-  private final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
-  private final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
-  private final LoggedTunableNumber tunableVoltage = group.build("tunableVoltage", 0.5);
-
+  private final DrivetrainWrapper drive;
+  private final Shooter shooter;
+  private final EndEffector endEffector;
   private final PIDController rotationController;
-
-  public static final double DEADBAND = 0.1;
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
-  private LinearFilter pidLatencyfilter = LinearFilter.movingAverage(10);
-
-  private ArrayList<PIDTargetMeasurement> targetMeasurements =
-      new ArrayList<PIDTargetMeasurement>();
+  private final LinearFilter pidLatencyfilter = LinearFilter.movingAverage(10);
+  private final List<PIDTargetMeasurement> targetMeasurements = new ArrayList<>();
 
   private double pidLatency = 0.0;
 
-  private ShootingSolver solver =
+  private final ShootingSolver solver =
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
           new Translation3d(0, 0, 0),
@@ -57,11 +52,11 @@ public class ScoreSpeaker extends Command {
           Constants.ShooterConstants.SHOOTING_TIME,
           false);
 
-  private BooleanSupplier shootGamepiece;
+  private final BooleanSupplier shootGamepiece;
 
   private boolean readyToShoot;
 
-  private GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
+  private final GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
 
   private Double deadline;
 

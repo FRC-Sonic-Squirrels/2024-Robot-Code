@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
@@ -26,17 +27,17 @@ import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   public static final double ODOMETRY_FREQUENCY = 250.0;
-  public static final double MAX_VOLTAGE = 12.0;
+
+  public static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
+  public static final LoggedTunableNumber turnCruiseVelocity =
+      group.build("SwerveTurnCruiseVelocity", 200);
+  public static final LoggedTunableNumber turnAcceleration =
+      group.build("SwerveTurnAcceleration", 200);
 
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final String index;
   private final double wheelRadius;
-
-  public static final LoggedTunableNumber turnCruiseVelocity =
-      new LoggedTunableNumber("RobotConfig/SwerveTurnCruiseVelocity", 200);
-  public static final LoggedTunableNumber turnAcceleration =
-      new LoggedTunableNumber("RobotConfig/SwerveTurnAcceleration", 200);
 
   private final LoggedTunableNumber driveKS;
   private final LoggedTunableNumber driveKV;
@@ -68,10 +69,7 @@ public class SwerveModule {
     angleKP = config.getAngleKP();
     angleKD = config.getAngleKD();
 
-    io.setDriveClosedLoopConstraints(
-        driveKP.get(), driveKD.get(), driveKS.get(), driveKV.get(), driveKA.get());
-    io.setTurnClosedLoopConstraints(
-        angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
+    updateConstants();
 
     setBrakeMode(true);
   }
@@ -104,14 +102,7 @@ public class SwerveModule {
           || angleKD.hasChanged(hc)
           || turnCruiseVelocity.hasChanged(hc)
           || turnAcceleration.hasChanged(hc)) {
-        io.setDriveClosedLoopConstraints(
-            driveKP.get(),
-            driveKD.get(),
-            driveKS.get(),
-            driveKV.get(),
-            driveKA.get()); // FIXME: do we need need ks?
-        io.setTurnClosedLoopConstraints(
-            angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
+        updateConstants();
       }
 
       // Run closed loop turn control
@@ -123,6 +114,18 @@ public class SwerveModule {
         io.setDriveVelocity(speedSetpoint, driveMotorMotionMagicAcceleration);
       }
     }
+  }
+
+  private void updateConstants() {
+    io.setDriveClosedLoopConstraints(
+        driveKP.get(),
+        driveKD.get(),
+        driveKS.get(),
+        driveKV.get(),
+        driveKA.get()); // FIXME: do we need need ks?
+
+    io.setTurnClosedLoopConstraints(
+        angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());
   }
 
   public SwerveModulePosition updateOdometry() {

@@ -9,10 +9,11 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveAfterSimpleShot extends StateMachine {
+  private static final LoggedTunableNumber driveDistance =
+      new LoggedTunableNumber("Autonomous/SimpleShot/DistanceMeters", 1.5);
+
   DrivetrainWrapper drive;
   DriveToPose driveToPose;
-  private LoggedTunableNumber driveDistance =
-      new LoggedTunableNumber("Autonomous/SimpleShot/DistanceMeters", 1.5);
   Pose2d initialPose;
 
   public DriveAfterSimpleShot(DrivetrainWrapper drive) {

@@ -44,16 +44,16 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected Translation2d gamepieceTranslation;
   private Translation2d lastSeenGamepiece;
 
-  private static LoggedTunableNumber distToBeginDriveToGamepiece =
+  private static final LoggedTunableNumber distToBeginDriveToGamepiece =
       new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
 
-  private static LoggedTunableNumber useVisionForDriving =
+  private static final LoggedTunableNumber useVisionForDriving =
       new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
 
-  private static LoggedTunableNumber confirmationTime =
+  private static final LoggedTunableNumber confirmationTime =
       new LoggedTunableNumber("AutoSubstateMachine/confirmationTime", 0.8);
 
-  protected static LoggedTunableNumber slowDownFactor =
+  protected static final LoggedTunableNumber slowDownFactor =
       new LoggedTunableNumber("AutoSubstateMachine/slowDownFactor", 1.0);
 
   /** Creates a new AutoSubstateMachine. */

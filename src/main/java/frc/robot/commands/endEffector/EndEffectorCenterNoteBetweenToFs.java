@@ -7,6 +7,7 @@ package frc.robot.commands.endEffector;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -15,19 +16,19 @@ import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffectorCenterNoteBetweenToFs extends Command {
+  private static final TunableNumberGroup group = new TunableNumberGroup("EndEffectorCentering");
+  private static final LoggedTunableNumber kP = group.build("kP", 0.03);
+  private static final LoggedTunableNumber kI = group.build("kI", 0.0);
+  private static final LoggedTunableNumber kD = group.build("kD", 0.0);
+  private static final LoggedTunableNumber tolerance = group.build("toleranceInches", 0.2);
+
   /** Creates a new EndEffectorCenterNoteBetweenToFs. */
-  EndEffector endEffector;
+  private final EndEffector endEffector;
 
-  Intake intake;
-  Shooter shooter;
+  private final Intake intake;
+  private final Shooter shooter;
 
-  PIDController controller;
-
-  LoggedTunableNumber kP = new LoggedTunableNumber("EndEffectorCentering/kP", 0.03);
-  LoggedTunableNumber kI = new LoggedTunableNumber("EndEffectorCentering/kI", 0.0);
-  LoggedTunableNumber kD = new LoggedTunableNumber("EndEffectorCentering/kD", 0.0);
-  LoggedTunableNumber tolerance =
-      new LoggedTunableNumber("EndEffectorCentering/toleranceInches", 0.2);
+  private final PIDController controller;
 
   public EndEffectorCenterNoteBetweenToFs(EndEffector endEffector, Intake intake, Shooter shooter) {
     this.endEffector = endEffector;

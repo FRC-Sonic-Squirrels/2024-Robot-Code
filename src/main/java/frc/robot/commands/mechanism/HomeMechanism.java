@@ -14,12 +14,6 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 
 public class HomeMechanism extends Command {
-  private Elevator elevator;
-  private Arm arm;
-  private boolean armReset = false;
-  private boolean elevatorReset = false;
-  private boolean beginHomingArm = false;
-
   private static final TunableNumberGroup group = new TunableNumberGroup("HomeMechanism");
 
   private static final LoggedTunableNumber safeElevatorHeightForArmResetting =
@@ -35,6 +29,12 @@ public class HomeMechanism extends Command {
 
   private static final LoggedTunableNumber homingVelocityMaxToResetArm =
       group.build("homingVelocityMaxToResetArm", 0.02);
+
+  private final Elevator elevator;
+  private final Arm arm;
+  private boolean armReset;
+  private boolean elevatorReset;
+  private boolean beginHomingArm;
 
   /** Creates a new HomeMechanism. */
   public HomeMechanism(Elevator elevator, Arm arm) {

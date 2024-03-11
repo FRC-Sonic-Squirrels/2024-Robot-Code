@@ -124,10 +124,11 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
-  private final LoggedTunableNumber tunableX = new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
-  private final LoggedTunableNumber tunableY = new LoggedTunableNumber("tunableYFromSpeaker", 0);
-
-  private final LoggedTunableNumber passThroughVel =
+  private static final LoggedTunableNumber tunableX =
+      new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
+  private static final LoggedTunableNumber tunableY =
+      new LoggedTunableNumber("tunableYFromSpeaker", 0);
+  private static final LoggedTunableNumber passThroughVel =
       new LoggedTunableNumber("Plop/passThroughVel", 1000);
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;

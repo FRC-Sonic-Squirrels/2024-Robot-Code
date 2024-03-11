@@ -10,14 +10,14 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class HomeShooter extends Command {
-  private Shooter shooter;
-  private boolean shooterReset = false;
-
   private static final TunableNumberGroup group = new TunableNumberGroup("HomeShooter");
 
   private static final LoggedTunableNumber homingVoltage = group.build("homingVoltage", -0.1);
   private static final LoggedTunableNumber homingVelocityMaxToResetShooter =
       group.build("homingVelocityMaxToResetShooter", 0.02);
+
+  private final Shooter shooter;
+  private boolean shooterReset = false;
 
   /** Creates a new HomeMechanism. */
   public HomeShooter(Shooter shooter) {

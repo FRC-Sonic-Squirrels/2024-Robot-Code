@@ -17,6 +17,7 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 import java.util.ArrayList;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -25,24 +26,27 @@ public class Shooter extends SubsystemBase {
 
   public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
-  private static final LoggedTunableNumber pivotkP = group.build("pivotkP");
-  private static final LoggedTunableNumber pivotkD = group.build("pivotkD");
-  private static final LoggedTunableNumber pivotkG = group.build("pivotkG");
+  private static final TunableNumberGroup groupPivot = group.subgroup("Pivot");
+  private static final LoggedTunableNumber pivotkP = groupPivot.build("kP");
+  private static final LoggedTunableNumber pivotkD = groupPivot.build("kD");
+  private static final LoggedTunableNumber pivotkG = groupPivot.build("kG");
   private static final LoggedTunableNumber pivotClosedLoopMaxVelocityConstraint =
-      group.build("pivotClosedLoopMaxVelocityConstraint");
+      groupPivot.build("ClosedLoopMaxVelocityConstraint");
   private static final LoggedTunableNumber pivotClosedLoopMaxAccelerationConstraint =
-      group.build("pivotClosedLoopMaxAccelerationConstraint");
+      groupPivot.build("ClosedLoopMaxAccelerationConstraint");
 
-  private static final LoggedTunableNumber launcherkS = group.build("launcherkS");
-  private static final LoggedTunableNumber launcherkP = group.build("launcherkP");
-  private static final LoggedTunableNumber launcherkV = group.build("launcherkV");
+  private static final TunableNumberGroup groupLauncher = group.subgroup("Launcher");
+  private static final LoggedTunableNumber launcherkS = groupLauncher.build("kS");
+  private static final LoggedTunableNumber launcherkP = groupLauncher.build("kP");
+  private static final LoggedTunableNumber launcherkV = groupLauncher.build("kV");
   private static final LoggedTunableNumber launcherClosedLoopMaxAccelerationConstraint =
-      group.build("launcherClosedLoopMaxAccelerationConstraint");
+      groupLauncher.build("ClosedLoopMaxAccelerationConstraint");
 
-  private static final LoggedTunableNumber kickerkP = group.build("Kicker/kP");
-  private static final LoggedTunableNumber kickerkV = group.build("Kicker/kV");
+  private static final TunableNumberGroup groupKicker = group.subgroup("Kicker");
+  private static final LoggedTunableNumber kickerkP = groupKicker.build("kP");
+  private static final LoggedTunableNumber kickerkV = groupKicker.build("kV");
   private static final LoggedTunableNumber kickerClosedLoopMaxAccelerationConstraint =
-      group.build("Kicker/ClosedLoopMaxAccelerationConstraint");
+      groupKicker.build("ClosedLoopMaxAccelerationConstraint");
 
   private static final LoggedTunableNumber pivotToleranceDegrees =
       group.build("pivotToleranceDegrees", 0.5);
@@ -92,10 +96,9 @@ public class Shooter extends SubsystemBase {
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
-  private LinearFilter pivotPidLatencyfilter = LinearFilter.movingAverage(20);
+  private final LinearFilter pivotPidLatencyfilter = LinearFilter.movingAverage(20);
 
-  private ArrayList<PIDTargetMeasurement> pivotTargetMeasurements =
-      new ArrayList<PIDTargetMeasurement>();
+  private final List<PIDTargetMeasurement> pivotTargetMeasurements = new ArrayList<>();
 
   private double pivotPidLatency = 0.0;
 

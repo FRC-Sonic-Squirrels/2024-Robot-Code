@@ -8,26 +8,30 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToGamepieceHelper {
-  private PIDController xController = new PIDController(0, 0, 0);
-  private PIDController yController = new PIDController(0, 0, 0);
-  private PIDController rotController = new PIDController(0, 0, 0);
 
-  private TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
+  private static final TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
 
-  private LoggedTunableNumber kP = group.build("kP", 4.0);
-  private LoggedTunableNumber kI = group.build("kI", 0.0);
-  private LoggedTunableNumber kD = group.build("kD", 0.0);
+  private static final LoggedTunableNumber kP = group.build("kP", 4.0);
+  private static final LoggedTunableNumber kI = group.build("kI", 0.0);
+  private static final LoggedTunableNumber kD = group.build("kD", 0.0);
 
-  private LoggedTunableNumber rotationKp = group.build("rotationKp", 4.8);
+  private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.8);
 
-  private LoggedTunableNumber allowedRotationalErrorDegrees =
+  private static final LoggedTunableNumber allowedRotationalErrorDegrees =
       group.build("allowedRotationalErrorDegrees", 20);
-  private LoggedTunableNumber advancedMode = group.build("advancedMode/doAdvancedMotion", 1);
 
-  private Rotation2d gamepieceDirection = new Rotation2d();
+  private static final LoggedTunableNumber advancedMode =
+      group.build("advancedMode/doAdvancedMotion", 1);
+
+  private final PIDController xController = new PIDController(0, 0, 0);
+  private final PIDController yController = new PIDController(0, 0, 0);
+  private final PIDController rotController = new PIDController(0, 0, 0);
+
+  private Rotation2d gamepieceDirection = Constants.zeroRotation2d;
 
   public DriveToGamepieceHelper() {
     xController.reset();

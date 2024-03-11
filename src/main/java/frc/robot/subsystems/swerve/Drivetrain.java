@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.AutoLock;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -44,11 +45,11 @@ import org.littletonrobotics.junction.Logger;
 public class Drivetrain extends SubsystemBase {
   public static final AutoLock odometryLock = new AutoLock();
 
+  public static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
   public static final LoggedTunableNumber driveMotorAccelerationAuto =
-      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationAuto", 1000);
-
+      group.build("SwerveDRIVEAccelerationAuto", 1000);
   public static final LoggedTunableNumber driveMotorAccelerationTele =
-      new LoggedTunableNumber("RobotConfig/SwerveDRIVEAccelerationTele", 1000);
+      group.build("SwerveDRIVEAccelerationTele", 1000);
 
   private final RobotConfig config;
   private final Supplier<Boolean> isAutonomous;

@@ -13,13 +13,11 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -144,11 +142,6 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
     // Logger.recordOutput("Vision/", null);
-
-    // FIXME: remove this eventually
-    Logger.recordOutput("TIME/CTRE TIME", Utils.getCurrentTimeSeconds());
-    Logger.recordOutput("TIME/FPGA TIME", Timer.getFPGATimestamp());
-    Logger.recordOutput("TIME/REAL FPGA", Logger.getRealTimestamp());
 
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();

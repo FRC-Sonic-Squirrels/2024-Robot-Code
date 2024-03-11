@@ -11,10 +11,12 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 
 public class RotateToAngle extends Command {
+  private static final LoggedTunableNumber tunableKP =
+      new LoggedTunableNumber("RotateToAngle/kP", 4.9);
+
   private final DrivetrainWrapper wrapper;
   private final Rotation2d angle;
   private final PIDController rotationalPID = new PIDController(0, 0, 0);
-  private final LoggedTunableNumber tunableKP = new LoggedTunableNumber("RotateToAngle/kP", 4.9);
 
   /** Creates a new RotateToAngle. */
   public RotateToAngle(DrivetrainWrapper wrapper, Rotation2d angle) {
