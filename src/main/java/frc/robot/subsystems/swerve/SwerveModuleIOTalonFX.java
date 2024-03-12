@@ -244,7 +244,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
     if (turnRelativeOffset == null) {
-      if (inputs.turnAbsolutePosition.getRadians() == 0.0) {
+      if (turnAbsolutePositionRaw == 0.0) {
         return null;
       }
 
