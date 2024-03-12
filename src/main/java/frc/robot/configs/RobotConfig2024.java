@@ -217,8 +217,8 @@ public class RobotConfig2024 extends RobotConfig {
   @Override
   public VisionModuleConfiguration[] getVisionModuleObjects() {
     return new VisionModuleConfiguration[] {
-      VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
-      VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      // VisionModuleConfiguration.build(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      // VisionModuleConfiguration.build(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
       VisionModuleConfiguration.build(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
     };
@@ -227,8 +227,9 @@ public class RobotConfig2024 extends RobotConfig {
   @Override
   public VisionModuleConfiguration[] getReplayVisionModules() {
     return new VisionModuleConfiguration[] {
-      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
-      VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_RIGHT_CAMERA_NAME, INTAKE_SIDE_RIGHT),
+      // VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_LEFT_CAMERA_NAME, INTAKE_SIDE_LEFT),
+      // VisionModuleConfiguration.buildReplayStub(INTAKE_SIDE_RIGHT_CAMERA_NAME,
+      // INTAKE_SIDE_RIGHT),
       VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_LEFT_CAMERA_NAME, SHOOTER_SIDE_LEFT),
       VisionModuleConfiguration.buildReplayStub(SHOOTER_SIDE_RIGHT_CAMERA_NAME, SHOOTER_SIDE_RIGHT)
     };
