@@ -15,9 +15,12 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.configs.RobotConfig2024;
 import java.util.List;
@@ -37,9 +40,27 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   private final DCMotorSim turnSim =
       new DCMotorSim(DCMotor.getFalcon500(1), RobotConfig2024.SWERVE_STEER_GEAR_RATIO, 0.004);
 
+  private final SimpleMotorFeedforward driveFeedforward;
+  private final PIDController driveFeedback;
+  private final PIDController turnFeedback;
+  private final double wheelRadius;
+
   private double lastPositionMeters;
   private double driveAppliedVolts;
   private double turnAppliedVolts;
+
+  private double speedSetpoint;
+  private Rotation2d angleSetpoint;
+
+  public SwerveModuleIOSim() {
+    driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+    driveFeedback = new PIDController(0.1, 0.0, 0.0);
+    turnFeedback = new PIDController(10.0, 0.0, 0);
+
+    turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
+
+    wheelRadius = Units.Inches.of(2.0).in(Units.Meters);
+  }
 
   @Override
   public void registerSignalForOdometry(List<BaseStatusSignal> signals) {}
@@ -66,6 +87,20 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
+    // Run closed loop turn control
+    if (angleSetpoint != null) {
+      setTurnVoltage(
+          turnFeedback.calculate(inputs.turnPosition.getRadians(), angleSetpoint.getRadians()));
+    }
+
+    double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
+
+    // Run drive controller
+    double velocityRadPerSec = adjustSpeedSetpoint / wheelRadius;
+    setDriveVoltage(
+        driveFeedforward.calculate(velocityRadPerSec)
+            + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+
     inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
@@ -79,6 +114,8 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   public void setDriveVoltage(double volts) {
     driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     driveSim.setInputVoltage(driveAppliedVolts);
+    speedSetpoint = 0;
+    angleSetpoint = null;
   }
 
   @Override
@@ -95,14 +132,18 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
 
   @Override
   public void setDriveVelocity(
-      double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {}
+      double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {
+    speedSetpoint = velocityMetersPerSec;
+  }
 
   @Override
   public void setDriveClosedLoopConstraints(
       double kP, double kD, double kS, double kV, double kA) {}
 
   @Override
-  public void setTurnPosition(Rotation2d position) {}
+  public void setTurnPosition(Rotation2d position) {
+    angleSetpoint = position;
+  }
 
   @Override
   public void setTurnClosedLoopConstraints(
