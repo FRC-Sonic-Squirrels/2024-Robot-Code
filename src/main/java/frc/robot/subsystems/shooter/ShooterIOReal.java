@@ -158,7 +158,11 @@ public class ShooterIOReal implements ShooterIO {
         kickerCurrentAmps,
         kickerVelocity);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        10, launcherFollowerVoltage, launcherFollowerCurrentAmps);
+        10,
+        launcherLeadVoltage,
+        launcherLeadCurrentAmps,
+        launcherFollowerVoltage,
+        launcherFollowerCurrentAmps);
     BaseStatusSignal.setUpdateFrequencyForAll(
         1, launcherLeadTempCelsius, launcherFollowTempCelsius, kickerTempCelsius, pivotTempCelsius);
 
