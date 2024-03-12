@@ -1005,6 +1005,9 @@ public class RobotContainer {
   }
 
   public void updateVisualization() {
+    // Disable visualization for real robot
+    if (Robot.isReal()) return;
+
     SimpleMechanismVisualization.updateVisualization(
         Constants.zeroRotation2d,
         shooter.getPitch(),

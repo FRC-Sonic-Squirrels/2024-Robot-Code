@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
@@ -43,6 +44,9 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
+  private static final ExecutionTiming timingCommandScheduler =
+      new ExecutionTiming("CommandScheduler");
+
   private static final LoggerGroup logGroupActiveCommands = new LoggerGroup("ActiveCommands");
   private static final LoggerGroup logGroupDIO = new LoggerGroup("DIO");
   private static final LoggerEntry logBreakModeButton = logGroupDIO.build("0");
@@ -155,7 +159,9 @@ public class Robot extends LoggedRobot {
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
-    CommandScheduler.getInstance().run();
+    try (var ignored = timingCommandScheduler.start()) {
+      CommandScheduler.getInstance().run();
+    }
     // Logger.recordOutput("Vision/", null);
 
     robotContainer.applyToDrivetrain();
