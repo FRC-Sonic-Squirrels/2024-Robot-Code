@@ -16,6 +16,7 @@ public class VisionModule {
 
   public VisionResultLoggedFields loggedFields;
   public double lastSuccessfullyProcessedResultTimeStampCTRETime;
+  public VisionResultStatus lastStatus;
 
   public final Alert missingCameraAlert;
 

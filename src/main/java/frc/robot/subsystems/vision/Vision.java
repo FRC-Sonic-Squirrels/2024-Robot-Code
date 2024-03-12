@@ -444,9 +444,14 @@ public class Vision extends SubsystemBase {
         .build("LastSuccessfullyProcessedResultTimeStampCTRETime")
         .info(visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime);
 
-    group
-        .build("*STATUS")
-        .info(fieldsToLog.status().name() + ": " + fieldsToLog.status().additionalInfo);
+    var status = fieldsToLog.status();
+    if ((status == visionModule.lastStatus) && (!status.additionalInfo.contains("SUCCESS"))) {
+      // skip logging details of unsuccessful results that repeat
+      return;
+    }
+    visionModule.lastStatus = status;
+
+    group.build("*STATUS").info(status.name() + ": " + status.additionalInfo);
     group.build("calculatedRobotPose3d").info(fieldsToLog.robotPose3d());
     group.build("calculatedRobotPose2d").info(fieldsToLog.robotPose3d().toPose2d());
     group.build("numSeenTargets").info(fieldsToLog.numSeenTargets());
@@ -458,14 +463,19 @@ public class Vision extends SubsystemBase {
     group.build("xyStandardDeviation").info(fieldsToLog.xyStandardDeviation());
     group.build("thetaStandardDeviation").info(fieldsToLog.thetaStandardDeviation());
 
-    var currentStatus = fieldsToLog.status();
-    boolean addedVisionEstimateToPoseEstimator =
-        (currentStatus == VisionResultStatus.SUCCESSFUL_MULTI_TAG
-                || currentStatus == VisionResultStatus.SUCCESSFUL_SINGLE_TAG
-                || currentStatus
-                    == VisionResultStatus.SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK)
-            ? true
-            : false;
+    boolean addedVisionEstimateToPoseEstimator;
+
+    switch (status) {
+      case SUCCESSFUL_MULTI_TAG:
+      case SUCCESSFUL_SINGLE_TAG:
+      case SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK:
+        addedVisionEstimateToPoseEstimator = true;
+        break;
+
+      default:
+        addedVisionEstimateToPoseEstimator = false;
+        break;
+    }
 
     group.build("SUCCESSFUL_RESULT?").info(addedVisionEstimateToPoseEstimator);
   }
