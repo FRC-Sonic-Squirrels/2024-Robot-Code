@@ -9,12 +9,31 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class VisionGamepiece extends SubsystemBase {
+  private static final String ROOT_TABLE = "VisionGamepiece";
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry logTotalLatencyMs = logGroup.build("totalLatencyMs");
+  private static final LoggerEntry logGamepiecePoseArray = logGroup.build("GamepiecePoseArray");
+
+  private static final LoggerGroup logGroupClosestGamepiece = logGroup.subgroup("ClosestGamepiece");
+  private static final LoggerEntry log_distance = logGroupClosestGamepiece.build("distance");
+  private static final LoggerEntry log_targetYawDegrees =
+      logGroupClosestGamepiece.build("targetYawDegrees");
+  private static final LoggerEntry log_targetPitchDegrees =
+      logGroupClosestGamepiece.build("targetPitchDegrees");
+  private static final LoggerEntry log_poseRobotCentric =
+      logGroupClosestGamepiece.build("poseRobotCentric");
+  private static final LoggerEntry log_pose = logGroupClosestGamepiece.build("pose");
+  private static final LoggerEntry log_timestamp = logGroupClosestGamepiece.build("timestamp");
+
   private final VisionGamepieceIO io;
   private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
 
@@ -29,10 +48,9 @@ public class VisionGamepiece extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("VisionGamepiece")) {
+    try (var ignored = new ExecutionTiming(ROOT_TABLE)) {
       io.updateInputs(inputs);
-
-      Logger.processInputs("VisionGamepiece", inputs);
+      logInputs.info(inputs);
 
       // uncomment if simming for target gamepieces ---------------------------------------
 
@@ -124,7 +142,7 @@ public class VisionGamepiece extends SubsystemBase {
 
       seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
 
-      log("totalLatencyMs", inputs.totalLatencyMs);
+      logTotalLatencyMs.info(inputs.totalLatencyMs);
 
       seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
 
@@ -145,12 +163,12 @@ public class VisionGamepiece extends SubsystemBase {
                 0.0254,
                 new Rotation3d());
 
-        log("ClosestGamepiece/distance", closestGamepiece.getDistance(robotPose).in(Units.Meters));
-        log("ClosestGamepiece/targetYawDegrees", closestGamepiece.getYaw(robotPose));
-        log("ClosestGamepiece/targetPitchDegrees", closestGamepiece.getPitch(robotPose));
-        log("ClosestGamepiece/poseRobotCentric", pose);
-        log("ClosestGamepiece/pose", globalPose);
-        log("ClosestGamepiece/timestamp", closestGamepiece.timestamp_RIOFPGA_capture);
+        log_distance.info(closestGamepiece.getDistance(robotPose).in(Units.Meters));
+        log_targetYawDegrees.info(closestGamepiece.getYaw(robotPose));
+        log_targetPitchDegrees.info(closestGamepiece.getPitch(robotPose));
+        log_poseRobotCentric.info(pose);
+        log_pose.info(globalPose);
+        log_timestamp.info(closestGamepiece.timestamp_RIOFPGA_capture);
       }
 
       var gamepiecePoses = new Pose3d[seenGamePieces.size()];
@@ -158,7 +176,7 @@ public class VisionGamepiece extends SubsystemBase {
         Pose2d pose = seenGamePieces.get(i).globalPose;
         gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
       }
-      log("GamepiecePoseArray", gamepiecePoses);
+      logGamepiecePoseArray.info(gamepiecePoses);
     }
   }
 
@@ -236,35 +254,18 @@ public class VisionGamepiece extends SubsystemBase {
   private void logGamepieceData(
       double yam, double pitch, ProcessedGamepieceData processedGamepieceData, int index) {
     Pose2d robotPose = robotPoseSupplier.get();
-    String baseName = "Gamepiece" + index;
+    var baseGroup = logGroup.subgroup("Gamepiece" + index);
     double distance = processedGamepieceData.getDistance(robotPose).in(Units.Inches);
 
-    log(baseName + "/Raw/yaw", Math.toDegrees(yam));
-    log(baseName + "/Raw/pitch", Math.toDegrees(pitch));
-    log(baseName + "/Processed/distanceInches", distance);
-    log(baseName + "/Processed/targetYaw", processedGamepieceData.getYaw(robotPose));
-    log(baseName + "/Processed/targetPitch", processedGamepieceData.getPitch(robotPose));
-    log(baseName + "/Processed/pose", processedGamepieceData.getRobotCentricPose(robotPose));
-    log(baseName + "/Processed/globalPose", processedGamepieceData.globalPose);
-  }
+    var rawGroup = baseGroup.subgroup("Raw");
+    rawGroup.build("yaw").info(Math.toDegrees(yam));
+    rawGroup.build("pitch").info(Math.toDegrees(pitch));
 
-  private static void log(String key, double value) {
-    Logger.recordOutput("VisionGamepiece/" + key, value);
-  }
-
-  private static void log(String key, Pose2d value) {
-    Logger.recordOutput("VisionGamepiece/" + key, value);
-  }
-
-  private static void log(String key, Pose3d value) {
-    Logger.recordOutput("VisionGamepiece/" + key, value);
-  }
-
-  private static void log(String key, Pose3d[] value) {
-    Logger.recordOutput("VisionGamepiece/" + key, value);
-  }
-
-  private static void log(String key, Rotation2d value) {
-    log(key, value.getDegrees());
+    var processedGroup = baseGroup.subgroup("Processed");
+    processedGroup.build("distanceInches").info(distance);
+    processedGroup.build("targetYaw").info(processedGamepieceData.getYaw(robotPose));
+    processedGroup.build("targetPitch").info(processedGamepieceData.getPitch(robotPose));
+    processedGroup.build("pose").info(processedGamepieceData.getRobotCentricPose(robotPose));
+    processedGroup.build("globalPose").info(processedGamepieceData.globalPose);
   }
 }

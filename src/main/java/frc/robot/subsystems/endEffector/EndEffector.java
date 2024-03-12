@@ -8,14 +8,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
-  private static final TunableNumberGroup group = new TunableNumberGroup("EndEffector");
+  private static final String ROOT_TABLE = "EndEffector";
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       group.build("distanceToTriggerNote", 11.0);
@@ -53,7 +57,8 @@ public class EndEffector extends SubsystemBase {
   public void periodic() {
     try (var ignored = new ExecutionTiming("EndEffector")) {
       io.updateInputs(inputs);
-      Logger.processInputs("EndEffector", inputs);
+      logInputs.info(inputs);
+
       var hc = hashCode();
       if (kS.hasChanged(hc)
           || kP.hasChanged(hc)

@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.littletonrobotics.junction.Logger;
 
 public class StateMachine {
   public enum Status {
@@ -56,7 +55,10 @@ public class StateMachine {
     }
   }
 
+  private static final LoggerGroup logGroup = new LoggerGroup("StateMachine");
+
   private final String name;
+  private final LoggerEntry logName;
   private Status status;
   private StateHandler currentState;
   private double startTime;
@@ -65,6 +67,7 @@ public class StateMachine {
 
   protected StateMachine(String name) {
     this.name = name;
+    logName = logGroup.build(name);
 
     var events = new ArrayList<EventState>();
 
@@ -116,12 +119,10 @@ public class StateMachine {
     currentState = nextState;
     startTimeOfState = Timer.getFPGATimestamp();
 
-    var key = "StateMachine/" + name;
-
     if (currentState instanceof StateHandlerWithName stateWithName) {
-      Logger.recordOutput(key, stateWithName.getName());
+      logName.info(stateWithName.getName());
     } else {
-      Logger.recordOutput(key, nextState.getClass().getName());
+      logName.info(nextState.getClass().getName());
     }
   }
 
@@ -155,7 +156,7 @@ public class StateMachine {
   }
 
   public void logCurrentState(String name) {
-    Logger.recordOutput(name, currentState.getClass().getName());
+    logName.info(currentState.getClass().getName());
   }
 
   private void processEvents() {
@@ -211,7 +212,7 @@ public class StateMachine {
   protected StateHandler suspendForSubStateMachine(
       StateMachine subStateMachine, ResumeStateHandler handler) {
     return stateWithName(
-        "waitForSm " + subStateMachine.name,
+        "waitFor" + subStateMachine.name,
         () -> {
           subStateMachine.advance();
           if (subStateMachine.isRunning()) return null;

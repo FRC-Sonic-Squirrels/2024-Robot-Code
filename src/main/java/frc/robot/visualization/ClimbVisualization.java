@@ -4,11 +4,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import org.littletonrobotics.junction.Logger;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 
 public class ClimbVisualization {
+  private static final LoggerGroup logGroup = new LoggerGroup("AutoClimb");
+  private static final LoggerEntry logPredictedPose3d = logGroup.build("predictedPose3d");
 
-  private static ClimbVisualization instance = new ClimbVisualization();
+  private static final ClimbVisualization instance = new ClimbVisualization();
   private double additionalRobotHeight = 0.0;
   private Pose3d pose = new Pose3d();
 
@@ -30,6 +33,6 @@ public class ClimbVisualization {
   }
 
   public void logPose() {
-    Logger.recordOutput("AutoClimb/predictedPose3d", pose);
+    logPredictedPose3d.info(pose);
   }
 }

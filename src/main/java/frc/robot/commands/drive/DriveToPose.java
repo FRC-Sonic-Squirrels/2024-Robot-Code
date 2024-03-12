@@ -16,28 +16,32 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.GeomUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
-  private final DrivetrainWrapper drive;
-  private final boolean slowMode;
-  private final Supplier<Pose2d> poseSupplier;
+  private static final String ROOT_TABLE = "DriveToPose";
 
-  private final ProfiledPIDController driveController =
-      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
-  private final ProfiledPIDController thetaController =
-      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
-  private double driveErrorAbs;
-  private double thetaErrorAbs;
-  private Translation2d lastSetpointTranslation;
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_DistanceMeasured = logGroup.build("DistanceMeasured");
+  private static final LoggerEntry log_DistanceSetpoint = logGroup.build("DistanceSetpoint");
+  private static final LoggerEntry log_ThetaMeasured = logGroup.build("ThetaMeasured");
+  private static final LoggerEntry log_ThetaSetpoint = logGroup.build("ThetaSetpoint");
+  private static final LoggerEntry log_isScheduled = logGroup.build("isScheduled");
+  private static final LoggerEntry log_DriveControllerIsAtGoal =
+      logGroup.build("DriveControllerIsAtGoal");
+  private static final LoggerEntry log_ThetaControllerIsAtGoal =
+      logGroup.build("ThetaControllerIsAtGoal");
+  private static final LoggerEntry log_Setpoint = logGroup.build("Setpoint");
+  private static final LoggerEntry log_Goal = logGroup.build("Goal");
 
-  private static final TunableNumberGroup group = new TunableNumberGroup("DriveToPose");
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber driveKp = group.build("DriveKp");
   private static final LoggedTunableNumber driveKd = group.build("DriveKd");
@@ -79,10 +83,17 @@ public class DriveToPose extends Command {
     ffMaxRadius.initDefault(0.8);
   }
 
-  /** Drives to the specified pose under full software control. */
-  public DriveToPose(DrivetrainWrapper drive, Pose2d pose) {
-    this(drive, false, pose);
-  }
+  private final DrivetrainWrapper drive;
+  private final boolean slowMode;
+  private final Supplier<Pose2d> poseSupplier;
+
+  private final ProfiledPIDController driveController =
+      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+  private final ProfiledPIDController thetaController =
+      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+  private double driveErrorAbs;
+  private double thetaErrorAbs;
+  private Translation2d lastSetpointTranslation;
 
   /** Drives to the specified pose under full software control. */
   public DriveToPose(DrivetrainWrapper drive, boolean slowMode, Pose2d pose) {
@@ -193,18 +204,17 @@ public class DriveToPose extends Command {
             driveVelocity.getX(), driveVelocity.getY(), thetaVelocity, currentPose.getRotation()));
 
     // Log data
-    Logger.recordOutput("DriveToPose/DistanceMeasured", currentDistance);
-    Logger.recordOutput("DriveToPose/DistanceSetpoint", driveController.getSetpoint().position);
-    Logger.recordOutput("DriveToPose/ThetaMeasured", currentPose.getRotation().getRadians());
-    Logger.recordOutput("DriveToPose/ThetaSetpoint", thetaController.getSetpoint().position);
-    Logger.recordOutput(
-        "Odometry/DriveToPoseSetpoint",
+    log_DistanceMeasured.info(currentDistance);
+    log_DistanceSetpoint.info(driveController.getSetpoint().position);
+    log_ThetaMeasured.info(currentPose.getRotation().getRadians());
+    log_ThetaSetpoint.info(thetaController.getSetpoint().position);
+    log_Setpoint.info(
         new Pose2d(
             lastSetpointTranslation, new Rotation2d(thetaController.getSetpoint().position)));
-    Logger.recordOutput("Odometry/DriveToPoseGoal", targetPose);
-    Logger.recordOutput("DriveToPose/isScheduled", isScheduled());
-    Logger.recordOutput("DriveToPose/DriveControllerIsAtGoal", driveController.atGoal());
-    Logger.recordOutput("DriveToPose/ThetaControllerIsAtGoal", thetaController.atGoal());
+    log_Goal.info(targetPose);
+    log_isScheduled.info(isScheduled());
+    log_DriveControllerIsAtGoal.info(driveController.atGoal());
+    log_ThetaControllerIsAtGoal.info(thetaController.atGoal());
   }
 
   @Override
@@ -215,8 +225,8 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.resetVelocityOverride();
-    Logger.recordOutput("Odometry/DriveToPoseSetpoint", new double[] {});
-    Logger.recordOutput("Odometry/DriveToPoseGoal", new double[] {});
+    log_Setpoint.info(new double[] {});
+    log_Goal.info(new double[] {});
   }
 
   /** Checks if the robot is stopped at the final pose. */

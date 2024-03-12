@@ -8,20 +8,25 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.subsystems.elevator.Elevator;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSetHeight extends Command {
-  /** Creates a new ElevatorSetHeight. */
-  Elevator elevator;
+  private static final String ROOT_TABLE = "ElevatorSetHeight";
 
-  Supplier<Measure<Distance>> heightSupplier;
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_targetHeight = logGroup.build("targetHeight");
+
+  /** Creates a new ElevatorSetHeight. */
+  private final Elevator elevator;
+
+  private final Supplier<Measure<Distance>> heightSupplier;
 
   public ElevatorSetHeight(Elevator elevator, Supplier<Measure<Distance>> heightSupplier) {
     this.elevator = elevator;
     this.heightSupplier = heightSupplier;
-    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -38,7 +43,7 @@ public class ElevatorSetHeight extends Command {
   @Override
   public void execute() {
     elevator.setHeight(heightSupplier.get());
-    Logger.recordOutput("ElevatorSetHeight/targetHeight", heightSupplier.get().in(Units.Inches));
+    log_targetHeight.info(heightSupplier.get().in(Units.Inches));
   }
 
   // Called once the command ends or is interrupted.

@@ -1,10 +1,13 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.geometry.*;
-import org.littletonrobotics.junction.Logger;
 
 public class ShootingSolver {
   public static final int DebugSpew = 0;
+
+  private static final LoggerGroup logGroup = new LoggerGroup("ShootingSolver");
+  private static final LoggerEntry logThetaNote = logGroup.build("thetaNote");
+  private static final LoggerEntry logSpeakerHeading = logGroup.build("speakerHeading");
 
   private final Translation3d Pspeaker;
   private final Translation3d PaxisOfRotationShooter;
@@ -82,7 +85,7 @@ public class ShootingSolver {
 
     // Direction of the note to face the speaker.
     var thetaNote = Math.atan2(dPspeaker.getY(), dPspeaker.getX());
-    Logger.recordOutput("ShootingSolver/thetaNote", Math.toDegrees(thetaNote));
+    logThetaNote.info(Math.toDegrees(thetaNote));
 
     // Robot relative translation of axis of rotation of shooter
     var Paxis = PaxisOfRotationShooter.rotateBy(new Rotation3d(0.0, 0.0, thetaNote));
@@ -99,7 +102,7 @@ public class ShootingSolver {
     // Direction to the speaker from the note.
     double speakerHeading = Math.atan2(dPspeakerAxisY, dPspeakerAxisX);
 
-    Logger.recordOutput("ShootingSolver/speakerHeading", Math.toDegrees(speakerHeading));
+    logSpeakerHeading.info(Math.toDegrees(speakerHeading));
 
     // Horizontal dist to speaker
     var xyDistToSpeaker = Math.hypot(dPspeakerAxisX, dPspeakerAxisY);

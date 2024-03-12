@@ -6,14 +6,20 @@ package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.shooter.Shooter;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterSimpleShoot extends Command {
+  private static final String ROOT_TABLE = "ShooterSimpleShot";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_validShot = logGroup.build("validShot");
+
   private final Shooter shooter;
   private final EndEffector endEffector;
   private final DoubleSupplier rpmSupplier;
@@ -88,7 +94,7 @@ public class ShooterSimpleShoot extends Command {
       endEffector.setPercentOut(0.0);
     }
 
-    Logger.recordOutput("ShooterSimpleShot/validShot", validShot);
+    log_validShot.info(validShot);
   }
 
   // Called once the command ends or is interrupted.
@@ -100,7 +106,7 @@ public class ShooterSimpleShoot extends Command {
 
     shooter.setPivotPosition(Constants.ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
 
-    Logger.recordOutput("ShooterSimpleShot/validShot", false);
+    log_validShot.info(false);
   }
 
   // Returns true when the command should end.

@@ -19,11 +19,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
-import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   public static final double ODOMETRY_FREQUENCY = 250.0;
@@ -34,9 +34,10 @@ public class SwerveModule {
   public static final LoggedTunableNumber turnAcceleration =
       group.build("SwerveTurnAcceleration", 200);
 
+  private final LoggerEntry log_index;
+
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-  private final String index;
   private final double wheelRadius;
 
   private final LoggedTunableNumber driveKS;
@@ -55,7 +56,7 @@ public class SwerveModule {
 
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
-    this.index = String.format("SwerveModule%d", index);
+    this.log_index = new LoggerEntry(String.format("SwerveModule%d", index));
 
     this.wheelRadius = config.getWheelRadius().in(Units.Meters);
 
@@ -88,8 +89,8 @@ public class SwerveModule {
   }
 
   public void periodic() {
-    try (var ignored = new ExecutionTiming(index)) {
-      Logger.processInputs(index, inputs);
+    try (var ignored = new ExecutionTiming(log_index.key)) {
+      log_index.info(inputs);
 
       // update Tuneable PID and FF values
       int hc = hashCode();

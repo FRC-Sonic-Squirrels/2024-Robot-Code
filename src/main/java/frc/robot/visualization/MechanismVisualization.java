@@ -5,10 +5,15 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.Units;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class MechanismVisualization {
+  private static final LoggerGroup logGroup = new LoggerGroup("Visualization");
+  private static final LoggerEntry logMechanism = logGroup.build("Mechanism");
+  private static final LoggerEntry logTestPose = logGroup.build("TestPose");
+
   private static Pose3d elevatorStage = new Pose3d();
   private static Pose3d elevatorCarriage = new Pose3d();
   private static Pose3d arm = new Pose3d();
@@ -56,10 +61,7 @@ public class MechanismVisualization {
   }
 
   public static void logMechanism() {
-    Logger.recordOutput(
-        "Visualization/Mechanism",
-        new Pose3d[] {elevatorStage, elevatorCarriage, arm, shooter, gamepiece});
-
-    Logger.recordOutput("Visualization/TestPose", new Pose2d());
+    logMechanism.info(elevatorStage, elevatorCarriage, arm, shooter, gamepiece);
+    logTestPose.info(new Pose2d());
   }
 }

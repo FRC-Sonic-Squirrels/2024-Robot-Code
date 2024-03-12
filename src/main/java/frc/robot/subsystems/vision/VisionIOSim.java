@@ -11,7 +11,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.configs.RobotConfig;
 import java.util.EnumSet;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -22,9 +21,9 @@ public class VisionIOSim implements VisionIO {
   private double lastTimestamp = 0;
   private PhotonPipelineResult lastResult = new PhotonPipelineResult();
 
-  private Supplier<Pose2d> poseSupplier;
+  private final Supplier<Pose2d> poseSupplier;
 
-  private AprilTagFieldLayout layout;
+  private final AprilTagFieldLayout layout;
 
   private final PhotonCamera camera;
   private final PhotonCameraSim cameraSim;
@@ -38,7 +37,7 @@ public class VisionIOSim implements VisionIO {
     this.poseSupplier = poseSupplier;
     this.layout = config.getAprilTagFieldLayout();
 
-    Logger.recordOutput("Vision/configTagAmount", config.getAprilTagFieldLayout().getTags().size());
+    Vision.logConfigTagAmount.info(config.getAprilTagFieldLayout().getTags().size());
 
     var cameraProp = new SimCameraProperties();
     // FIXME: get these values for the cameras we use

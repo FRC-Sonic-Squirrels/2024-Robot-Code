@@ -6,14 +6,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class DriveToGamepieceHelper {
+  private static final String ROOT_TABLE = "DriveToGamepiece";
 
-  private static final TunableNumberGroup group = new TunableNumberGroup("DriveToGamepiece");
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_rotationalErrorDegrees = logGroup.build("rotationalError");
+  private static final LoggerEntry log_xVel = logGroup.build("xVel");
+  private static final LoggerEntry log_yVel = logGroup.build("yVel");
+  private static final LoggerEntry log_rotVel = logGroup.build("rotVel");
+  private static final LoggerEntry log_isAtTarget = logGroup.build("isAtTarget");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber kP = group.build("kP", 4.0);
   private static final LoggedTunableNumber kI = group.build("kI", 0.0);
@@ -70,8 +79,6 @@ public class DriveToGamepieceHelper {
     while (rotationalErrorDegrees >= 180) rotationalErrorDegrees -= 360;
     rotationalErrorDegrees = Math.abs(rotationalErrorDegrees);
 
-    Logger.recordOutput("rotationalErrorDegrees", rotationalErrorDegrees);
-
     double allowedRotationalErrorDegreesValue = allowedRotationalErrorDegrees.get();
     if (advancedMode.get() == 0) {
       xVel =
@@ -96,17 +103,12 @@ public class DriveToGamepieceHelper {
 
     rotVel =
         rotController.calculate(pose.getRotation().getRadians(), gamepieceDirection.getRadians());
-    // }
 
-    Logger.recordOutput("DriveToGamepiece/rotationalErrorDegrees", rotationalErrorDegrees);
-    Logger.recordOutput("DriveToGamepiece/xVel", xVel);
-    Logger.recordOutput("DriveToGamepiece/yVel", yVel);
-    Logger.recordOutput("DriveToGamepiece/rotVel", rotVel);
-
-    Logger.recordOutput("ActiveCommands/DriveToGamepiece", true);
-
-    Logger.recordOutput(
-        "DriveToGamepiece/isAtTarget",
+    log_rotationalErrorDegrees.info(rotationalErrorDegrees);
+    log_xVel.info(xVel);
+    log_yVel.info(yVel);
+    log_rotVel.info(rotVel);
+    log_isAtTarget.info(
         xController.atSetpoint() && yController.atSetpoint() && rotController.atSetpoint());
 
     return ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotVel, pose.getRotation());

@@ -24,11 +24,38 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.visualization.GamepieceVisualization;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class ShooterScoreSpeakerStateMachine extends StateMachine {
-  private static final TunableNumberGroup group = new TunableNumberGroup("ShooterScoreSpeaker");
+  private static final String ROOT_TABLE = "ShooterScoreSpeaker";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_cancelled = logGroup.build("cancelled");
+  private static final LoggerEntry log_TimeToShoot = logGroup.build("TimeToShoot");
+  private static final LoggerEntry log_simpleShot = logGroup.build("simpleShot");
+
+  private static final LoggerGroup logGroupSub = logGroup.subgroup("shootingConfimation");
+  private static final LoggerEntry log_launcherAtRPM = logGroupSub.build("launcherAtRPM");
+  private static final LoggerEntry log_pivotAtAngle = logGroupSub.build("pivotAtAngle");
+  private static final LoggerEntry log_shootingPosition = logGroupSub.build("shootingPosition");
+  private static final LoggerEntry log_forceShoot = logGroupSub.build("forceShoot");
+  private static final LoggerEntry log_driverConfirmation = logGroupSub.build("driverConfirmation");
+  private static final LoggerEntry log_atThetaTarget = logGroupSub.build("atThetaTarget");
+  private static final LoggerEntry log_belowMaxSpeed = logGroupSub.build("belowMaxSpeed");
+  private static final LoggerEntry log_belowMaxRotVel = logGroupSub.build("belowMaxRotVel");
+  private static final LoggerEntry log_shooterSolver = logGroupSub.build("shooterSolver");
+  private static final LoggerEntry log_omega = logGroupSub.build("omega");
+  private static final LoggerEntry log_rotationalError = logGroupSub.build("rotationalError");
+  private static final LoggerEntry log_CurrentHeadingDegrees =
+      logGroupSub.build("CurrentHeadingDegrees");
+  private static final LoggerEntry log_headingTargetDegrees =
+      logGroupSub.build("headingTargetDegrees");
+  private static final LoggerEntry log_pitchTargetDegrees = logGroupSub.build("pitchTargetDegrees");
+  private static final LoggerEntry log_pitchOffset = logGroupSub.build("pitchOffset");
+  private static final LoggerEntry log_xyDistanceFromSpeaker =
+      logGroupSub.build("xyDistanceFromSpeaker");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 9000.0);
 
@@ -229,9 +256,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     updateSolver();
     rotateToSpeaker();
-    Logger.recordOutput("ShooterScoreSpeaker/cancelled", false);
+    log_cancelled.info(false);
     if (noNoteInRobot.getAsBoolean()) {
-      Logger.recordOutput("ShooterScoreSpeaker/cancelled", true);
+      log_cancelled.info(true);
       return setDone();
     }
 
@@ -322,15 +349,16 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     var forceShoot = stateRunningLongerThan(forceShotIn);
 
-    log("ShooterScoreSpeakerStateMachine/simpleShot", simpleShot);
-    log("shootingConfimation/launcherAtRPM", launcherAtRpm);
-    log("shootingConfimation/pivotAtAngle", pivotAtAngle);
-    log("shootingConfimation/shootingPosition", validShootingPosition());
-    log("shootingConfimation/forceShoot", forceShoot);
-    log("shootingConfimation/driverConfirmation", externalConfirmation);
-    log("shootingConfimation/atThetaTarget", atThetaTarget);
-    log("shootingConfimation/belowMaxSpeed", belowMaxSpeed);
-    log("shootingConfimation/belowMaxRotVel", belowMaxRotVel);
+    log_simpleShot.info(simpleShot);
+
+    log_launcherAtRPM.info(launcherAtRpm);
+    log_pivotAtAngle.info(pivotAtAngle);
+    log_shootingPosition.info(validShootingPosition());
+    log_forceShoot.info(forceShoot);
+    log_driverConfirmation.info(externalConfirmation);
+    log_atThetaTarget.info(atThetaTarget);
+    log_belowMaxSpeed.info(belowMaxSpeed);
+    log_belowMaxRotVel.info(belowMaxRotVel);
 
     if ((launcherAtRpm
             && pivotAtAngle
@@ -362,8 +390,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     endEffector.setVelocity(shootingLoadingVelocity.get());
 
     if (!shooter.noteInShooter()) {
-      Logger.recordOutput(
-          "ShooterScoreSpeaker/TimeToShoot", Timer.getFPGATimestamp() - startOfShooting);
+      log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
       return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
@@ -391,7 +418,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private void rotateToSpeaker() {
     if (solverResult != null) {
-      log("shooterSolver", true);
+      log_shooterSolver.info(true);
 
       double currentRotation = drivetrainWrapper.getRotationGyroOnly().getRadians();
       double omega =
@@ -400,13 +427,13 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         drivetrainWrapper.setRotationOverride(omega);
       }
 
-      log("omega", omega);
-      log("rotationalError", Math.toDegrees(rotationController.getPositionError()));
+      log_omega.info(omega);
+      log_rotationalError.info(Math.toDegrees(rotationController.getPositionError()));
     } else {
-      log("shooterSolver", false);
+      log_shooterSolver.info(false);
     }
 
-    log("CurrentHeadingDegrees", drivetrainWrapper.getRotationGyroOnly().getDegrees());
+    log_CurrentHeadingDegrees.info(drivetrainWrapper.getRotationGyroOnly().getDegrees());
   }
 
   private boolean validShootingPosition() {
@@ -465,22 +492,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                       Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getDegrees()));
       desiredShootingHeading = solverResult.heading();
 
-      log("headingTargetDegrees", desiredShootingHeading);
-      log("pitchTargetDegrees", desiredShootingPitch);
-      log("pitchOffset", offset);
-      log("xyDistanceFromSpeaker", distance);
+      log_headingTargetDegrees.info(desiredShootingHeading);
+      log_pitchTargetDegrees.info(desiredShootingPitch);
+      log_pitchOffset.info(offset);
+      log_xyDistanceFromSpeaker.info(distance);
     }
-  }
-
-  private static void log(String key, boolean value) {
-    Logger.recordOutput("ShooterScoreSpeaker/" + key, value);
-  }
-
-  private static void log(String key, double value) {
-    Logger.recordOutput("ShooterScoreSpeaker/" + key, value);
-  }
-
-  private static void log(String key, Rotation2d value) {
-    log(key, value.getDegrees());
   }
 }

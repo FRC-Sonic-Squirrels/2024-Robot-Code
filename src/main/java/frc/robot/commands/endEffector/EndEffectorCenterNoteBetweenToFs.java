@@ -7,16 +7,23 @@ package frc.robot.commands.endEffector;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import org.littletonrobotics.junction.Logger;
 
 public class EndEffectorCenterNoteBetweenToFs extends Command {
-  private static final TunableNumberGroup group = new TunableNumberGroup("EndEffectorCentering");
+  private static final String ROOT_TABLE = "EndEffectorCentering";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_difference = logGroup.build("difference");
+  private static final LoggerEntry log_percent = logGroup.build("percent");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber kP = group.build("kP", 0.03);
   private static final LoggedTunableNumber kI = group.build("kI", 0.0);
   private static final LoggedTunableNumber kD = group.build("kD", 0.0);
@@ -60,26 +67,26 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
       var shooterSideTofSeenGamepiece = endEffector.shooterSideTOFDetectGamepiece();
 
       // maybe note backed up into intake?
-      // if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-      //   endEffector.setVelocity(1200);
+      if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
+        endEffector.setVelocity(1200);
 
-      // } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-      //   endEffector.setPercentOut(0.3);
+      } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
+        endEffector.setPercentOut(0.3);
 
-      // } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-      //   endEffector.setPercentOut(-0.3);
+      } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
+        endEffector.setPercentOut(-0.3);
 
-      // } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-      //   endEffector.setPercentOut(0.0);
-      // }
+      } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
+        endEffector.setPercentOut(0.0);
+      }
     }
     // New Centering Code
     double difference = endEffector.noteOffsetInches();
-    Logger.recordOutput("EndEffectorCenter/difference", difference);
+    log_difference.info(difference);
     if (Double.isFinite(difference)) {
       double percent = controller.calculate(difference, 0.0);
       percent = -MathUtil.clamp(percent, -0.35, 0.35);
-      Logger.recordOutput("EndEffectorCenter/percent", percent);
+      log_percent.info(percent);
 
       if (Math.abs(percent) <= 0.05) {
         endEffector.setPercentOut(0.0);

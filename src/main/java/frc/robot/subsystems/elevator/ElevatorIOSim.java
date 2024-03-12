@@ -9,10 +9,9 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOSim implements ElevatorIO {
-  private ElevatorSim sim =
+  private final ElevatorSim sim =
       new ElevatorSim(
           DCMotor.getFalcon500Foc(1),
           Constants.ElevatorConstants.GEAR_RATIO,
@@ -41,14 +40,14 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     sim.update(0.02);
-    Logger.recordOutput("Elevator/actualTargetHeight", targetHeight.in(Units.Inches));
+    Elevator.logSIM_ActualTargetHeight.info(targetHeight.in(Units.Inches));
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
       appliedVolts = feedback.calculate(inputs.heightInches, targetHeight.in(Units.Inches)) + kG;
     } else {
       appliedVolts = openLoopVolts;
     }
 
-    Logger.recordOutput("Elevator/error", feedback.getPositionError());
+    Elevator.logSIM_Error.info(feedback.getPositionError());
 
     sim.setInputVoltage(appliedVolts);
 

@@ -7,12 +7,21 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.List;
-import org.littletonrobotics.junction.Logger;
 
 public class ChoreoHelper {
+  private static final String ROOT_TABLE = "ChoreoHelper";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_stateLinearVel = logGroup.build("stateLinearVel");
+  private static final LoggerEntry log_closestPose = logGroup.build("closestPose");
+  private static final LoggerEntry log_optimalPose = logGroup.build("optimalPose");
+  private static final LoggerEntry log_desiredVelocity = logGroup.build("desiredVelocity");
+
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
   private final PIDController yFeedback;
@@ -65,7 +74,7 @@ public class ChoreoHelper {
 
     if (closestState != null) {
       this.timeOffset = closestState.timestamp;
-      log("closestPose", closestState.getPose());
+      log_closestPose.info(closestState.getPose());
     }
 
     this.initialTime = initialTime;
@@ -107,12 +116,12 @@ public class ChoreoHelper {
     double xVel = state.velocityX + xFeedback.calculate(x, state.x);
     double yVel = state.velocityY + yFeedback.calculate(y, state.y);
 
-    log("stateLinearVel", Math.hypot(state.velocityX, state.velocityY));
+    log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
     double theta = rotation.getRadians();
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
-    log("optimalPose", state.getPose());
-    log("desiredVelocity", new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
+    log_optimalPose.info(state.getPose());
+    log_desiredVelocity.info(new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
 
     if (timestamp > traj.getTotalTime()) return null;
 
@@ -149,13 +158,5 @@ public class ChoreoHelper {
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static void log(String key, double value) {
-    Logger.recordOutput("ChoreoHelper/" + key, value);
-  }
-
-  private static void log(String key, Pose2d value) {
-    Logger.recordOutput("ChoreoHelper/" + key, value);
   }
 }

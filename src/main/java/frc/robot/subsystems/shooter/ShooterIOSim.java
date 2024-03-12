@@ -10,11 +10,24 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.lib.team2930.LoggerEntry;
 import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOSim implements ShooterIO {
+  public static final LoggerEntry log_error = Shooter.logGroup.build("SIM_error");
+  public static final LoggerEntry log_feedForward = Shooter.logGroup.build("SIM_feedForward");
+  public static final LoggerEntry log_outputVoltage = Shooter.logGroup.build("SIM_outputVoltage");
+  public static final LoggerEntry log_targetVelRadPerSec =
+      Shooter.logGroup.build("SIM_targetVelRadPerSec");
+  public static final LoggerEntry log_currentVelRadPerSec =
+      Shooter.logGroup.build("SIM_currentVelRadPerSec");
+  public static final LoggerEntry log_pitchController =
+      Shooter.logGroup.build("SIM_pitchController");
+  public static final LoggerEntry log_pivotControlMode =
+      Shooter.logGroup.build("SIM_pivotControlMode");
+  public static final LoggerEntry log_targetPositionDegrees =
+      Shooter.logGroup.build("SIM_targetPositionDegrees");
 
   private final SingleJointedArmSim pivot =
       new SingleJointedArmSim(
@@ -102,8 +115,7 @@ public class ShooterIOSim implements ShooterIO {
                   inputs.pivotPosition.getRadians(), pivotClosedLoopTargetAngle.getRadians())
               + ff;
 
-      Logger.recordOutput("Shooter/error", pivotFeedback.getPositionError());
-
+      log_error.info(pivotFeedback.getPositionError());
     } else if (pivotControlMode.equals(ControlMode.VELOCITY)) {
 
       pivotControlEffort =
@@ -114,21 +126,19 @@ public class ShooterIOSim implements ShooterIO {
       pivotControlEffort = pivotOpenLoopVolts;
     }
 
-    Logger.recordOutput("Shooter/feedForward", ff);
+    log_feedForward.info(ff);
 
     launcherMotorSim.setInputVoltage(launcherOpenLoopVolts);
 
     pivot.setInputVoltage(MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
     kickerMotorSim.setInputVoltage(MathUtil.clamp(kickerVolts, -12.0, 12.0));
-    Logger.recordOutput("Shooter/outputVoltage", MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
-
-    Logger.recordOutput("Shooter/targetVelRadPerSec", pivotTargetVelRadPerSec);
-    Logger.recordOutput("Shooter/currentVelRadPerSec", pivot.getVelocityRadPerSec());
-    Logger.recordOutput(
-        "Shooter/pitchController",
+    log_outputVoltage.info(MathUtil.clamp(pivotControlEffort, -12.0, 12.0));
+    log_targetVelRadPerSec.info(pivotTargetVelRadPerSec);
+    log_currentVelRadPerSec.info(pivot.getVelocityRadPerSec());
+    log_pitchController.info(
         pivotVelController.calculate(pivot.getVelocityRadPerSec(), pivotTargetVelRadPerSec));
-    Logger.recordOutput("Shooter/pivotControlMode", pivotControlMode.toString());
-    Logger.recordOutput("Shooter/targetPositionDegrees", pivotClosedLoopTargetAngle.getDegrees());
+    log_pivotControlMode.info(pivotControlMode.toString());
+    log_targetPositionDegrees.info(pivotClosedLoopTargetAngle.getDegrees());
   }
 
   @Override

@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.robot.autonomous.AutosManager.Auto;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -41,6 +43,19 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
+  private static final LoggerGroup logGroupActiveCommands = new LoggerGroup("ActiveCommands");
+  private static final LoggerGroup logGroupDIO = new LoggerGroup("DIO");
+  private static final LoggerEntry logBreakModeButton = logGroupDIO.build("0");
+  private static final LoggerEntry logHomeSensorsButton = logGroupDIO.build("1");
+  private static final LoggerGroup logGroupAuto = new LoggerGroup("Auto");
+  private static final LoggerEntry logCurrentChooserValue =
+      logGroupAuto.build("currentChooserValue");
+  private static final LoggerEntry logSelectedAuto = logGroupAuto.build("SelectedAuto");
+  private static final LoggerGroup logGroupSimulatedRobot = new LoggerGroup("SimulatedRobot");
+  private static final LoggerEntry logCurrentDraws = logGroupSimulatedRobot.build("currentDraws");
+  private static final LoggerEntry logBatteryVoltage =
+      logGroupSimulatedRobot.build("batteryVoltage");
+
   private RobotContainer robotContainer;
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
@@ -116,11 +131,11 @@ public class Robot extends LoggedRobot {
 
     var commandScheduler = CommandScheduler.getInstance();
     commandScheduler.onCommandInitialize(
-        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), true));
+        command -> logGroupActiveCommands.build(command.getName()).info(true));
     commandScheduler.onCommandInterrupt(
-        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
+        command -> logGroupActiveCommands.build(command.getName()).info(false));
     commandScheduler.onCommandFinish(
-        command -> Logger.recordOutput("ActiveCommands/" + command.getName(), false));
+        command -> logGroupActiveCommands.build(command.getName()).info(false));
     robotContainer.resetSubsystems();
 
     // Dashboard buttons to turn off/on cameras
@@ -146,8 +161,8 @@ public class Robot extends LoggedRobot {
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();
 
-    Logger.recordOutput("DIO/0", robotContainer.breakModeButton.get());
-    Logger.recordOutput("DIO/1", robotContainer.homeSensorsButton.get());
+    logBreakModeButton.info(robotContainer.breakModeButton.get());
+    logHomeSensorsButton.info(robotContainer.homeSensorsButton.get());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -174,8 +189,8 @@ public class Robot extends LoggedRobot {
           initialPose = AllianceFlipUtil.flipPoseForAlliance(initialPose);
         }
 
-        Logger.recordOutput("Auto/currentChooserValue", currentChooserSelectedName);
-        Logger.recordOutput("Auto/SelectedAuto", selectedAuto.name());
+        logCurrentChooserValue.info(currentChooserSelectedName);
+        logSelectedAuto.info(selectedAuto.name());
       } else {
         initialPose = null;
       }
@@ -275,8 +290,7 @@ public class Robot extends LoggedRobot {
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(robotContainer.getCurrentDraws()));
 
-    Logger.recordOutput("SimulatedRobot/currentDraws", robotContainer.getCurrentDraws());
-
-    Logger.recordOutput("SimulatedRobot/batteryVoltage", RobotController.getBatteryVoltage());
+    logCurrentDraws.info(robotContainer.getCurrentDraws());
+    logBatteryVoltage.info(RobotController.getBatteryVoltage());
   }
 }

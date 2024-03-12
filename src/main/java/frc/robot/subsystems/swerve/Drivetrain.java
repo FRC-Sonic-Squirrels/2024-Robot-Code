@@ -27,9 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.team2930.AutoLock;
-import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -40,9 +38,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class Drivetrain extends SubsystemBase {
+  private static final LoggerGroup logGroupDrive = new LoggerGroup("Drive");
+  private static final LoggerEntry logGyro = logGroupDrive.build("Gyro");
+
+  private static final LoggerGroup logGroupSwerveStates = new LoggerGroup("SwerveStates");
+  private static final LoggerEntry logSwerveStatesSetpoints =
+      logGroupSwerveStates.build("Setpoints");
+  private static final LoggerEntry logSwerveStatesSetpointsOptimized =
+      logGroupSwerveStates.build("SetpointsOptimized");
+  private static final LoggerEntry logSwerveStatesMeasured = logGroupSwerveStates.build("Measured");
+
+  private static final LoggerGroup logGroupOdometryThread = new LoggerGroup("OdometryThread");
+  private static final LoggerEntry logOdometryStatus = logGroupOdometryThread.build("status");
+  private static final LoggerEntry logOdometryTimestampSpread =
+      logGroupOdometryThread.build("timestampSpread");
+  private static final LoggerEntry logOdometryTwist = logGroupOdometryThread.build("twist");
+  private static final LoggerEntry logOdometryCrash = logGroupOdometryThread.build("crash");
+
+  private static final LoggerGroup logGroupDrivetrain = new LoggerGroup("Drivetrain");
+  private static final LoggerEntry logDrivetrain_leftoverVelocity =
+      logGroupDrivetrain.build("leftoverVelocity");
+  private static final LoggerEntry logDrivetrain_speedsX = logGroupDrivetrain.build("speedsX");
+  private static final LoggerEntry logDrivetrain_speedsY = logGroupDrivetrain.build("speedsY");
+  private static final LoggerEntry logDrivetrain_linearSpeed =
+      logGroupDrivetrain.build("linearSpeed");
+  private static final LoggerEntry logDrivetrain_linearSpeedMax =
+      logGroupDrivetrain.build("linearSpeedMax");
+  private static final LoggerEntry logDrivetrain_speedsRot = logGroupDrivetrain.build("speedsRot");
+  private static final LoggerEntry logDrivetrain = logGroupDrivetrain.build("");
+
   public static final AutoLock odometryLock = new AutoLock();
 
   public static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
@@ -129,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
       gyroIO.updateInputs(gyroInputs);
       modules.updateInputs();
 
-      Logger.processInputs("Drive/Gyro", gyroInputs);
+      logGyro.info(gyroInputs);
       modules.periodic();
 
       // Stop moving when disabled
@@ -138,11 +164,11 @@ public class Drivetrain extends SubsystemBase {
       }
       // Log empty setpoint states when disabled
       if (DriverStation.isDisabled()) {
-        Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-        Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+        logSwerveStatesSetpoints.info(new SwerveModuleState[] {});
+        logSwerveStatesSetpointsOptimized.info(new SwerveModuleState[] {});
       }
 
-      Logger.recordOutput("SwerveStates/Measured", getModuleStates());
+      logSwerveStatesMeasured.info(getModuleStates());
 
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
@@ -171,7 +197,7 @@ public class Drivetrain extends SubsystemBase {
               BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
 
           if (statusCode != lastStatusCode) {
-            Logger.recordOutput("OdometryThread/status", statusCode);
+            logOdometryStatus.info(statusCode);
             lastStatusCode = statusCode;
           }
 
@@ -192,8 +218,8 @@ public class Drivetrain extends SubsystemBase {
           timestamp = timeSum / signalsArray.length;
           var timestampSpread =
               Math.max(Math.abs(timeMax - timestamp), Math.abs(timeMin - timestamp));
-          Logger.recordOutput("OdometryThread/timestampSpread", timestampSpread);
 
+          logOdometryTimestampSpread.info(timestampSpread);
         } else {
           // "waitForAll" does not support blocking on multiple
           // signals with a bus that is not CAN FD, regardless
@@ -213,7 +239,7 @@ public class Drivetrain extends SubsystemBase {
         // the gyro. The gyro is always disconnected in simulation.
         var twist = kinematics.toTwist2d(wheelDeltas);
 
-        Logger.recordOutput("OdometryThread/twist", twist);
+        logOdometryTwist.info(twist);
         if (gyroRotation != null) {
           if (lastGyroRotation != null) {
             var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
@@ -231,7 +257,7 @@ public class Drivetrain extends SubsystemBase {
           poseEstimator.addDriveData(timestamp, twist);
         }
       } catch (Exception e) {
-        Logger.recordOutput("OdometryThread/crash", e.toString());
+        logOdometryCrash.info(e.toString());
       }
     }
   }
@@ -300,18 +326,17 @@ public class Drivetrain extends SubsystemBase {
 
         speeds =
             new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, speeds.omegaRadiansPerSecond);
-        Logger.recordOutput(
-            "Drivetrain/leftoverVelocity",
+
+        logDrivetrain_leftoverVelocity.info(
             config.getRobotMaxLinearVelocity() - rotationSpeedMetersPerSecond);
       }
     }
 
-    Logger.recordOutput("Drivetrain/speedsX", speeds.vxMetersPerSecond);
-    Logger.recordOutput("Drivetrain/speedsY", speeds.vyMetersPerSecond);
-    Logger.recordOutput(
-        "Drivetrain/linearSpeed", Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
-    Logger.recordOutput("Drivetrain/linearSpeedMax", config.getRobotMaxLinearVelocity());
-    Logger.recordOutput("Drivetrain/speedsRot", speeds.omegaRadiansPerSecond);
+    logDrivetrain_speedsX.info(speeds.vxMetersPerSecond);
+    logDrivetrain_speedsY.info(speeds.vyMetersPerSecond);
+    logDrivetrain_linearSpeed.info(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+    logDrivetrain_linearSpeedMax.info(config.getRobotMaxLinearVelocity());
+    logDrivetrain_speedsRot.info(speeds.omegaRadiansPerSecond);
 
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
@@ -331,8 +356,8 @@ public class Drivetrain extends SubsystemBase {
     var optimizedSetpointStates = modules.runSetpoints(setpointStates, driveMotorAcceleration);
 
     // Log setpoint states
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+    logSwerveStatesSetpoints.info(setpointStates);
+    logSwerveStatesSetpointsOptimized.info(optimizedSetpointStates);
   }
 
   /** Stops the drive. */

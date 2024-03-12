@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import frc.robot.commands.mechanism.MechanismPositions;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
@@ -21,17 +23,22 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.visualization.ClimbVisualization;
-import org.littletonrobotics.junction.Logger;
 
 public class AutoClimb extends Command {
+  private static final String ROOT_TABLE = "AutoClimb";
 
-  private DrivetrainWrapper drive;
-  private Elevator elevator;
-  private Arm arm;
-  private EndEffector endEffector;
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_stage = logGroup.build("stage");
+  private static final LoggerEntry log_armIsAtPosition = logGroup.build("armIsAtPosition");
+  public static final LoggerEntry log_poses = logGroup.build("poses");
+  private static final LoggerEntry log_closestPose = logGroup.build("closestPose");
+
+  private final DrivetrainWrapper drive;
+  private final Elevator elevator;
+  private final Arm arm;
+  private final EndEffector endEffector;
   private int stage = 1;
   private Pose2d initialPose;
-  private Trigger endEffectorTrigger;
   private double additionalRobotHeight;
 
   /** Creates a new AutoClimb. */
@@ -53,13 +60,14 @@ public class AutoClimb extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    endEffectorTrigger =
+    log_stage.info(stage);
+
+    var endEffectorTrigger =
         new Trigger(
                 () ->
                     !endEffector.intakeSideTOFDetectGamepiece()
                         && !endEffector.shooterSideTOFDetectGamepiece())
             .debounce(0.5);
-    Logger.recordOutput("AutoClimb/stage", stage);
     ClimbVisualization.getInstance().updateAdditionalHeight(additionalRobotHeight);
     /*
      * STAGE 0 (before command starts): move in front of chain
@@ -120,7 +128,7 @@ public class AutoClimb extends Command {
         MechanismPosition position = MechanismPositions.climbTrapPosition();
         elevator.setHeight(position.elevatorHeight());
         arm.setAngle(position.armAngle());
-        Logger.recordOutput("AutoClimb/armIsAtPosition", arm.isAtTargetAngle(position.armAngle()));
+        log_armIsAtPosition.info(arm.isAtTargetAngle(position.armAngle()));
         if (elevator.isAtTarget(position.elevatorHeight())
             && arm.isAtTargetAngle(position.armAngle())) stage++;
         break;
@@ -153,17 +161,17 @@ public class AutoClimb extends Command {
     return stage == 7;
   }
 
-  public Pose2d getTargetPose(Pose2d robotPose) {
+  public static Pose2d getTargetPose(Pose2d robotPose) {
     Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
-    Logger.recordOutput("AutoClimb/poses", poses);
+    log_poses.info(poses);
     Pose2d closestPose = null;
     for (int i = 0; i < poses.length; i++) {
       if (closestPose == null) {
         closestPose = poses[i];
       } else {
-        Logger.recordOutput(
-            "AutoClimb/" + i + "_Distance", GeometryUtil.getDist(poses[i], flippedPose));
+        logGroup.build(i + "_Distance").info(GeometryUtil.getDist(poses[i], flippedPose));
+
         if (GeometryUtil.getDist(poses[i], flippedPose)
             < GeometryUtil.getDist(closestPose, flippedPose)) {
           closestPose = poses[i];
@@ -173,11 +181,11 @@ public class AutoClimb extends Command {
 
     closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 
-    Logger.recordOutput("AutoClimb/ClosestPose", closestPose);
+    log_closestPose.info(closestPose);
     return closestPose;
   }
 
-  public boolean underStage(Pose2d robotPose) {
+  public static boolean underStage(Pose2d robotPose) {
     Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     /*
      * Corners:

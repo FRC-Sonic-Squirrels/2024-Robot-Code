@@ -6,9 +6,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import org.littletonrobotics.junction.Logger;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 
 public class DrivetrainWrapper {
+  private static final LoggerGroup logGroup = new LoggerGroup("DrivetrainWrapper");
+  private static final LoggerEntry logChassisSpeedsBase = logGroup.build("chassisSpeedsBase");
+  private static final LoggerEntry logChassisSpeedsOverride =
+      logGroup.build("chassisSpeedsOverride");
+  private static final LoggerEntry logOmegaOverride = logGroup.build("omegaOverride");
+  private static final LoggerEntry logGyroDrift = logGroup.build("gyroDrift");
+
   private final Drivetrain drivetrain;
   private ChassisSpeeds chassisSpeedsBase = new ChassisSpeeds();
   private ChassisSpeeds chassisSpeedsOverride;
@@ -46,12 +54,12 @@ public class DrivetrainWrapper {
 
   public void apply() {
     if (chassisSpeedsBase != null) {
-      Logger.recordOutput("DrivetrainWrapper/chassisSpeedsBase", chassisSpeedsBase);
+      logChassisSpeedsBase.info(chassisSpeedsBase);
     }
     if (chassisSpeedsOverride != null) {
-      Logger.recordOutput("DrivetrainWrapper/chassisSpeedsOverride", chassisSpeedsOverride);
+      logChassisSpeedsOverride.info(chassisSpeedsOverride);
     }
-    Logger.recordOutput("DrivetrainWrapper/omegaOverride", omegaOverride);
+    logOmegaOverride.info(omegaOverride);
 
     ChassisSpeeds chassisSpeeds;
 
@@ -77,8 +85,7 @@ public class DrivetrainWrapper {
     var pose1 = getPoseEstimatorPose(false);
     var pose2 = getPoseEstimatorPose(true);
 
-    Logger.recordOutput(
-        "DrivetrainWrapper/gyroDrift", pose1.getRotation().minus(pose2.getRotation()).getDegrees());
+    logGyroDrift.info(pose1.getRotation().minus(pose2.getRotation()).getDegrees());
   }
 
   public Subsystem getRequirements() {

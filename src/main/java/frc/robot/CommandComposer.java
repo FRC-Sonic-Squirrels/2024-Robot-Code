@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.DriveToPose;
@@ -26,7 +25,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class CommandComposer {
   public static Command autoClimb(
@@ -47,12 +45,11 @@ public class CommandComposer {
      * stay in stow/loading position
      * Step 2: run climb command
      */
-    AutoClimb autoClimb = new AutoClimb(drivetrainWrapper, elevator, arm, endEffector);
 
     DriveToPose driveToClimbPos =
         new DriveToPose(
             drivetrainWrapper,
-            () -> autoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose(true)));
+            () -> AutoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose(true)));
 
     BooleanSupplier withinRangeOfStage =
         () ->
@@ -62,7 +59,7 @@ public class CommandComposer {
                 <= 2.0;
 
     BooleanSupplier underStage =
-        () -> autoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose(false));
+        () -> AutoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose(false));
 
     Supplier<Command> prepForClimb =
         () ->
@@ -84,7 +81,7 @@ public class CommandComposer {
                         .andThen(prepForClimb.get()),
                     withinRangeOfStage)))
             .until(driveToClimbPos::atGoal)
-            .andThen(autoClimb);
+            .andThen(new AutoClimb(drivetrainWrapper, elevator, arm, endEffector));
 
     climbCommand.setName("AutoClimb");
     return climbCommand;
@@ -163,7 +160,8 @@ public class CommandComposer {
 
   public static Command stageAlign(DrivetrainWrapper wrapper, Supplier<Double> driveMagnitude) {
     PIDController rotationalPID = new PIDController(5.0, 0, 0);
-    Supplier<Pose2d> targetPose = () -> getClimbTargetPose(wrapper.getPoseEstimatorPose(false));
+    Supplier<Pose2d> targetPose =
+        () -> AutoClimb.getTargetPose(wrapper.getPoseEstimatorPose(false));
     DriveToPose driveCommand = new DriveToPose(wrapper, targetPose);
     return driveCommand
         .until(() -> driveCommand.withinTolerance(0.05, new Rotation2d(0.05)))
@@ -177,30 +175,6 @@ public class CommandComposer {
                             rotationalPID.calculate(
                                 wrapper.getPoseEstimatorPose(false).getRotation().getRadians(),
                                 targetPose.get().getRotation().getRadians())))))
-        .finallyDo(() -> wrapper.resetVelocityOverride());
-  }
-
-  private static Pose2d getClimbTargetPose(Pose2d robotPose) {
-    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
-    Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
-    Logger.recordOutput("AutoClimb/poses", poses);
-    Pose2d closestPose = null;
-    for (int i = 0; i < poses.length; i++) {
-      if (closestPose == null) {
-        closestPose = poses[i];
-      } else {
-        Logger.recordOutput(
-            "AutoClimb/" + i + "_Distance", GeometryUtil.getDist(poses[i], flippedPose));
-        if (GeometryUtil.getDist(poses[i], flippedPose)
-            < GeometryUtil.getDist(closestPose, flippedPose)) {
-          closestPose = poses[i];
-        }
-      }
-    }
-
-    closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
-
-    Logger.recordOutput("AutoClimb/ClosestPose", closestPose);
-    return closestPose;
+        .finallyDo(wrapper::resetVelocityOverride);
   }
 }

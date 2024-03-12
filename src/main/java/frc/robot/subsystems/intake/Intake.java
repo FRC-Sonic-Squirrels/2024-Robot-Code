@@ -6,13 +6,15 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
+  private static final LoggerEntry logInputs = new LoggerEntry("Intake");
+
   private static final TunableNumberGroup group = new TunableNumberGroup("Intake");
 
   private static final LoggedTunableNumber kS = group.build("kS");
@@ -50,7 +52,7 @@ public class Intake extends SubsystemBase {
     try (var ignored = new ExecutionTiming("Intake")) {
       // This method will be called once per scheduler run
       io.updateInputs(inputs);
-      Logger.processInputs("Intake", inputs);
+      logInputs.info(inputs);
 
       var hc = hashCode();
       if (kS.hasChanged(hc)

@@ -12,13 +12,21 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
+  private static final LoggerEntry logInputs = new LoggerEntry("Elevator");
+  private static final LoggerGroup logGroup = new LoggerGroup("Elevator");
+  private static final LoggerEntry logTargetHeight = logGroup.build("targetHeight");
+  public static final LoggerEntry logSIM_ActualTargetHeight =
+      logGroup.build("SIM_actualTargetHeight");
+  public static final LoggerEntry logSIM_Error = logGroup.build("SIM_error");
+
   private static final TunableNumberGroup group = new TunableNumberGroup("Elevator");
 
   private static final LoggedTunableNumber kP = group.build("kP");
@@ -84,9 +92,9 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     try (var ignored = new ExecutionTiming("Elevator")) {
       io.updateInputs(inputs);
-      Logger.processInputs("Elevator", inputs);
+      logInputs.info(inputs);
 
-      Logger.recordOutput("Elevator/targetHeight", targetHeight.in(Units.Inches));
+      logTargetHeight.info(targetHeight.in(Units.Inches));
 
       // ---- UPDATE TUNABLE NUMBERS
       var hc = hashCode();

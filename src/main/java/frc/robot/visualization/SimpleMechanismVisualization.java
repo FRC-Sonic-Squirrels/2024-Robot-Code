@@ -6,10 +6,14 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class SimpleMechanismVisualization {
+  private static final LoggerGroup logGroup = new LoggerGroup("Mechanism");
+  private static final LoggerEntry logSimpleElevatorAndArm = logGroup.build("SimpleElevatorAndArm");
+  private static final LoggerEntry logSimpleShooter = logGroup.build("SimpleShooter");
 
   static Mechanism2d shooterMechanism2d =
       new Mechanism2d(
@@ -89,7 +93,7 @@ public class SimpleMechanismVisualization {
   }
 
   public static void logMechanism() {
-    Logger.recordOutput("Mechanism/SimpleElevatorAndArm", elevatorAndArmMech2d);
-    Logger.recordOutput("Mechanism/SimpleShooter", shooterMechanism2d);
+    logSimpleElevatorAndArm.info(elevatorAndArmMech2d);
+    logSimpleShooter.info(shooterMechanism2d);
   }
 }

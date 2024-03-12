@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
@@ -100,7 +101,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -110,6 +110,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final LoggerEntry logRobotType = new LoggerEntry("RobotType");
+  private static final LoggerEntry logRobotMode = new LoggerEntry("RobotMode");
+
   private final Drivetrain drivetrain;
   private final DrivetrainWrapper drivetrainWrapper;
   public final Vision vision;
@@ -168,8 +171,8 @@ public class RobotContainer {
     RobotType robotType = Constants.RobotMode.getRobot();
     Mode mode = Constants.RobotMode.getMode();
 
-    Logger.recordOutput("RobotType", robotType);
-    Logger.recordOutput("RobotMode", mode);
+    logRobotType.info(robotType);
+    logRobotMode.info(mode);
 
     var config = robotType.config.get();
     AprilTagFieldLayout aprilTagLayout;

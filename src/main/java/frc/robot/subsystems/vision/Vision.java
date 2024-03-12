@@ -10,9 +10,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.GeometryUtil;
-import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
@@ -27,13 +25,36 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Vision extends SubsystemBase {
+  public static final LoggerGroup logGroup = new LoggerGroup("Vision");
+  private static final LoggerEntry logAllAprilTags3D = logGroup.build("AllAprilTags3D");
+  private static final LoggerEntry logUseVision = logGroup.build("useVision");
+  private static final LoggerEntry logUseMaxDistanceAwayFromExistingEstimate =
+      logGroup.build("useMaxDistanceAwayFromExistingEstimate");
+  private static final LoggerEntry logRejectByGyro = logGroup.build("RejectByGyro");
+  private static final LoggerEntry logRejectByGyroError = logGroup.build("RejectByGyroError");
+  private static final LoggerEntry logRejectByDistance = logGroup.build("RejectByDistance");
+  private static final LoggerEntry logRejectByDistanceError =
+      logGroup.build("RejectByDistanceError");
+  public static final LoggerEntry logConfigTagAmount = logGroup.build("configTagAmount");
+
+  private static final LoggerGroup logGroupVisionModules = logGroup.subgroup("VisionModules");
+
+  private static final LoggerGroup logGroupVisibleTags = logGroup.subgroup("visibleTags");
+  private static final LoggerEntry log_rawAllVisibleTags =
+      logGroupVisibleTags.build("rawAllVisibleTags");
+  private static final LoggerEntry log_tagsActuallyUsedInPoseEstimation =
+      logGroupVisibleTags.build("tagsActuallyUsedInPoseEstimation");
+  private static final LoggerEntry log_posesFedToPoseEstimator3D =
+      logGroupVisibleTags.build("posesFedToPoseEstimator3D");
+  private static final LoggerEntry log_posesFedToPoseEstimator2D =
+      logGroupVisibleTags.build("posesFedToPoseEstimator2D");
+
   protected static final TunableNumberGroup group = new TunableNumberGroup("Vision");
 
   private static final LoggedTunableNumber thetaStdDevCoefficient =
@@ -101,7 +122,7 @@ public class Vision extends SubsystemBase {
     for (int i = 0; i < aprilTagLayout.getTags().size(); i++) {
       allTagsArray[i] = allTagsList.get(i).pose;
     }
-    Logger.recordOutput("Vision/AllAprilTags3D", allTagsArray);
+    logAllAprilTags3D.info(allTagsArray);
   }
 
   @Override
@@ -110,7 +131,7 @@ public class Vision extends SubsystemBase {
       // update all inputs
       for (VisionModule module : visionModules) {
         module.visionIO.updateInputs(module.visionIOInputs);
-        Logger.processInputs("Vision/" + module.name, module.visionIOInputs);
+        logGroup.build(module.name).info(module.visionIOInputs);
       }
 
       boolean processVision = true;
@@ -147,7 +168,7 @@ public class Vision extends SubsystemBase {
         var robotPose = new Pose3d(poseEstimatorPoseSupplier.get());
         var camPose = robotPose.transformBy(visionModule.RobotToCamera);
 
-        Logger.recordOutput("Vision/VisionModules/" + visionModule.name + "/CameraPose", camPose);
+        logGroupVisionModules.subgroup(visionModule.name).build("CameraPose").info(camPose);
       }
 
       // logging all visible tags
@@ -160,8 +181,7 @@ public class Vision extends SubsystemBase {
           }
         }
       }
-      Logger.recordOutput(
-          "Vision/visibleTags/rawAllVisibleTags", allSeenTags.toArray(new Pose3d[0]));
+      log_rawAllVisibleTags.info(allSeenTags.toArray(new Pose3d[0]));
 
       // logging tags actually used in pose estimation
       Pose3d[] tagsUsedInPoseEstimationPoses = new Pose3d[tagsUsedInPoseEstimation.size()];
@@ -169,21 +189,17 @@ public class Vision extends SubsystemBase {
         tagsUsedInPoseEstimationPoses[i] =
             aprilTagLayout.getTagPose(tagsUsedInPoseEstimation.get(i)).get();
       }
-      Logger.recordOutput(
-          "Vision/visibleTags/tagsActuallyUsedInPoseEstimation", tagsUsedInPoseEstimationPoses);
 
-      Logger.recordOutput(
-          "Vision/posesFedToPoseEstimator3D", posesFedToPoseEstimator3D.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/posesFedToPoseEstimator2D", posesFedToPoseEstimator2D.toArray(new Pose2d[0]));
+      log_tagsActuallyUsedInPoseEstimation.info(tagsUsedInPoseEstimationPoses);
+      log_posesFedToPoseEstimator3D.info(posesFedToPoseEstimator3D.toArray(new Pose3d[0]));
+      log_posesFedToPoseEstimator2D.info(posesFedToPoseEstimator2D.toArray(new Pose2d[0]));
 
       tagsUsedInPoseEstimation.clear();
       posesFedToPoseEstimator3D.clear();
       posesFedToPoseEstimator2D.clear();
 
-      Logger.recordOutput("Vision/useVision", useVisionForPoseEstimation);
-      Logger.recordOutput(
-          "Vision/useMaxDistanceAwayFromExistingEstimate", useMaxDistanceAwayFromExistingEstimate);
+      logUseVision.info(useVisionForPoseEstimation);
+      logUseMaxDistanceAwayFromExistingEstimate.info(useMaxDistanceAwayFromExistingEstimate);
     }
   }
 
@@ -283,8 +299,8 @@ public class Vision extends SubsystemBase {
                   .getDegrees());
 
       if (absError > gyroFilteringToleranceDegrees.get()) {
-        Logger.recordOutput("Vision/RejectByGyro", ++useGyroBasedFilteringForVisionCount);
-        Logger.recordOutput("Vision/RejectByGyroError", absError);
+        logRejectByGyro.info(++useGyroBasedFilteringForVisionCount);
+        logRejectByGyroError.info(absError);
         return VisionResultLoggedFields.unsuccessfulResult(
             VisionResultStatus.NOT_CLOSE_ENOUGH_TO_GYRO_ROTATION);
       }
@@ -336,8 +352,8 @@ public class Vision extends SubsystemBase {
     if (useMaxDistanceAwayFromExistingEstimate
         && (distanceFromExistingPoseEstimate
             > (maxValidDistanceAwayFromCurrentEstimateMeters.get() * numTargetsSeen))) {
-      Logger.recordOutput("Vision/RejectByDistance", ++useMaxDistanceAwayFromExistingEstimateCount);
-      Logger.recordOutput("Vision/RejectByDistanceError", distanceFromExistingPoseEstimate);
+      logRejectByDistance.info(++useMaxDistanceAwayFromExistingEstimateCount);
+      logRejectByDistanceError.info(distanceFromExistingPoseEstimate);
       return VisionResultLoggedFields.unsuccessfulResult(
           VisionResultStatus.TOO_FAR_FROM_EXISTING_ESTIMATE);
     }
@@ -416,30 +432,26 @@ public class Vision extends SubsystemBase {
 
   private void logVisionModule(VisionModule visionModule) {
 
-    String ROOT_TABLE_PATH = "Vision/VisionModules/" + visionModule.name + "/";
+    var group = logGroupVisionModules.subgroup(visionModule.name);
     var fieldsToLog = visionModule.loggedFields;
 
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "LastSuccessfullyProcessedResultTimeStampCTRETime",
-        visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime);
+    group
+        .build("LastSuccessfullyProcessedResultTimeStampCTRETime")
+        .info(visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime);
 
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "*STATUS",
-        fieldsToLog.status().name() + ": " + fieldsToLog.status().additionalInfo);
-    Logger.recordOutput(ROOT_TABLE_PATH + "calculatedRobotPose3d", fieldsToLog.robotPose3d());
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "calculatedRobotPose2d", fieldsToLog.robotPose3d().toPose2d());
-
-    Logger.recordOutput(ROOT_TABLE_PATH + "numSeenTargets", fieldsToLog.numSeenTargets());
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "distanceFromExistingPoseEstimate",
-        fieldsToLog.distanceFromExistingPoseEstimate());
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "averageDistanceFromTags", fieldsToLog.averageDistanceFromTags());
-    Logger.recordOutput(ROOT_TABLE_PATH + "tagAmbiguity", fieldsToLog.tagAmbiguity());
-    Logger.recordOutput(ROOT_TABLE_PATH + "xyStandardDeviation", fieldsToLog.xyStandardDeviation());
-    Logger.recordOutput(
-        ROOT_TABLE_PATH + "thetaStandardDeviation", fieldsToLog.thetaStandardDeviation());
+    group
+        .build("*STATUS")
+        .info(fieldsToLog.status().name() + ": " + fieldsToLog.status().additionalInfo);
+    group.build("calculatedRobotPose3d").info(fieldsToLog.robotPose3d());
+    group.build("calculatedRobotPose2d").info(fieldsToLog.robotPose3d().toPose2d());
+    group.build("numSeenTargets").info(fieldsToLog.numSeenTargets());
+    group
+        .build("distanceFromExistingPoseEstimate")
+        .info(fieldsToLog.distanceFromExistingPoseEstimate());
+    group.build("averageDistanceFromTags").info(fieldsToLog.averageDistanceFromTags());
+    group.build("tagAmbiguity").info(fieldsToLog.tagAmbiguity());
+    group.build("xyStandardDeviation").info(fieldsToLog.xyStandardDeviation());
+    group.build("thetaStandardDeviation").info(fieldsToLog.thetaStandardDeviation());
 
     var currentStatus = fieldsToLog.status();
     boolean addedVisionEstimateToPoseEstimator =
@@ -449,7 +461,8 @@ public class Vision extends SubsystemBase {
                     == VisionResultStatus.SUCCESSFUL_SINGLE_TAG_BECAUSE_MULTI_TAG_FALLBACK)
             ? true
             : false;
-    Logger.recordOutput(ROOT_TABLE_PATH + "SUCCESSFUL_RESULT?", addedVisionEstimateToPoseEstimator);
+
+    group.build("SUCCESSFUL_RESULT?").info(addedVisionEstimateToPoseEstimator);
   }
 
   public static void restartPhotonVision(String ipString) {

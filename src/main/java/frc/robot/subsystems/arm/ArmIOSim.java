@@ -10,11 +10,10 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ArmIOSim implements ArmIO {
-  private double MOMENT_OF_INERTIA = 0.15;
-  private Measure<Distance> ARM_LENGTH = Units.Inches.of(14);
+  private final double MOMENT_OF_INERTIA = 0.15;
+  private final Measure<Distance> ARM_LENGTH = Units.Inches.of(14);
 
   SingleJointedArmSim armSim =
       new SingleJointedArmSim(
@@ -50,8 +49,8 @@ public class ArmIOSim implements ArmIO {
 
       controlEffort = fb + ff;
 
-      Logger.recordOutput("Arm/SIM_FF_fG", ff);
-      Logger.recordOutput("Arm/SIM_error", feedback.getPositionError());
+      Arm.logSIM_FF_fG.info(ff);
+      Arm.logSIM_error.info(feedback.getPositionError());
 
     } else {
       controlEffort = openLoopVolts;
@@ -67,7 +66,8 @@ public class ArmIOSim implements ArmIO {
     inputs.armAppliedVolts = controlEffort;
     inputs.armCurrentAmps = armSim.getCurrentDrawAmps();
 
-    Logger.recordOutput("Arm/SIM_controlEffort", controlEffort);
+    Arm.logSIM_error.info(feedback.getPositionError());
+    Arm.logSIM_controlEffort.info(controlEffort);
   }
 
   @Override

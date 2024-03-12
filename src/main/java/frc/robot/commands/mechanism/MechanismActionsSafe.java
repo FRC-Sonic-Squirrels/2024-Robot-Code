@@ -7,15 +7,26 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class MechanismActionsSafe {
+  private static final String ROOT_TABLE = "MechanismActionsSafe";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_armCanRotateFreelyAtThisHeight =
+      logGroup.build("armCanRotateFreelyAtThisHeight");
+  private static final LoggerEntry log_maxArmExtensionDuringRotation =
+      logGroup.build("maxArmExtensionDuringRotation");
+  private static final LoggerEntry log_state = logGroup.build("state");
+  private static final LoggerEntry log_currentSafeHeight = logGroup.build("currentSafeHeight");
+
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
   }
@@ -123,8 +134,7 @@ public class MechanismActionsSafe {
         boolean armCanRotateFreelyAtThisHeight =
             currentElevatorHeightInches + armLength < maxLegalHeightInches;
 
-        Logger.recordOutput(
-            "MechanismActionsSafe/armCanRotateFreelyAtThisHeight", armCanRotateFreelyAtThisHeight);
+        log_armCanRotateFreelyAtThisHeight.info(armCanRotateFreelyAtThisHeight);
 
         //
         // Compute the maximum vertical extension of the arm during rotation.
@@ -144,8 +154,7 @@ public class MechanismActionsSafe {
               Math.max(targetArmVerticalOffset, currentArmVerticalOffset);
         }
 
-        Logger.recordOutput(
-            "MechanismActionsSafe/maxArmExtensionDuringRotation", maxArmExtensionDuringRotation);
+        log_maxArmExtensionDuringRotation.info(maxArmExtensionDuringRotation);
 
         var maxElevatorHeadroom = maxLegalHeightInches - maxArmExtensionDuringRotation;
         var currentSafeHeight =
@@ -162,7 +171,7 @@ public class MechanismActionsSafe {
             //
             // Safe to move to target position directly
             //
-            Logger.recordOutput("MechanismActionsSafe/state", "HomeDirectly");
+            log_state.info("HomeDirectly");
             elevator.setHeight(targetElevatorHeight);
             arm.setAngle(targetArmAngle);
             return;
@@ -186,7 +195,7 @@ public class MechanismActionsSafe {
           }
         }
 
-        Logger.recordOutput("MechanismActionsSafe/currentSafeHeight", currentSafeHeight);
+        log_currentSafeHeight.info(currentSafeHeight);
 
         boolean aboveMinimumHeight =
             currentElevatorHeightInches > currentSafeHeight - elevatorToleranceInches;
@@ -197,9 +206,9 @@ public class MechanismActionsSafe {
         // We are not going to exceed the maximum legal height, start rotation.
         if (aboveMinimumHeight && belowMaximumHeight) {
           arm.setAngle(safeArmAngle);
-          Logger.recordOutput("MechanismActionsSafe/state", actionName + "Arm");
+          log_state.info(actionName + "Arm");
         } else {
-          Logger.recordOutput("MechanismActionsSafe/state", actionName + "NoArm");
+          log_state.info(actionName + "NoArm");
         }
 
         elevator.setHeight(Units.Inches.of(currentSafeHeight));

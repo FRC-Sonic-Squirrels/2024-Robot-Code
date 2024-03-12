@@ -7,6 +7,8 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -20,10 +22,17 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class MechanismActions {
-  private static final TunableNumberGroup group = new TunableNumberGroup("MechanismActions");
+  private static final String ROOT_TABLE = "MechanismActions";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_runningArm = logGroup.build("runningArm");
+  private static final LoggerEntry log_runningElevator = logGroup.build("runningElevator");
+  private static final LoggerEntry log_ElevatorInPosition = logGroup.build("ElevatorInPosition");
+  private static final LoggerEntry log_ArmInPosition = logGroup.build("ArmInPosition");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   public static final LoggedTunableNumber climbDownElevatorVelocity =
       group.build("MechanismActions/climbDownElevatorVelocity", 500);
@@ -153,13 +162,13 @@ public class MechanismActions {
             } else {
               elevator.setHeight(targetPosition.elevatorHeight());
             }
-            Logger.recordOutput("MechanismActions/runningArm", runningArm);
-            Logger.recordOutput("MechanismActions/runningElevator", runningElevatorSafety);
+            log_runningArm.info(runningArm);
+            log_runningElevator.info(runningElevatorSafety);
             elevatorInPosition = elevator.isAtTarget(position.get().elevatorHeight());
-            Logger.recordOutput("MechanismActions/ElevatorInPosition", elevatorInPosition);
+            log_ElevatorInPosition.info(elevatorInPosition);
             armInPosition =
                 arm.isAtTargetAngle(position.get().armAngle(), Rotation2d.fromDegrees(5.0));
-            Logger.recordOutput("MechanismActions/ArmInPosition", armInPosition);
+            log_ArmInPosition.info(armInPosition);
           }
 
           @Override

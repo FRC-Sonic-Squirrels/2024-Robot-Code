@@ -23,10 +23,36 @@ import frc.robot.visualization.GamepieceVisualization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class ScoreSpeaker extends Command {
-  private static final TunableNumberGroup group = new TunableNumberGroup("RotateToSpeaker");
+  private static final String ROOT_TABLE = "ScoreSpeaker";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_gamepieceLoaded = logGroup.build("gamepieceLoaded");
+  private static final LoggerEntry log_PIDLatency = logGroup.build("PIDLatency");
+  private static final LoggerEntry log_targetRotationDegrees =
+      logGroup.build("targetRotationDegrees");
+  private static final LoggerEntry log_targetPose = logGroup.build("targetPose");
+  private static final LoggerEntry log_RotationalEffort = logGroup.build("RotationalEffort");
+  private static final LoggerEntry log_RotationalErrorDegrees =
+      logGroup.build("RotationalErrorDegrees");
+  private static final LoggerEntry log_feedForward = logGroup.build("feedForward");
+  private static final LoggerEntry log_RobotRotationDegrees =
+      logGroup.build("RobotRotationDegrees");
+  private static final LoggerEntry log_atSetpoint = logGroup.build("atSetpoint");
+  private static final LoggerEntry log_timer = logGroup.build("timer");
+  private static final LoggerEntry log_ShootingRPM = logGroup.build("ShootingRPM");
+
+  private static final LoggerGroup logGroupShooting = logGroup.subgroup("shooting");
+  private static final LoggerEntry log_IsAtTargetRPM = logGroupShooting.build("IsAtTargetRPM");
+  private static final LoggerEntry log_RotationControllerAtSetpoint =
+      logGroupShooting.build("RotationControllerAtSetpoint");
+  private static final LoggerEntry log_PivotAtTarget = logGroupShooting.build("PivotAtTarget");
+  private static final LoggerEntry log_ShootGamepiece = logGroupShooting.build("ShootGamepiece");
+  private static final LoggerEntry log_Position = logGroupShooting.build("Position");
+  private static final LoggerEntry log_shooting = logGroupShooting.build("shooting");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);
   private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
   private static final LoggedTunableNumber tunableVoltage = group.build("tunableVoltage", 0.5);
@@ -144,7 +170,7 @@ public class ScoreSpeaker extends Command {
         gamepieceLoaded = true;
       }
 
-      Logger.recordOutput("ScoreSpeaker/gamepieceLoaded", gamepieceLoaded);
+      log_gamepieceLoaded.info(gamepieceLoaded);
 
       prevNoteInShoot = shooter.noteInShooter();
 
@@ -189,7 +215,7 @@ public class ScoreSpeaker extends Command {
         }
       }
 
-      Logger.recordOutput("ScoreSpeaker/PIDLatency", pidLatency);
+      log_PIDLatency.info(pidLatency);
 
       var rotationalEffort =
           rotationController.calculate(currentRot.getRadians(), targetRotation)
@@ -204,23 +230,18 @@ public class ScoreSpeaker extends Command {
       if (targetRotationDegrees > 360) targetRotationDegrees -= 360;
       if (targetRotationDegrees < -360) targetRotationDegrees += 360;
 
-      Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", targetRotationDegrees);
-
-      Logger.recordOutput(
-          "ScoreSpeaker/targetPose",
+      log_targetRotationDegrees.info(targetRotationDegrees);
+      log_targetPose.info(
           new Pose2d(poseEstimatorPose.getTranslation(), Rotation2d.fromRadians(targetRotation)));
 
       // drive.setRotationOverride(rotationalEffort);
 
       // TODO: remove most of these once we are happy with the command
-      Logger.recordOutput("ScoreSpeaker/RotationalEffort", rotationalEffort);
-      Logger.recordOutput(
-          "ScoreSpeaker/rotationalErrorDegrees",
-          Math.toDegrees(rotationController.getPositionError()));
-      Logger.recordOutput("ScoreSpeaker/feedForward", targetAngularSpeed);
-      Logger.recordOutput(
-          "ScoreSpeaker/robotRotationDegrees", drive.getRotationGyroOnly().getDegrees());
-      Logger.recordOutput("ScoreSpeaker/atSetpoint", rotationController.atSetpoint());
+      log_RotationalEffort.info(rotationalEffort);
+      log_RotationalErrorDegrees.info(Math.toDegrees(rotationController.getPositionError()));
+      log_feedForward.info(targetAngularSpeed);
+      log_RobotRotationDegrees.info(drive.getRotationGyroOnly().getDegrees());
+      log_atSetpoint.info(rotationController.atSetpoint());
 
       if (rotationKp.hasChanged(hashCode()) || rotationKd.hasChanged(hashCode())) {
         rotationController.setP(rotationKp.get());
@@ -257,13 +278,12 @@ public class ScoreSpeaker extends Command {
           }
         }
 
-        Logger.recordOutput("ScoreSpeaker/shooting/IsAtTargetRPM", shooter.isAtTargetRPM());
-        Logger.recordOutput(
-            "ScoreSpeaker/shooting/RotationControllerAtSetpoint", rotationController.atSetpoint());
-        Logger.recordOutput("ScoreSpeaker/shooting/PivotAtTarget", shooter.isPivotIsAtTarget());
-        Logger.recordOutput("ScoreSpeaker/shooting/ShootGamepiece", shootGamepiece.getAsBoolean());
-        Logger.recordOutput("ScoreSpeaker/shooting/Position", shootingPosition());
-        Logger.recordOutput("ScoreSpeaker/shooting/shooting", readyToShoot);
+        log_IsAtTargetRPM.info(shooter.isAtTargetRPM());
+        log_RotationControllerAtSetpoint.info(rotationController.atSetpoint());
+        log_PivotAtTarget.info(shooter.isPivotIsAtTarget());
+        log_ShootGamepiece.info(shootGamepiece.getAsBoolean());
+        log_Position.info(shootingPosition());
+        log_shooting.info(readyToShoot);
 
         if (gamepieceLoaded) {
           if (solver.isShooting()) {
@@ -287,10 +307,10 @@ public class ScoreSpeaker extends Command {
     shooter.setKickerPercentOut(0.0);
     shooter.setLauncherVoltage(0.0);
 
-    Logger.recordOutput("ScoreSpeaker/targetRotationDegrees", 0.0);
-    Logger.recordOutput("ScoreSpeaker/RotationalEffort", 0.0);
-    Logger.recordOutput("ScoreSpeaker/rotationalErrorDegrees", 0.0);
-    Logger.recordOutput("ScoreSpeaker/feedForward", 0.0);
+    log_targetRotationDegrees.info(0.0);
+    log_RotationalEffort.info(0.0);
+    log_RotationalErrorDegrees.info(0.0);
+    log_feedForward.info(0.0);
   }
 
   // Returns true when the command should end.
@@ -333,10 +353,8 @@ public class ScoreSpeaker extends Command {
   Pose2d robotPoseOfShot = new Pose2d();
 
   public void updateVisualization() {
-
-    Logger.recordOutput("ShootSpeaker/timer", shootingTimer.get());
-
-    Logger.recordOutput("ShootSpeaker/ShootingRPM", shooter.getRPM());
+    log_timer.info(shootingTimer.get());
+    log_ShootingRPM.info(shooter.getRPM());
 
     // GamepieceVisualization.getInstance()
     //     .updateVisualization(

@@ -1,16 +1,22 @@
 package frc.robot.autonomous.substates;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
-import org.littletonrobotics.junction.Logger;
 
 public class DriveAfterSimpleShot extends StateMachine {
+  private static final String ROOT_TABLE = "Autonomous/SimpleShot";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_targetPose = logGroup.build("targetPose");
+
   private static final LoggedTunableNumber driveDistance =
-      new LoggedTunableNumber("Autonomous/SimpleShot/DistanceMeters", 1.5);
+      new LoggedTunableNumber(ROOT_TABLE + "/DistanceMeters", 1.5);
 
   DrivetrainWrapper drive;
   DriveToPose driveToPose;
@@ -35,7 +41,8 @@ public class DriveAfterSimpleShot extends StateMachine {
               Pose2d targetPose =
                   new Pose2d(
                       initialPose.getX() + distance, initialPose.getY(), Constants.zeroRotation2d);
-              Logger.recordOutput("Autonomous/SimpleShot/targetPose", targetPose);
+
+              log_targetPose.info(targetPose);
               return targetPose;
             });
     return suspendForCommand(driveToPose, (command) -> setDone());

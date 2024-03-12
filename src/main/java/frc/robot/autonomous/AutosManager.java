@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.DriveAfterSimpleShot;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -30,21 +32,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
-  private DrivetrainWrapper drivetrain;
-  private Shooter shooter;
-  private EndEffector endEffector;
-  private Intake intake;
+  private static final LoggerGroup logGroupSysid = new LoggerGroup("Sysid");
+  private static final LoggerEntry logSwerveSysidState = logGroupSysid.build("swervesysidstate");
+
+  private final DrivetrainWrapper drivetrain;
+  private final Shooter shooter;
+  private final EndEffector endEffector;
+  private final Intake intake;
   private final Elevator elevator;
   private final Arm arm;
-  private VisionGamepiece visionGamepiece;
+  private final VisionGamepiece visionGamepiece;
 
-  private RobotConfig config;
+  private final RobotConfig config;
 
-  private boolean includeDebugPaths = true;
+  public final boolean includeDebugPaths = true;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
@@ -153,7 +157,7 @@ public class AutosManager {
             null,
             (state) -> {
               if (state != SysIdRoutineLog.State.kNone) {
-                Logger.recordOutput("Sysid/swervesysidstate", state);
+                logSwerveSysidState.info(state);
               }
             });
 
@@ -172,11 +176,7 @@ public class AutosManager {
             .andThen(command3)
             // .andThen(Commands.waitSeconds(1.0))
             .andThen(command4)
-            .andThen(
-                Commands.runOnce(
-                    () ->
-                        Logger.recordOutput(
-                            "Sysid/swervesysidstate", SysIdRoutineLog.State.kNone)));
+            .andThen(Commands.runOnce(() -> logSwerveSysidState.info(SysIdRoutineLog.State.kNone)));
 
     return new Auto("swerveCharacterization", finalCommand, new Pose2d());
   }

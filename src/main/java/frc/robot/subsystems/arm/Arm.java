@@ -8,16 +8,26 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.team2930.ControlMode;
-import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
-import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
-  private static final TunableNumberGroup group = new TunableNumberGroup("Arm");
+  private static final String ROOT_TABLE = "Arm";
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry logPositionDegrees = logGroup.build("PositionDegrees");
+  private static final LoggerEntry logControlMode = logGroup.build("ControlMode");
+  private static final LoggerEntry logTargetClosedLoopSetpointDegrees =
+      logGroup.build("targetClosedLoopSetpointDegrees");
+
+  public static final LoggerEntry logSIM_FF_fG = logGroup.build("SIM_FF_fG");
+  public static final LoggerEntry logSIM_error = logGroup.build("SIM_error");
+  public static final LoggerEntry logSIM_controlEffort = logGroup.build("SIM_controlEffort");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber kP = group.build("kP");
   private static final LoggedTunableNumber kD = group.build("kD");
@@ -55,7 +65,7 @@ public class Arm extends SubsystemBase {
   private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;
   // FIXME: tune this value
   private final Rotation2d closedLoopTolerance = Rotation2d.fromDegrees(1);
-  private final double MAX_VOLTAGE = 12;
+  private static final double MAX_VOLTAGE = 12;
 
   /** Creates a new ArmSubsystem. */
   public Arm(ArmIO io) {
@@ -76,12 +86,11 @@ public class Arm extends SubsystemBase {
   public void periodic() {
     try (var ignored = new ExecutionTiming("Arm")) {
       io.updateInputs(inputs);
-      Logger.processInputs("Arm", inputs);
+      logInputs.info(inputs);
 
-      Logger.recordOutput("Arm/PositionDegrees", inputs.armPosition.getDegrees() % 360);
-      Logger.recordOutput("Arm/ControlMode", currentControlMode);
-      Logger.recordOutput(
-          "Arm/targetClosedLoopSetpointDegrees", closedLoopTargetAngle.getDegrees());
+      logPositionDegrees.info(inputs.armPosition.getDegrees() % 360);
+      logControlMode.info(currentControlMode);
+      logTargetClosedLoopSetpointDegrees.info(closedLoopTargetAngle.getDegrees());
 
       // ---- UPDATE TUNABLE NUMBERS
       var hc = hashCode();

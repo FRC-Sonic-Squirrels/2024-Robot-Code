@@ -12,12 +12,23 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainDefaultTeleopDrive extends Command {
+  private static final String ROOT_TABLE = "Commands/TeleopDrive";
+
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry log_XSupplier = logGroup.build("XSupplier");
+  private static final LoggerEntry log_YSupplier = logGroup.build("YSupplier");
+  private static final LoggerEntry log_OmegaSupplier = logGroup.build("OmegaSupplier");
+  private static final LoggerEntry log_LinearMagnitude = logGroup.build("LinearMagnitude");
+  private static final LoggerEntry log_LinearDirection = logGroup.build("LinearDirection");
+  private static final LoggerEntry log_LinearVelocity = logGroup.build("LinearVelocity");
+
   /** Creates a new DrivetrainDefaultTeleopDrive. */
   private final DrivetrainWrapper drivetrain;
 
@@ -69,14 +80,13 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
     var correctedLinearVelocity = AllianceFlipUtil.flipVelocitiesForAlliance(linearVelocity);
 
-    Logger.recordOutput("Commands/TeleopDrive/XSupplier", xSupplier.getAsDouble());
-    Logger.recordOutput("Commands/TeleopDrive/YSupplier", ySupplier.getAsDouble());
-    Logger.recordOutput("Commands/TeleopDrive/OmegaSupplier", omegaSupplier.getAsDouble());
+    log_XSupplier.info(xSupplier.getAsDouble());
+    log_YSupplier.info(ySupplier.getAsDouble());
+    log_OmegaSupplier.info(omegaSupplier.getAsDouble());
 
-    Logger.recordOutput("Commands/TeleopDrive/LinearMagnitude", linearMagnitude);
-    Logger.recordOutput("Commands/TeleopDrive/LinearDirection", linearDirection);
-
-    Logger.recordOutput("Commands/TeleopDrive/LinearVelocity", linearVelocity);
+    log_LinearMagnitude.info(linearMagnitude);
+    log_LinearDirection.info(linearDirection);
+    log_LinearVelocity.info(linearVelocity);
 
     // Convert to field relative speeds & send command
     ChassisSpeeds chassisSpeeds =

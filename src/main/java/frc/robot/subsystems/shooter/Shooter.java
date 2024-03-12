@@ -10,19 +10,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.team2930.ExecutionTiming;
-import frc.lib.team2930.PIDTargetMeasurement;
-import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team2930.*;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 import java.util.ArrayList;
 import java.util.List;
-import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private static final String ROOT_TABLE = "Shooter";
   private static final double MAX_VOLTAGE = 12;
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  public static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry logPitchDegrees = logGroup.build("PitchDegrees");
+  private static final LoggerEntry logTargetPitchDegrees = logGroup.build("TargetPitchDegrees");
+  private static final LoggerEntry logNoteInShooter = logGroup.build("NoteInShooter");
+  private static final LoggerEntry logPivotPIDLatency = logGroup.build("PivotPIDLatency");
 
   public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -131,11 +135,10 @@ public class Shooter extends SubsystemBase {
     try (var ignored = new ExecutionTiming("Shooter")) {
       io.updateInputs(inputs);
 
-      Logger.processInputs(ROOT_TABLE, inputs);
-      Logger.recordOutput(ROOT_TABLE + "/PitchDegrees", inputs.pivotPosition.getDegrees());
-      Logger.recordOutput(ROOT_TABLE + "/targetPitchDegrees", targetPivotPosition.getDegrees());
-
-      Logger.recordOutput(ROOT_TABLE + "noteInShooter", noteInShooter.getAsBoolean());
+      logInputs.info(inputs);
+      logPitchDegrees.info(inputs.pivotPosition.getDegrees());
+      logTargetPitchDegrees.info(targetPivotPosition.getDegrees());
+      logNoteInShooter.info(noteInShooter.getAsBoolean());
 
       pivotTargetMeasurements.add(
           new PIDTargetMeasurement(
@@ -155,7 +158,7 @@ public class Shooter extends SubsystemBase {
           pivotTargetMeasurements.remove(index);
         }
       }
-      Logger.recordOutput(ROOT_TABLE + "/pivotPIDLatency", pivotPidLatency);
+      logPivotPIDLatency.info(pivotPidLatency);
 
       var hc = hashCode();
       if (launcherkS.hasChanged(hc)
