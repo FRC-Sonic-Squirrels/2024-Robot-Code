@@ -180,13 +180,12 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     turnCurrent = turnTalon.getStatorCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        SwerveModule.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+        SwerveModule.ODOMETRY_FREQUENCY, drivePosition, turnPosition, turnAbsolutePosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
-        turnAbsolutePosition,
         turnVelocity,
         turnAppliedVolts,
         turnCurrent);

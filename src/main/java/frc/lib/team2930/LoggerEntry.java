@@ -14,93 +14,142 @@ import us.hebi.quickbuf.ProtoMessage;
 
 public class LoggerEntry {
   public final String key;
+  public final double updateFrequency;
+  public double lastRefresh;
 
   public LoggerEntry(String key) {
+    this(key, 20.0 / 1000);
+  }
+
+  public LoggerEntry(String key, double updateFrequencyInSeconds) {
     this.key = key;
+    this.updateFrequency = updateFrequencyInSeconds;
   }
 
   public void info(byte[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(boolean value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(int value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(long value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(float value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(double value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(String value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public <E extends Enum<E>> void info(E value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public <U extends Unit<U>> void info(Measure<U> value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(boolean[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(int[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(long[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(float[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(double[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(String[] value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public <T> void info(Struct<T> struct, T value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, struct, value);
   }
 
   public <T> void info(Struct<T> struct, T... value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, struct, value);
   }
 
   public <T, MessageType extends ProtoMessage<?>> void info(
       Protobuf<T, MessageType> proto, T value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, proto, value);
   }
 
   public <T extends WPISerializable> void info(T value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public <T extends StructSerializable> void info(T... value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
   public void info(Mechanism2d value) {
+    if (shouldNotRefresh()) return;
+
     Logger.recordOutput(key, value);
   }
 
@@ -109,6 +158,18 @@ public class LoggerEntry {
   }
 
   public void info(LoggableInputs inputs) {
+    if (shouldNotRefresh()) return;
+
     Logger.processInputs(key, inputs);
+  }
+
+  private boolean shouldNotRefresh() {
+    var updated = LoggerGroup.shouldRefresh(lastRefresh, updateFrequency);
+    if (Double.isFinite(updated)) {
+      lastRefresh = updated;
+      return false;
+    }
+
+    return true;
   }
 }
