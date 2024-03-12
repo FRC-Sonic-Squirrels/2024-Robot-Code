@@ -18,12 +18,12 @@ public class LoggerEntry {
   public double lastRefresh;
 
   public LoggerEntry(String key) {
-    this(key, 20.0 / 1000);
+    this(key, 50);
   }
 
-  public LoggerEntry(String key, double updateFrequencyInSeconds) {
+  public LoggerEntry(String key, int updateFrequencyInSeconds) {
     this.key = key;
-    this.updateFrequency = updateFrequencyInSeconds;
+    this.updateFrequency = 1.0 / updateFrequencyInSeconds;
   }
 
   public void info(byte[] value) {

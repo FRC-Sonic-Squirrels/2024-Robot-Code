@@ -27,10 +27,10 @@ public class LoggerGroup {
   }
 
   public LoggerEntry build(String name) {
-    return build(name, 20.0 / 1000);
+    return build(name, 50);
   }
 
-  public synchronized LoggerEntry build(String name, double updateFrequencyInSeconds) {
+  public synchronized LoggerEntry build(String name, int updateFrequencyInSeconds) {
     var entry = entries.get(name);
     if (entry == null) {
       entry = new LoggerEntry(root + "/" + name, updateFrequencyInSeconds);

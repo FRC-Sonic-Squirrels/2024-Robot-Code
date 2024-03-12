@@ -26,7 +26,7 @@ import frc.robot.configs.RobotConfig;
 import java.util.List;
 
 public class SwerveModule {
-  public static final double ODOMETRY_FREQUENCY = 250.0;
+  public static final int ODOMETRY_FREQUENCY = 250;
 
   public static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
   public static final LoggedTunableNumber turnCruiseVelocity =

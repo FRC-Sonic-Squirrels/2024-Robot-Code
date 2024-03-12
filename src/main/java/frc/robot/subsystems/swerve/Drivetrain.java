@@ -43,6 +43,11 @@ public class Drivetrain extends SubsystemBase {
   public static final String ROOT_TABLE = "Drivetrain";
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+  private static final ExecutionTiming timing_wait = new ExecutionTiming(ROOT_TABLE + "/wait");
+  private static final ExecutionTiming timing_process =
+      new ExecutionTiming(ROOT_TABLE + "/odometry");
+  private static final ExecutionTiming timing_vision = new ExecutionTiming(ROOT_TABLE + "/vision");
+  private static final ExecutionTiming timing_pose = new ExecutionTiming(ROOT_TABLE + "/pose");
 
   private static final LoggerGroup logGroupDrive = new LoggerGroup("Drive");
   private static final LoggerEntry logGyro = logGroupDrive.build("Gyro");
@@ -55,10 +60,12 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry logSwerveStatesMeasured = logGroupSwerveStates.build("Measured");
 
   private static final LoggerGroup logGroupOdometryThread = new LoggerGroup("OdometryThread");
-  private static final LoggerEntry logOdometryStatus = logGroupOdometryThread.build("status");
+  private static final LoggerEntry logOdometryStatus =
+      logGroupOdometryThread.build("status", SwerveModule.ODOMETRY_FREQUENCY);
   private static final LoggerEntry logOdometryTimestampSpread =
-      logGroupOdometryThread.build("timestampSpread");
-  private static final LoggerEntry logOdometryTwist = logGroupOdometryThread.build("twist");
+      logGroupOdometryThread.build("timestampSpread", SwerveModule.ODOMETRY_FREQUENCY);
+  private static final LoggerEntry logOdometryTwist =
+      logGroupOdometryThread.build("twist", SwerveModule.ODOMETRY_FREQUENCY);
   private static final LoggerEntry logOdometryCrash = logGroupOdometryThread.build("crash");
 
   private static final LoggerGroup logGroupDrivetrain = new LoggerGroup("Drivetrain");
@@ -197,8 +204,12 @@ public class Drivetrain extends SubsystemBase {
 
         // Wait for updates from all signals
         if (isCANFD) {
-          var statusCode =
-              BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
+          StatusCode statusCode;
+
+          try (var ignored = timing_wait.start()) {
+            statusCode =
+                BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
+          }
 
           if (statusCode != lastStatusCode) {
             logOdometryStatus.info(statusCode);
@@ -255,10 +266,12 @@ public class Drivetrain extends SubsystemBase {
 
         try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
         {
-          // Apply the twist (change since last sample) to the current pose
-          rawOdometryPose = rawOdometryPose.exp(twist);
+          try (var ignored3 = timing_process.start()) {
+            // Apply the twist (change since last sample) to the current pose
+            rawOdometryPose = rawOdometryPose.exp(twist);
 
-          poseEstimator.addDriveData(timestamp, twist);
+            poseEstimator.addDriveData(timestamp, twist);
+          }
         }
       } catch (Exception e) {
         logOdometryCrash.info(e.toString());
@@ -416,7 +429,9 @@ public class Drivetrain extends SubsystemBase {
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
-      poseEstimator.addVisionData(visionData);
+      try (var ignored2 = timing_vision.start()) {
+        poseEstimator.addVisionData(visionData);
+      }
     }
   }
 
@@ -433,7 +448,9 @@ public class Drivetrain extends SubsystemBase {
   public Pose2d getPoseEstimatorPose() {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
-      return poseEstimator.getLatestPose();
+      try (var ignored2 = timing_pose.start()) {
+        return poseEstimator.getLatestPose();
+      }
     }
   }
 
