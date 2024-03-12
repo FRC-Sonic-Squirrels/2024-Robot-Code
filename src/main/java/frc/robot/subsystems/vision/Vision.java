@@ -31,11 +31,16 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Vision extends SubsystemBase {
-  public static final LoggerGroup logGroup = new LoggerGroup("Vision");
+  public static final String ROOT_TABLE = "Vision";
+
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
+  public static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry logAllAprilTags3D = logGroup.build("AllAprilTags3D");
   private static final LoggerEntry logUseVision = logGroup.build("useVision");
   private static final LoggerEntry logUseMaxDistanceAwayFromExistingEstimate =
       logGroup.build("useMaxDistanceAwayFromExistingEstimate");
+
   private static final LoggerEntry logRejectByGyro = logGroup.build("RejectByGyro");
   private static final LoggerEntry logRejectByGyroError = logGroup.build("RejectByGyroError");
   private static final LoggerEntry logRejectByDistance = logGroup.build("RejectByDistance");
@@ -127,7 +132,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Vision")) {
+    try (var ignored = timing.start()) {
       // update all inputs
       for (VisionModule module : visionModules) {
         module.visionIO.updateInputs(module.visionIOInputs);

@@ -27,6 +27,8 @@ import java.util.function.BooleanSupplier;
 public class ScoreSpeaker extends Command {
   private static final String ROOT_TABLE = "ScoreSpeaker";
 
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
   private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry log_gamepieceLoaded = logGroup.build("gamepieceLoaded");
   private static final LoggerEntry log_PIDLatency = logGroup.build("PIDLatency");
@@ -82,8 +84,6 @@ public class ScoreSpeaker extends Command {
 
   private boolean readyToShoot;
 
-  private final GamepieceVisualization gamepieceVisualizer = new GamepieceVisualization();
-
   private Double deadline;
 
   private double shootDeadline;
@@ -98,7 +98,6 @@ public class ScoreSpeaker extends Command {
    * @param drive drivetrain subsystem
    * @param shooter shooter subsystem
    * @param shootGamepiece when this command should end
-   * @return Command to lock rotation in direction of target
    */
   public ScoreSpeaker(
       DrivetrainWrapper drive,
@@ -116,7 +115,6 @@ public class ScoreSpeaker extends Command {
    * @param drive drivetrain subsystem
    * @param shooter shooter subsystem
    * @param shootGamepiece when this command should end
-   * @return Command to lock rotation in direction of target
    */
   public ScoreSpeaker(
       DrivetrainWrapper drive,
@@ -146,18 +144,7 @@ public class ScoreSpeaker extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    try (var ignored = new ExecutionTiming("ScoreSpeaker")) {
-
-      double kickerOut = 0.0;
-
-      // 1
-      // note move,ent
-      // kickerOut = 1.0;
-
-      // 2
-      // aiming
-      //
-
+    try (var ignored = timing.start()) {
       if (!shooter.noteInShooter()) {
         shooter.markStartOfNoteLoading();
         shooter.setKickerPercentOut(0.1 * 1.42);

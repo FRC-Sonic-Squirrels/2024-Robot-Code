@@ -21,6 +21,8 @@ public class Shooter extends SubsystemBase {
   private static final String ROOT_TABLE = "Shooter";
   private static final double MAX_VOLTAGE = 12;
 
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
   private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
   public static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry logPitchDegrees = logGroup.build("PitchDegrees");
@@ -132,7 +134,7 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Shooter")) {
+    try (var ignored = timing.start()) {
       io.updateInputs(inputs);
 
       logInputs.info(inputs);

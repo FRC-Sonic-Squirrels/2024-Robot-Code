@@ -20,14 +20,18 @@ import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 
 public class Elevator extends SubsystemBase {
-  private static final LoggerEntry logInputs = new LoggerEntry("Elevator");
-  private static final LoggerGroup logGroup = new LoggerGroup("Elevator");
+  public static final String ROOT_TABLE = "Elevator";
+
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry logTargetHeight = logGroup.build("targetHeight");
   public static final LoggerEntry logSIM_ActualTargetHeight =
       logGroup.build("SIM_actualTargetHeight");
   public static final LoggerEntry logSIM_Error = logGroup.build("SIM_error");
 
-  private static final TunableNumberGroup group = new TunableNumberGroup("Elevator");
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber kP = group.build("kP");
   private static final LoggedTunableNumber kD = group.build("kD");
@@ -90,7 +94,7 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Elevator")) {
+    try (var ignored = timing.start()) {
       io.updateInputs(inputs);
       logInputs.info(inputs);
 

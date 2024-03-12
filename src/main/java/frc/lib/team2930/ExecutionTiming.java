@@ -6,11 +6,15 @@ public class ExecutionTiming implements AutoCloseable {
   private static final String ROOT_TABLE = "ExecutionTiming/";
 
   private final String context;
-  private final long startTime;
+  private long startTime;
 
   public ExecutionTiming(String context) {
     this.context = context;
+  }
+
+  public ExecutionTiming start() {
     startTime = Logger.getRealTimestamp();
+    return this;
   }
 
   @Override

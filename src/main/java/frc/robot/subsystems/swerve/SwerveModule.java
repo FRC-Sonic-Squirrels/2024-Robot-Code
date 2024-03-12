@@ -35,6 +35,7 @@ public class SwerveModule {
       group.build("SwerveTurnAcceleration", 200);
 
   private final LoggerEntry log_index;
+  private final ExecutionTiming timing;
 
   private final SwerveModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -56,9 +57,11 @@ public class SwerveModule {
 
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
-    this.log_index = new LoggerEntry(String.format("SwerveModule%d", index));
 
-    this.wheelRadius = config.getWheelRadius().in(Units.Meters);
+    log_index = new LoggerEntry(String.format("SwerveModule%d", index));
+    timing = new ExecutionTiming(log_index.key);
+
+    wheelRadius = config.getWheelRadius().in(Units.Meters);
 
     driveKS = config.getDriveKS();
     driveKV = config.getDriveKV();
@@ -89,7 +92,7 @@ public class SwerveModule {
   }
 
   public void periodic() {
-    try (var ignored = new ExecutionTiming(log_index.key)) {
+    try (var ignored = timing.start()) {
       log_index.info(inputs);
 
       // update Tuneable PID and FF values

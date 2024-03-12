@@ -13,26 +13,30 @@ import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
 
 public class Intake extends SubsystemBase {
-  private static final LoggerEntry logInputs = new LoggerEntry("Intake");
+  public static final String ROOT_TABLE = "Intake";
 
-  private static final TunableNumberGroup group = new TunableNumberGroup("Intake");
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
+  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
   private static final LoggedTunableNumber kS = group.build("kS");
   private static final LoggedTunableNumber kP = group.build("kP");
   private static final LoggedTunableNumber kV = group.build("kV");
-  private static final LoggedTunableNumber ClosedLoopMaxAccelerationConstraint =
+  private static final LoggedTunableNumber maxProfiledAcceleration =
       group.build("ClosedLoopMaxAccelerationConstraint");
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
       kP.initDefault(0.8);
       kV.initDefault(0.15);
-      ClosedLoopMaxAccelerationConstraint.initDefault(300.0);
+      maxProfiledAcceleration.initDefault(300.0);
     } else if (Constants.RobotMode.isSimBot()) {
 
       kP.initDefault(0.0);
       kV.initDefault(0.0);
-      ClosedLoopMaxAccelerationConstraint.initDefault(0.0);
+      maxProfiledAcceleration.initDefault(0.0);
     }
   }
 
@@ -43,13 +47,12 @@ public class Intake extends SubsystemBase {
   public Intake(IntakeIO io) {
     this.io = io;
 
-    io.setClosedLoopConstants(
-        kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
+    io.setClosedLoopConstants(kP.get(), kV.get(), kS.get(), maxProfiledAcceleration.get());
   }
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Intake")) {
+    try (var ignored = timing.start()) {
       // This method will be called once per scheduler run
       io.updateInputs(inputs);
       logInputs.info(inputs);
@@ -58,9 +61,8 @@ public class Intake extends SubsystemBase {
       if (kS.hasChanged(hc)
           || kP.hasChanged(hc)
           || kV.hasChanged(hc)
-          || ClosedLoopMaxAccelerationConstraint.hasChanged(hc)) {
-        io.setClosedLoopConstants(
-            kP.get(), kV.get(), kS.get(), ClosedLoopMaxAccelerationConstraint.get());
+          || maxProfiledAcceleration.hasChanged(hc)) {
+        io.setClosedLoopConstants(kP.get(), kV.get(), kS.get(), maxProfiledAcceleration.get());
       }
     }
   }

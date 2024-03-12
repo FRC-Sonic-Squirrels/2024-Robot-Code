@@ -17,6 +17,8 @@ import frc.robot.Constants.RobotMode.RobotType;
 public class EndEffector extends SubsystemBase {
   private static final String ROOT_TABLE = "EndEffector";
 
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
   private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
@@ -55,7 +57,7 @@ public class EndEffector extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("EndEffector")) {
+    try (var ignored = timing.start()) {
       io.updateInputs(inputs);
       logInputs.info(inputs);
 

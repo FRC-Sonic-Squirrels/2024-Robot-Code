@@ -16,6 +16,8 @@ import frc.robot.Constants.RobotMode.RobotType;
 public class Arm extends SubsystemBase {
   private static final String ROOT_TABLE = "Arm";
 
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
   private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
   private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry logPositionDegrees = logGroup.build("PositionDegrees");
@@ -84,7 +86,7 @@ public class Arm extends SubsystemBase {
 
   @Override
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Arm")) {
+    try (var ignored = timing.start()) {
       io.updateInputs(inputs);
       logInputs.info(inputs);
 

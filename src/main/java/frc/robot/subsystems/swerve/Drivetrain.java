@@ -40,6 +40,10 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Drivetrain extends SubsystemBase {
+  public static final String ROOT_TABLE = "Drivetrain";
+
+  private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
+
   private static final LoggerGroup logGroupDrive = new LoggerGroup("Drive");
   private static final LoggerEntry logGyro = logGroupDrive.build("Gyro");
 
@@ -151,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void periodic() {
-    try (var ignored = new ExecutionTiming("Drivetrain")) {
+    try (var ignored = timing.start()) {
       gyroIO.updateInputs(gyroInputs);
       modules.updateInputs();
 
