@@ -142,25 +142,31 @@ public class Shooter extends SubsystemBase {
       logTargetPitchDegrees.info(targetPivotPosition.getDegrees());
       logNoteInShooter.info(noteInShooter.getAsBoolean());
 
-      pivotTargetMeasurements.add(
-          new PIDTargetMeasurement(
-              Timer.getFPGATimestamp(),
-              targetPivotPosition,
-              inputs.pivotPosition.getRadians() <= targetPivotPosition.getRadians()));
-      for (int index = 0; index < pivotTargetMeasurements.size(); index++) {
-        PIDTargetMeasurement measurement = pivotTargetMeasurements.get(index);
-        if ((measurement.upDirection
-                && inputs.pivotPosition.getRadians() >= measurement.targetRot.getRadians())
-            || (!measurement.upDirection
-                && inputs.pivotPosition.getRadians() <= measurement.targetRot.getRadians())) {
-          pivotPidLatency =
-              pivotPidLatencyfilter.calculate(Timer.getFPGATimestamp() - measurement.timestamp);
-          pivotTargetMeasurements.remove(index);
-        } else if (Timer.getFPGATimestamp() - measurement.timestamp >= 1.0) {
-          pivotTargetMeasurements.remove(index);
+      if (Constants.unusedCode) {
+        var timestamp = Timer.getFPGATimestamp();
+        var pivotPositionRadians = inputs.pivotPosition.getRadians();
+
+        pivotTargetMeasurements.add(
+            new PIDTargetMeasurement(
+                timestamp,
+                targetPivotPosition,
+                pivotPositionRadians <= targetPivotPosition.getRadians()));
+
+        for (var it = pivotTargetMeasurements.iterator(); it.hasNext(); ) {
+          var measurement = it.next();
+          var targetRot = measurement.targetRot.getRadians();
+
+          double delta = timestamp - measurement.timestamp;
+          if ((measurement.upDirection && pivotPositionRadians >= targetRot)
+              || (!measurement.upDirection && pivotPositionRadians <= targetRot)) {
+            pivotPidLatency = pivotPidLatencyfilter.calculate(delta);
+            it.remove();
+          } else if (delta >= 1.0) {
+            it.remove();
+          }
         }
+        logPivotPIDLatency.info(pivotPidLatency);
       }
-      logPivotPIDLatency.info(pivotPidLatency);
 
       var hc = hashCode();
       if (launcherkS.hasChanged(hc)
