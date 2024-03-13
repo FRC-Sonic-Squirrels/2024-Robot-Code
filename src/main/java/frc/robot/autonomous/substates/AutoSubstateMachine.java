@@ -86,7 +86,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
   protected StateHandler visionPickupGamepiece() {
     ProcessedGamepieceData gamepieceData = closestGamepiece.get();
-    if (gamepieceData != null && useVisionForGamepiece()) {
+    if (gamepieceData != null && useVisionForGamepiece()
+     && gamepieceData.getDistance(drive.getPoseEstimatorPose(true)).in(Units.Inches) > 35.0
+     ) {
       lastSeenGamepiece = gamepieceData.globalPose.getTranslation();
     }
 
