@@ -123,7 +123,7 @@ public class RobotContainer {
   private final Intake intake;
   private final Shooter shooter;
   private final EndEffector endEffector;
-  private final LED led;
+  private LED led;
   private final VisionGamepiece visionGamepiece;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -353,7 +353,7 @@ public class RobotContainer {
           endEffector = new EndEffector(new EndEffectorIOReal());
           shooter = new Shooter(new ShooterIOReal());
 
-          led = new LED();
+          //   led = new LED()  p;
 
           // -- All empty IO's
           // drivetrain =
