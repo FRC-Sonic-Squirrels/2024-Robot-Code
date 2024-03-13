@@ -11,9 +11,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.Utils;
 
 public class VisionGamepiece extends SubsystemBase {
   private static final String ROOT_TABLE = "VisionGamepiece";
@@ -33,6 +38,9 @@ public class VisionGamepiece extends SubsystemBase {
       logGroupClosestGamepiece.build("poseRobotCentric");
   private static final LoggerEntry log_pose = logGroupClosestGamepiece.build("pose");
   private static final LoggerEntry log_timestamp = logGroupClosestGamepiece.build("timestamp");
+
+  private static final LoggedTunableNumber pitchFudgeFactor = new LoggedTunableNumber(ROOT_TABLE + "/pitchFudgeFactor", 0.0);
+  private static final LoggedTunableNumber yawFudgeFactor = new LoggedTunableNumber(ROOT_TABLE + "/yawFudgeFactor", 0.0);
 
   private final VisionGamepieceIO io;
   private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
@@ -129,18 +137,23 @@ public class VisionGamepiece extends SubsystemBase {
 
           var processedGamepieceData = processGamepieceData(yaw, pitch, inputs.timestamp);
 
-          seenGamePieces.removeIf(
-              previousSeenGamePiece -> previousSeenGamePiece.sameGamepiece(processedGamepieceData));
+          boolean alreadySeen = false;
 
+          for (int i = 0; i < seenGamePieces.size(); i++) {
+            if(seenGamePieces.get(i).sameGamepiece(processedGamepieceData)){
+              seenGamePieces.set(i, processedGamepieceData);
+              alreadySeen = true;
+            }
+          }
+
+          if(!alreadySeen)
           seenGamePieces.add(processedGamepieceData);
 
           logGamepieceData(yaw, pitch, processedGamepieceData, index);
         }
       }
 
-      var timestamp = Timer.getFPGATimestamp();
-
-      seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
+      var timestamp = Utils.getCurrentTimeSeconds();
 
       logTotalLatencyMs.info(inputs.totalLatencyMs);
 
@@ -176,6 +189,7 @@ public class VisionGamepiece extends SubsystemBase {
         Pose2d pose = seenGamePieces.get(i).globalPose;
         gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
       }
+      Logger.recordOutput(ROOT_TABLE + "/gamepieceCount", seenGamePieces.size());
       logGamepiecePoseArray.info(gamepiecePoses);
     }
   }
@@ -221,14 +235,19 @@ public class VisionGamepiece extends SubsystemBase {
                         .getY())));
   }
 
-  private double groundGamepieceDistance(Rotation2d targetPitch) {
+  private double groundGamepieceDistance(Rotation2d targetPitch, Rotation2d cameraYaw, Rotation2d cameraPitch) {
+    double fudgeFromYaw = yawFudgeFactor.get() * Math.sin(Math.abs(cameraYaw.getRadians()));
+    double fudgeFromPitch = pitchFudgeFactor.get() * Math.sin(-cameraPitch.getRadians());
+
+    Logger.recordOutput(ROOT_TABLE + "/fudgeFromYaw", fudgeFromYaw);
+    Logger.recordOutput(ROOT_TABLE + "/fudgeFromPitch", fudgeFromPitch);
+
     return (Constants.VisionGamepieceConstants.GAMEPIECE_CAMERA_POSE.getZ()
                 - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS
                         .minus(Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS)
                         .in(Units.Meters))
                     / 2)
-            * Math.tan(targetPitch.getRadians())
-        + 0.2;
+            * Math.tan(targetPitch.getRadians()) + Units.Inches.of(fudgeFromYaw).in(Units.Meter) + Units.Inches.of(fudgeFromPitch).in(Units.Meter);
   }
 
   private Pose2d groundGamepiecePose(double distanceMeters, Rotation2d targetYaw) {
@@ -238,7 +257,7 @@ public class VisionGamepiece extends SubsystemBase {
   private ProcessedGamepieceData processGamepieceData(double yaw, double pitch, double timestamp) {
     Rotation2d targetYaw = targetYaw(yaw);
     Rotation2d targetPitch = targetPitch(pitch);
-    double distance = groundGamepieceDistance(targetPitch);
+    double distance = groundGamepieceDistance(targetPitch, Rotation2d.fromDegrees(yaw), Rotation2d.fromDegrees(pitch));
     Pose2d pose = groundGamepiecePose(distance, targetYaw);
     Pose2d robotPose = robotPoseSupplier.get();
 
@@ -267,5 +286,6 @@ public class VisionGamepiece extends SubsystemBase {
     processedGroup.build("targetPitch").info(processedGamepieceData.getPitch(robotPose));
     processedGroup.build("pose").info(processedGamepieceData.getRobotCentricPose(robotPose));
     processedGroup.build("globalPose").info(processedGamepieceData.globalPose);
+    processedGroup.build("timestamp").info(processedGamepieceData.timestamp_RIOFPGA_capture);
   }
 }
