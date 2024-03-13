@@ -21,14 +21,18 @@ public class ChoreoHelper {
   private static final LoggerEntry log_closestPose = logGroup.build("closestPose");
   private static final LoggerEntry log_optimalPose = logGroup.build("optimalPose");
   private static final LoggerEntry log_desiredVelocity = logGroup.build("desiredVelocity");
+  private static final LoggerEntry log_distanceError = logGroup.build("distanceError");
+  private static final LoggerEntry log_headingError = logGroup.build("headingError");
 
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
   private final PIDController yFeedback;
   private final PIDController rotationalFeedback;
   private final double initialTime;
+  private final double lagThreshold;
   private double timeOffset;
   private double pausedTime = Double.NaN;
+  private ChoreoTrajectoryState stateTooBehind;
 
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
@@ -42,10 +46,12 @@ public class ChoreoHelper {
       double initialTime,
       Pose2d initialPose,
       ChoreoTrajectory traj,
+      double lagThreshold,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
       PIDController rotationalFeedback) {
     this.traj = traj;
+    this.lagThreshold = lagThreshold;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
@@ -100,32 +106,58 @@ public class ChoreoHelper {
    * @param timestamp time of path
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
-    if (!Double.isNaN(pausedTime)) {
+    ChoreoTrajectoryState state;
+    boolean endOfPath;
+
+    if (stateTooBehind != null) {
+      state = stateTooBehind;
+      endOfPath = false;
+    } else {
+      var timestampCorrected = timestamp - initialTime + timeOffset;
+      state = traj.sample(timestampCorrected, Constants.isRedAlliance());
+      endOfPath = timestampCorrected > traj.getTotalTime();
+    }
+
+    double xRobot = robotPose.getX();
+    double yRobot = robotPose.getY();
+
+    double xDesired = state.x;
+    double yDesired = state.y;
+
+    var distanceError = Math.hypot(xDesired - xRobot, yDesired - yRobot);
+    log_distanceError.info(distanceError);
+    if (distanceError < lagThreshold) {
+      if (stateTooBehind != null) {
+        stateTooBehind = null;
+        resume(timestamp);
+      }
+    } else {
+      if (stateTooBehind == null) {
+        stateTooBehind = state;
+        pause(timestamp);
+      }
+    }
+
+    if (stateTooBehind == null && !Double.isNaN(pausedTime)) {
       return null;
     }
 
-    timestamp -= initialTime;
-    timestamp += timeOffset;
-
-    ChoreoTrajectoryState state = traj.sample(timestamp, Constants.isRedAlliance());
-
-    double x = robotPose.getX();
-    double y = robotPose.getY();
-    Rotation2d rotation = robotPose.getRotation();
-
-    double xVel = state.velocityX + xFeedback.calculate(x, state.x);
-    double yVel = state.velocityY + yFeedback.calculate(y, state.y);
+    double xVel = state.velocityX + xFeedback.calculate(xRobot, xDesired);
+    double yVel = state.velocityY + yFeedback.calculate(yRobot, yDesired);
 
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
+
+    Rotation2d rotation = robotPose.getRotation();
     double theta = rotation.getRadians();
     double omegaVel = state.angularVelocity + rotationalFeedback.calculate(theta, state.heading);
 
     log_optimalPose.info(state.getPose());
     log_desiredVelocity.info(new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
+    log_headingError.info(Math.toDegrees(GeometryUtil.optimizeRotation(theta - state.heading)));
 
-    if (timestamp > traj.getTotalTime()) return null;
-
-    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+    return endOfPath
+        ? null
+        : ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
   }
 
   public static ChoreoTrajectory rescale(ChoreoTrajectory traj, double speedScaling) {

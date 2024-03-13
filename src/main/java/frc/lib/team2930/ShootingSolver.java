@@ -249,9 +249,7 @@ public class ShootingSolver {
 
     var currentHeading = robotPose.getRotation().getRadians();
 
-    var deltaAngle = targetTheta - currentHeading;
-    while (deltaAngle <= -Math.PI) deltaAngle += Math.PI * 2;
-    while (deltaAngle >= Math.PI) deltaAngle -= Math.PI * 2;
+    var deltaAngle = GeometryUtil.optimizeRotation(targetTheta - currentHeading);
 
     var rateOfRotation = deltaAngle / Math.max(0.01, timeToShoot);
 

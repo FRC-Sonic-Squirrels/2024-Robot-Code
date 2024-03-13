@@ -130,6 +130,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
               timeFromStart(),
               drive.getPoseEstimatorPose(true),
               traj,
+              config.getDriveBaseRadius() / 2,
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());

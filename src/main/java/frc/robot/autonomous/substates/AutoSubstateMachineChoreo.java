@@ -62,6 +62,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
               timeFromStart(),
               drive.getPoseEstimatorPose(true),
               traj,
+              config.getDriveBaseRadius() / 2,
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());

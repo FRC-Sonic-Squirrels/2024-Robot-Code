@@ -339,8 +339,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         var thetaError =
             desiredShootingHeading.getRadians()
                 - drivetrainWrapper.getRotationGyroOnly().getRadians();
-        while (thetaError <= -Math.PI) thetaError += Math.PI * 2;
-        while (thetaError >= Math.PI) thetaError -= Math.PI * 2;
+
+        thetaError = GeometryUtil.optimizeRotation(thetaError);
         atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
       } else {
         atThetaTarget = false;

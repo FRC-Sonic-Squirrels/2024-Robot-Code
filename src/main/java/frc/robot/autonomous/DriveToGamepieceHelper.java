@@ -75,8 +75,7 @@ public class DriveToGamepieceHelper {
     }
 
     rotationalErrorDegrees = gamepieceDirection.minus(pose.getRotation()).getDegrees();
-    while (rotationalErrorDegrees <= -180) rotationalErrorDegrees += 360;
-    while (rotationalErrorDegrees >= 180) rotationalErrorDegrees -= 360;
+    rotationalErrorDegrees = GeometryUtil.optimizeRotationInDegrees(rotationalErrorDegrees);
     rotationalErrorDegrees = Math.abs(rotationalErrorDegrees);
 
     double allowedRotationalErrorDegreesValue = allowedRotationalErrorDegrees.get();

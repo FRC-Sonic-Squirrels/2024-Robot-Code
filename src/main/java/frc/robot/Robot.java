@@ -64,7 +64,7 @@ public class Robot extends LoggedRobot {
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
   private Auto selectedAuto;
-  private String selectedChooserSelectedName;
+  private String selectedAutoName;
   private Command autoCommand;
   private Pose2d selectedInitialPose;
   private Pose2d desiredInitialPose;
@@ -189,26 +189,25 @@ public class Robot extends LoggedRobot {
       autonomousChooser = robotContainer.getAutonomousChooser();
     }
 
-    var currentChooserSelectedName = autonomousChooser.get();
-    if (currentChooserSelectedName != null
-        && !currentChooserSelectedName.equals(selectedChooserSelectedName)) {
+    var autoName = autonomousChooser.get();
+    if (autoName != null && !autoName.equals(selectedAutoName)) {
       Pose2d initialPose;
 
-      selectedAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
+      selectedAuto = robotContainer.getAutoSupplierForString(autoName).get();
       if (selectedAuto != null) {
         initialPose = selectedAuto.initPose();
         if (initialPose != null) {
           initialPose = AllianceFlipUtil.flipPoseForAlliance(initialPose);
         }
 
-        logCurrentChooserValue.info(currentChooserSelectedName);
+        logCurrentChooserValue.info(autoName);
         logSelectedAuto.info(selectedAuto.name());
       } else {
         initialPose = null;
       }
 
       desiredInitialPose = initialPose;
-      selectedChooserSelectedName = currentChooserSelectedName;
+      selectedAutoName = autoName;
     }
 
     if (desiredInitialPose != null && !desiredInitialPose.equals(selectedInitialPose)) {

@@ -43,4 +43,16 @@ public class GeometryUtil {
     }
     return false;
   }
+
+  public static double optimizeRotation(double theta) {
+    while (theta <= -Math.PI) theta += Math.PI * 2;
+    while (theta >= Math.PI) theta -= Math.PI * 2;
+    return theta;
+  }
+
+  public static double optimizeRotationInDegrees(double theta) {
+    while (theta <= -180) theta += 360;
+    while (theta >= 180) theta -= 360;
+    return theta;
+  }
 }
