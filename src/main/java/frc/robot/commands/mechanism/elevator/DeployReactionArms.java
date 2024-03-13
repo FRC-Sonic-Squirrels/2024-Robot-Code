@@ -9,6 +9,7 @@ import frc.robot.subsystems.elevator.Elevator;
 
 public class DeployReactionArms extends Command {
   private final Elevator elevator;
+
   /** Creates a new DeployReactionArms. */
   public DeployReactionArms(Elevator elevator) {
     this.elevator = elevator;

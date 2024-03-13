@@ -6,7 +6,6 @@ package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase.IdleMode;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
@@ -181,18 +180,20 @@ public class Elevator extends SubsystemBase {
 
   // REACTION ARM
   public void deployReactionArms() {
-    io.setReactionArmPosition(Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_DEPLOY_ROTATIONS);
+    io.setReactionArmPosition(
+        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_DEPLOY_ROTATIONS);
   }
 
   public void retractReactionArms() {
-    io.setReactionArmPosition(Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS);
+    io.setReactionArmPosition(
+        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS);
   }
 
-  public void resetReactionArmPositions(){
+  public void resetReactionArmPositions() {
     io.resetReactionArmPosition();
   }
 
-  public void setReactionArmIdleMode(IdleMode idleMode){
+  public void setReactionArmIdleMode(IdleMode idleMode) {
     io.setReactionArmIdleMode(idleMode);
   }
 }

@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.autonomous.DriveToGamepieceHelper;
@@ -44,17 +45,17 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected Translation2d gamepieceTranslation;
   private Translation2d lastSeenGamepiece;
 
+  private static final TunableNumberGroup groupTunable =
+      new TunableNumberGroup("AutoSubstateMachine");
+
   private static final LoggedTunableNumber distToBeginDriveToGamepiece =
-      new LoggedTunableNumber("AutoSubstateMachine/distToBeginDriveToGamepiece", 2.0);
-
+      groupTunable.build("distToBeginDriveToGamepiece", 2.0);
   private static final LoggedTunableNumber useVisionForDriving =
-      new LoggedTunableNumber("AutoSubstateMachine/useVisionForDriving", 0);
-
+      groupTunable.build("useVisionForDriving", 0);
   private static final LoggedTunableNumber confirmationTime =
-      new LoggedTunableNumber("AutoSubstateMachine/confirmationTime", 0.8);
-
+      groupTunable.build("confirmationTime", 0.8);
   protected static final LoggedTunableNumber slowDownFactor =
-      new LoggedTunableNumber("AutoSubstateMachine/slowDownFactor", 1.0);
+      groupTunable.build("slowDownFactor", 1.0);
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -86,9 +87,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
   protected StateHandler visionPickupGamepiece() {
     ProcessedGamepieceData gamepieceData = closestGamepiece.get();
-    if (gamepieceData != null && useVisionForGamepiece()
-     && gamepieceData.getDistance(drive.getPoseEstimatorPose(true)).in(Units.Inches) > 35.0
-     ) {
+    if (gamepieceData != null
+        && useVisionForGamepiece()
+        && gamepieceData.getDistance(drive.getPoseEstimatorPose(true)).in(Units.Inches) > 35.0) {
       lastSeenGamepiece = gamepieceData.globalPose.getTranslation();
     }
 

@@ -19,7 +19,6 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
@@ -42,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
@@ -61,7 +61,6 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.arm.ArmSetAngle;
-import frc.robot.commands.mechanism.elevator.DeployReactionArms;
 import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
@@ -130,12 +129,11 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
-  private static final LoggedTunableNumber tunableX =
-      new LoggedTunableNumber("tunableXFromSpeaker", 50.0);
-  private static final LoggedTunableNumber tunableY =
-      new LoggedTunableNumber("tunableYFromSpeaker", 0);
+  private static final TunableNumberGroup groupTunable = new TunableNumberGroup("Speaker");
+  private static final LoggedTunableNumber tunableX = groupTunable.build("dX", 50.0);
+  private static final LoggedTunableNumber tunableY = groupTunable.build("dY", 0);
   private static final LoggedTunableNumber passThroughVel =
-      new LoggedTunableNumber("Plop/passThroughVel", 1000);
+      groupTunable.build("PlopThroughVel", 1000);
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
@@ -847,7 +845,23 @@ public class RobotContainer {
           .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
     }
 
-    operatorController.leftBumper().onTrue(new ConditionalCommand(Commands.runOnce(() -> {elevator.retractReactionArms(); reactionArmsDown = false;}, elevator), Commands.runOnce(() -> {elevator.deployReactionArms(); reactionArmsDown = true;}, elevator), () -> reactionArmsDown));
+    operatorController
+        .leftBumper()
+        .onTrue(
+            new ConditionalCommand(
+                Commands.runOnce(
+                    () -> {
+                      elevator.retractReactionArms();
+                      reactionArmsDown = false;
+                    },
+                    elevator),
+                Commands.runOnce(
+                    () -> {
+                      elevator.deployReactionArms();
+                      reactionArmsDown = true;
+                    },
+                    elevator),
+                () -> reactionArmsDown));
 
     operatorController
         .povUp()
@@ -899,7 +913,8 @@ public class RobotContainer {
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
             .andThen(arm::resetSensorToHomePosition, arm)
-            .andThen(shooter::pivotResetHomePosition, shooter).andThen(elevator::resetReactionArmPositions)
+            .andThen(shooter::pivotResetHomePosition, shooter)
+            .andThen(elevator::resetReactionArmPositions)
             .ignoringDisable(true));
 
     breakModeButtonTrigger.onTrue(

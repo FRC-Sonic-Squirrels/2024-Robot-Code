@@ -126,13 +126,14 @@ public class CommandComposer {
                     () ->
                         driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10))
                             || confirmation.getAsBoolean()),
-                Commands.none(),
+                Commands.waitUntil(confirmation::getAsBoolean),
                 () -> doDrive)
             .asProxy()
             .alongWith(MechanismActions.ampPrepPosition(elevator, arm))
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(
-                Commands.run(() -> endEffector.setVelocity(2500), endEffector).alongWith(MechanismActions.ampPosition(elevator, arm))
+                Commands.run(() -> endEffector.setVelocity(2500), endEffector)
+                    .alongWith(MechanismActions.ampPosition(elevator, arm))
                     .until(noGamepieceInEE));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
@@ -144,14 +145,14 @@ public class CommandComposer {
   public static Command cancelScoreAmp(
       DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
-        // Commands.waitUntil(
-        // () ->
-        // GeometryUtil.getDist(
-        // drivetrainWrapper.getPoseEstimatorPose(),
-        // Constants.FieldConstants.getAmpScoringPose())
-        // >= 0.5)
-        // .andThen(
         MechanismActions.ampPositionToLoadPosition(elevator, arm)
+            .until(
+                () ->
+                    GeometryUtil.getDist(
+                            drivetrainWrapper.getPoseEstimatorPose(true),
+                            Constants.FieldConstants.getAmpScoringPose())
+                        >= 0.5)
+            .andThen(MechanismActions.loadingPosition(elevator, arm))
             .alongWith(new EndEffectorPercentOut(endEffector, 0.0));
 
     cancelScoreAmp.setName("CancelScoreAmp");

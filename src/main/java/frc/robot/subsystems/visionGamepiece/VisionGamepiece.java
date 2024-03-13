@@ -4,21 +4,19 @@
 
 package frc.robot.subsystems.visionGamepiece;
 
+import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.Utils;
 
 public class VisionGamepiece extends SubsystemBase {
   private static final String ROOT_TABLE = "VisionGamepiece";
@@ -39,8 +37,11 @@ public class VisionGamepiece extends SubsystemBase {
   private static final LoggerEntry log_pose = logGroupClosestGamepiece.build("pose");
   private static final LoggerEntry log_timestamp = logGroupClosestGamepiece.build("timestamp");
 
-  private static final LoggedTunableNumber pitchFudgeFactor = new LoggedTunableNumber(ROOT_TABLE + "/pitchFudgeFactor", 0.0);
-  private static final LoggedTunableNumber yawFudgeFactor = new LoggedTunableNumber(ROOT_TABLE + "/yawFudgeFactor", 0.0);
+  private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
+  private static final LoggedTunableNumber pitchFudgeFactor =
+      groupTunable.build("pitchFudgeFactor", 21.85);
+  private static final LoggedTunableNumber yawFudgeFactor =
+      groupTunable.build("yawFudgeFactor", 56.16);
 
   private final VisionGamepieceIO io;
   private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
@@ -140,14 +141,13 @@ public class VisionGamepiece extends SubsystemBase {
           boolean alreadySeen = false;
 
           for (int i = 0; i < seenGamePieces.size(); i++) {
-            if(seenGamePieces.get(i).sameGamepiece(processedGamepieceData)){
+            if (seenGamePieces.get(i).sameGamepiece(processedGamepieceData)) {
               seenGamePieces.set(i, processedGamepieceData);
               alreadySeen = true;
             }
           }
 
-          if(!alreadySeen)
-          seenGamePieces.add(processedGamepieceData);
+          if (!alreadySeen) seenGamePieces.add(processedGamepieceData);
 
           logGamepieceData(yaw, pitch, processedGamepieceData, index);
         }
@@ -235,7 +235,8 @@ public class VisionGamepiece extends SubsystemBase {
                         .getY())));
   }
 
-  private double groundGamepieceDistance(Rotation2d targetPitch, Rotation2d cameraYaw, Rotation2d cameraPitch) {
+  private double groundGamepieceDistance(
+      Rotation2d targetPitch, Rotation2d cameraYaw, Rotation2d cameraPitch) {
     double fudgeFromYaw = yawFudgeFactor.get() * Math.sin(Math.abs(cameraYaw.getRadians()));
     double fudgeFromPitch = pitchFudgeFactor.get() * Math.sin(-cameraPitch.getRadians());
 
@@ -247,7 +248,9 @@ public class VisionGamepiece extends SubsystemBase {
                         .minus(Constants.FieldConstants.Gamepieces.NOTE_INNER_RADIUS)
                         .in(Units.Meters))
                     / 2)
-            * Math.tan(targetPitch.getRadians()) + Units.Inches.of(fudgeFromYaw).in(Units.Meter) + Units.Inches.of(fudgeFromPitch).in(Units.Meter);
+            * Math.tan(targetPitch.getRadians())
+        + Units.Inches.of(fudgeFromYaw).in(Units.Meter)
+        + Units.Inches.of(fudgeFromPitch).in(Units.Meter);
   }
 
   private Pose2d groundGamepiecePose(double distanceMeters, Rotation2d targetYaw) {
@@ -257,7 +260,9 @@ public class VisionGamepiece extends SubsystemBase {
   private ProcessedGamepieceData processGamepieceData(double yaw, double pitch, double timestamp) {
     Rotation2d targetYaw = targetYaw(yaw);
     Rotation2d targetPitch = targetPitch(pitch);
-    double distance = groundGamepieceDistance(targetPitch, Rotation2d.fromDegrees(yaw), Rotation2d.fromDegrees(pitch));
+    double distance =
+        groundGamepieceDistance(
+            targetPitch, Rotation2d.fromDegrees(yaw), Rotation2d.fromDegrees(pitch));
     Pose2d pose = groundGamepiecePose(distance, targetYaw);
     Pose2d robotPose = robotPoseSupplier.get();
 

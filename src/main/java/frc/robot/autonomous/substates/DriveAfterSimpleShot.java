@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.drive.DriveToPose;
@@ -15,8 +16,9 @@ public class DriveAfterSimpleShot extends StateMachine {
   private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
   private static final LoggerEntry log_targetPose = logGroup.build("targetPose");
 
+  private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber driveDistance =
-      new LoggedTunableNumber(ROOT_TABLE + "/DistanceMeters", 1.5);
+      groupTunable.build("DistanceMeters", 1.5);
 
   DrivetrainWrapper drive;
   DriveToPose driveToPose;

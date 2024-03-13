@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase.IdleMode;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
@@ -43,5 +42,5 @@ public interface ElevatorIO {
 
   public default void resetReactionArmPosition() {}
 
-  public default void setReactionArmIdleMode(IdleMode idleMode){}
+  public default void setReactionArmIdleMode(IdleMode idleMode) {}
 }

@@ -11,30 +11,27 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkRelativeEncoder;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Servo;
-import frc.lib.team2930.ControlMode;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOReal implements ElevatorIO {
 
   private final TalonFX motor = new TalonFX(Constants.CanIDs.ELEVATOR_CAN_ID);
-  private final CANSparkMax reactionArmMotor = new CANSparkMax(Constants.CanIDs.REACTION_ARM_CAN_ID, MotorType.kBrushless);
+  private final CANSparkMax reactionArmMotor =
+      new CANSparkMax(Constants.CanIDs.REACTION_ARM_CAN_ID, MotorType.kBrushless);
 
   private SparkPIDController reactionArmPIDController = reactionArmMotor.getPIDController();
   private RelativeEncoder reactionArmEncoder = reactionArmMotor.getEncoder();
@@ -106,8 +103,14 @@ public class ElevatorIOReal implements ElevatorIO {
     reactionArmPIDController.setP(0.05);
     reactionArmPIDController.setOutputRange(-8, 8);
     reactionArmMotor.setSmartCurrentLimit(20);
-    reactionArmMotor.setSoftLimit(SoftLimitDirection.kForward, (float) Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_DEPLOY_ROTATIONS + (float) 0.5);
-    reactionArmMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS - (float) 0.5);
+    reactionArmMotor.setSoftLimit(
+        SoftLimitDirection.kForward,
+        (float) Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_DEPLOY_ROTATIONS
+            + (float) 0.5);
+    reactionArmMotor.setSoftLimit(
+        SoftLimitDirection.kReverse,
+        (float) Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS
+            - (float) 0.5);
     reactionArmMotor.burnFlash();
 
     resetReactionArmPosition();
@@ -189,6 +192,6 @@ public class ElevatorIOReal implements ElevatorIO {
 
   @Override
   public void setReactionArmIdleMode(IdleMode idleMode) {
-      reactionArmMotor.setIdleMode(idleMode);
+    reactionArmMotor.setIdleMode(idleMode);
   }
 }

@@ -91,8 +91,7 @@ public class IntakeGamepiece extends Command {
         rumbleValue = 0.0;
 
         // if we see the game piece slow down system to maintain better control over the note
-      }
-      else {
+      } else {
         intake.setVelocity(intakingVelocity.get());
         endEffector.setVelocity(intakingVelocity.get());
       }

@@ -126,7 +126,8 @@ public class MechanismPositions {
 
   public static MechanismPosition AmpPrepPosition() {
     return new MechanismPosition(
-        Units.Inches.of(ampPrepElevatorHeightInches.get()), Rotation2d.fromDegrees(ampPrepArmAngleDegrees.get()));
+        Units.Inches.of(ampPrepElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(ampPrepArmAngleDegrees.get()));
   }
 
   public static MechanismPosition ampPosition() {

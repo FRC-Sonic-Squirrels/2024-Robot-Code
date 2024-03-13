@@ -56,9 +56,9 @@ public class MechanismActions {
   }
 
   // public static Command ampPosition(Elevator elevator, Arm arm) {
-  //   return ampStage3Position(elevator, arm)
-  //       .andThen(ampStage2Position(elevator, arm))
-  //       .andThen(ampStage1Position(elevator, arm));
+  // return ampStage3Position(elevator, arm)
+  // .andThen(ampStage2Position(elevator, arm))
+  // .andThen(ampStage1Position(elevator, arm));
   // }
 
   public static Command ampPositionToLoadPosition(Elevator elevator, Arm arm) {
@@ -69,7 +69,10 @@ public class MechanismActions {
   }
 
   public static Command ampStage1Position(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
+    return goToPositionParallel(
+        elevator,
+        arm,
+        () -> new MechanismPosition(Units.Inches.of(24.0), Rotation2d.fromDegrees(0.0)));
   }
 
   public static Command ampStage2Position(Elevator elevator, Arm arm) {
@@ -158,12 +161,16 @@ public class MechanismActions {
 
             boolean runningElevatorSafety =
                 targetPosition.elevatorHeight().lte(safeHeight)
-                    && (arm.getAngle().getRadians()
-                            >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()
-                        && targetPosition.armAngle().getRadians()
-                            <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians());
+                    && ((arm.getAngle().getRadians()
+                                >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()
+                            && targetPosition.armAngle().getRadians()
+                                <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians())
+                        || (arm.getAngle().getRadians()
+                                <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()
+                            && position.get().armAngle().getRadians()
+                                >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()));
             if (ignoreSafety) runningElevatorSafety = false;
-            //  && targetPosition.armAngle().getRadians() >= Math.toRadians(60.0)
+            // && targetPosition.armAngle().getRadians() >= Math.toRadians(60.0)
 
             if (runningElevatorSafety) {
               elevator.setHeight(safeHeight);

@@ -7,12 +7,15 @@ package frc.robot.commands.drive;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 
 public class RotateToAngle extends Command {
-  private static final LoggedTunableNumber tunableKP =
-      new LoggedTunableNumber("RotateToAngle/kP", 4.9);
+  private static final String ROOT_TABLE = "RotateToAngle";
+
+  private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
+  private static final LoggedTunableNumber tunableKP = groupTunable.build("kP", 4.9);
 
   private final DrivetrainWrapper wrapper;
   private final Rotation2d angle;
