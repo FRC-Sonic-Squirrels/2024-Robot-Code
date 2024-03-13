@@ -18,6 +18,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
@@ -59,6 +61,7 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.arm.ArmSetAngle;
+import frc.robot.commands.mechanism.elevator.DeployReactionArms;
 import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
@@ -164,6 +167,8 @@ public class RobotContainer {
 
   private boolean is_teleop;
   private boolean is_autonomous;
+
+  private boolean reactionArmsDown = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -637,7 +642,7 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  shooter.setLauncherRPM(1500);
+                  shooter.setLauncherRPM(1000);
                   shooter.setKickerVelocity(passThroughVel.get());
                   endEffector.setVelocity(passThroughVel.get());
                   intake.setVelocity(passThroughVel.get());
@@ -842,6 +847,8 @@ public class RobotContainer {
           .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
     }
 
+    operatorController.leftBumper().onTrue(new ConditionalCommand(Commands.runOnce(() -> {elevator.retractReactionArms(); reactionArmsDown = false;}, elevator), Commands.runOnce(() -> {elevator.deployReactionArms(); reactionArmsDown = true;}, elevator), () -> reactionArmsDown));
+
     operatorController
         .povUp()
         .onTrue(MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake));
@@ -892,7 +899,7 @@ public class RobotContainer {
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
             .andThen(arm::resetSensorToHomePosition, arm)
-            .andThen(shooter::pivotResetHomePosition, shooter)
+            .andThen(shooter::pivotResetHomePosition, shooter).andThen(elevator::resetReactionArmPositions)
             .ignoringDisable(true));
 
     breakModeButtonTrigger.onTrue(
@@ -902,6 +909,7 @@ public class RobotContainer {
                       arm.setNeutralMode(NeutralModeValue.Coast);
                       elevator.setNeutralMode(NeutralModeValue.Coast);
                       shooter.setNeutralMode(NeutralModeValue.Coast);
+                      elevator.setReactionArmIdleMode(IdleMode.kCoast);
                       brakeModeTriggered = false;
                     },
                     elevator,
@@ -912,6 +920,7 @@ public class RobotContainer {
                       arm.setNeutralMode(NeutralModeValue.Brake);
                       elevator.setNeutralMode(NeutralModeValue.Brake);
                       shooter.setNeutralMode(NeutralModeValue.Brake);
+                      elevator.setReactionArmIdleMode(IdleMode.kBrake);
                       brakeModeTriggered = true;
                     },
                     elevator,
