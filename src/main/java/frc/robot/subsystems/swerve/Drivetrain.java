@@ -37,7 +37,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Drivetrain extends SubsystemBase {
   public static final String ROOT_TABLE = "Drivetrain";
@@ -78,7 +77,15 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry logDrivetrain_linearSpeedMax =
       logGroupDrivetrain.build("linearSpeedMax");
   private static final LoggerEntry logDrivetrain_speedsRot = logGroupDrivetrain.build("speedsRot");
-  private static final LoggerEntry logDrivetrain = logGroupDrivetrain.build("");
+
+  private static final LoggerGroup logGroupLocalization = new LoggerGroup("Localization");
+  private static final LoggerEntry logLocalization_RobotPosition =
+      logGroupLocalization.build("RobotPosition");
+  private static final LoggerEntry logLocalization_RobotPosition_RAW_ODOMETRY =
+      logGroupLocalization.build("RobotPosition_RAW_ODOMETRY");
+
+  private static final LoggerGroup logGroupRobot = new LoggerGroup("Robot");
+  private static final LoggerEntry log_FieldRelativeVel = logGroupRobot.build("FieldRelativeVel");
 
   public static final AutoLock odometryLock = new AutoLock();
 
@@ -180,6 +187,10 @@ public class Drivetrain extends SubsystemBase {
       }
 
       logSwerveStatesMeasured.info(getModuleStates());
+
+      log_FieldRelativeVel.info(getFieldRelativeVelocities());
+      logLocalization_RobotPosition.info(getPoseEstimatorPose());
+      logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
 
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
@@ -408,7 +419,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     return modules.getModuleStates();
   }
@@ -417,7 +427,6 @@ public class Drivetrain extends SubsystemBase {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
-  @AutoLogOutput(key = "Robot/FieldRelativeVel")
   public Pose2d getFieldRelativeVelocities() {
     Translation2d translation =
         new Translation2d(
@@ -439,12 +448,10 @@ public class Drivetrain extends SubsystemBase {
    * WARNING - THIS IS THE RAW *ODOMETRY* POSE, THIS DOES NOT ACCOUNT FOR VISION DATA & SHOULD
    * EXCLUSIVELY BE USED FOR LOGGING AND ANALYSIS
    */
-  @AutoLogOutput(key = "Localization/RobotPosition_RAW_ODOMETRY")
   private Pose2d getRawOdometryPose() {
     return rawOdometryPose;
   }
 
-  @AutoLogOutput(key = "Localization/RobotPosition")
   public Pose2d getPoseEstimatorPose() {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
