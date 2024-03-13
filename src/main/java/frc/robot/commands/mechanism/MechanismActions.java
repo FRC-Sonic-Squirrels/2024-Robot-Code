@@ -47,11 +47,19 @@ public class MechanismActions {
     return goToPositionParallel(elevator, arm, MechanismPositions::AmpFastPosition);
   }
 
-  public static Command ampPosition(Elevator elevator, Arm arm) {
-    return ampStage3Position(elevator, arm)
-        .andThen(ampStage2Position(elevator, arm))
-        .andThen(ampStage1Position(elevator, arm));
+  public static Command ampPrepPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::AmpPrepPosition);
   }
+
+  public static Command ampPosition(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
+  }
+
+  // public static Command ampPosition(Elevator elevator, Arm arm) {
+  //   return ampStage3Position(elevator, arm)
+  //       .andThen(ampStage2Position(elevator, arm))
+  //       .andThen(ampStage1Position(elevator, arm));
+  // }
 
   public static Command ampPositionToLoadPosition(Elevator elevator, Arm arm) {
     return ampStage1Position(elevator, arm)

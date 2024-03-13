@@ -129,10 +129,10 @@ public class CommandComposer {
                 Commands.none(),
                 () -> doDrive)
             .asProxy()
-            .alongWith(MechanismActions.ampPosition(elevator, arm))
+            .alongWith(MechanismActions.ampPrepPosition(elevator, arm))
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(
-                Commands.run(() -> endEffector.setVelocity(2500), endEffector)
+                Commands.run(() -> endEffector.setVelocity(2500), endEffector).alongWith(MechanismActions.ampPosition(elevator, arm))
                     .until(noGamepieceInEE));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 

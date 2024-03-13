@@ -28,6 +28,12 @@ public class MechanismPositions {
   private static final LoggedTunableNumber ampArmAngleDegrees =
       group.build("ampArmAngleDegrees", 43); // 35.0
 
+  private static final LoggedTunableNumber ampPrepElevatorHeightInches =
+      group.build("ampPrepElevatorHeightInches", 11.6);
+
+  private static final LoggedTunableNumber ampPrepArmAngleDegrees =
+      group.build("ampPrepArmAngleDegrees", 70);
+
   private static final LoggedTunableNumber ampStage2ElevatorHeightInches =
       group.build("ampStage2ElevatorHeightInches", 24.0);
 
@@ -116,6 +122,11 @@ public class MechanismPositions {
   public static MechanismPosition AmpFastPosition() {
     return new MechanismPosition(
         Units.Inches.of(ampFastElevator.get()), Rotation2d.fromDegrees(ampFastArm.get()));
+  }
+
+  public static MechanismPosition AmpPrepPosition() {
+    return new MechanismPosition(
+        Units.Inches.of(ampPrepElevatorHeightInches.get()), Rotation2d.fromDegrees(ampPrepArmAngleDegrees.get()));
   }
 
   public static MechanismPosition ampPosition() {

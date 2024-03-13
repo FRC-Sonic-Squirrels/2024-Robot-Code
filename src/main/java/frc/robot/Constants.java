@@ -252,6 +252,12 @@ public final class Constants {
     // swerveModule
     public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
     public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.35); // was 7.5
+
+    public static class ReactionArmConstants {
+      public static final double REACTION_ARM_HOME_ROTATIONS = 0;
+      public static final double REACTION_ARM_DEPLOY_ROTATIONS = 8;
+    }
+    
   }
 
   public static class ShooterConstants {
@@ -377,6 +383,7 @@ public final class Constants {
     public static final int ARM_CAN_ID = 17;
 
     public static final int ELEVATOR_CAN_ID = 37;
+    public static final int REACTION_ARM_CAN_ID = 7;
 
     public static final int END_EFFECTOR_CAN_ID = 30;
     public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 39;
@@ -413,7 +420,7 @@ public final class Constants {
             Units.Inches.of(5.3).in(Units.Meters),
             0.0,
             Units.Inches.of(18.725).in(Units.Meters),
-            new Rotation3d(0.0, Math.toRadians(-14.0), 0.0));
+            new Rotation3d(0.0, Math.toRadians(-12), 0.0));
     public static final String CAMERA_NAME = RobotConfig2024.OBJECT_DETECTION_CAMERA_NAME;
   }
 

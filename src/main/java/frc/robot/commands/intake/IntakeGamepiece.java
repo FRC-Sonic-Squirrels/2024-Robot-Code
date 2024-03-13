@@ -92,11 +92,10 @@ public class IntakeGamepiece extends Command {
 
         // if we see the game piece slow down system to maintain better control over the note
       }
-      // else {
-      //   double percent = intakingPercentWithGamepiece.get();
-      //   intake.setPercentOut(percent);
-      //   endEffector.setPercentOut(percent);
-      // }
+      else {
+        intake.setVelocity(intakingVelocity.get());
+        endEffector.setVelocity(intakingVelocity.get());
+      }
     } else {
       intake.setPercentOut(0.0);
       if (!intakeSideTofSeenGamepiece) {
