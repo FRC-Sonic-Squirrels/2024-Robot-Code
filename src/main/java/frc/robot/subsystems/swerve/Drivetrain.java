@@ -87,7 +87,7 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerGroup logGroupRobot = new LoggerGroup("Robot");
   private static final LoggerEntry log_FieldRelativeVel = logGroupRobot.build("FieldRelativeVel");
 
-  public static final AutoLock odometryLock = new AutoLock();
+  public static final AutoLock odometryLock = new AutoLock("odometry", 100);
 
   public static final TunableNumberGroup group = new TunableNumberGroup("RobotConfig");
   public static final LoggedTunableNumber driveMotorAccelerationAuto =
