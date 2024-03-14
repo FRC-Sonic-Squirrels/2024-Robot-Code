@@ -65,7 +65,6 @@ import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
-import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;

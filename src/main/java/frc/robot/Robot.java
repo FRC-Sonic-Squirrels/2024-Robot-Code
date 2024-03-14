@@ -63,8 +63,8 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
-  private Auto    selectedAuto;
-  private String  selectedChooserSelectedName;
+  private Auto selectedAuto;
+  private String selectedChooserSelectedName;
   private Command autoCommand;
   private Pose2d selectedInitialPose;
   private Pose2d desiredInitialPose;
@@ -190,7 +190,8 @@ public class Robot extends LoggedRobot {
     }
 
     var currentChooserSelectedName = autonomousChooser.get();
-    if (currentChooserSelectedName != null && !currentChooserSelectedName.equals(selectedChooserSelectedName)) {
+    if (currentChooserSelectedName != null
+        && !currentChooserSelectedName.equals(selectedChooserSelectedName)) {
       Pose2d initialPose;
 
       selectedAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
