@@ -123,7 +123,6 @@ public class RobotContainer {
   private final Intake intake;
   private final Shooter shooter;
   private final EndEffector endEffector;
-  private LED led;
   private final VisionGamepiece visionGamepiece;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -227,7 +226,6 @@ public class RobotContainer {
       intake = new Intake(new IntakeIO() {});
       shooter = new Shooter(new ShooterIO() {});
       endEffector = new EndEffector(new EndEffectorIO() {});
-      led = new LED();
       visionGamepiece =
           new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
 
@@ -295,7 +293,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          led = new LED();
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -318,7 +315,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          led = new LED();
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;
@@ -352,8 +348,6 @@ public class RobotContainer {
           // arm = new Arm(new ArmIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           shooter = new Shooter(new ShooterIOReal());
-
-          //   led = new LED()  p;
 
           // -- All empty IO's
           // drivetrain =
@@ -399,7 +393,6 @@ public class RobotContainer {
           intake = new Intake(new IntakeIO() {});
           shooter = new Shooter(new ShooterIO() {});
           endEffector = new EndEffector(new EndEffectorIO() {});
-          led = new LED();
           visionGamepiece =
               new VisionGamepiece(new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPose);
           break;

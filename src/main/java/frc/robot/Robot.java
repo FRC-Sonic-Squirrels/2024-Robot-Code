@@ -29,7 +29,6 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.robot.autonomous.AutosManager.Auto;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -47,8 +46,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private static final ExecutionTiming timingCommandScheduler =
       new ExecutionTiming("CommandScheduler");
-  private static final ExecutionTiming timingCommandScheduler2 =
-      new ExecutionTiming("CommandScheduler2");
 
   private static final LoggerGroup logGroupActiveCommands = new LoggerGroup("ActiveCommands");
   private static final LoggerGroup logGroupDIO = new LoggerGroup("DIO");
@@ -66,8 +63,8 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private LoggedDashboardChooser<String> autonomousChooser = null;
-  private Supplier<Auto> selectedAutoSupplier;
-  private Auto selectedAuto;
+  private Auto    selectedAuto;
+  private String  selectedChooserSelectedName;
   private Command autoCommand;
   private Pose2d selectedInitialPose;
   private Pose2d desiredInitialPose;
@@ -188,38 +185,29 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    try (var ignored = timingCommandScheduler2.start()) {
-      disabledPeriodic2();
-    }
-  }
-
-  public void disabledPeriodic2() {
     if (autonomousChooser == null) {
       autonomousChooser = robotContainer.getAutonomousChooser();
     }
 
     var currentChooserSelectedName = autonomousChooser.get();
-    if (currentChooserSelectedName != null) {
-      var supplier = robotContainer.getAutoSupplierForString(currentChooserSelectedName);
-      if (supplier != selectedAutoSupplier) {
-        selectedAutoSupplier = supplier;
-        Pose2d initialPose;
+    if (currentChooserSelectedName != null && !currentChooserSelectedName.equals(selectedChooserSelectedName)) {
+      Pose2d initialPose;
 
-        selectedAuto = supplier.get();
-        if (selectedAuto != null) {
-          initialPose = selectedAuto.initPose();
-          if (initialPose != null) {
-            initialPose = AllianceFlipUtil.flipPoseForAlliance(initialPose);
-          }
-
-          logCurrentChooserValue.info(currentChooserSelectedName);
-          logSelectedAuto.info(selectedAuto.name());
-        } else {
-          initialPose = null;
+      selectedAuto = robotContainer.getAutoSupplierForString(currentChooserSelectedName).get();
+      if (selectedAuto != null) {
+        initialPose = selectedAuto.initPose();
+        if (initialPose != null) {
+          initialPose = AllianceFlipUtil.flipPoseForAlliance(initialPose);
         }
 
-        desiredInitialPose = initialPose;
+        logCurrentChooserValue.info(currentChooserSelectedName);
+        logSelectedAuto.info(selectedAuto.name());
+      } else {
+        initialPose = null;
       }
+
+      desiredInitialPose = initialPose;
+      selectedChooserSelectedName = currentChooserSelectedName;
     }
 
     if (desiredInitialPose != null && !desiredInitialPose.equals(selectedInitialPose)) {
