@@ -24,7 +24,7 @@ public class DriveToGamepieceHelper {
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
-  private static final LoggedTunableNumber kP = group.build("kP", 4.0);
+  private static final LoggedTunableNumber kP = group.build("kP", 2.0);
   private static final LoggedTunableNumber kI = group.build("kI", 0.0);
   private static final LoggedTunableNumber kD = group.build("kD", 0.0);
 

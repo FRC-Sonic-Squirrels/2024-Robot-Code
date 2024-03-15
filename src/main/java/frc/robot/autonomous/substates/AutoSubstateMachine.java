@@ -50,12 +50,13 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
   private static final LoggedTunableNumber distToBeginDriveToGamepiece =
       groupTunable.build("distToBeginDriveToGamepiece", 2.0);
-  private static final LoggedTunableNumber useVisionForDriving =
-      groupTunable.build("useVisionForDriving", 0);
   private static final LoggedTunableNumber confirmationTime =
       groupTunable.build("confirmationTime", 0.8);
   protected static final LoggedTunableNumber slowDownFactor =
       groupTunable.build("slowDownFactor", 1.0);
+
+  private static final LoggedTunableNumber distFromExpectedToAcceptVisionGamepiece =
+      groupTunable.build("distFromExpectedToAcceptVisionGamepiece", 1.0);
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
@@ -177,6 +178,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     Pose2d robotPose = drive.getPoseEstimatorPose(true);
     double distanceToRobot = gamepieceData.getDistance(robotPose).in(Units.Meters);
     double distanceToTarget = gamepieceData.getDistance(gamepieceTranslation).in(Units.Meters);
-    return distanceToRobot <= distToBeginDriveToGamepiece.get() && distanceToTarget <= 0.5;
+    return distanceToRobot <= distToBeginDriveToGamepiece.get()
+        && distanceToTarget <= distFromExpectedToAcceptVisionGamepiece.get();
   }
 }
