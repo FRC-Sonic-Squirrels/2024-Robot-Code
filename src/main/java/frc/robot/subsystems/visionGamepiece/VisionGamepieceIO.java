@@ -12,6 +12,7 @@ public interface VisionGamepieceIO {
     public double timestamp = 0.0;
     public double[] pitch = new double[] {};
     public double[] yaw = new double[] {};
+    public double[] area = new double[] {};
     public int targetCount = 0;
   }
 

@@ -27,9 +27,11 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     List<PhotonTrackedTarget> targets = results.targets;
     inputs.pitch = new double[targets.size()];
     inputs.yaw = new double[targets.size()];
+    inputs.area = new double[targets.size()];
     for (int index = 0; index < targets.size(); index++) {
       inputs.pitch[index] = targets.get(index).getPitch();
       inputs.yaw[index] = targets.get(index).getYaw();
+      inputs.area[index] = targets.get(index).getArea();
     }
     inputs.totalLatencyMs = results.getLatencyMillis();
     inputs.targetCount = targets.size();
