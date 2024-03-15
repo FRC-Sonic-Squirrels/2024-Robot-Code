@@ -13,103 +13,115 @@ public class MechanismPositions {
 
   private static final LoggedTunableNumber homeElevatorHeightInches =
       group.build(
-          "homeElevatorHeightInches",
+          "home/ElevatorHeightInches",
           Constants.ElevatorConstants.LOADING_POSITION.in(Units.Inches));
 
   private static final LoggedTunableNumber homeArmAngleDegrees =
-      group.build("homeArmAngleDegrees", -92.0);
+      group.build("home/ArmAngleDegrees", -92.0);
 
-  private static final LoggedTunableNumber ampFastElevator = group.build("ampFastElevator", 14.0);
-  private static final LoggedTunableNumber ampFastArm = group.build("ampFastArm", 50.0);
+  private static final LoggedTunableNumber ampFastElevator = group.build("amp/Fast/Elevator", 14.0);
+  private static final LoggedTunableNumber ampFastArm = group.build("amp/Fast/Arm", 50.0);
 
   private static final LoggedTunableNumber ampElevatorHeightInches =
-      group.build("ampElevatorHeightInches", 11.6); // 17.0
+      group.build("amp/Score/ElevatorHeightInches", 11.6); // 17.0
 
   private static final LoggedTunableNumber ampArmAngleDegrees =
-      group.build("ampArmAngleDegrees", 43); // 35.0
+      group.build("amp/Score/ArmAngleDegrees", 43); // 35.0
 
   private static final LoggedTunableNumber ampPrepElevatorHeightInches =
-      group.build("ampPrepElevatorHeightInches", 11.6);
+      group.build("amp/Prep/ElevatorHeightInches", 11.6);
 
   private static final LoggedTunableNumber ampPrepArmAngleDegrees =
-      group.build("ampPrepArmAngleDegrees", 70);
+      group.build("amp/Prep/ArmAngleDegrees", 70);
 
   private static final LoggedTunableNumber ampStage2ElevatorHeightInches =
-      group.build("ampStage2ElevatorHeightInches", 24.0);
+      group.build("amp/Stage2/ElevatorHeightInches", 24.0);
 
   private static final LoggedTunableNumber ampStage2ArmAngleDegrees =
-      group.build("ampStage2ArmAngleDegrees", 0.0);
+      group.build("amp/Stage2/ArmAngleDegrees", 0.0);
 
   public static final LoggedTunableNumber ampStage3ElevatorHeightInches =
-      group.build("ampStage3ElevatorHeightInches", 24.0);
+      group.build("amp/Stage3/ElevatorHeightInches", 24.0);
 
   private static final LoggedTunableNumber ampStage3ArmAngleDegrees =
-      group.build("ampStage3ArmAngleDegrees", -90.0);
+      group.build("amp/Stage3/ArmAngleDegrees", -90.0);
 
   private static final LoggedTunableNumber climbPrepUnderStageElevatorHeightInches =
       group.build(
-          "climbPrepUnderStageElevatorHeightInches",
+          "climb/PrepUnderStage/ElevatorHeightInches",
           Constants.ElevatorConstants.MAX_HEIGHT_BELOW_STAGE.in(Units.Inches));
 
   private static final LoggedTunableNumber climbPrepUnderStageArmAngleDegrees =
-      group.build("climbPrepUnderStageArmAngleDegrees", -45.0);
+      group.build("climb/PrepUnderStage/ArmAngleDegrees", -45.0);
 
   private static final LoggedTunableNumber climbPrepElevatorHeightInches =
       group.build(
-          "climbPrepElevatorHeightInches",
+          "climb/Prep/ElevatorHeightInches",
           Constants.ElevatorConstants.HEIGHT_ABOVE_CHAIN.in(Units.Inches));
 
   private static final LoggedTunableNumber climbPrepArmAngleDegrees =
-      group.build("climbPrepArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+      group.build("climb/Prep/ArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
 
   private static final LoggedTunableNumber climbDownElevatorHeightInches =
-      group.build("climbDownElevatorHeightInches", 0.0);
+      group.build("climb/Down/ElevatorHeightInches", 0.0);
 
   private static final LoggedTunableNumber climbDownArmAngleDegrees =
-      group.build("climbDownArmAngleDegrees", 90.0);
+      group.build("climb/Down/ArmAngleDegrees", 90.0);
 
   private static final LoggedTunableNumber climbTrapElevatorHeightInches =
-      group.build("climbTrapElevatorHeightInches", 26.2);
+      group.build("climb/Trap/Stage1/ElevatorHeightInches", 17.5);
 
   private static final LoggedTunableNumber climbTrapArmAngleDegrees =
-      group.build("climbTrapArmAngleDegrees", 23.0);
+      group.build("climb/Trap/Stage1/ArmAngleDegrees", 69.0);
+
+    private static final LoggedTunableNumber climbTrapStage2ElevatorHeightInches =
+      group.build("climb/Trap/Stage2/ElevatorHeightInches", 26.2);
+
+  private static final LoggedTunableNumber climbTrapStage2ArmAngleDegrees =
+      group.build("climb/Trap/Stage2/ArmAngleDegrees", 23.0);
 
   private static final LoggedTunableNumber climbChainCheckElevatorHeightInches =
-      group.build("climbChainCheckElevatorHeightInches", 24);
+      group.build("climb/ChainCheck/ElevatorHeightInches", 24);
 
   private static final LoggedTunableNumber climbChainCheckArmAngleDegrees =
       group.build(
-          "climbChainCheckArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+          "climb/ChainCheck/ArmAngleDegrees", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
 
   private static final LoggedTunableNumber climbFinalRestPositionElevatorHeightInches =
-      group.build("climbFinalRestPositionElevatorHeightInches", 18);
+      group.build("climb/FinalRestPosition/Stage1/ElevatorHeightInches", 18);
 
   private static final LoggedTunableNumber climbFinalRestPositionArmAngleDegrees =
-      group.build("climbFinalRestPositionArmAngleDegrees", 23.0);
+      group.build("climb/FinalRestPosition/Stage1/ArmAngleDegrees", 64.0);
+
+      private static final LoggedTunableNumber climbFinalRestPositionStage2ElevatorHeightInches =
+      group.build("climb/FinalRestPosition/Stage2/ElevatorHeightInches", 14);
+
+  private static final LoggedTunableNumber climbFinalRestPositionStage2ArmAngleDegrees =
+      group.build("climb/FinalRestPosition/Stage2/ArmAngleDegrees", 50.0);
 
   private static final LoggedTunableNumber deployReactionArms1ElevatorHeightInches =
-      group.build("deployReactionArms1ElevatorHeightInches", 14.13);
+      group.build("deployReactionArms/stage1/ElevatorHeightInches", 14.13);
 
   private static final LoggedTunableNumber deployReactionArms1ArmAngleDegrees =
-      group.build("deployReactionArms1ArmAngleDegrees", -90);
+      group.build("deployReactionArms/stage1/ArmAngleDegrees", -90);
 
   private static final LoggedTunableNumber deployReactionArms2ElevatorHeightInches =
-      group.build("deployReactionArms2ElevatorHeightInches", 14.13);
+      group.build("deployReactionArms/stage2/ElevatorHeightInches", 14.13);
 
   private static final LoggedTunableNumber deployReactionArms2ArmAngleDegrees =
-      group.build("deployReactionArms2ArmAngleDegrees", -59);
+      group.build("deployReactionArms/stage2/ArmAngleDegrees", -59);
 
   private static final LoggedTunableNumber deployReactionArms3ElevatorHeightInches =
-      group.build("deployReactionArms3ElevatorHeightInches", 10.9);
+      group.build("deployReactionArms/stage3/ElevatorHeightInches", 10.9);
 
   private static final LoggedTunableNumber deployReactionArms3ArmAngleDegrees =
-      group.build("deployReactionArms3ArmAngleDegrees", -59);
+      group.build("deployReactionArms/stage3/ArmAngleDegrees", -59);
 
   private static final LoggedTunableNumber deployReactionArms4ElevatorHeightInches =
-      group.build("deployReactionArms4ElevatorHeightInches", 11.0);
+      group.build("deployReactionArms/stage4/ElevatorHeightInches", 11.0);
 
   private static final LoggedTunableNumber deployReactionArms4ArmAngleDegrees =
-      group.build("deployReactionArms4ArmAngleDegrees", -46);
+      group.build("deployReactionArms/stage4/ArmAngleDegrees", -46);
 
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
@@ -178,6 +190,12 @@ public class MechanismPositions {
         Rotation2d.fromDegrees(climbTrapArmAngleDegrees.get()));
   }
 
+  public static MechanismPosition climbTrapStage2Position() {
+    return new MechanismPosition(
+        Units.Inches.of(climbTrapStage2ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbTrapStage2ArmAngleDegrees.get()));
+  }
+
   public static MechanismPosition climbChainCheck() {
     return new MechanismPosition(
         Units.Inches.of(climbChainCheckElevatorHeightInches.get()),
@@ -188,6 +206,12 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(climbFinalRestPositionElevatorHeightInches.get()),
         Rotation2d.fromDegrees(climbFinalRestPositionArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbFinalRestPositionStage2() {
+    return new MechanismPosition(
+        Units.Inches.of(climbFinalRestPositionStage2ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbFinalRestPositionStage2ArmAngleDegrees.get()));
   }
 
   public static MechanismPosition deployReactionArmsStep1() {

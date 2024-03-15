@@ -89,7 +89,11 @@ public class MechanismActions {
 
   public static Command climbPrepPosition(
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition)
+    return goToPositionParallel(
+            elevator,
+            arm,
+            () -> new MechanismPosition(Units.Inch.of(14), Constants.ArmConstants.MAX_ARM_ANGLE))
+        .andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition))
         .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
         .andThen(new EndEffectorPrepareNoteForTrap(endEffector));
   }
@@ -111,7 +115,7 @@ public class MechanismActions {
   }
 
   public static Command climbTrapPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition);
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition).andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbTrapStage2Position));
   }
 
   public static Command climbChainCheck(Elevator elevator, Arm arm) {
@@ -119,7 +123,11 @@ public class MechanismActions {
   }
 
   public static Command climbFinalRestPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition);
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition).andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2));
+  }
+
+  public static Command climbFinalRestPositionStage2(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2);
   }
 
   public static Command deployReactionArms(Elevator elevator, Arm arm) {
