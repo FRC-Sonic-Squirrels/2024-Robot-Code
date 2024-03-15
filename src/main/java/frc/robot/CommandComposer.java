@@ -159,7 +159,7 @@ public class CommandComposer {
     return cancelScoreAmp;
   }
 
-  public static Command stageAlign(DrivetrainWrapper wrapper, Supplier<Double> driveMagnitude) {
+  public static Command stageAlign(DrivetrainWrapper wrapper, Supplier<Double> driveMagnitudeX, Supplier<Double> driveMagnitudeY) {
     PIDController rotationalPID = new PIDController(5.0, 0, 0);
     Supplier<Pose2d> targetPose =
         () -> AutoClimb.getTargetPose(wrapper.getPoseEstimatorPose(false));
@@ -171,8 +171,8 @@ public class CommandComposer {
                 () ->
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
-                            driveMagnitude.get(),
-                            0.0,
+                            driveMagnitudeX.get(),
+                            driveMagnitudeY.get(),
                             rotationalPID.calculate(
                                 wrapper.getPoseEstimatorPose(false).getRotation().getRadians(),
                                 targetPose.get().getRotation().getRadians())))))
