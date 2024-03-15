@@ -34,7 +34,7 @@ public class EndEffector extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(0.2);
+      kP.initDefault(0.4);
       kV.initDefault(0.15);
       ClosedLoopMaxAccelerationConstraint.initDefault(300.0);
     } else if (Constants.RobotMode.isSimBot()) {

@@ -292,7 +292,23 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       }
     }
 
+    if(timeFromStartOfState() > 1.0 && endEffector.getRPM() < 20.0){
+      return stateWithName("loadingPause", this::loadingPause);
+    }
+
     return null;
+  }
+
+  public StateHandler loadingPause(){
+    updateSolver();
+    rotateToSpeaker();
+    shooter.setKickerPercentOut(0.0);
+    endEffector.setPercentOut(0.0);
+    intake.setPercentOut(0.0);
+    if(timeFromStartOfState() < 0.3){
+      return null;
+    }
+    return stateWithName("prepWhileLoadingGamepiece", this::prepWhileLoadingGamepiece);
   }
 
   public StateHandler finalConfirmationsBeforeShooting() {
