@@ -253,7 +253,7 @@ public final class Constants {
 
     public static class ReactionArmConstants {
       public static final double REACTION_ARM_HOME_ROTATIONS = 0;
-      public static final double REACTION_ARM_DEPLOY_ROTATIONS = 8;
+      public static final double REACTION_ARM_DEPLOY_ROTATIONS = 9.92;
     }
   }
 
