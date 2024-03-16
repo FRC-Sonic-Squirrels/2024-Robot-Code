@@ -291,9 +291,12 @@ public class Drivetrain extends SubsystemBase {
             rawOdometryPose = rawOdometryPose.exp(twist);
 
             poseEstimator.addDriveData(timestamp, twist);
-            poseEstimatorGlobal.addDriveData(timestamp, twist);
-            poseEstimatorStageRed.addDriveData(timestamp, twist);
-            poseEstimatorStageBlue.addDriveData(timestamp, twist);
+            if (Constants.unusedCode) {
+              poseEstimatorGlobal.addDriveData(timestamp, twist);
+
+              poseEstimatorStageRed.addDriveData(timestamp, twist);
+              poseEstimatorStageBlue.addDriveData(timestamp, twist);
+            }
           }
         }
       } catch (Exception e) {
@@ -452,12 +455,14 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_vision.start()) {
         poseEstimator.addVisionData(visionData);
-        poseEstimatorGlobal.addVisionData(visionData);
+        if (Constants.unusedCode) {
+          poseEstimatorGlobal.addVisionData(visionData);
 
-        if (Constants.isRedAlliance()) {
-          poseEstimatorStageRed.addVisionData(visionData);
-        } else {
-          poseEstimatorStageBlue.addVisionData(visionData);
+          if (Constants.isRedAlliance()) {
+            poseEstimatorStageRed.addVisionData(visionData);
+          } else {
+            poseEstimatorStageBlue.addVisionData(visionData);
+          }
         }
       }
     }
