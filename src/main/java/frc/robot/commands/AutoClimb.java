@@ -181,8 +181,7 @@ public class AutoClimb extends Command {
     //   }
     // }
 
-    Pose2d closestPose =
-        new Pose2d(3.9430322647094727, 5.627425193786621, new Rotation2d(-1.0592400775588025));
+    Pose2d closestPose = new Pose2d(6.6, 4.1, new Rotation2d(3.141));
 
     closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 

@@ -164,8 +164,12 @@ public class CommandComposer {
       Supplier<Double> driveMagnitudeX,
       Supplier<Double> driveMagnitudeY) {
     PIDController rotationalPID = new PIDController(5.0, 0, 0);
-    Supplier<Pose2d> targetPose =
-        () -> AutoClimb.getTargetPose(wrapper.getPoseEstimatorPose(false));
+    Supplier<Pose2d> robotLocalization =
+        () ->
+            Constants.isRedAlliance()
+                ? wrapper.getPoseEstimatorPoseStageBlue(true)
+                : wrapper.getPoseEstimatorPoseStageRed(true);
+    Supplier<Pose2d> targetPose = () -> AutoClimb.getTargetPose(robotLocalization.get());
     DriveToPose driveCommand = new DriveToPose(wrapper, targetPose);
     return driveCommand
         .until(() -> driveCommand.withinTolerance(0.05, new Rotation2d(0.05)))
@@ -177,7 +181,7 @@ public class CommandComposer {
                             driveMagnitudeX.get(),
                             driveMagnitudeY.get(),
                             rotationalPID.calculate(
-                                wrapper.getPoseEstimatorPose(false).getRotation().getRadians(),
+                                robotLocalization.get().getRotation().getRadians(),
                                 targetPose.get().getRotation().getRadians())))))
         .finallyDo(wrapper::resetVelocityOverride);
   }

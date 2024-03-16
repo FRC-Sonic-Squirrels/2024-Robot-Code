@@ -85,6 +85,12 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry logLocalization_RobotPosition_RAW_ODOMETRY =
       logGroupLocalization.build("RobotPosition_RAW_ODOMETRY");
 
+  private static final LoggerEntry logLocalization_StageRedOnly =
+      logGroupLocalization.build("RobotPosition_stage_Red");
+
+  private static final LoggerEntry logLocalization_StageBlueOnly =
+      logGroupLocalization.build("RobotPosition_stage_Blue");
+
   private static final LoggerGroup logGroupRobot = new LoggerGroup("Robot");
   private static final LoggerEntry log_FieldRelativeVel = logGroupRobot.build("FieldRelativeVel");
 
@@ -201,6 +207,9 @@ public class Drivetrain extends SubsystemBase {
       logLocalization_RobotPosition.info(getPoseEstimatorPose());
       logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
 
+      logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
+      logLocalization_StageBlueOnly.info(getPoseEstimatorPoseStageBlue());
+
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
 
@@ -291,11 +300,10 @@ public class Drivetrain extends SubsystemBase {
             rawOdometryPose = rawOdometryPose.exp(twist);
 
             poseEstimator.addDriveData(timestamp, twist);
+            poseEstimatorStageRed.addDriveData(timestamp, twist);
+            poseEstimatorStageBlue.addDriveData(timestamp, twist);
             if (Constants.unusedCode) {
               poseEstimatorGlobal.addDriveData(timestamp, twist);
-
-              poseEstimatorStageRed.addDriveData(timestamp, twist);
-              poseEstimatorStageBlue.addDriveData(timestamp, twist);
             }
           }
         }
@@ -455,14 +463,13 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_vision.start()) {
         poseEstimator.addVisionData(visionData);
+        if (Constants.isRedAlliance()) {
+          poseEstimatorStageRed.addVisionData(visionData);
+        } else {
+          poseEstimatorStageBlue.addVisionData(visionData);
+        }
         if (Constants.unusedCode) {
           poseEstimatorGlobal.addVisionData(visionData);
-
-          if (Constants.isRedAlliance()) {
-            poseEstimatorStageRed.addVisionData(visionData);
-          } else {
-            poseEstimatorStageBlue.addVisionData(visionData);
-          }
         }
       }
     }

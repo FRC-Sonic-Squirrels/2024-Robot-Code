@@ -101,6 +101,24 @@ public class DrivetrainWrapper {
     return pose;
   }
 
+  public Pose2d getPoseEstimatorPoseStageBlue(boolean prioritizeGyro) {
+    var pose = drivetrain.getPoseEstimatorPoseStageBlue();
+    if (prioritizeGyro) {
+      pose = new Pose2d(pose.getTranslation(), getRotationGyroOnly());
+    }
+
+    return pose;
+  }
+
+  public Pose2d getPoseEstimatorPoseStageRed(boolean prioritizeGyro) {
+    var pose = drivetrain.getPoseEstimatorPoseStageRed();
+    if (prioritizeGyro) {
+      pose = new Pose2d(pose.getTranslation(), getRotationGyroOnly());
+    }
+
+    return pose;
+  }
+
   public double getMaxLinearSpeedMetersPerSec() {
     return drivetrain.getMaxLinearSpeedMetersPerSec();
   }
