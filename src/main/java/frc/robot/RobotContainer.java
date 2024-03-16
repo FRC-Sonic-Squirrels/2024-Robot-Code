@@ -546,16 +546,17 @@ public class RobotContainer {
 
     driverController
         .rightBumper()
+        .whileTrue(new IntakeGamepiece(intake, endEffector, shooter, arm, elevator, (rumble) -> {}))
         .whileTrue(
-            new IntakeGamepiece(
-                intake,
-                endEffector,
-                shooter,
-                arm,
-                elevator,
-                (rumble) -> {
-                  driverController.getHID().setRumble(RumbleType.kBothRumble, rumble);
-                }));
+            Commands.run(
+                    () -> {
+                      if (endEffector.noteInEndEffector()) {
+                        driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
+                      } else {
+                        driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                      }
+                    })
+                .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
 
     driverController
         .b()

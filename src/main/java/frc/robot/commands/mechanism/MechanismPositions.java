@@ -75,10 +75,10 @@ public class MechanismPositions {
       group.build("climb/Trap/Stage1/ArmAngleDegrees", 69.0);
 
   private static final LoggedTunableNumber climbTrapStage2ElevatorHeightInches =
-      group.build("climb/Trap/Stage2/ElevatorHeightInches", 26.2);
+      group.build("climb/Trap/Stage2/ElevatorHeightInches", 21.575);
 
   private static final LoggedTunableNumber climbTrapStage2ArmAngleDegrees =
-      group.build("climb/Trap/Stage2/ArmAngleDegrees", 23.0);
+      group.build("climb/Trap/Stage2/ArmAngleDegrees", 45.0);
 
   private static final LoggedTunableNumber climbChainCheckElevatorHeightInches =
       group.build("climb/ChainCheck/ElevatorHeightInches", 24);

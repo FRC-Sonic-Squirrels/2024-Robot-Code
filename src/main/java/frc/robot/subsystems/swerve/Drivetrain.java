@@ -240,10 +240,10 @@ public class Drivetrain extends SubsystemBase {
                 BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
           }
 
-          if (statusCode != lastStatusCode) {
-            logOdometryStatus.info(statusCode);
-            lastStatusCode = statusCode;
-          }
+          // if (statusCode != lastStatusCode) {
+          //   logOdometryStatus.info(statusCode);
+          //   lastStatusCode = statusCode;
+          // }
 
           if (statusCode != StatusCode.OK) {
             continue;
@@ -263,7 +263,7 @@ public class Drivetrain extends SubsystemBase {
           var timestampSpread =
               Math.max(Math.abs(timeMax - timestamp), Math.abs(timeMin - timestamp));
 
-          logOdometryTimestampSpread.info(timestampSpread);
+          // logOdometryTimestampSpread.info(timestampSpread);
         } else {
           // "waitForAll" does not support blocking on multiple
           // signals with a bus that is not CAN FD, regardless
@@ -283,7 +283,7 @@ public class Drivetrain extends SubsystemBase {
         // the gyro. The gyro is always disconnected in simulation.
         var twist = kinematics.toTwist2d(wheelDeltas);
 
-        logOdometryTwist.info(twist);
+        // logOdometryTwist.info(twist);
         if (gyroRotation != null) {
           if (lastGyroRotation != null) {
             var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
@@ -308,7 +308,7 @@ public class Drivetrain extends SubsystemBase {
           }
         }
       } catch (Exception e) {
-        logOdometryCrash.info(e.toString());
+        // logOdometryCrash.info(e.toString());
       }
     }
   }

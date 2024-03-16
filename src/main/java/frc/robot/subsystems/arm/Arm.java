@@ -47,8 +47,8 @@ public class Arm extends SubsystemBase {
       kG.initDefault(0.0);
 
       // FIXME: find the theoritical from the JVN docs
-      closedLoopMaxVelocityConstraint.initDefault(80);
-      closedLoopMaxAccelerationConstraint.initDefault(160);
+      closedLoopMaxVelocityConstraint.initDefault(10);
+      closedLoopMaxAccelerationConstraint.initDefault(10);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
 
       kP.initDefault(2.5);
