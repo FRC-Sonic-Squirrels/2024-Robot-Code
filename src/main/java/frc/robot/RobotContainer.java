@@ -50,11 +50,11 @@ import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
-import frc.robot.commands.Shimmy;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
+import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.intake.IntakeEject;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.mechanism.HomeMechanism;
@@ -633,7 +633,7 @@ public class RobotContainer {
                 endEffector,
                 intake));
 
-    operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
+    // operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
 
     if (Constants.unusedCode) {
       driverController
@@ -709,6 +709,20 @@ public class RobotContainer {
     // endEffector));
 
     driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
+
+    driverController
+        .y()
+        .whileTrue(
+            ShooterScoreSpeakerStateMachine.getAsCommand(
+                drivetrainWrapper,
+                shooter,
+                endEffector,
+                intake,
+                5.0,
+                () -> true,
+                (r) -> {},
+                true,
+                Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
     // driverController
     // .leftTrigger()
@@ -856,20 +870,6 @@ public class RobotContainer {
         .a()
         .whileTrue(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter));
 
-    driverController
-        .y()
-        .whileTrue(
-            ShooterScoreSpeakerStateMachine.getAsCommand(
-                drivetrainWrapper,
-                shooter,
-                endEffector,
-                intake,
-                5.0,
-                () -> true,
-                (r) -> {},
-                true,
-                Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
-
     // operatorController
     // .rightBumper()
     // .onTrue(Commands.runOnce(() -> vision.setUsingVision(false), vision))
@@ -880,6 +880,8 @@ public class RobotContainer {
         .onTrue(new LoadGamepieceToShooter(shooter, endEffector, intake));
 
     operatorController.rightTrigger().whileTrue(new IntakeEject(shooter, endEffector, intake));
+
+    operatorController.start().onTrue(new EndEffectorPrepareNoteForTrap(endEffector));
 
     // -- buttons on robot
 
