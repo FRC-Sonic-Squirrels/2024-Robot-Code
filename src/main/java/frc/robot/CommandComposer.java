@@ -159,7 +159,10 @@ public class CommandComposer {
     return cancelScoreAmp;
   }
 
-  public static Command stageAlign(DrivetrainWrapper wrapper, Supplier<Double> driveMagnitudeX, Supplier<Double> driveMagnitudeY) {
+  public static Command stageAlign(
+      DrivetrainWrapper wrapper,
+      Supplier<Double> driveMagnitudeX,
+      Supplier<Double> driveMagnitudeY) {
     PIDController rotationalPID = new PIDController(5.0, 0, 0);
     Supplier<Pose2d> targetPose =
         () -> AutoClimb.getTargetPose(wrapper.getPoseEstimatorPose(false));

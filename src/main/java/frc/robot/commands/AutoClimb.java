@@ -162,7 +162,8 @@ public class AutoClimb extends Command {
   }
 
   public static Pose2d getTargetPose(Pose2d robotPose) {
-    //FIXME: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BRING THIS CODE BACK, IT ALLOWS FOR MORE CLIMB POSITIONS
+    // FIXME: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BRING THIS CODE BACK, IT ALLOWS FOR
+    // MORE CLIMB POSITIONS
     // Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     // Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
     // log_poses.info(poses);
@@ -180,7 +181,8 @@ public class AutoClimb extends Command {
     //   }
     // }
 
-    Pose2d closestPose = new Pose2d(3.9430322647094727, 5.627425193786621, new Rotation2d(-1.0592400775588025));
+    Pose2d closestPose =
+        new Pose2d(3.9430322647094727, 5.627425193786621, new Rotation2d(-1.0592400775588025));
 
     closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 

@@ -115,7 +115,8 @@ public class MechanismActions {
   }
 
   public static Command climbTrapPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition).andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbTrapStage2Position));
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbTrapPosition)
+        .andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbTrapStage2Position));
   }
 
   public static Command climbChainCheck(Elevator elevator, Arm arm) {
@@ -123,7 +124,9 @@ public class MechanismActions {
   }
 
   public static Command climbFinalRestPosition(Elevator elevator, Arm arm) {
-    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition).andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2));
+    return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition)
+        .andThen(
+            goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2));
   }
 
   public static Command climbFinalRestPositionStage2(Elevator elevator, Arm arm) {

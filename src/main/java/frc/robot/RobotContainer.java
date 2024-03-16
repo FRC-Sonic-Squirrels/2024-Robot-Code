@@ -560,7 +560,10 @@ public class RobotContainer {
     driverController
         .b()
         .whileTrue(
-            CommandComposer.stageAlign(drivetrainWrapper, () -> -driverController.getLeftY(), () -> -driverController.getLeftX()));
+            CommandComposer.stageAlign(
+                drivetrainWrapper,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX()));
 
     // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
     // .andThen(new
