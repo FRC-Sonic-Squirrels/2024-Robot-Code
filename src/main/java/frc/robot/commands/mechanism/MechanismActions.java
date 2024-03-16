@@ -39,6 +39,9 @@ public class MechanismActions {
   public static final LoggedTunableNumber climbDownElevatorAcceleration =
       group.build("climbDownElevatorAcceleration", 500);
 
+  public static final LoggedTunableNumber tunableArmVoltage =
+      group.build("MechanismActions/tunableArmVoltage", 5.0);
+
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);
   }
@@ -131,6 +134,18 @@ public class MechanismActions {
 
   public static Command climbFinalRestPositionStage2(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2);
+  }
+
+  public static Command climbFinalRestPositionArmVoltage(Elevator elevator, Arm arm) {
+    return Commands.run(() -> arm.setVoltage(tunableArmVoltage.get()), arm)
+        .alongWith(
+            Commands.runOnce(
+                () ->
+                    elevator.setHeight(
+                        MechanismPositions.climbFinalRestPositionStage2().elevatorHeight()),
+                elevator))
+        .andThen(Commands.waitUntil(elevator::isAtTarget))
+        .andThen(Commands.runOnce(() -> arm.setVoltage(0.0), arm));
   }
 
   public static Command deployReactionArms(Elevator elevator, Arm arm) {
