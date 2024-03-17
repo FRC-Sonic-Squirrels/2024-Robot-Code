@@ -74,7 +74,7 @@ public class Vision extends SubsystemBase {
       group.build("MaxValidDistanceFromCurrentEstimateMeters", 30.0);
 
   private static final LoggedTunableNumber gyroFilteringToleranceDegrees =
-      group.build("GyroFilteringToleranceDegrees", 10.0);
+      group.build("GyroFilteringToleranceDegrees", 20.0);
 
   private static final LoggedTunableNumber zHeightToleranceMeters =
       group.build("zHeightToleranceMeters", 0.5);

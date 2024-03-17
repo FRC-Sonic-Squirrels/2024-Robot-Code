@@ -144,7 +144,7 @@ public class Drivetrain extends SubsystemBase {
     int[] tagsSpeakersAndAmps = new int[] {3, 4, 5, 6, 7, 8};
     int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16};
 
-    poseEstimator = new PoseEstimator(0.4, 0.4, 0.3, tagsSpeakersAndAmps);
+    poseEstimator = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
     poseEstimatorStageBlue = new PoseEstimator(0.4, 0.4, 0.3, new int[] {14, 15, 16});
     poseEstimatorStageRed = new PoseEstimator(0.4, 0.4, 0.3, new int[] {11, 12, 13});
     poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
