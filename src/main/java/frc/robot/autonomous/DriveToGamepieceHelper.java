@@ -31,7 +31,7 @@ public class DriveToGamepieceHelper {
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.8);
 
   private static final LoggedTunableNumber allowedRotationalErrorDegrees =
-      group.build("allowedRotationalErrorDegrees", 20);
+      group.build("allowedRotationalErrorDegrees", 10);
 
   private static final LoggedTunableNumber advancedMode =
       group.build("advancedMode/doAdvancedMotion", 1);
