@@ -149,34 +149,6 @@ public class Drivetrain extends SubsystemBase {
     poseEstimatorStageRed = new PoseEstimator(0.4, 0.4, 0.3, new int[] {11, 12, 13});
     poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
 
-    // Configure AutoBuilder for PathPlanner
-    // FIXME: pass in custom PID constants? Issue for this use case has been created:
-    // https://github.com/mjansen4857/pathplanner/issues/474
-    // FIXME: fix all the pathplanner jank
-    // AutoBuilder.configureHolonomic(
-    //   this::getPose,
-    //   this::setPose,
-    //   () -> kinematics.toChassisSpeeds(getModuleStates()),
-    //   this::runVelocity,
-    //   new HolonomicPathFollowerConfig(
-    //     getMaxAngularSpeedRadPerSec(),
-    //     getCharacterizationVelocity(),
-    //     new ReplanningConfig()),
-    //   () -> true,
-    //   this);
-
-    // // FIXME:
-    // Pathfinding.setPathfinder(new LocalADStarAK());
-    // PathPlannerLogging.setLogActivePathCallback(
-    //     (activePath) -> {
-    //       Logger.recordOutput(
-    //           "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-    //     });
-    // PathPlannerLogging.setLogTargetPoseCallback(
-    //     (targetPose) -> {
-    //       Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-    //     });
-
     var thread = new Thread(this::runOdometry);
     thread.setName("PhoenixOdometryThread");
     thread.setDaemon(true);
@@ -240,10 +212,10 @@ public class Drivetrain extends SubsystemBase {
                 BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
           }
 
-          // if (statusCode != lastStatusCode) {
-          //   logOdometryStatus.info(statusCode);
-          //   lastStatusCode = statusCode;
-          // }
+          if (statusCode != lastStatusCode) {
+            logOdometryStatus.info(statusCode);
+            lastStatusCode = statusCode;
+          }
 
           if (statusCode != StatusCode.OK) {
             continue;
@@ -263,7 +235,7 @@ public class Drivetrain extends SubsystemBase {
           var timestampSpread =
               Math.max(Math.abs(timeMax - timestamp), Math.abs(timeMin - timestamp));
 
-          // logOdometryTimestampSpread.info(timestampSpread);
+          logOdometryTimestampSpread.info(timestampSpread);
         } else {
           // "waitForAll" does not support blocking on multiple
           // signals with a bus that is not CAN FD, regardless
@@ -308,7 +280,7 @@ public class Drivetrain extends SubsystemBase {
           }
         }
       } catch (Exception e) {
-        // logOdometryCrash.info(e.toString());
+        logOdometryCrash.info(e.toString());
       }
     }
   }

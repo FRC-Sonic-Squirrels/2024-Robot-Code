@@ -13,6 +13,8 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import us.hebi.quickbuf.ProtoMessage;
 
 public class LoggerEntry {
+  private static final Object g_lock = new Object();
+
   public final String key;
   public final double updateFrequency;
   public double lastRefresh;
@@ -29,128 +31,170 @@ public class LoggerEntry {
   public void info(byte[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(boolean value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(int value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(long value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(float value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(double value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(String value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public <E extends Enum<E>> void info(E value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public <U extends Unit<U>> void info(Measure<U> value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(boolean[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(int[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(long[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(float[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(double[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(String[] value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public <T> void info(Struct<T> struct, T value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, struct, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, struct, value);
+    }
   }
 
   public <T> void info(Struct<T> struct, T... value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, struct, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, struct, value);
+    }
   }
 
   public <T, MessageType extends ProtoMessage<?>> void info(
       Protobuf<T, MessageType> proto, T value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, proto, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, proto, value);
+    }
   }
 
   public <T extends WPISerializable> void info(T value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public <T extends StructSerializable> void info(T... value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(Mechanism2d value) {
     if (shouldNotRefresh()) return;
 
-    Logger.recordOutput(key, value);
+    synchronized (g_lock) {
+      Logger.recordOutput(key, value);
+    }
   }
 
   public void info(Rotation2d value) {
@@ -160,7 +204,9 @@ public class LoggerEntry {
   public void info(LoggableInputs inputs) {
     if (shouldNotRefresh()) return;
 
-    Logger.processInputs(key, inputs);
+    synchronized (g_lock) {
+      Logger.processInputs(key, inputs);
+    }
   }
 
   private boolean shouldNotRefresh() {

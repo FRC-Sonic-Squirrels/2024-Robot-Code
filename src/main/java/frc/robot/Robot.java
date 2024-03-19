@@ -167,7 +167,6 @@ public class Robot extends LoggedRobot {
     try (var ignored = timingCommandScheduler.start()) {
       CommandScheduler.getInstance().run();
     }
-    // Logger.recordOutput("Vision/", null);
 
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();

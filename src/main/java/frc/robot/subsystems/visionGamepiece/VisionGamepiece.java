@@ -16,15 +16,17 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.function.Function;
-import org.littletonrobotics.junction.Logger;
 
 public class VisionGamepiece extends SubsystemBase {
   private static final String ROOT_TABLE = "VisionGamepiece";
 
   private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
   private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
+  private static final LoggerEntry logGamepieceCount = logGroup.build("gamepieceCount");
   private static final LoggerEntry logTotalLatencyMs = logGroup.build("totalLatencyMs");
   private static final LoggerEntry logGamepiecePoseArray = logGroup.build("GamepiecePoseArray");
+  private static final LoggerEntry logFudgeFromYaw = logGroup.build("fudgeFromYaw");
+  private static final LoggerEntry logFudgeFromPitch = logGroup.build("fudgeFromPitch");
 
   private static final LoggerGroup logGroupClosestGamepiece = logGroup.subgroup("ClosestGamepiece");
   private static final LoggerEntry log_distance = logGroupClosestGamepiece.build("distance");
@@ -189,7 +191,7 @@ public class VisionGamepiece extends SubsystemBase {
         Pose2d pose = seenGamePieces.get(i).globalPose;
         gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
       }
-      Logger.recordOutput(ROOT_TABLE + "/gamepieceCount", seenGamePieces.size());
+      logGamepieceCount.info(seenGamePieces.size());
       logGamepiecePoseArray.info(gamepiecePoses);
     }
   }
@@ -240,8 +242,8 @@ public class VisionGamepiece extends SubsystemBase {
     double fudgeFromYaw = yawFudgeFactor.get() * Math.sin(Math.abs(cameraYaw.getRadians()));
     double fudgeFromPitch = pitchFudgeFactor.get() * Math.sin(-cameraPitch.getRadians());
 
-    Logger.recordOutput(ROOT_TABLE + "/fudgeFromYaw", fudgeFromYaw);
-    Logger.recordOutput(ROOT_TABLE + "/fudgeFromPitch", fudgeFromPitch);
+    logFudgeFromYaw.info(fudgeFromYaw);
+    logFudgeFromPitch.info(fudgeFromPitch);
 
     return (Constants.VisionGamepieceConstants.GAMEPIECE_CAMERA_POSE.getZ()
                 - (Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS
