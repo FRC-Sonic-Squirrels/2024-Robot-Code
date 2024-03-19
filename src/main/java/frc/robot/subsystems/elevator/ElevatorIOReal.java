@@ -100,7 +100,7 @@ public class ElevatorIOReal implements ElevatorIO {
           rotorPosition, rotorVelocity, appliedVolts, currentAmps, tempCelsius
         };
 
-    reactionArmPIDController.setP(0.05);
+    reactionArmPIDController.setP(0.1);
     reactionArmPIDController.setOutputRange(-8, 8);
     reactionArmMotor.setSmartCurrentLimit(20);
     reactionArmMotor.setSoftLimit(
