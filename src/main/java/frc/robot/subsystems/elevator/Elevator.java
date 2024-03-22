@@ -184,6 +184,11 @@ public class Elevator extends SubsystemBase {
         Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_DEPLOY_ROTATIONS);
   }
 
+  public void reactionArmsAmp() {
+    io.setReactionArmPosition(
+        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS);
+  }
+
   public void retractReactionArms() {
     io.setReactionArmPosition(
         Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS);
