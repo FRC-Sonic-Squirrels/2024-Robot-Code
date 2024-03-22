@@ -16,13 +16,18 @@ import java.util.List;
 public class ChoreoHelper {
   private static final String ROOT_TABLE = "ChoreoHelper";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_stateLinearVel = logGroup.build("stateLinearVel");
-  private static final LoggerEntry log_closestPose = logGroup.build("closestPose");
-  private static final LoggerEntry log_optimalPose = logGroup.build("optimalPose");
-  private static final LoggerEntry log_desiredVelocity = logGroup.build("desiredVelocity");
-  private static final LoggerEntry log_distanceError = logGroup.build("distanceError");
-  private static final LoggerEntry log_headingError = logGroup.build("headingError");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal log_stateLinearVel =
+      logGroup.buildDecimal("stateLinearVel");
+  private static final LoggerEntry.Struct<Pose2d> log_closestPose =
+      logGroup.buildStruct(Pose2d.class, "closestPose");
+  private static final LoggerEntry.Struct<Pose2d> log_optimalPose =
+      logGroup.buildStruct(Pose2d.class, "optimalPose");
+  private static final LoggerEntry.Struct<Pose2d> log_desiredVelocity =
+      logGroup.buildStruct(Pose2d.class, "desiredVelocity");
+  private static final LoggerEntry.Decimal log_distanceError =
+      logGroup.buildDecimal("distanceError");
+  private static final LoggerEntry.Decimal log_headingError = logGroup.buildDecimal("headingError");
 
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;

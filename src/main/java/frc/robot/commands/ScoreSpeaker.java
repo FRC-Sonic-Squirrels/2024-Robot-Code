@@ -29,30 +29,36 @@ public class ScoreSpeaker extends Command {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_gamepieceLoaded = logGroup.build("gamepieceLoaded");
-  private static final LoggerEntry log_PIDLatency = logGroup.build("PIDLatency");
-  private static final LoggerEntry log_targetRotationDegrees =
-      logGroup.build("targetRotationDegrees");
-  private static final LoggerEntry log_targetPose = logGroup.build("targetPose");
-  private static final LoggerEntry log_RotationalEffort = logGroup.build("RotationalEffort");
-  private static final LoggerEntry log_RotationalErrorDegrees =
-      logGroup.build("RotationalErrorDegrees");
-  private static final LoggerEntry log_feedForward = logGroup.build("feedForward");
-  private static final LoggerEntry log_RobotRotationDegrees =
-      logGroup.build("RobotRotationDegrees");
-  private static final LoggerEntry log_atSetpoint = logGroup.build("atSetpoint");
-  private static final LoggerEntry log_timer = logGroup.build("timer");
-  private static final LoggerEntry log_ShootingRPM = logGroup.build("ShootingRPM");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool log_gamepieceLoaded =
+      logGroup.buildBoolean("gamepieceLoaded");
+  private static final LoggerEntry.Decimal log_PIDLatency = logGroup.buildDecimal("PIDLatency");
+  private static final LoggerEntry.Decimal log_targetRotationDegrees =
+      logGroup.buildDecimal("targetRotationDegrees");
+  private static final LoggerEntry.Struct<Pose2d> log_targetPose =
+      logGroup.buildStruct(Pose2d.class, "targetPose");
+  private static final LoggerEntry.Decimal log_RotationalEffort =
+      logGroup.buildDecimal("RotationalEffort");
+  private static final LoggerEntry.Decimal log_RotationalErrorDegrees =
+      logGroup.buildDecimal("RotationalErrorDegrees");
+  private static final LoggerEntry.Decimal log_feedForward = logGroup.buildDecimal("feedForward");
+  private static final LoggerEntry.Decimal log_RobotRotationDegrees =
+      logGroup.buildDecimal("RobotRotationDegrees");
+  private static final LoggerEntry.Bool log_atSetpoint = logGroup.buildBoolean("atSetpoint");
+  private static final LoggerEntry.Decimal log_timer = logGroup.buildDecimal("timer");
+  private static final LoggerEntry.Decimal log_ShootingRPM = logGroup.buildDecimal("ShootingRPM");
 
   private static final LoggerGroup logGroupShooting = logGroup.subgroup("shooting");
-  private static final LoggerEntry log_IsAtTargetRPM = logGroupShooting.build("IsAtTargetRPM");
-  private static final LoggerEntry log_RotationControllerAtSetpoint =
-      logGroupShooting.build("RotationControllerAtSetpoint");
-  private static final LoggerEntry log_PivotAtTarget = logGroupShooting.build("PivotAtTarget");
-  private static final LoggerEntry log_ShootGamepiece = logGroupShooting.build("ShootGamepiece");
-  private static final LoggerEntry log_Position = logGroupShooting.build("Position");
-  private static final LoggerEntry log_shooting = logGroupShooting.build("shooting");
+  private static final LoggerEntry.Bool log_IsAtTargetRPM =
+      logGroupShooting.buildBoolean("IsAtTargetRPM");
+  private static final LoggerEntry.Bool log_RotationControllerAtSetpoint =
+      logGroupShooting.buildBoolean("RotationControllerAtSetpoint");
+  private static final LoggerEntry.Bool log_PivotAtTarget =
+      logGroupShooting.buildBoolean("PivotAtTarget");
+  private static final LoggerEntry.Bool log_ShootGamepiece =
+      logGroupShooting.buildBoolean("ShootGamepiece");
+  private static final LoggerEntry.Bool log_Position = logGroupShooting.buildBoolean("Position");
+  private static final LoggerEntry.Bool log_shooting = logGroupShooting.buildBoolean("shooting");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.9);

@@ -27,11 +27,12 @@ import frc.robot.visualization.ClimbVisualization;
 public class AutoClimb extends Command {
   private static final String ROOT_TABLE = "AutoClimb";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_stage = logGroup.build("stage");
-  private static final LoggerEntry log_armIsAtPosition = logGroup.build("armIsAtPosition");
-  public static final LoggerEntry log_poses = logGroup.build("poses");
-  private static final LoggerEntry log_closestPose = logGroup.build("closestPose");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Integer log_stage = logGroup.buildInteger("stage");
+  private static final LoggerEntry.Bool log_armIsAtPosition =
+      logGroup.buildBoolean("armIsAtPosition");
+  private static final LoggerEntry.Struct<Pose2d> log_closestPose =
+      logGroup.buildStruct(Pose2d.class, "closestPose");
 
   private final DrivetrainWrapper drive;
   private final Elevator elevator;
@@ -130,7 +131,9 @@ public class AutoClimb extends Command {
         arm.setAngle(position.armAngle());
         log_armIsAtPosition.info(arm.isAtTargetAngle(position.armAngle()));
         if (elevator.isAtTarget(position.elevatorHeight())
-            && arm.isAtTargetAngle(position.armAngle())) stage++;
+            && arm.isAtTargetAngle(position.armAngle())) {
+          stage++;
+        }
         break;
       case 5:
         arm.setAngle(Constants.ArmConstants.TRAP_SCORE_ANGLE);

@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 public class ElevatorSetHeight extends Command {
   private static final String ROOT_TABLE = "ElevatorSetHeight";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_targetHeight = logGroup.build("targetHeight");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal log_targetHeight = logGroup.buildDecimal("targetHeight");
 
   /** Creates a new ElevatorSetHeight. */
   private final Elevator elevator;

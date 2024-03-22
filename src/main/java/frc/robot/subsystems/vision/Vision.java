@@ -3,11 +3,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.*;
@@ -18,15 +14,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.common.dataflow.structures.Packet;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -35,30 +28,34 @@ public class Vision extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  public static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry logAllAprilTags3D = logGroup.build("AllAprilTags3D");
-  private static final LoggerEntry logUseVision = logGroup.build("useVision");
-  private static final LoggerEntry logUseMaxDistanceAwayFromExistingEstimate =
-      logGroup.build("useMaxDistanceAwayFromExistingEstimate");
+  public static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.StructArray<Pose3d> logAllAprilTags3D =
+      logGroup.buildStructArray(Pose3d.class, "AllAprilTags3D");
+  private static final LoggerEntry.Bool logUseVision = logGroup.buildBoolean("useVision");
+  private static final LoggerEntry.Bool logUseMaxDistanceAwayFromExistingEstimate =
+      logGroup.buildBoolean("useMaxDistanceAwayFromExistingEstimate");
 
-  private static final LoggerEntry logRejectByGyro = logGroup.build("RejectByGyro");
-  private static final LoggerEntry logRejectByGyroError = logGroup.build("RejectByGyroError");
-  private static final LoggerEntry logRejectByDistance = logGroup.build("RejectByDistance");
-  private static final LoggerEntry logRejectByDistanceError =
-      logGroup.build("RejectByDistanceError");
-  public static final LoggerEntry logConfigTagAmount = logGroup.build("configTagAmount");
+  private static final LoggerEntry.Integer logRejectByGyro = logGroup.buildInteger("RejectByGyro");
+  private static final LoggerEntry.Decimal logRejectByGyroError =
+      logGroup.buildDecimal("RejectByGyroError");
+  private static final LoggerEntry.Integer logRejectByDistance =
+      logGroup.buildInteger("RejectByDistance");
+  private static final LoggerEntry.Decimal logRejectByDistanceError =
+      logGroup.buildDecimal("RejectByDistanceError");
+  public static final LoggerEntry.Integer logConfigTagAmount =
+      logGroup.buildInteger("configTagAmount");
 
   private static final LoggerGroup logGroupVisionModules = logGroup.subgroup("VisionModules");
 
   private static final LoggerGroup logGroupVisibleTags = logGroup.subgroup("visibleTags");
-  private static final LoggerEntry log_rawAllVisibleTags =
-      logGroupVisibleTags.build("rawAllVisibleTags");
-  private static final LoggerEntry log_tagsActuallyUsedInPoseEstimation =
-      logGroupVisibleTags.build("tagsActuallyUsedInPoseEstimation");
-  private static final LoggerEntry log_posesFedToPoseEstimator3D =
-      logGroupVisibleTags.build("posesFedToPoseEstimator3D");
-  private static final LoggerEntry log_posesFedToPoseEstimator2D =
-      logGroupVisibleTags.build("posesFedToPoseEstimator2D");
+  private static final LoggerEntry.StructArray<Pose3d> log_rawAllVisibleTags =
+      logGroupVisibleTags.buildStructArray(Pose3d.class, "rawAllVisibleTags");
+  private static final LoggerEntry.StructArray<Pose3d> log_tagsActuallyUsedInPoseEstimation =
+      logGroupVisibleTags.buildStructArray(Pose3d.class, "tagsActuallyUsedInPoseEstimation");
+  private static final LoggerEntry.StructArray<Pose3d> log_posesFedToPoseEstimator3D =
+      logGroupVisibleTags.buildStructArray(Pose3d.class, "posesFedToPoseEstimator3D");
+  private static final LoggerEntry.StructArray<Pose2d> log_posesFedToPoseEstimator2D =
+      logGroupVisibleTags.buildStructArray(Pose2d.class, "posesFedToPoseEstimator2D");
 
   protected static final TunableNumberGroup group = new TunableNumberGroup("Vision");
 
@@ -135,8 +132,17 @@ public class Vision extends SubsystemBase {
     try (var ignored = timing.start()) {
       // update all inputs
       for (VisionModule module : visionModules) {
-        module.visionIO.updateInputs(module.visionIOInputs);
-        logGroup.build(module.name).info(module.visionIOInputs);
+        VisionIO.Inputs inputs = module.visionIOInputs;
+        module.visionIO.updateInputs(inputs);
+        var subGroup = logGroup.subgroup(module.name);
+
+        byte[] photonPacketBytes = new byte[inputs.lastResult.getPacketSize()];
+        PhotonPipelineResult.serde.pack(new Packet(photonPacketBytes), inputs.lastResult);
+        subGroup.buildBytes("photonPacketBytes").info(photonPacketBytes);
+        subGroup.buildDecimal("lastTimestampCTRETime").info(inputs.lastTimestampCTRETime);
+        subGroup.buildBoolean("connected").info(inputs.connected);
+        subGroup.buildDecimal("medianLatency").info(inputs.medianLatency);
+        subGroup.buildDecimal("medianUpdateTime").info(inputs.medianUpdateTime);
       }
 
       boolean processVision = true;
@@ -173,7 +179,10 @@ public class Vision extends SubsystemBase {
         var robotPose = new Pose3d(poseEstimatorPoseSupplier.get());
         var camPose = robotPose.transformBy(visionModule.RobotToCamera);
 
-        logGroupVisionModules.subgroup(visionModule.name).build("CameraPose").info(camPose);
+        logGroupVisionModules
+            .subgroup(visionModule.name)
+            .buildStruct(Pose3d.class, "CameraPose")
+            .info(camPose);
       }
 
       // logging all visible tags
@@ -433,7 +442,7 @@ public class Vision extends SubsystemBase {
     var fieldsToLog = visionModule.loggedFields;
 
     group
-        .build("LastSuccessfullyProcessedResultTimeStampCTRETime")
+        .buildDecimal("LastSuccessfullyProcessedResultTimeStampCTRETime")
         .info(visionModule.lastSuccessfullyProcessedResultTimeStampCTRETime);
 
     var status = fieldsToLog.status();
@@ -443,17 +452,19 @@ public class Vision extends SubsystemBase {
     }
     visionModule.lastStatus = status;
 
-    group.build("*STATUS").info(status.name() + ": " + status.additionalInfo);
-    group.build("calculatedRobotPose3d").info(fieldsToLog.robotPose3d());
-    group.build("calculatedRobotPose2d").info(fieldsToLog.robotPose3d().toPose2d());
-    group.build("numSeenTargets").info(fieldsToLog.numSeenTargets());
+    group.buildString("*STATUS").info(status.name() + ": " + status.additionalInfo);
+    group.buildStruct(Pose3d.class, "calculatedRobotPose3d").info(fieldsToLog.robotPose3d());
     group
-        .build("distanceFromExistingPoseEstimate")
+        .buildStruct(Pose2d.class, "calculatedRobotPose2d")
+        .info(fieldsToLog.robotPose3d().toPose2d());
+    group.buildDecimal("numSeenTargets").info(fieldsToLog.numSeenTargets());
+    group
+        .buildDecimal("distanceFromExistingPoseEstimate")
         .info(fieldsToLog.distanceFromExistingPoseEstimate());
-    group.build("averageDistanceFromTags").info(fieldsToLog.averageDistanceFromTags());
-    group.build("tagAmbiguity").info(fieldsToLog.tagAmbiguity());
-    group.build("xyStandardDeviation").info(fieldsToLog.xyStandardDeviation());
-    group.build("thetaStandardDeviation").info(fieldsToLog.thetaStandardDeviation());
+    group.buildDecimal("averageDistanceFromTags").info(fieldsToLog.averageDistanceFromTags());
+    group.buildDecimal("tagAmbiguity").info(fieldsToLog.tagAmbiguity());
+    group.buildDecimal("xyStandardDeviation").info(fieldsToLog.xyStandardDeviation());
+    group.buildDecimal("thetaStandardDeviation").info(fieldsToLog.thetaStandardDeviation());
 
     boolean addedVisionEstimateToPoseEstimator;
 
@@ -469,7 +480,7 @@ public class Vision extends SubsystemBase {
         break;
     }
 
-    group.build("SUCCESSFUL_RESULT?").info(addedVisionEstimateToPoseEstimator);
+    group.buildBoolean("SUCCESSFUL_RESULT?").info(addedVisionEstimateToPoseEstimator);
   }
 
   public static void restartPhotonVision(String ipString) {

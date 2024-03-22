@@ -15,19 +15,21 @@ import frc.robot.Constants;
 import frc.robot.Constants.ControlMode;
 
 public class ShooterIOSim implements ShooterIO {
-  public static final LoggerEntry log_error = Shooter.logGroup.build("SIM_error");
-  public static final LoggerEntry log_feedForward = Shooter.logGroup.build("SIM_feedForward");
-  public static final LoggerEntry log_outputVoltage = Shooter.logGroup.build("SIM_outputVoltage");
-  public static final LoggerEntry log_targetVelRadPerSec =
-      Shooter.logGroup.build("SIM_targetVelRadPerSec");
-  public static final LoggerEntry log_currentVelRadPerSec =
-      Shooter.logGroup.build("SIM_currentVelRadPerSec");
-  public static final LoggerEntry log_pitchController =
-      Shooter.logGroup.build("SIM_pitchController");
-  public static final LoggerEntry log_pivotControlMode =
-      Shooter.logGroup.build("SIM_pivotControlMode");
-  public static final LoggerEntry log_targetPositionDegrees =
-      Shooter.logGroup.build("SIM_targetPositionDegrees");
+  public static final LoggerEntry.Decimal log_error = Shooter.logGroup.buildDecimal("SIM_error");
+  public static final LoggerEntry.Decimal log_feedForward =
+      Shooter.logGroup.buildDecimal("SIM_feedForward");
+  public static final LoggerEntry.Decimal log_outputVoltage =
+      Shooter.logGroup.buildDecimal("SIM_outputVoltage");
+  public static final LoggerEntry.Decimal log_targetVelRadPerSec =
+      Shooter.logGroup.buildDecimal("SIM_targetVelRadPerSec");
+  public static final LoggerEntry.Decimal log_currentVelRadPerSec =
+      Shooter.logGroup.buildDecimal("SIM_currentVelRadPerSec");
+  public static final LoggerEntry.Decimal log_pitchController =
+      Shooter.logGroup.buildDecimal("SIM_pitchController");
+  public static final LoggerEntry.EnumValue<ControlMode> log_pivotControlMode =
+      Shooter.logGroup.buildEnum("SIM_pivotControlMode");
+  public static final LoggerEntry.Decimal log_targetPositionDegrees =
+      Shooter.logGroup.buildDecimal("SIM_targetPositionDegrees");
 
   private final SingleJointedArmSim pivot =
       new SingleJointedArmSim(
@@ -74,7 +76,7 @@ public class ShooterIOSim implements ShooterIO {
   public ShooterIOSim() {}
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
 
     pivot.update(0.02);
     launcherMotorSim.update(0.02);
@@ -137,7 +139,7 @@ public class ShooterIOSim implements ShooterIO {
     log_currentVelRadPerSec.info(pivot.getVelocityRadPerSec());
     log_pitchController.info(
         pivotVelController.calculate(pivot.getVelocityRadPerSec(), pivotTargetVelRadPerSec));
-    log_pivotControlMode.info(pivotControlMode.toString());
+    log_pivotControlMode.info(pivotControlMode);
     log_targetPositionDegrees.info(pivotClosedLoopTargetAngle.getDegrees());
   }
 

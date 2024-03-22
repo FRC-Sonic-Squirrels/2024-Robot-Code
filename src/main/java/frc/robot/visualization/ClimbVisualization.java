@@ -8,8 +8,9 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 
 public class ClimbVisualization {
-  private static final LoggerGroup logGroup = new LoggerGroup("AutoClimb");
-  private static final LoggerEntry logPredictedPose3d = logGroup.build("predictedPose3d");
+  private static final LoggerGroup logGroup = LoggerGroup.build("AutoClimb");
+  private static final LoggerEntry.Struct<Pose3d> logPredictedPose3d =
+      logGroup.buildStruct(Pose3d.class, "predictedPose3d");
 
   private static final ClimbVisualization instance = new ClimbVisualization();
   private double additionalRobotHeight = 0.0;

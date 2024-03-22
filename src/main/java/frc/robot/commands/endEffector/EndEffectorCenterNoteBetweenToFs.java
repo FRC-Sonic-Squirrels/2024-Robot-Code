@@ -19,9 +19,9 @@ import frc.robot.subsystems.shooter.Shooter;
 public class EndEffectorCenterNoteBetweenToFs extends Command {
   private static final String ROOT_TABLE = "EndEffectorCentering";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_difference = logGroup.build("difference");
-  private static final LoggerEntry log_percent = logGroup.build("percent");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal log_difference = logGroup.buildDecimal("difference");
+  private static final LoggerEntry.Decimal log_percent = logGroup.buildDecimal("percent");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber kP = group.build("kP", 0.03);

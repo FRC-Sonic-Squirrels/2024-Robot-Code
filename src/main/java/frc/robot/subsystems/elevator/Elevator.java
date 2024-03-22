@@ -25,12 +25,27 @@ public class Elevator extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry logTargetHeight = logGroup.build("targetHeight");
-  public static final LoggerEntry logSIM_ActualTargetHeight =
-      logGroup.build("SIM_actualTargetHeight");
-  public static final LoggerEntry logSIM_Error = logGroup.build("SIM_error");
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logInputs_heightInches =
+      logInputs.buildDecimal("HeightInches");
+  private static final LoggerEntry.Decimal logInputs_velocityInchesPerSecond =
+      logInputs.buildDecimal("VelocityInchesPerSecond");
+  private static final LoggerEntry.Decimal logInputs_appliedVolts =
+      logInputs.buildDecimal("AppliedVolts");
+  private static final LoggerEntry.Decimal logInputs_currentAmps =
+      logInputs.buildDecimal("CurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_tempCelsius =
+      logInputs.buildDecimal("TempCelsius");
+  private static final LoggerEntry.Decimal logInputs_reactionArmRotations =
+      logInputs.buildDecimal("ReactionArmRotations");
+  private static final LoggerEntry.Decimal logInputs_reactionArmVoltage =
+      logInputs.buildDecimal("ReactionArmVoltage");
+
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logTargetHeight = logGroup.buildDecimal("targetHeight");
+  public static final LoggerEntry.Decimal logSIM_ActualTargetHeight =
+      logGroup.buildDecimal("SIM_actualTargetHeight");
+  public static final LoggerEntry.Decimal logSIM_Error = logGroup.buildDecimal("SIM_error");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -78,7 +93,7 @@ public class Elevator extends SubsystemBase {
   private Rotation2d targetServoAngle = Constants.zeroRotation2d;
 
   private final ElevatorIO io;
-  private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
+  private final ElevatorIO.Inputs inputs = new ElevatorIO.Inputs();
   private Measure<Distance> targetHeight = Units.Meters.zero();
 
   /** Creates a new ElevatorSubsystem. */
@@ -97,7 +112,13 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     try (var ignored = timing.start()) {
       io.updateInputs(inputs);
-      logInputs.info(inputs);
+      logInputs_heightInches.info(inputs.heightInches);
+      logInputs_velocityInchesPerSecond.info(inputs.velocityInchesPerSecond);
+      logInputs_appliedVolts.info(inputs.appliedVolts);
+      logInputs_currentAmps.info(inputs.currentAmps);
+      logInputs_tempCelsius.info(inputs.tempCelsius);
+      logInputs_reactionArmRotations.info(inputs.reactionArmRotations);
+      logInputs_reactionArmVoltage.info(inputs.reactionArmVoltage);
 
       logTargetHeight.info(targetHeight.in(Units.Inches));
 

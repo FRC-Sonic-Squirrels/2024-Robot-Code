@@ -207,7 +207,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
@@ -227,7 +227,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   }
 
   @Override
-  public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+  public SwerveModulePosition updateOdometry(Inputs inputs, double wheelRadius) {
     // Process drive motor position.
     var drivePositionRotations = drivePosition.getValueAsDouble();
     var drivePositionRaw = Units.rotationsToRadians(drivePositionRotations);

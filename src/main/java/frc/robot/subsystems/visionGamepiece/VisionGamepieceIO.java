@@ -1,11 +1,8 @@
 package frc.robot.subsystems.visionGamepiece;
 
-import org.littletonrobotics.junction.AutoLog;
-
 public interface VisionGamepieceIO {
 
-  @AutoLog
-  public static class VisionGamepieceIOInputs {
+  public static class Inputs {
     public boolean isConnected = false;
     public boolean validTarget = false;
     public double totalLatencyMs = 0;
@@ -17,5 +14,5 @@ public interface VisionGamepieceIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(VisionGamepieceIOInputs inputs) {}
+  public default void updateInputs(Inputs inputs) {}
 }

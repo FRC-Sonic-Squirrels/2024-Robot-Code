@@ -66,7 +66,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   public void registerSignalForOdometry(List<BaseStatusSignal> signals) {}
 
   @Override
-  public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+  public SwerveModulePosition updateOdometry(Inputs inputs, double wheelRadius) {
     inputs.drivePositionRad = driveSim.getAngularPositionRad();
     double positionMeters = inputs.drivePositionRad * wheelRadius;
 
@@ -83,7 +83,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 

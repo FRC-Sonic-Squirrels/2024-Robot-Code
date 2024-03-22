@@ -10,12 +10,14 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 
 public class DrivetrainWrapper {
-  private static final LoggerGroup logGroup = new LoggerGroup("DrivetrainWrapper");
-  private static final LoggerEntry logChassisSpeedsBase = logGroup.build("chassisSpeedsBase");
-  private static final LoggerEntry logChassisSpeedsOverride =
-      logGroup.build("chassisSpeedsOverride");
-  private static final LoggerEntry logOmegaOverride = logGroup.build("omegaOverride");
-  private static final LoggerEntry logGyroDrift = logGroup.build("gyroDrift");
+  private static final LoggerGroup logGroup = LoggerGroup.build("DrivetrainWrapper");
+  private static final LoggerEntry.Struct<ChassisSpeeds> logChassisSpeedsBase =
+      logGroup.buildStruct(ChassisSpeeds.class, "chassisSpeedsBase");
+  private static final LoggerEntry.Struct<ChassisSpeeds> logChassisSpeedsOverride =
+      logGroup.buildStruct(ChassisSpeeds.class, "chassisSpeedsOverride");
+  private static final LoggerEntry.Decimal logOmegaOverride =
+      logGroup.buildDecimal("omegaOverride");
+  private static final LoggerEntry.Decimal logGyroDrift = logGroup.buildDecimal("gyroDrift");
 
   private final Drivetrain drivetrain;
   private ChassisSpeeds chassisSpeedsBase = new ChassisSpeeds();
@@ -85,7 +87,7 @@ public class DrivetrainWrapper {
     var pose1 = getPoseEstimatorPose(false);
     var pose2 = getPoseEstimatorPose(true);
 
-    logGyroDrift.info(pose1.getRotation().minus(pose2.getRotation()).getDegrees());
+    logGyroDrift.info(pose1.getRotation().minus(pose2.getRotation()));
   }
 
   public Subsystem getRequirements() {

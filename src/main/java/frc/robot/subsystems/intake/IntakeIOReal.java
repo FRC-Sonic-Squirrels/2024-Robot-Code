@@ -60,7 +60,7 @@ public class IntakeIOReal implements IntakeIO {
   }
 
   @Override
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.currentAmps = currentAmps.getValueAsDouble();

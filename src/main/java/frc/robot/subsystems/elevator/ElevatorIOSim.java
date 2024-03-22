@@ -38,7 +38,7 @@ public class ElevatorIOSim implements ElevatorIO {
   public ElevatorIOSim() {}
 
   @Override
-  public void updateInputs(ElevatorIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     sim.update(0.02);
     Elevator.logSIM_ActualTargetHeight.info(targetHeight.in(Units.Inches));
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {

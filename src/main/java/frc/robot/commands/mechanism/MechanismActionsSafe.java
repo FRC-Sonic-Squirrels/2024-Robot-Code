@@ -19,13 +19,14 @@ import java.util.function.Supplier;
 public class MechanismActionsSafe {
   private static final String ROOT_TABLE = "MechanismActionsSafe";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_armCanRotateFreelyAtThisHeight =
-      logGroup.build("armCanRotateFreelyAtThisHeight");
-  private static final LoggerEntry log_maxArmExtensionDuringRotation =
-      logGroup.build("maxArmExtensionDuringRotation");
-  private static final LoggerEntry log_state = logGroup.build("state");
-  private static final LoggerEntry log_currentSafeHeight = logGroup.build("currentSafeHeight");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool log_armCanRotateFreelyAtThisHeight =
+      logGroup.buildBoolean("armCanRotateFreelyAtThisHeight");
+  private static final LoggerEntry.Decimal log_maxArmExtensionDuringRotation =
+      logGroup.buildDecimal("maxArmExtensionDuringRotation");
+  private static final LoggerEntry.Text log_state = logGroup.buildString("state");
+  private static final LoggerEntry.Decimal log_currentSafeHeight =
+      logGroup.buildDecimal("currentSafeHeight");
 
   public static Command loadingPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::loadingPosition);

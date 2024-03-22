@@ -10,9 +10,11 @@ import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 
 public class MechanismVisualization {
-  private static final LoggerGroup logGroup = new LoggerGroup("Visualization");
-  private static final LoggerEntry logMechanism = logGroup.build("Mechanism");
-  private static final LoggerEntry logTestPose = logGroup.build("TestPose");
+  private static final LoggerGroup logGroup = LoggerGroup.build("Visualization");
+  private static final LoggerEntry.StructArray<Pose3d> logMechanism =
+      logGroup.buildStructArray(Pose3d.class, "Mechanism");
+  private static final LoggerEntry.Struct<Pose2d> logTestPose =
+      logGroup.buildStruct(Pose2d.class, "TestPose");
 
   private static Pose3d elevatorStage = new Pose3d();
   private static Pose3d elevatorCarriage = new Pose3d();
@@ -61,7 +63,7 @@ public class MechanismVisualization {
   }
 
   public static void logMechanism() {
-    logMechanism.info(elevatorStage, elevatorCarriage, arm, shooter, gamepiece);
+    logMechanism.info(new Pose3d[] {elevatorStage, elevatorCarriage, arm, shooter, gamepiece});
     logTestPose.info(new Pose2d());
   }
 }

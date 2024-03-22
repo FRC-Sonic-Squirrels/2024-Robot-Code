@@ -61,7 +61,8 @@ public class VisionIOSim implements VisionIO {
        * based on
     https://docs.wpilib.org/en/latest/docs/software/networktables/listening-for-change.html#listening-for-changes
        * and
-    https://github.com/Mechanical-Advantage/RobotCode2022/blob/main/src/main/java/frc/robot/subsystems/vision/VisionIOPhotonVision.java
+    https://github.com/Mechanical-Advantage/RobotCode2022/blob/main/src/main/java/frc/robot/subsystems/vision
+    * /VisionIOPhotonVision.java
        */
     DoubleArraySubscriber targetPoseSub =
         inst.getTable("/photonvision/" + networkName)
@@ -83,7 +84,7 @@ public class VisionIOSim implements VisionIO {
   }
 
   @Override
-  public synchronized void updateInputs(VisionIOInputs inputs) {
+  public synchronized void updateInputs(Inputs inputs) {
     visionSim.update(poseSupplier.get());
 
     inputs.lastTimestampCTRETime = this.lastTimestamp;

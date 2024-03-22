@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -17,7 +18,16 @@ public class Intake extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logInputs_velocityRPM =
+      logInputs.buildDecimal("VelocityRPM");
+  private static final LoggerEntry.Decimal logInputs_currentAmps =
+      logInputs.buildDecimal("CurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_tempCelsius =
+      logInputs.buildDecimal("TempCelsius");
+  private static final LoggerEntry.Decimal logInputs_appliedVolts =
+      logInputs.buildDecimal("AppliedVolts");
+  private static final LoggerEntry.Bool logInputs_beamBreak = logInputs.buildBoolean("BeamBreak");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -41,7 +51,7 @@ public class Intake extends SubsystemBase {
   }
 
   private final IntakeIO io;
-  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  private final IntakeIO.Inputs inputs = new IntakeIO.Inputs();
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {
@@ -55,7 +65,11 @@ public class Intake extends SubsystemBase {
     try (var ignored = timing.start()) {
       // This method will be called once per scheduler run
       io.updateInputs(inputs);
-      logInputs.info(inputs);
+      logInputs_velocityRPM.info(inputs.velocityRPM);
+      logInputs_currentAmps.info(inputs.currentAmps);
+      logInputs_tempCelsius.info(inputs.tempCelsius);
+      logInputs_appliedVolts.info(inputs.appliedVolts);
+      logInputs_beamBreak.info(inputs.beamBreak);
 
       var hc = hashCode();
       if (kS.hasChanged(hc)

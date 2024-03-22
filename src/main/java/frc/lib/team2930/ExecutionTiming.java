@@ -5,7 +5,7 @@ import org.littletonrobotics.junction.Logger;
 public class ExecutionTiming implements AutoCloseable {
   private static final String ROOT_TABLE = "ExecutionTiming";
 
-  private static LoggerGroup group = new LoggerGroup(ROOT_TABLE);
+  private static LoggerGroup group = LoggerGroup.build(ROOT_TABLE);
 
   private final String context;
   private long startTime;
@@ -23,6 +23,6 @@ public class ExecutionTiming implements AutoCloseable {
   public void close() {
     var endTime = Logger.getRealTimestamp();
 
-    group.build(context).info(endTime - startTime);
+    group.buildDecimalArray(context).info(endTime - startTime);
   }
 }

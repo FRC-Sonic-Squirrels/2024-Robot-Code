@@ -6,12 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface ElevatorIO {
   /** Contains all of the input data received from hardware. */
-  @AutoLog
-  public static class ElevatorIOInputs {
+  public static class Inputs {
     public double heightInches = 0.0;
     public double velocityInchesPerSecond = 0.0;
     public double appliedVolts = 0.0;
@@ -22,7 +20,7 @@ public interface ElevatorIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ElevatorIOInputs inputs) {}
+  public default void updateInputs(Inputs inputs) {}
 
   public default void setVoltage(double volts) {}
 

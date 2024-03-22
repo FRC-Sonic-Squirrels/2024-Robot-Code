@@ -55,10 +55,10 @@ public class StateMachine {
     }
   }
 
-  private static final LoggerGroup logGroup = new LoggerGroup("StateMachine");
+  private static final LoggerGroup logGroup = LoggerGroup.build("StateMachine");
 
   private final String name;
-  private final LoggerEntry logName;
+  private final LoggerEntry.Text logName;
   private Status status;
   private StateHandler currentState;
   private double startTime;
@@ -67,7 +67,7 @@ public class StateMachine {
 
   protected StateMachine(String name) {
     this.name = name;
-    logName = logGroup.build(name);
+    logName = logGroup.buildString(name);
 
     var events = new ArrayList<EventState>();
 

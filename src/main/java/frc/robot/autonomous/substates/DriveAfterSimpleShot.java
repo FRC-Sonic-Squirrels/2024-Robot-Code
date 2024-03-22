@@ -13,8 +13,9 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 public class DriveAfterSimpleShot extends StateMachine {
   private static final String ROOT_TABLE = "Autonomous/SimpleShot";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_targetPose = logGroup.build("targetPose");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Struct<Pose2d> log_targetPose =
+      logGroup.buildStruct(Pose2d.class, "targetPose");
 
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber driveDistance =

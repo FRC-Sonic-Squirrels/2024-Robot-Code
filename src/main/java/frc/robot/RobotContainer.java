@@ -37,10 +37,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.team2930.ArrayUtil;
-import frc.lib.team2930.GeometryUtil;
-import frc.lib.team2930.LoggerEntry;
-import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team2930.*;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
@@ -109,8 +106,10 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  private static final LoggerEntry logRobotType = new LoggerEntry("RobotType");
-  private static final LoggerEntry logRobotMode = new LoggerEntry("RobotMode");
+  private static final LoggerEntry.EnumValue<RobotType> logRobotType =
+      LoggerGroup.root.buildEnum("RobotType");
+  private static final LoggerEntry.EnumValue<Mode> logRobotMode =
+      LoggerGroup.root.buildEnum("RobotMode");
 
   private final Drivetrain drivetrain;
   private final DrivetrainWrapper drivetrainWrapper;
@@ -390,10 +389,11 @@ public class RobotContainer {
             new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(0.0, 0.0, 0.0), // Rotation PID constants
             4.5, // Max module speed, in m/s
-            config
-                .getDriveBaseRadius(), // Drive base radius in meters. Distance from robot center to
+            config.getDriveBaseRadius(), // Drive base radius in meters.
+            // Distance from robot center to
             // furthest module.
-            new ReplanningConfig() // Default path replanning config. See the API for the options
+            new ReplanningConfig() // Default path replanning config. See the
+            // API for the options
             // here
             ),
         () -> false,

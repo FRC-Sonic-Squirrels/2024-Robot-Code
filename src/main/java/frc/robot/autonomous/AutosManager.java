@@ -35,8 +35,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutosManager {
-  private static final LoggerGroup logGroupSysid = new LoggerGroup("Sysid");
-  private static final LoggerEntry logSwerveSysidState = logGroupSysid.build("swervesysidstate");
+  private static final LoggerGroup logGroupSysid = LoggerGroup.build("Sysid");
+  private static final LoggerEntry.EnumValue<SysIdRoutineLog.State> logSwerveSysidState =
+      logGroupSysid.buildEnum("swervesysidstate");
 
   private final DrivetrainWrapper drivetrain;
   private final Shooter shooter;
@@ -375,13 +376,19 @@ public class AutosManager {
   "isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40
   }
 
-  CG1: {"dataType":"choreo/waypoint","x":2.89,"y":7.02,"heading":0.611,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  CG2: {"dataType":"choreo/waypoint","x":2.89,"y":5.56,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  CG3: {"dataType":"choreo/waypoint","x":2.89,"y":4.1,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":12}
+  CG1: {"dataType":"choreo/waypoint","x":2.89,"y":7.02,"heading":0.611,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CG2: {"dataType":"choreo/waypoint","x":2.89,"y":5.56,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CG3: {"dataType":"choreo/waypoint","x":2.89,"y":4.1,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":12}
 
-  CS1: {"dataType":"choreo/waypoint","x":2.055,"y":6.613,"heading":0.463,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  CS2: {"dataType":"choreo/waypoint","x":1.913,"y":5.569,"heading":0,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
-  CS3: {"dataType":"choreo/waypoint","x":2.110,"y":4.438,"heading":-0.390,"isInitialGuess":false,"translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CS1: {"dataType":"choreo/waypoint","x":2.055,"y":6.613,"heading":0.463,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CS2: {"dataType":"choreo/waypoint","x":1.913,"y":5.569,"heading":0,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
+  CS3: {"dataType":"choreo/waypoint","x":2.110,"y":4.438,"heading":-0.390,"isInitialGuess":false,
+  "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   */
   public static Pose2d getPoseFromString(String string) {
     if (string.charAt(0) == 'G') {

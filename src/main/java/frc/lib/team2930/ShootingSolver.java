@@ -5,9 +5,10 @@ import edu.wpi.first.math.geometry.*;
 public class ShootingSolver {
   public static final int DebugSpew = 0;
 
-  private static final LoggerGroup logGroup = new LoggerGroup("ShootingSolver");
-  private static final LoggerEntry logThetaNote = logGroup.build("thetaNote");
-  private static final LoggerEntry logSpeakerHeading = logGroup.build("speakerHeading");
+  private static final LoggerGroup logGroup = LoggerGroup.build("ShootingSolver");
+  private static final LoggerEntry.Decimal logThetaNote = logGroup.buildDecimal("thetaNote");
+  private static final LoggerEntry.Decimal logSpeakerHeading =
+      logGroup.buildDecimal("speakerHeading");
 
   private final Translation3d Pspeaker;
   private final Translation3d PaxisOfRotationShooter;

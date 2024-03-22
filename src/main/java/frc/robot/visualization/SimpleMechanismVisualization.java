@@ -11,9 +11,11 @@ import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
 
 public class SimpleMechanismVisualization {
-  private static final LoggerGroup logGroup = new LoggerGroup("Mechanism");
-  private static final LoggerEntry logSimpleElevatorAndArm = logGroup.build("SimpleElevatorAndArm");
-  private static final LoggerEntry logSimpleShooter = logGroup.build("SimpleShooter");
+  private static final LoggerGroup logGroup = LoggerGroup.build("Mechanism");
+  private static final LoggerEntry.Mechanism logSimpleElevatorAndArm =
+      logGroup.buildMechanism2d("SimpleElevatorAndArm");
+  private static final LoggerEntry.Mechanism logSimpleShooter =
+      logGroup.buildMechanism2d("SimpleShooter");
 
   static Mechanism2d shooterMechanism2d =
       new Mechanism2d(

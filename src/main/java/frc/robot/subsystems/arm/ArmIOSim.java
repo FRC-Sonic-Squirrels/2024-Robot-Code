@@ -39,7 +39,7 @@ public class ArmIOSim implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     var controlEffort = 0.0;
 
     if (closedLoop) {

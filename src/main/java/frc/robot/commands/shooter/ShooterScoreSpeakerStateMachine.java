@@ -29,31 +29,41 @@ import java.util.function.Consumer;
 public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final String ROOT_TABLE = "ShooterScoreSpeaker";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_cancelled = logGroup.build("cancelled");
-  private static final LoggerEntry log_TimeToShoot = logGroup.build("TimeToShoot");
-  private static final LoggerEntry log_simpleShot = logGroup.build("simpleShot");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool log_cancelled = logGroup.buildBoolean("cancelled");
+  private static final LoggerEntry.Decimal log_TimeToShoot = logGroup.buildDecimal("TimeToShoot");
+  private static final LoggerEntry.Bool log_simpleShot = logGroup.buildBoolean("simpleShot");
 
   private static final LoggerGroup logGroupSub = logGroup.subgroup("shootingConfimation");
-  private static final LoggerEntry log_launcherAtRPM = logGroupSub.build("launcherAtRPM");
-  private static final LoggerEntry log_pivotAtAngle = logGroupSub.build("pivotAtAngle");
-  private static final LoggerEntry log_shootingPosition = logGroupSub.build("shootingPosition");
-  private static final LoggerEntry log_forceShoot = logGroupSub.build("forceShoot");
-  private static final LoggerEntry log_driverConfirmation = logGroupSub.build("driverConfirmation");
-  private static final LoggerEntry log_atThetaTarget = logGroupSub.build("atThetaTarget");
-  private static final LoggerEntry log_belowMaxSpeed = logGroupSub.build("belowMaxSpeed");
-  private static final LoggerEntry log_belowMaxRotVel = logGroupSub.build("belowMaxRotVel");
-  private static final LoggerEntry log_shooterSolver = logGroupSub.build("shooterSolver");
-  private static final LoggerEntry log_omega = logGroupSub.build("omega");
-  private static final LoggerEntry log_rotationalError = logGroupSub.build("rotationalError");
-  private static final LoggerEntry log_CurrentHeadingDegrees =
-      logGroupSub.build("CurrentHeadingDegrees");
-  private static final LoggerEntry log_headingTargetDegrees =
-      logGroupSub.build("headingTargetDegrees");
-  private static final LoggerEntry log_pitchTargetDegrees = logGroupSub.build("pitchTargetDegrees");
-  private static final LoggerEntry log_pitchOffset = logGroupSub.build("pitchOffset");
-  private static final LoggerEntry log_xyDistanceFromSpeaker =
-      logGroupSub.build("xyDistanceFromSpeaker");
+  private static final LoggerEntry.Bool log_launcherAtRPM =
+      logGroupSub.buildBoolean("launcherAtRPM");
+  private static final LoggerEntry.Bool log_pivotAtAngle = logGroupSub.buildBoolean("pivotAtAngle");
+  private static final LoggerEntry.Bool log_shootingPosition =
+      logGroupSub.buildBoolean("shootingPosition");
+  private static final LoggerEntry.Bool log_forceShoot = logGroupSub.buildBoolean("forceShoot");
+  private static final LoggerEntry.Bool log_driverConfirmation =
+      logGroupSub.buildBoolean("driverConfirmation");
+  private static final LoggerEntry.Bool log_atThetaTarget =
+      logGroupSub.buildBoolean("atThetaTarget");
+  private static final LoggerEntry.Bool log_belowMaxSpeed =
+      logGroupSub.buildBoolean("belowMaxSpeed");
+  private static final LoggerEntry.Bool log_belowMaxRotVel =
+      logGroupSub.buildBoolean("belowMaxRotVel");
+  private static final LoggerEntry.Bool log_shooterSolver =
+      logGroupSub.buildBoolean("shooterSolver");
+  private static final LoggerEntry.Decimal log_omega = logGroupSub.buildDecimal("omega");
+  private static final LoggerEntry.Decimal log_rotationalError =
+      logGroupSub.buildDecimal("rotationalError");
+  private static final LoggerEntry.Decimal log_CurrentHeadingDegrees =
+      logGroupSub.buildDecimal("CurrentHeadingDegrees");
+  private static final LoggerEntry.Decimal log_headingTargetDegrees =
+      logGroupSub.buildDecimal("headingTargetDegrees");
+  private static final LoggerEntry.Decimal log_pitchTargetDegrees =
+      logGroupSub.buildDecimal("pitchTargetDegrees");
+  private static final LoggerEntry.Decimal log_pitchOffset =
+      logGroupSub.buildDecimal("pitchOffset");
+  private static final LoggerEntry.Decimal log_xyDistanceFromSpeaker =
+      logGroupSub.buildDecimal("xyDistanceFromSpeaker");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 

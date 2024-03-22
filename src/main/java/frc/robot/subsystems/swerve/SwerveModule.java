@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
@@ -34,11 +35,20 @@ public class SwerveModule {
   public static final LoggedTunableNumber turnAcceleration =
       group.build("SwerveTurnAcceleration", 200);
 
-  private final LoggerEntry log_index;
+  private final LoggerEntry.Decimal log_drivePositionRad;
+  private final LoggerEntry.Decimal log_driveVelocityRadPerSec;
+  private final LoggerEntry.Decimal log_driveAppliedVolts;
+  private final LoggerEntry.Decimal log_driveCurrentAmps;
+  private final LoggerEntry.Decimal log_turnAbsolutePosition;
+  private final LoggerEntry.Decimal log_turnPosition;
+  private final LoggerEntry.Decimal log_turnVelocityRadPerSec;
+  private final LoggerEntry.Decimal log_turnAppliedVolts;
+  private final LoggerEntry.Decimal log_turnCurrentAmps;
+  private final LoggerEntry.Decimal log_angle;
   private final ExecutionTiming timing;
 
   private final SwerveModuleIO io;
-  private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+  private final SwerveModuleIO.Inputs inputs = new SwerveModuleIO.Inputs();
   private final double wheelRadius;
 
   private final LoggedTunableNumber driveKS;
@@ -58,8 +68,19 @@ public class SwerveModule {
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
 
-    log_index = new LoggerEntry(String.format("SwerveModule%d", index));
-    timing = new ExecutionTiming(log_index.key);
+    String key = String.format("SwerveModule%d", index);
+    var group = LoggerGroup.build(key);
+    log_drivePositionRad = group.buildDecimal("DrivePositionRad");
+    log_driveVelocityRadPerSec = group.buildDecimal("DriveVelocityRadPerSec");
+    log_driveAppliedVolts = group.buildDecimal("DriveAppliedVolts");
+    log_driveCurrentAmps = group.buildDecimal("DriveCurrentAmps");
+    log_turnAbsolutePosition = group.buildDecimal("TurnAbsolutePosition");
+    log_turnPosition = group.buildDecimal("TurnPosition");
+    log_turnVelocityRadPerSec = group.buildDecimal("TurnVelocityRadPerSec");
+    log_turnAppliedVolts = group.buildDecimal("TurnAppliedVolts");
+    log_turnCurrentAmps = group.buildDecimal("TurnCurrentAmps");
+    log_angle = group.buildDecimal("Angle");
+    timing = new ExecutionTiming(key);
 
     wheelRadius = config.getWheelRadius().in(Units.Meters);
 
@@ -93,7 +114,16 @@ public class SwerveModule {
 
   public void periodic() {
     try (var ignored = timing.start()) {
-      log_index.info(inputs);
+      log_drivePositionRad.info(inputs.drivePositionRad);
+      log_driveVelocityRadPerSec.info(inputs.driveVelocityRadPerSec);
+      log_driveAppliedVolts.info(inputs.driveAppliedVolts);
+      log_driveCurrentAmps.info(inputs.driveCurrentAmps);
+      log_turnAbsolutePosition.info(inputs.turnAbsolutePosition);
+      log_turnPosition.info(inputs.turnPosition);
+      log_turnVelocityRadPerSec.info(inputs.turnVelocityRadPerSec);
+      log_turnAppliedVolts.info(inputs.turnAppliedVolts);
+      log_turnCurrentAmps.info(inputs.turnCurrentAmps);
+      log_angle.info(inputs.angle);
 
       // update Tuneable PID and FF values
       int hc = hashCode();

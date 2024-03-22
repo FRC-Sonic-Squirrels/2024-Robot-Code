@@ -20,7 +20,7 @@ public class IntakeIOSim implements IntakeIO {
   public IntakeIOSim() {}
 
   @Override
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
     inputs.currentAmps = motor.getCurrentDrawAmps();

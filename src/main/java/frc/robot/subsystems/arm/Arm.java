@@ -18,16 +18,32 @@ public class Arm extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry logPositionDegrees = logGroup.build("PositionDegrees");
-  private static final LoggerEntry logControlMode = logGroup.build("ControlMode");
-  private static final LoggerEntry logTargetClosedLoopSetpointDegrees =
-      logGroup.build("targetClosedLoopSetpointDegrees");
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logInputs_armPosition =
+      logInputs.buildDecimal("ArmPosition");
+  private static final LoggerEntry.Decimal logInputs_armAngleDegrees =
+      logInputs.buildDecimal("ArmAngleDegrees");
+  private static final LoggerEntry.Decimal logInputs_armAppliedVolts =
+      logInputs.buildDecimal("ArmAppliedVolts");
+  private static final LoggerEntry.Decimal logInputs_armCurrentAmps =
+      logInputs.buildDecimal("ArmCurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_armTempCelsius =
+      logInputs.buildDecimal("ArmTempCelsius");
+  private static final LoggerEntry.Decimal logInputs_armVelocity =
+      logInputs.buildDecimal("ArmVelocity");
 
-  public static final LoggerEntry logSIM_FF_fG = logGroup.build("SIM_FF_fG");
-  public static final LoggerEntry logSIM_error = logGroup.build("SIM_error");
-  public static final LoggerEntry logSIM_controlEffort = logGroup.build("SIM_controlEffort");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logPositionDegrees =
+      logGroup.buildDecimal("PositionDegrees");
+  private static final LoggerEntry.EnumValue<ControlMode> logControlMode =
+      logGroup.buildEnum("ControlMode");
+  private static final LoggerEntry.Decimal logTargetClosedLoopSetpointDegrees =
+      logGroup.buildDecimal("targetClosedLoopSetpointDegrees");
+
+  public static final LoggerEntry.Decimal logSIM_FF_fG = logGroup.buildDecimal("SIM_FF_fG");
+  public static final LoggerEntry.Decimal logSIM_error = logGroup.buildDecimal("SIM_error");
+  public static final LoggerEntry.Decimal logSIM_controlEffort =
+      logGroup.buildDecimal("SIM_controlEffort");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -61,7 +77,7 @@ public class Arm extends SubsystemBase {
   }
 
   private final ArmIO io;
-  private final ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+  private final ArmIO.Inputs inputs = new ArmIO.Inputs();
 
   private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
   private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;
@@ -88,11 +104,16 @@ public class Arm extends SubsystemBase {
   public void periodic() {
     try (var ignored = timing.start()) {
       io.updateInputs(inputs);
-      logInputs.info(inputs);
+      logInputs_armPosition.info(inputs.armPosition);
+      logInputs_armAngleDegrees.info(inputs.armAngleDegrees);
+      logInputs_armAppliedVolts.info(inputs.armAppliedVolts);
+      logInputs_armCurrentAmps.info(inputs.armCurrentAmps);
+      logInputs_armTempCelsius.info(inputs.armTempCelsius);
+      logInputs_armVelocity.info(inputs.armVelocity);
 
       logPositionDegrees.info(inputs.armPosition.getDegrees() % 360);
       logControlMode.info(currentControlMode);
-      logTargetClosedLoopSetpointDegrees.info(closedLoopTargetAngle.getDegrees());
+      logTargetClosedLoopSetpointDegrees.info(closedLoopTargetAngle);
 
       // ---- UPDATE TUNABLE NUMBERS
       var hc = hashCode();

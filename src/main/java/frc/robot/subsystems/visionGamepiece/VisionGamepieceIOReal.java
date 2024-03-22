@@ -20,7 +20,7 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
   }
 
   @Override
-  public void updateInputs(VisionGamepieceIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     PhotonPipelineResult results = camera.getLatestResult();
     inputs.isConnected = camera.isConnected();
     inputs.validTarget = results.hasTargets();

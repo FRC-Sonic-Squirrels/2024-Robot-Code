@@ -24,7 +24,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
   public EndEffectorIOSim() {}
 
   @Override
-  public void updateInputs(EndEffectorIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     motor.update(0.02);
     motor.setInputVoltage(voltage);
 

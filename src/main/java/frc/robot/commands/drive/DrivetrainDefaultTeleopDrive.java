@@ -21,13 +21,17 @@ import java.util.function.DoubleSupplier;
 public class DrivetrainDefaultTeleopDrive extends Command {
   private static final String ROOT_TABLE = "Commands/TeleopDrive";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_XSupplier = logGroup.build("XSupplier");
-  private static final LoggerEntry log_YSupplier = logGroup.build("YSupplier");
-  private static final LoggerEntry log_OmegaSupplier = logGroup.build("OmegaSupplier");
-  private static final LoggerEntry log_LinearMagnitude = logGroup.build("LinearMagnitude");
-  private static final LoggerEntry log_LinearDirection = logGroup.build("LinearDirection");
-  private static final LoggerEntry log_LinearVelocity = logGroup.build("LinearVelocity");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal log_XSupplier = logGroup.buildDecimal("XSupplier");
+  private static final LoggerEntry.Decimal log_YSupplier = logGroup.buildDecimal("YSupplier");
+  private static final LoggerEntry.Decimal log_OmegaSupplier =
+      logGroup.buildDecimal("OmegaSupplier");
+  private static final LoggerEntry.Decimal log_LinearMagnitude =
+      logGroup.buildDecimal("LinearMagnitude");
+  private static final LoggerEntry.Decimal log_LinearDirection =
+      logGroup.buildDecimal("LinearDirection");
+  private static final LoggerEntry.Struct<Translation2d> log_LinearVelocity =
+      logGroup.buildStruct(Translation2d.class, "LinearVelocity");
 
   /** Creates a new DrivetrainDefaultTeleopDrive. */
   private final DrivetrainWrapper drivetrain;

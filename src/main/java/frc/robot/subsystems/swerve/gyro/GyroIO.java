@@ -17,11 +17,9 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import java.util.List;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {
-  @AutoLog
-  public static class GyroIOInputs {
+  class Inputs {
     public boolean connected = false;
     public Rotation2d yawPosition = Constants.zeroRotation2d;
     public double yawVelocityRadPerSec;
@@ -35,17 +33,17 @@ public interface GyroIO {
     public void registerSignalForOdometry(List<BaseStatusSignal> signal) {}
 
     @Override
-    public Rotation2d updateOdometry(GyroIOInputs inputs) {
+    public Rotation2d updateOdometry(Inputs inputs) {
       return null;
     }
 
     @Override
-    public void updateInputs(GyroIOInputs inputs) {}
+    public void updateInputs(Inputs inputs) {}
   }
 
   void registerSignalForOdometry(List<BaseStatusSignal> signal);
 
-  Rotation2d updateOdometry(GyroIOInputs inputs);
+  Rotation2d updateOdometry(Inputs inputs);
 
-  void updateInputs(GyroIOInputs inputs);
+  void updateInputs(Inputs inputs);
 }

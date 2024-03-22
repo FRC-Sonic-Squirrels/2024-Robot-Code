@@ -23,12 +23,39 @@ public class Shooter extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
-  public static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry logPitchDegrees = logGroup.build("PitchDegrees");
-  private static final LoggerEntry logTargetPitchDegrees = logGroup.build("TargetPitchDegrees");
-  private static final LoggerEntry logNoteInShooter = logGroup.build("NoteInShooter");
-  private static final LoggerEntry logPivotPIDLatency = logGroup.build("PivotPIDLatency");
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logInputs_pivotPosition =
+      logInputs.buildDecimal("PivotPosition");
+  private static final LoggerEntry.Decimal logInputs_pivotVelocityRadsPerSec =
+      logInputs.buildDecimal("PivotVelocityRadsPerSec");
+  private static final LoggerEntry.Decimal logInputs_pivotAppliedVolts =
+      logInputs.buildDecimal("PivotAppliedVolts");
+  private static final LoggerEntry.Decimal logInputs_pivotCurrentAmps =
+      logInputs.buildDecimal("PivotCurrentAmps");
+  private static final LoggerEntry.DecimalArray logInputs_launcherRPM =
+      logInputs.buildDecimalArray("LauncherRPM");
+  private static final LoggerEntry.DecimalArray logInputs_launcherAppliedVolts =
+      logInputs.buildDecimalArray("LauncherAppliedVolts");
+  private static final LoggerEntry.DecimalArray logInputs_launcherCurrentAmps =
+      logInputs.buildDecimalArray("LauncherCurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_kickerAppliedVolts =
+      logInputs.buildDecimal("KickerAppliedVolts");
+  private static final LoggerEntry.Decimal logInputs_kickerCurrentAmps =
+      logInputs.buildDecimal("KickerCurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_kickerVelocityRPM =
+      logInputs.buildDecimal("KickerVelocityRPM");
+  private static final LoggerEntry.DecimalArray logInputs_tempsCelcius =
+      logInputs.buildDecimalArray("TempsCelcius");
+  private static final LoggerEntry.Decimal logInputs_timeOfFlightDistance =
+      logInputs.buildDecimal("TimeOfFlightDistance");
+
+  public static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logPitchDegrees = logGroup.buildDecimal("PitchDegrees");
+  private static final LoggerEntry.Decimal logTargetPitchDegrees =
+      logGroup.buildDecimal("TargetPitchDegrees");
+  private static final LoggerEntry.Bool logNoteInShooter = logGroup.buildBoolean("NoteInShooter");
+  private static final LoggerEntry.Decimal logPivotPIDLatency =
+      logGroup.buildDecimal("PivotPIDLatency");
 
   public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -98,7 +125,7 @@ public class Shooter extends SubsystemBase {
   private final Trigger noteInShooter = new Trigger(this::getToFActivated);
 
   private final ShooterIO io;
-  private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private final ShooterIO.Inputs inputs = new ShooterIO.Inputs();
 
   // Creates a new flat moving average filter
   // Average will be taken over the last 20 samples
@@ -136,8 +163,19 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     try (var ignored = timing.start()) {
       io.updateInputs(inputs);
+      logInputs_pivotPosition.info(inputs.pivotPosition);
+      logInputs_pivotVelocityRadsPerSec.info(inputs.pivotVelocityRadsPerSec);
+      logInputs_pivotAppliedVolts.info(inputs.pivotAppliedVolts);
+      logInputs_pivotCurrentAmps.info(inputs.pivotCurrentAmps);
+      logInputs_launcherRPM.info(inputs.launcherRPM);
+      logInputs_launcherAppliedVolts.info(inputs.launcherAppliedVolts);
+      logInputs_launcherCurrentAmps.info(inputs.launcherCurrentAmps);
+      logInputs_kickerAppliedVolts.info(inputs.kickerAppliedVolts);
+      logInputs_kickerCurrentAmps.info(inputs.kickerCurrentAmps);
+      logInputs_kickerVelocityRPM.info(inputs.kickerVelocityRPM);
+      logInputs_tempsCelcius.info(inputs.tempsCelcius);
+      logInputs_timeOfFlightDistance.info(inputs.timeOfFlightDistance);
 
-      logInputs.info(inputs);
       logPitchDegrees.info(inputs.pivotPosition.getDegrees());
       logTargetPitchDegrees.info(targetPivotPosition.getDegrees());
       logNoteInShooter.info(noteInShooter.getAsBoolean());

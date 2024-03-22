@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.Constants;
 import java.util.List;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface SwerveModuleIO {
   public class Fake implements SwerveModuleIO {
@@ -26,12 +25,12 @@ public interface SwerveModuleIO {
     public void registerSignalForOdometry(List<BaseStatusSignal> signals) {}
 
     @Override
-    public SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius) {
+    public SwerveModulePosition updateOdometry(Inputs inputs, double wheelRadius) {
       return new SwerveModulePosition();
     }
 
     @Override
-    public void updateInputs(ModuleIOInputs inputs) {}
+    public void updateInputs(Inputs inputs) {}
 
     @Override
     public void setDriveVoltage(double volts) {}
@@ -61,8 +60,7 @@ public interface SwerveModuleIO {
         double kP, double kD, double cruiseVelocity, double acceleration) {}
   }
 
-  @AutoLog
-  public static class ModuleIOInputs {
+  public static class Inputs {
     public double drivePositionRad;
     public double driveVelocityRadPerSec;
     public double driveAppliedVolts;
@@ -80,10 +78,10 @@ public interface SwerveModuleIO {
   void registerSignalForOdometry(List<BaseStatusSignal> signals);
 
   /** Updates the odometry position. */
-  SwerveModulePosition updateOdometry(ModuleIOInputs inputs, double wheelRadius);
+  SwerveModulePosition updateOdometry(Inputs inputs, double wheelRadius);
 
   /** Updates the set of loggable inputs. */
-  void updateInputs(ModuleIOInputs inputs);
+  void updateInputs(Inputs inputs);
 
   /** Run the drive motor at the specified voltage. */
   void setDriveVoltage(double volts);

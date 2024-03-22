@@ -47,18 +47,22 @@ public class Robot extends LoggedRobot {
   private static final ExecutionTiming timingCommandScheduler =
       new ExecutionTiming("CommandScheduler");
 
-  private static final LoggerGroup logGroupActiveCommands = new LoggerGroup("ActiveCommands");
-  private static final LoggerGroup logGroupDIO = new LoggerGroup("DIO");
-  private static final LoggerEntry logBreakModeButton = logGroupDIO.build("0");
-  private static final LoggerEntry logHomeSensorsButton = logGroupDIO.build("1");
-  private static final LoggerGroup logGroupAuto = new LoggerGroup("Auto");
-  private static final LoggerEntry logCurrentChooserValue =
-      logGroupAuto.build("currentChooserValue");
-  private static final LoggerEntry logSelectedAuto = logGroupAuto.build("SelectedAuto");
-  private static final LoggerGroup logGroupSimulatedRobot = new LoggerGroup("SimulatedRobot");
-  private static final LoggerEntry logCurrentDraws = logGroupSimulatedRobot.build("currentDraws");
-  private static final LoggerEntry logBatteryVoltage =
-      logGroupSimulatedRobot.build("batteryVoltage");
+  private static final LoggerGroup logGroupDIO = LoggerGroup.build("DIO");
+  private static final LoggerEntry.Bool logBreakModeButton = logGroupDIO.buildBoolean("0");
+  private static final LoggerEntry.Bool logHomeSensorsButton = logGroupDIO.buildBoolean("1");
+
+  private static final LoggerGroup logGroupActiveCommands = LoggerGroup.build("ActiveCommands");
+
+  private static final LoggerGroup logGroupAuto = LoggerGroup.build("Auto");
+  private static final LoggerEntry.Text logCurrentChooserValue =
+      logGroupAuto.buildString("currentChooserValue");
+  private static final LoggerEntry.Text logSelectedAuto = logGroupAuto.buildString("SelectedAuto");
+
+  private static final LoggerGroup logGroupSimulatedRobot = LoggerGroup.build("SimulatedRobot");
+  private static final LoggerEntry.DecimalArray logCurrentDraws =
+      logGroupSimulatedRobot.buildDecimalArray("currentDraws");
+  private static final LoggerEntry.Decimal logBatteryVoltage =
+      logGroupSimulatedRobot.buildDecimal("batteryVoltage");
 
   private RobotContainer robotContainer;
 
@@ -136,11 +140,11 @@ public class Robot extends LoggedRobot {
 
     var commandScheduler = CommandScheduler.getInstance();
     commandScheduler.onCommandInitialize(
-        command -> logGroupActiveCommands.build(command.getName()).info(true));
+        command -> logGroupActiveCommands.buildBoolean(command.getName()).info(true));
     commandScheduler.onCommandInterrupt(
-        command -> logGroupActiveCommands.build(command.getName()).info(false));
+        command -> logGroupActiveCommands.buildBoolean(command.getName()).info(false));
     commandScheduler.onCommandFinish(
-        command -> logGroupActiveCommands.build(command.getName()).info(false));
+        command -> logGroupActiveCommands.buildBoolean(command.getName()).info(false));
     robotContainer.resetSubsystems();
 
     // Dashboard buttons to turn off/on cameras

@@ -3,12 +3,10 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
   /** Contains all of the input data received from hardware. */
-  @AutoLog
-  public static class ArmIOInputs {
+  public static class Inputs {
     public Rotation2d armPosition = Constants.zeroRotation2d;
     public double armAngleDegrees;
     public double armAppliedVolts;
@@ -18,7 +16,7 @@ public interface ArmIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ArmIOInputs inputs) {}
+  public default void updateInputs(Inputs inputs) {}
 
   public default void setVoltage(double volts) {}
 

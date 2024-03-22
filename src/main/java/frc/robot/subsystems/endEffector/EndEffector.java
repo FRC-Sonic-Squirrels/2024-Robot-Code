@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
@@ -19,7 +20,19 @@ public class EndEffector extends SubsystemBase {
 
   private static final ExecutionTiming timing = new ExecutionTiming(ROOT_TABLE);
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logInputs_velocityRPM =
+      logInputs.buildDecimal("VelocityRPM");
+  private static final LoggerEntry.Decimal logInputs_appliedVolts =
+      logInputs.buildDecimal("AppliedVolts");
+  private static final LoggerEntry.Decimal logInputs_currentAmps =
+      logInputs.buildDecimal("CurrentAmps");
+  private static final LoggerEntry.Decimal logInputs_tempCelsius =
+      logInputs.buildDecimal("TempCelsius");
+  private static final LoggerEntry.Decimal logInputs_intakeSideTOFDistanceInches =
+      logInputs.buildDecimal("IntakeSideTOFDistanceInches");
+  private static final LoggerEntry.Decimal logInputs_shooterSideTOFDistanceInches =
+      logInputs.buildDecimal("ShooterSideTOFDistanceInches");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -46,7 +59,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   private final EndEffectorIO io;
-  private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
+  private final EndEffectorIO.Inputs inputs = new EndEffectorIO.Inputs();
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {
@@ -59,7 +72,12 @@ public class EndEffector extends SubsystemBase {
   public void periodic() {
     try (var ignored = timing.start()) {
       io.updateInputs(inputs);
-      logInputs.info(inputs);
+      logInputs_velocityRPM.info(inputs.velocityRPM);
+      logInputs_appliedVolts.info(inputs.appliedVolts);
+      logInputs_currentAmps.info(inputs.currentAmps);
+      logInputs_tempCelsius.info(inputs.tempCelsius);
+      logInputs_intakeSideTOFDistanceInches.info(inputs.intakeSideTOFDistanceInches);
+      logInputs_shooterSideTOFDistanceInches.info(inputs.shooterSideTOFDistanceInches);
 
       var hc = hashCode();
       if (kS.hasChanged(hc)

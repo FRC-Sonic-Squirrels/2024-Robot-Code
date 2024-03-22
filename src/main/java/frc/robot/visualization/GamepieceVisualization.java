@@ -11,10 +11,13 @@ import frc.robot.Constants;
 import java.util.ArrayList;
 
 public class GamepieceVisualization {
-  private static final LoggerGroup group = new LoggerGroup("Visualization");
-  private static final LoggerEntry logShootingGamepiece = group.build("shootingGamepiece");
-  private static final LoggerEntry logShooterTanSpeed = group.build("ShooterTanSpeed");
-  private static final LoggerEntry logGamepieceTraj = group.build("GamepieceTraj");
+  private static final LoggerGroup group = LoggerGroup.build("Visualization");
+  private static final LoggerEntry.Bool logShootingGamepiece =
+      group.buildBoolean("shootingGamepiece");
+  private static final LoggerEntry.Decimal logShooterTanSpeed =
+      group.buildDecimal("ShooterTanSpeed");
+  private static final LoggerEntry.StructArray<Pose3d> logGamepieceTraj =
+      group.buildStructArray(Pose3d.class, "GamepieceTraj");
 
   private static final ArrayList<Pair<Pose3d, Double>> poses = new ArrayList<>(200);
   private static Pose3d[] loggedPoses = new Pose3d[] {};
@@ -86,15 +89,14 @@ public class GamepieceVisualization {
     showingPath = !(shootingTime * gamepieceLinearVel <= dist);
     showPath = showingPath && !prevShowingPath;
     if (!poses.isEmpty()) {
-      poses.set(
-          0, new Pair<Pose3d, Double>(new Pose3d(0.0, 0.0, -1000.0, new Rotation3d()), 10000000.0));
+      poses.set(0, new Pair<>(new Pose3d(0.0, 0.0, -1000.0, new Rotation3d()), 10000000.0));
     }
     if (shootingGamepiece) {
       if (shootingTime * gamepieceLinearVel <= dist) {
         if (initial) {
           poses.add(
               0,
-              new Pair<Pose3d, Double>(
+              new Pair<>(
                   new Pose3d(
                       new Translation3d(
                               shootingTime * gamepieceLinearVel,
@@ -106,7 +108,7 @@ public class GamepieceVisualization {
         }
         poses.set(
             0,
-            new Pair<Pose3d, Double>(
+            new Pair<>(
                 new Pose3d(
                     new Translation3d(
                             shootingTime * gamepieceLinearVel,
@@ -118,7 +120,7 @@ public class GamepieceVisualization {
         if (showPath) {
           for (int i = 0; i < (int) (dist / gamepieceSpacing) + 3; i++) {
             poses.add(
-                new Pair<Pose3d, Double>(
+                new Pair<>(
                     new Pose3d(
                         new Translation3d(
                                 gamepieceSpacing * i,

@@ -72,14 +72,14 @@ public class GyroIOPigeon2 implements GyroIO {
   }
 
   @Override
-  public Rotation2d updateOdometry(GyroIOInputs inputs) {
+  public Rotation2d updateOdometry(Inputs inputs) {
     var gyroRotation = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     inputs.yawPosition = gyroRotation;
     return gyroRotation;
   }
 
   @Override
-  public void updateInputs(GyroIOInputs inputs) {
+  public void updateInputs(Inputs inputs) {
     var statusCode = BaseStatusSignal.refreshAll(refreshSet);
 
     inputs.connected = statusCode == StatusCode.OK;

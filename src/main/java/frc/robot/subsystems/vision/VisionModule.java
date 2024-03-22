@@ -3,13 +3,13 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.lib.team6328.Alert;
-import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
+import frc.robot.subsystems.vision.VisionIO.Inputs;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 public class VisionModule {
   final VisionIO visionIO;
-  final VisionIOInputs visionIOInputs;
+  final Inputs visionIOInputs;
   final PhotonPoseEstimator photonPoseEstimator;
   final Transform3d RobotToCamera;
   final String name;
@@ -22,7 +22,7 @@ public class VisionModule {
 
   public VisionModule(VisionModuleConfiguration config, AprilTagFieldLayout aprilTagFieldLayout) {
     this.visionIO = config.visionIO;
-    this.visionIOInputs = new VisionIOInputs();
+    this.visionIOInputs = new Inputs();
     this.RobotToCamera = config.robotToCamera;
     this.name = config.logName;
 

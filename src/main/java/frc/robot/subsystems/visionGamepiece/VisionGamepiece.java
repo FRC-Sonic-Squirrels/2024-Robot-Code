@@ -20,24 +20,47 @@ import java.util.function.Function;
 public class VisionGamepiece extends SubsystemBase {
   private static final String ROOT_TABLE = "VisionGamepiece";
 
-  private static final LoggerEntry logInputs = new LoggerEntry(ROOT_TABLE);
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry logGamepieceCount = logGroup.build("gamepieceCount");
-  private static final LoggerEntry logTotalLatencyMs = logGroup.build("totalLatencyMs");
-  private static final LoggerEntry logGamepiecePoseArray = logGroup.build("GamepiecePoseArray");
-  private static final LoggerEntry logFudgeFromYaw = logGroup.build("fudgeFromYaw");
-  private static final LoggerEntry logFudgeFromPitch = logGroup.build("fudgeFromPitch");
+  private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool logInputs_isConnected =
+      logInputs.buildBoolean("IsConnected");
+  private static final LoggerEntry.Bool logInputs_validTarget =
+      logInputs.buildBoolean("ValidTarget");
+  private static final LoggerEntry.Decimal logInputs_totalLatencyMs =
+      logInputs.buildDecimal("TotalLatencyMs");
+  private static final LoggerEntry.Decimal logInputs_timestamp =
+      logInputs.buildDecimal("Timestamp");
+  private static final LoggerEntry.DecimalArray logInputs_pitch =
+      logInputs.buildDecimalArray("Pitch");
+  private static final LoggerEntry.DecimalArray logInputs_yaw = logInputs.buildDecimalArray("Yaw");
+  private static final LoggerEntry.DecimalArray logInputs_area =
+      logInputs.buildDecimalArray("Area");
+  private static final LoggerEntry.Integer logInputs_targetCount =
+      logInputs.buildInteger("TargetCount");
+
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Integer logGamepieceCount =
+      logGroup.buildInteger("gamepieceCount");
+  private static final LoggerEntry.Decimal logTotalLatencyMs =
+      logGroup.buildDecimal("totalLatencyMs");
+  private static final LoggerEntry.StructArray<Pose3d> logGamepiecePoseArray =
+      logGroup.buildStructArray(Pose3d.class, "GamepiecePoseArray");
+  private static final LoggerEntry.Decimal logFudgeFromYaw = logGroup.buildDecimal("fudgeFromYaw");
+  private static final LoggerEntry.Decimal logFudgeFromPitch =
+      logGroup.buildDecimal("fudgeFromPitch");
 
   private static final LoggerGroup logGroupClosestGamepiece = logGroup.subgroup("ClosestGamepiece");
-  private static final LoggerEntry log_distance = logGroupClosestGamepiece.build("distance");
-  private static final LoggerEntry log_targetYawDegrees =
-      logGroupClosestGamepiece.build("targetYawDegrees");
-  private static final LoggerEntry log_targetPitchDegrees =
-      logGroupClosestGamepiece.build("targetPitchDegrees");
-  private static final LoggerEntry log_poseRobotCentric =
-      logGroupClosestGamepiece.build("poseRobotCentric");
-  private static final LoggerEntry log_pose = logGroupClosestGamepiece.build("pose");
-  private static final LoggerEntry log_timestamp = logGroupClosestGamepiece.build("timestamp");
+  private static final LoggerEntry.Decimal log_distance =
+      logGroupClosestGamepiece.buildDecimal("distance");
+  private static final LoggerEntry.Decimal log_targetYawDegrees =
+      logGroupClosestGamepiece.buildDecimal("targetYawDegrees");
+  private static final LoggerEntry.Decimal log_targetPitchDegrees =
+      logGroupClosestGamepiece.buildDecimal("targetPitchDegrees");
+  private static final LoggerEntry.Struct<Pose3d> log_poseRobotCentric =
+      logGroupClosestGamepiece.buildStruct(Pose3d.class, "poseRobotCentric");
+  private static final LoggerEntry.Struct<Pose3d> log_pose =
+      logGroupClosestGamepiece.buildStruct(Pose3d.class, "pose");
+  private static final LoggerEntry.Decimal log_timestamp =
+      logGroupClosestGamepiece.buildDecimal("timestamp");
 
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber pitchFudgeFactor =
@@ -46,7 +69,7 @@ public class VisionGamepiece extends SubsystemBase {
       groupTunable.build("yawFudgeFactor", 56.16);
 
   private final VisionGamepieceIO io;
-  private final VisionGamepieceIOInputsAutoLogged inputs = new VisionGamepieceIOInputsAutoLogged();
+  private final VisionGamepieceIO.Inputs inputs = new VisionGamepieceIO.Inputs();
 
   private final Function<Double, Pose2d> robotPoseSupplier;
   private final ArrayList<ProcessedGamepieceData> seenGamePieces = new ArrayList<>();
@@ -61,7 +84,14 @@ public class VisionGamepiece extends SubsystemBase {
   public void periodic() {
     try (var ignored = new ExecutionTiming(ROOT_TABLE)) {
       io.updateInputs(inputs);
-      logInputs.info(inputs);
+      logInputs_isConnected.info(inputs.isConnected);
+      logInputs_validTarget.info(inputs.validTarget);
+      logInputs_totalLatencyMs.info(inputs.totalLatencyMs);
+      logInputs_timestamp.info(inputs.timestamp);
+      logInputs_pitch.info(inputs.pitch);
+      logInputs_yaw.info(inputs.yaw);
+      logInputs_area.info(inputs.area);
+      logInputs_targetCount.info(inputs.targetCount);
 
       // uncomment if simming for target gamepieces ---------------------------------------
 
@@ -284,15 +314,17 @@ public class VisionGamepiece extends SubsystemBase {
     double distance = processedGamepieceData.getDistance(robotPose).in(Units.Inches);
 
     var rawGroup = baseGroup.subgroup("Raw");
-    rawGroup.build("yaw").info(Math.toDegrees(yam));
-    rawGroup.build("pitch").info(Math.toDegrees(pitch));
+    rawGroup.buildDecimal("yaw").info(Math.toDegrees(yam));
+    rawGroup.buildDecimal("pitch").info(Math.toDegrees(pitch));
 
     var processedGroup = baseGroup.subgroup("Processed");
-    processedGroup.build("distanceInches").info(distance);
-    processedGroup.build("targetYaw").info(processedGamepieceData.getYaw(robotPose));
-    processedGroup.build("targetPitch").info(processedGamepieceData.getPitch(robotPose));
-    processedGroup.build("pose").info(processedGamepieceData.getRobotCentricPose(robotPose));
-    processedGroup.build("globalPose").info(processedGamepieceData.globalPose);
-    processedGroup.build("timestamp").info(processedGamepieceData.timestamp_RIOFPGA_capture);
+    processedGroup.buildDecimal("distanceInches").info(distance);
+    processedGroup.buildDecimal("targetYaw").info(processedGamepieceData.getYaw(robotPose));
+    processedGroup.buildDecimal("targetPitch").info(processedGamepieceData.getPitch(robotPose));
+    processedGroup
+        .buildStruct(Pose2d.class, "pose")
+        .info(processedGamepieceData.getRobotCentricPose(robotPose));
+    processedGroup.buildStruct(Pose2d.class, "globalPose").info(processedGamepieceData.globalPose);
+    processedGroup.buildDecimal("timestamp").info(processedGamepieceData.timestamp_RIOFPGA_capture);
   }
 }

@@ -26,11 +26,13 @@ import java.util.function.Supplier;
 public class MechanismActions {
   private static final String ROOT_TABLE = "MechanismActions";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_runningArm = logGroup.build("runningArm");
-  private static final LoggerEntry log_runningElevator = logGroup.build("runningElevator");
-  private static final LoggerEntry log_ElevatorInPosition = logGroup.build("ElevatorInPosition");
-  private static final LoggerEntry log_ArmInPosition = logGroup.build("ArmInPosition");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool log_runningArm = logGroup.buildBoolean("runningArm");
+  private static final LoggerEntry.Bool log_runningElevator =
+      logGroup.buildBoolean("runningElevator");
+  private static final LoggerEntry.Bool log_ElevatorInPosition =
+      logGroup.buildBoolean("ElevatorInPosition");
+  private static final LoggerEntry.Bool log_ArmInPosition = logGroup.buildBoolean("ArmInPosition");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 

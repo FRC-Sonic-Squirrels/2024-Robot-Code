@@ -17,8 +17,8 @@ import java.util.function.Supplier;
 public class ShooterSimpleShoot extends Command {
   private static final String ROOT_TABLE = "ShooterSimpleShot";
 
-  private static final LoggerGroup logGroup = new LoggerGroup(ROOT_TABLE);
-  private static final LoggerEntry log_validShot = logGroup.build("validShot");
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Bool log_validShot = logGroup.buildBoolean("validShot");
 
   private final Shooter shooter;
   private final EndEffector endEffector;

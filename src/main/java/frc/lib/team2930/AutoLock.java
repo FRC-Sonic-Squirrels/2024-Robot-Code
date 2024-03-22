@@ -7,20 +7,24 @@ import org.littletonrobotics.junction.Logger;
 public class AutoLock implements AutoCloseable {
   private final Lock state = new ReentrantLock();
   private final int waitThreshold;
-  private final LoggerEntry log_averageTime;
-  private final LoggerEntry log_timeViolation;
-  private final LoggerEntry log_count;
-  private final LoggerEntry log_countViolations;
+  private final LoggerEntry.Decimal log_averageTime;
+  private final LoggerEntry.Integer log_timeViolation;
+  private final LoggerEntry.Integer log_count;
+  private final LoggerEntry.Integer log_countViolations;
   private int counter;
   private int counterViolations;
   private long totalTime;
 
   public AutoLock(String name, int waitThreshold) {
     this.waitThreshold = waitThreshold;
-    log_averageTime = new LoggerEntry("AutoLock/" + name + "/averageTime");
-    log_timeViolation = new LoggerEntry("AutoLock/" + name + "/timeViolation");
-    log_count = new LoggerEntry("AutoLock/" + name + "/count");
-    log_countViolations = new LoggerEntry("AutoLock/" + name + "/countViolations");
+
+    var group = LoggerGroup.build("AutoLock");
+    var subgroup = group.subgroup(name);
+
+    log_averageTime = subgroup.buildDecimal("averageTime");
+    log_timeViolation = subgroup.buildInteger("timeViolation");
+    log_count = subgroup.buildInteger("count");
+    log_countViolations = subgroup.buildInteger("countViolations");
   }
 
   public AutoLock lock() {
