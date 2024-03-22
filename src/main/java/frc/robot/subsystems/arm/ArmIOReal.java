@@ -23,8 +23,8 @@ public class ArmIOReal implements ArmIO {
 
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
-      new MotionMagicVoltage(0.0).withEnableFOC(false);
-  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
+      new MotionMagicVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(true);
 
   private final TalonFX motor;
 
