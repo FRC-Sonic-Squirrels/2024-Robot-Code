@@ -240,7 +240,7 @@ public final class Constants {
     public static final Measure<Distance> MAX_LEGAL_HEIGHT = Units.Inches.of(26.2); // FIXME
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
-    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(12.0);
+    public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(15.491);
     public static final Measure<Distance> SUPPLY_CURRENT_LIMIT = Units.Inches.of(40.0);
 
     public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
@@ -254,6 +254,7 @@ public final class Constants {
     public static class ReactionArmConstants {
       public static final double REACTION_ARM_HOME_ROTATIONS = 0;
       public static final double REACTION_ARM_DEPLOY_ROTATIONS = 9.92;
+      public static final double REACTION_ARM_AMP_ROTATIONS = 6.333;
     }
   }
 
