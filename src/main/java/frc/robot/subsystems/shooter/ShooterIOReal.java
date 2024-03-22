@@ -55,13 +55,13 @@ public class ShooterIOReal implements ShooterIO {
   // FIX: add FOC
   private final MotionMagicVoltage pivotClosedLoopControl =
       new MotionMagicVoltage(0).withEnableFOC(true);
-  private final VoltageOut pivotOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
+  private final VoltageOut pivotOpenLoop = new VoltageOut(0.0).withEnableFOC(true);
 
   private final MotionMagicVelocityVoltage launcherClosedLoop =
-      new MotionMagicVelocityVoltage(0.0).withEnableFOC(false);
-  private final VoltageOut launcherOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
+      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut launcherOpenLoop = new VoltageOut(0.0).withEnableFOC(true);
 
-  private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(false);
+  private final VoltageOut kickerOpenLoop = new VoltageOut(0.0).withEnableFOC(true);
 
   TimeOfFlight timeOfFlight = new TimeOfFlight(Constants.CanIDs.SHOOTER_TOF_CAN_ID);
 

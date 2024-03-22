@@ -41,8 +41,8 @@ public class ElevatorIOReal implements ElevatorIO {
           / (Math.PI * Constants.ElevatorConstants.PULLEY_DIAMETER);
   // FIXME: add FOC
   private final MotionMagicVoltage closedLoopControl =
-      new MotionMagicVoltage(0.0).withEnableFOC(false);
-  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
+      new MotionMagicVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(true);
 
   private StatusSignal<Double> rotorPosition;
   private StatusSignal<Double> rotorVelocity;

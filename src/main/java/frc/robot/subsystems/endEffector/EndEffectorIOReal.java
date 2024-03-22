@@ -29,7 +29,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
   private final StatusSignal<Double> currentAmps;
   private final StatusSignal<Double> velocityRPS;
 
-  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(false);
+  private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(true);
 
   private final MotionMagicVelocityVoltage closedLoopControl =
       new MotionMagicVelocityVoltage(0, 0, true, 0, 0, false, false, false);
