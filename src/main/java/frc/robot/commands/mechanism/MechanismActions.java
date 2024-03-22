@@ -178,8 +178,10 @@ public class MechanismActions {
             boolean runningArm =
                 elevator.getHeightInches()
                         >= safeHeight.minus(Units.Inches.of(1.0)).in(Units.Inches)
-                    || position.get().armAngle().getRadians()
-                        <= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians();
+                    || (arm.getAngle().getRadians()
+                            > Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()
+                        && position.get().armAngle().getRadians()
+                            > Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians());
             if (ignoreSafety) runningArm = true;
             if (runningArm) {
               arm.setAngle(targetPosition.armAngle());
