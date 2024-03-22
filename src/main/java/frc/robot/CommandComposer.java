@@ -126,10 +126,13 @@ public class CommandComposer {
                     () ->
                         driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10))
                             || confirmation.getAsBoolean()),
-                Commands.waitUntil(confirmation::getAsBoolean),
+                Commands.waitUntil(() -> confirmation.getAsBoolean()),
                 () -> doDrive)
             .asProxy()
-            .alongWith(MechanismActions.ampPrepPosition(elevator, arm))
+            .alongWith(
+                Commands.runOnce(elevator::reactionArmsAmp, elevator)
+                    .andThen(MechanismActions.ampPrepPosition(elevator, arm))
+                    .andThen(Commands.runOnce(elevator::retractReactionArms, elevator)))
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(
                 MechanismActions.ampPosition(elevator, arm)
@@ -152,7 +155,10 @@ public class CommandComposer {
                             drivetrainWrapper.getPoseEstimatorPose(true),
                             Constants.FieldConstants.getAmpScoringPose())
                         >= 0.5)
-            .andThen(MechanismActions.loadingPosition(elevator, arm))
+            .andThen(
+                Commands.runOnce(elevator::reactionArmsAmp, elevator)
+                    .andThen(MechanismActions.loadingPosition(elevator, arm))
+                    .andThen(Commands.runOnce(elevator::retractReactionArms, elevator)))
             .alongWith(new EndEffectorPercentOut(endEffector, 0.0));
 
     cancelScoreAmp.setName("CancelScoreAmp");
