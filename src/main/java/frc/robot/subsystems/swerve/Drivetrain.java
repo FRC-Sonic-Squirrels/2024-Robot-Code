@@ -109,6 +109,9 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry.Struct<Pose2d> logLocalization_StageBlueOnly =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_stage_Blue");
 
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_Global =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_global");
+
   private static final LoggerGroup logGroupRobot = LoggerGroup.build("Robot");
   private static final LoggerEntry.Struct<Pose2d> log_FieldRelativeVel =
       logGroupRobot.buildStruct(Pose2d.class, "FieldRelativeVel");
@@ -206,6 +209,8 @@ public class Drivetrain extends SubsystemBase {
       logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
       logLocalization_StageBlueOnly.info(getPoseEstimatorPoseStageBlue());
 
+      logLocalization_Global.info(getPoseEstimatorPoseAllTags());
+
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
 
@@ -298,7 +303,7 @@ public class Drivetrain extends SubsystemBase {
             poseEstimator.addDriveData(timestamp, twist);
             poseEstimatorStageRed.addDriveData(timestamp, twist);
             poseEstimatorStageBlue.addDriveData(timestamp, twist);
-            if (Constants.unusedCode) {
+            if (!Constants.unusedCode) {
               poseEstimatorGlobal.addDriveData(timestamp, twist);
             }
           }
@@ -464,7 +469,7 @@ public class Drivetrain extends SubsystemBase {
         } else {
           poseEstimatorStageBlue.addVisionData(visionData);
         }
-        if (Constants.unusedCode) {
+        if (!Constants.unusedCode) {
           poseEstimatorGlobal.addVisionData(visionData);
         }
       }
