@@ -397,6 +397,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
         startOfShooting = Timer.getFPGATimestamp();
+        solver.startShooting(startOfShooting);
+        shooter.markStartOfNoteShooting();
         return stateWithName("shoot", this::shoot);
       }
     }
@@ -410,7 +412,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     updateSolver();
     rotateToSpeaker();
 
-    shooter.markStartOfNoteShooting();
     shooter.setPivotPosition(desiredShootingPitch);
     // run kicker for X seconds
     shooter.setKickerVelocity(shootingLoadingVelocity.get());
