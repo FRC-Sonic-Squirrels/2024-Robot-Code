@@ -85,6 +85,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final LoggedTunableNumber shootingLoadingVelocity =
       group.build("shootingLoadingVelocity", 3000);
 
+  private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
+
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -340,9 +342,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                 .getDistance(new Translation2d())
             <= maxVel;
 
-    double maxRotVel = 0.03;
+    double maxRotVelRads = Math.toRadians(maxRotVel.get());
     boolean belowMaxRotVel =
-        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVel;
+        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVelRads;
 
     boolean pivotAtAngle;
     var launcherAtRpm = shooter.isAtTargetRPM();
