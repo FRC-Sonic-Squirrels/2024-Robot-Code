@@ -86,6 +86,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       group.build("shootingLoadingVelocity", 3000);
   private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
 
+  private static final LoggedTunableNumber maxVel = group.build("maxVelMetersPerSec", 3);
+
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -333,13 +335,13 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check are we in valid shooting position
     // check if we are below max vel
 
-    double maxVel = 1.0;
+    double maxVelMetersPerSec = maxVel.get();
     boolean belowMaxSpeed =
         drivetrainWrapper
                 .getFieldRelativeVelocities()
                 .getTranslation()
                 .getDistance(new Translation2d())
-            <= maxVel;
+            <= maxVelMetersPerSec;
 
     double maxRotVelRads = Math.toRadians(maxRotVel.get());
     boolean belowMaxRotVel =

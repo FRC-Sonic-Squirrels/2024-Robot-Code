@@ -163,7 +163,7 @@ public class Drivetrain extends SubsystemBase {
 
     kinematics = config.getSwerveDriveKinematics();
 
-    int[] tagsSpeakersAndAmps = new int[] {3, 4, 5, 6, 7, 8};
+    int[] tagsSpeakersAndAmps = new int[] {3, 4, /*5, 6 , */ 7, 8};
     int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16};
 
     poseEstimator = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
