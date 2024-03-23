@@ -21,6 +21,8 @@ public class ChoreoHelper {
       logGroup.buildDecimal("stateLinearVel");
   private static final LoggerEntry.Decimal log_stateScaleVel =
       logGroup.buildDecimal("stateScaleVel");
+  private static final LoggerEntry.Decimal log_stateTimeOffset =
+      logGroup.buildDecimal("stateTimeOffset");
   private static final LoggerEntry.Decimal log_stateTimestamp =
       logGroup.buildDecimal("stateTimestamp");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
@@ -122,10 +124,27 @@ public class ChoreoHelper {
       state = stateTooBehind;
       endOfPath = false;
     } else {
-      var timestampCorrected = timestamp - initialTime + timeOffset;
-      state = traj.sample(timestampCorrected, Constants.isRedAlliance());
-      endOfPath = timestampCorrected > traj.getTotalTime();
-      log_stateTimestamp.info(timestampCorrected);
+      while (true) {
+        var timestampCorrected = timestamp - initialTime + timeOffset;
+        log_stateTimestamp.info(timestampCorrected);
+        log_stateTimeOffset.info(timeOffset);
+
+        state = traj.sample(timestampCorrected, Constants.isRedAlliance());
+        endOfPath = timestampCorrected > traj.getTotalTime();
+        if (endOfPath) break;
+
+        var lookaheadTime = 0.02;
+        var stateAhead = traj.sample(timestampCorrected + lookaheadTime, Constants.isRedAlliance());
+
+        double stateDistance = GeometryUtil.getDist(robotPose, state.getPose());
+        double stateDistanceAhead = GeometryUtil.getDist(robotPose, stateAhead.getPose());
+        if (stateDistanceAhead >= stateDistance) {
+          // If we are closer to the goal in the future, skip ahead in the path.
+          break;
+        }
+
+        timeOffset += lookaheadTime;
+      }
     }
 
     double xRobot = robotPose.getX();
