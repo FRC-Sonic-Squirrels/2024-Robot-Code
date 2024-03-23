@@ -126,11 +126,11 @@ public final class Constants {
     public static double FIELD_WIDTH = 8.211;
 
     // FIXME: double check this number
-    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
+    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 12.5);
 
     // TODO: move to right
     public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.24, 5.508944988250732);
+        new Translation2d(0.0, 5.6);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
