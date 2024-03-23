@@ -201,11 +201,13 @@ public class StateMachine {
 
   protected StateHandler setDone() {
     status = Status.Done;
+    logName.info("<done>");
     return null;
   }
 
   protected StateHandler setStopped() {
     status = Status.Stopped;
+    logName.info("<stopped>");
     return null;
   }
 
