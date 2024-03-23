@@ -156,9 +156,7 @@ public class ChoreoHelper {
       }
 
       // If we are paused, scale down the velocity, to avoid fighting the Feedback PID.
-      if (timestamp > pausedTime + 0.05) {
-        scaleVelocity /= (timestamp - pausedTime);
-      }
+      scaleVelocity *= Math.exp(-(timestamp - pausedTime));
     }
 
     log_stateScaleVel.info(scaleVelocity);
