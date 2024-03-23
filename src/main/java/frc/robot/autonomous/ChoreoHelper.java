@@ -19,6 +19,8 @@ public class ChoreoHelper {
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal log_stateLinearVel =
       logGroup.buildDecimal("stateLinearVel");
+  private static final LoggerEntry.Decimal log_stateScaleVel =
+      logGroup.buildDecimal("stateScaleVel");
   private static final LoggerEntry.Decimal log_stateTimestamp =
       logGroup.buildDecimal("stateTimestamp");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
@@ -146,12 +148,23 @@ public class ChoreoHelper {
       }
     }
 
-    if (stateTooBehind == null && !Double.isNaN(pausedTime)) {
-      return null;
+    double scaleVelocity = 1.0;
+
+    if (Double.isFinite(pausedTime)) {
+      if (stateTooBehind == null) {
+        return null;
+      }
+
+      // If we are paused, scale down the velocity, to avoid fighting the Feedback PID.
+      if (timestamp > pausedTime + 0.05) {
+        scaleVelocity /= (timestamp - pausedTime);
+      }
     }
 
-    double xVel = state.velocityX + xFeedback.calculate(xRobot, xDesired);
-    double yVel = state.velocityY + yFeedback.calculate(yRobot, yDesired);
+    log_stateScaleVel.info(scaleVelocity);
+
+    double xVel = state.velocityX * scaleVelocity + xFeedback.calculate(xRobot, xDesired);
+    double yVel = state.velocityY * scaleVelocity + yFeedback.calculate(yRobot, yDesired);
 
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
 
