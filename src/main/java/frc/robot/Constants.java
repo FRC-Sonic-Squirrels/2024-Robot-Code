@@ -184,8 +184,8 @@ public final class Constants {
 
     public static Pose2d getAmpScoringPose() {
       return new Pose2d(
-          Constants.isRedAlliance() ? 14.66 : Constants.FieldConstants.FIELD_LENGTH - 14.66,
-          7.8,
+          Constants.isRedAlliance() ? 14.76 : Constants.FieldConstants.FIELD_LENGTH - 14.76,
+          7.65,
           Rotation2d.fromDegrees(90.0));
     }
 

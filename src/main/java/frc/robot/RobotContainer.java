@@ -606,7 +606,8 @@ public class RobotContainer {
                 intake,
                 shooter,
                 true,
-                driverController.a()))
+                driverController.a(),
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)))
         .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     driverController

@@ -17,6 +17,7 @@ import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.mechanism.MechanismActions;
+import frc.robot.commands.mechanism.elevator.ReactionArmsSetAngle;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CommandComposer {
@@ -95,7 +97,8 @@ public class CommandComposer {
       Intake intake,
       Shooter shooter,
       boolean doDrive,
-      Trigger confirmation) {
+      Trigger confirmation,
+      Consumer<Double> rumbleCommand) {
     /*
      * Step 1: drive to amp
      * at the same time, if we are within a distance move mech into position
@@ -122,22 +125,31 @@ public class CommandComposer {
 
     Command scoreAmp =
         new ConditionalCommand(
-                driveToAmp.until(
-                    () ->
-                        driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10))
-                            || confirmation.getAsBoolean()),
+                driveToAmp
+                    .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
+                    .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
+                    .finallyDo(() -> rumbleCommand.accept(0.0))
+                    .andThen(Commands.waitUntil(() -> false))
+                    .until(() -> confirmation.getAsBoolean()),
                 Commands.waitUntil(() -> confirmation.getAsBoolean()),
                 () -> doDrive)
             .asProxy()
             .alongWith(
-                Commands.runOnce(elevator::reactionArmsAmp, elevator)
+                new ReactionArmsSetAngle(
+                        elevator,
+                        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
                     .andThen(MechanismActions.ampPrepPosition(elevator, arm))
-                    .andThen(Commands.runOnce(elevator::retractReactionArms, elevator)))
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_HOME_ROTATIONS)))
             .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
             .andThen(
                 MechanismActions.ampPosition(elevator, arm)
                     .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
-                    .until(noGamepieceInEE));
+                    .until(noGamepieceInEE))
+            .finallyDo(() -> rumbleCommand.accept(0.0));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");
@@ -148,17 +160,22 @@ public class CommandComposer {
   public static Command cancelScoreAmp(
       DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
     Command cancelScoreAmp =
-        MechanismActions.ampPositionToLoadPosition(elevator, arm)
-            .until(
-                () ->
-                    GeometryUtil.getDist(
-                            drivetrainWrapper.getPoseEstimatorPose(true),
-                            Constants.FieldConstants.getAmpScoringPose())
-                        >= 0.5)
+        // MechanismActions.ampPositionToLoadPosition(elevator, arm)
+        // .until(
+        // () ->
+        // GeometryUtil.getDist(
+        // drivetrainWrapper.getPoseEstimatorPose(true),
+        // Constants.FieldConstants.getAmpScoringPose())
+        // >= 0.5)
+        // .andThen(
+        new ReactionArmsSetAngle(
+                elevator,
+                Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+            .andThen(MechanismActions.loadingPosition(elevator, arm))
             .andThen(
-                Commands.runOnce(elevator::reactionArmsAmp, elevator)
-                    .andThen(MechanismActions.loadingPosition(elevator, arm))
-                    .andThen(Commands.runOnce(elevator::retractReactionArms, elevator)))
+                new ReactionArmsSetAngle(
+                    elevator,
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
             .alongWith(new EndEffectorPercentOut(endEffector, 0.0));
 
     cancelScoreAmp.setName("CancelScoreAmp");
