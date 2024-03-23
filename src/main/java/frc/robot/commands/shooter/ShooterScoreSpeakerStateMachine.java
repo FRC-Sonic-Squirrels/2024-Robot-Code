@@ -73,7 +73,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
-  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 9000.0);
+  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8750.0);
   private static final LoggedTunableNumber tunablePitchOffset =
       group.build("tunablePitchOffset", 0.0);
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
@@ -86,7 +86,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       group.build("shootingLoadingVelocity", 3000);
   private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
 
-  private static final LoggedTunableNumber maxVel = group.build("maxVelMetersPerSec", 3);
+  private static final LoggedTunableNumber maxVel = group.build("maxVelMetersPerSec", 1);
 
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
