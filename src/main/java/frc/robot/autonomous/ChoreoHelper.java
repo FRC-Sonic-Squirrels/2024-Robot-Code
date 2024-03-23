@@ -19,6 +19,8 @@ public class ChoreoHelper {
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal log_stateLinearVel =
       logGroup.buildDecimal("stateLinearVel");
+  private static final LoggerEntry.Decimal log_stateTimestamp =
+      logGroup.buildDecimal("stateTimestamp");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
       logGroup.buildStruct(Pose2d.class, "closestPose");
   private static final LoggerEntry.Struct<Pose2d> log_optimalPose =
@@ -121,6 +123,7 @@ public class ChoreoHelper {
       var timestampCorrected = timestamp - initialTime + timeOffset;
       state = traj.sample(timestampCorrected, Constants.isRedAlliance());
       endOfPath = timestampCorrected > traj.getTotalTime();
+      log_stateTimestamp.info(timestampCorrected);
     }
 
     double xRobot = robotPose.getX();

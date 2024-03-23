@@ -129,8 +129,7 @@ public final class Constants {
     public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 12.5);
 
     // TODO: move to right
-    public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.0, 5.6);
+    public static final Translation2d BLUE_SPEAKER_TRANSLATION = new Translation2d(0.0, 5.6);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
@@ -316,18 +315,18 @@ public final class Constants {
 
       public static final InterpolatingDoubleTreeMap PITCH_ADJUSTMENT_MAP;
 
-      public static final Measure<Distance> MIN_DISTANCE = Units.Inches.of(40.0); 
+      public static final Measure<Distance> MIN_DISTANCE = Units.Inches.of(40.0);
 
       static {
         PITCH_ADJUSTMENT_MAP = new InterpolatingDoubleTreeMap();
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 3.5);  
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 3.5);  
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 3.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 3.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 3.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 3.5);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 5.0);  
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 6.7);  
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 7.5);  
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 8.3);  
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 5.0);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 6.7);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 7.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 8.3);
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(110.0).in(Units.Meters), 3.5); // 4.0
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 4.0); // 4.5
