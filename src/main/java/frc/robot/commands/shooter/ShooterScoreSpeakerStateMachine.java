@@ -34,57 +34,56 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final LoggerEntry.Decimal log_TimeToShoot = logGroup.buildDecimal("TimeToShoot");
   private static final LoggerEntry.Bool log_simpleShot = logGroup.buildBoolean("simpleShot");
 
-  private static final LoggerGroup logGroupSub = logGroup.subgroup("shootingConfimation");
+  // --
+  private static final LoggerGroup logGroupConfirmation = logGroup.subgroup("shootingConfimation");
   private static final LoggerEntry.Bool log_launcherAtRPM =
-      logGroupSub.buildBoolean("launcherAtRPM");
-  private static final LoggerEntry.Bool log_pivotAtAngle = logGroupSub.buildBoolean("pivotAtAngle");
+      logGroupConfirmation.buildBoolean("launcherAtRPM");
+  private static final LoggerEntry.Bool log_pivotAtAngle =
+      logGroupConfirmation.buildBoolean("pivotAtAngle");
   private static final LoggerEntry.Bool log_shootingPosition =
-      logGroupSub.buildBoolean("shootingPosition");
-  private static final LoggerEntry.Bool log_forceShoot = logGroupSub.buildBoolean("forceShoot");
+      logGroupConfirmation.buildBoolean("shootingPosition");
   private static final LoggerEntry.Bool log_driverConfirmation =
-      logGroupSub.buildBoolean("driverConfirmation");
+      logGroupConfirmation.buildBoolean("driverConfirmation");
   private static final LoggerEntry.Bool log_atThetaTarget =
-      logGroupSub.buildBoolean("atThetaTarget");
+      logGroupConfirmation.buildBoolean("atThetaTarget");
   private static final LoggerEntry.Bool log_belowMaxSpeed =
-      logGroupSub.buildBoolean("belowMaxSpeed");
+      logGroupConfirmation.buildBoolean("belowMaxSpeed");
   private static final LoggerEntry.Bool log_belowMaxRotVel =
-      logGroupSub.buildBoolean("belowMaxRotVel");
+      logGroupConfirmation.buildBoolean("belowMaxRotVel");
   private static final LoggerEntry.Bool log_shooterSolver =
-      logGroupSub.buildBoolean("shooterSolver");
-  private static final LoggerEntry.Decimal log_omega = logGroupSub.buildDecimal("omega");
+      logGroupConfirmation.buildBoolean("shooterSolver");
+  private static final LoggerEntry.Bool log_forceShoot =
+      logGroupConfirmation.buildBoolean("forceShoot");
+
+  // --
+  private static final LoggerGroup logGroupData = logGroup.subgroup("data");
+  private static final LoggerEntry.Decimal log_omega = logGroupData.buildDecimal("omega");
   private static final LoggerEntry.Decimal log_rotationalError =
-      logGroupSub.buildDecimal("rotationalError");
+      logGroupData.buildDecimal("rotationalError");
   private static final LoggerEntry.Decimal log_CurrentHeadingDegrees =
-      logGroupSub.buildDecimal("CurrentHeadingDegrees");
+      logGroupData.buildDecimal("CurrentHeadingDegrees");
   private static final LoggerEntry.Decimal log_headingTargetDegrees =
-      logGroupSub.buildDecimal("headingTargetDegrees");
+      logGroupData.buildDecimal("headingTargetDegrees");
   private static final LoggerEntry.Decimal log_pitchTargetDegrees =
-      logGroupSub.buildDecimal("pitchTargetDegrees");
+      logGroupData.buildDecimal("pitchTargetDegrees");
   private static final LoggerEntry.Decimal log_pitchOffset =
-      logGroupSub.buildDecimal("pitchOffset");
+      logGroupData.buildDecimal("pitchOffset");
   private static final LoggerEntry.Decimal log_xyDistanceFromSpeaker =
-      logGroupSub.buildDecimal("xyDistanceFromSpeaker");
+      logGroupData.buildDecimal("xyDistanceFromSpeaker");
 
+  // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
-
   private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 9000.0);
-
   private static final LoggedTunableNumber tunablePitchOffset =
       group.build("tunablePitchOffset", 0.0);
-
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
   private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
-
   private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);
-
   public static final LoggedTunableNumber loadingRPM = group.build("loading/LoadingRPM", 1200);
-
   public static final LoggedTunableNumber slowLoadingRPM =
       group.build("loading/slowLoadingRPM", 500);
-
   private static final LoggedTunableNumber shootingLoadingVelocity =
       group.build("shootingLoadingVelocity", 3000);
-
   private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
 
   private final DrivetrainWrapper drivetrainWrapper;
@@ -418,7 +417,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     endEffector.setVelocity(shootingLoadingVelocity.get());
 
     if (!shooter.noteInShooter()) {
-      log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
       return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
@@ -430,6 +428,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (!stateRunningLongerThan(0.2)) return null;
     // visualize gamepiece
 
+    log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
     return visualizeGamepiece();
   }
 
