@@ -207,8 +207,8 @@ public class Drivetrain extends SubsystemBase {
       logSwerveStatesMeasured.info(getModuleStates());
 
       log_FieldRelativeVel.info(getFieldRelativeVelocities());
-      log_FieldRelativeAcceleration.info(getFieldRelativeAccelerationMagnitude(prevVel.getTranslation().getNorm
-     () ));
+      log_FieldRelativeAcceleration.info(
+          getFieldRelativeAccelerationMagnitude(prevVel.getTranslation().getNorm()));
 
       prevVel = getFieldRelativeVelocities();
 
@@ -471,7 +471,7 @@ public class Drivetrain extends SubsystemBase {
   public Pose2d getRobotCentricVelocities() {
     Translation2d translation =
         new Translation2d(
-                getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond);
+            getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond);
     return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
   }
 

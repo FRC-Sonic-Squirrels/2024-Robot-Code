@@ -260,7 +260,7 @@ public class ShootingSolver {
         new Rotation2d(targetTheta),
         rateOfRotation,
         new Rotation2d(shooterPitch),
-        xyDistToSpeaker, 
+        xyDistToSpeaker,
         dPspeaker);
   }
 }

@@ -738,11 +738,13 @@ public class RobotContainer {
                           Units.Degrees.of(90.0).in(Units.Radians)));
                 }));
 
-                if(Constants.unusedCode) {
+    if (Constants.unusedCode) {
 
-                
-                driverController.povUp().whileTrue(new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
-                }
+      driverController
+          .povUp()
+          .whileTrue(
+              new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
+    }
     // driverController
     // .y()
     // .whileTrue(

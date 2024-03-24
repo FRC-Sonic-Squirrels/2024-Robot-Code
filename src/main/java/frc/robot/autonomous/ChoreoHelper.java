@@ -35,9 +35,7 @@ public class ChoreoHelper {
       logGroup.buildDecimal("distanceError");
   private static final LoggerEntry.Decimal log_headingError = logGroup.buildDecimal("headingError");
 
-  private static final LoggerEntry.Bool log_isPaused =
-      logGroup.buildBoolean("isPaused");
-
+  private static final LoggerEntry.Bool log_isPaused = logGroup.buildBoolean("isPaused");
 
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
@@ -45,7 +43,7 @@ public class ChoreoHelper {
   private final PIDController rotationalFeedback;
   private final double initialTime;
   private final double lagThreshold;
-  private final double minVelToPause; 
+  private final double minVelToPause;
 
   private double timeOffset;
   private double pausedTime = Double.NaN;
@@ -128,36 +126,30 @@ public class ChoreoHelper {
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     ChoreoTrajectoryState state;
-    boolean endOfPath;
-
-    double timestampCorrected = timestamp - initialTime + timeOffset;
 
     if (stateTooBehind != null) {
       state = stateTooBehind;
-      endOfPath = false;
     } else {
-      while (true) {
-        log_stateTimestamp.info(timestampCorrected);
-        log_stateTimeOffset.info(timeOffset);
+      var timestampCorrected = timestamp - initialTime + timeOffset;
 
-        state = traj.sample(timestampCorrected, Constants.isRedAlliance());
-        endOfPath = timestampCorrected > traj.getTotalTime();
-        if (endOfPath) break;
-
-        var lookaheadTime = 0.02;
-        var stateAhead = traj.sample(timestampCorrected + lookaheadTime, Constants.isRedAlliance());
-
-        double stateDistance = GeometryUtil.getDist(robotPose, state.getPose());
-        double stateDistanceAhead = GeometryUtil.getDist(robotPose, stateAhead.getPose());
-        if (stateDistanceAhead >= stateDistance) {
-          // If we are closer to the goal in the future, skip ahead in the path.
-          break;
-        }
-
-        timeOffset += lookaheadTime;
-        timestampCorrected = timestamp - initialTime + timeOffset;
+      state = traj.sample(timestampCorrected, Constants.isRedAlliance());
+      if (timestampCorrected >= traj.getTotalTime()) {
+        return null;
       }
     }
+
+    while (true) {
+      var lookaheadTime = 0.02;
+
+      var stateAhead = isFutureStateCloser(robotPose, state, lookaheadTime);
+      if (stateAhead != null) break;
+
+      timeOffset += lookaheadTime;
+      state = stateAhead;
+    }
+
+    log_stateTimestamp.info(state.timestamp);
+    log_stateTimeOffset.info(timeOffset);
 
     double xRobot = robotPose.getX();
     double yRobot = robotPose.getY();
@@ -166,7 +158,7 @@ public class ChoreoHelper {
     double yDesired = state.y;
 
     var distanceError = Math.hypot(xDesired - xRobot, yDesired - yRobot);
-    
+
     log_distanceError.info(distanceError);
     if (distanceError < lagThreshold) {
       if (stateTooBehind != null) {
@@ -175,7 +167,7 @@ public class ChoreoHelper {
       }
     } else {
       var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
-      if (stateTooBehind == null && velMagnitude >= minVelToPause && timestampCorrected > 1) {
+      if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 1) {
         stateTooBehind = state;
         pause(timestamp);
       }
@@ -207,9 +199,26 @@ public class ChoreoHelper {
     log_desiredVelocity.info(new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
     log_headingError.info(Math.toDegrees(GeometryUtil.optimizeRotation(theta - state.heading)));
 
-    return endOfPath
-        ? null
-        : ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+  }
+
+  private ChoreoTrajectoryState isFutureStateCloser(
+      Pose2d robotPose, ChoreoTrajectoryState state, double lookaheadTime) {
+    var stateAhead = traj.sample(state.timestamp + lookaheadTime, Constants.isRedAlliance());
+
+    double stateDistance = distanceToState(robotPose, state);
+    double stateDistanceAhead = distanceToState(robotPose, stateAhead);
+    return stateDistanceAhead < stateDistance ? stateAhead : null;
+  }
+
+  private static double distanceToState(Pose2d robotPose, ChoreoTrajectoryState state) {
+    double xRobot = robotPose.getX();
+    double yRobot = robotPose.getY();
+
+    double xDesired = state.x;
+    double yDesired = state.y;
+
+    return Math.hypot(xDesired - xRobot, yDesired - yRobot);
   }
 
   public static ChoreoTrajectory rescale(ChoreoTrajectory traj, double speedScaling) {

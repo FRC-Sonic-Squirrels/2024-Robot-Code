@@ -59,7 +59,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   private static final LoggedTunableNumber distFromExpectedToAcceptVisionGamepiece =
       groupTunable.build("distFromExpectedToAcceptVisionGamepiece", 1.0);
 
-      protected static final LoggedTunableNumber minVelToPause =
+  protected static final LoggedTunableNumber minVelToPause =
       groupTunable.build("minVelToPause", 2.0);
 
   /** Creates a new AutoSubstateMachine. */
