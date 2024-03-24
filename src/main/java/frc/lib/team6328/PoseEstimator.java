@@ -51,6 +51,20 @@ public class PoseEstimator {
     return this.tailPoseUpdate.previousUpdate.getFinalPose();
   }
 
+  /** Returns the timestamp of the last vision update. */
+  public double getVisionStaleness() {
+    var lastUpdate = this.tailPoseUpdate.previousUpdate;
+    var lastVisionUpdate = lastUpdate;
+    while (lastVisionUpdate.visionUpdates.isEmpty()) {
+      PoseUpdate previousUpdate = lastUpdate.previousUpdate;
+      if (previousUpdate == null) return 100;
+
+      lastVisionUpdate = previousUpdate;
+    }
+
+    return lastUpdate.timestamp - lastVisionUpdate.timestamp;
+  }
+
   public Pose2d getPoseAtTime(double timestamp) {
     if (Double.isNaN(timestamp)) {
       return getLatestPose();
@@ -58,8 +72,10 @@ public class PoseEstimator {
 
     var poseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
     if (poseUpdateAfter.twist == null)
-      // This means that we have no drive data, ignore vision.
+    // This means that we have no drive data, ignore vision.
+    {
       return new Pose2d();
+    }
 
     var poseUpdateBefore = poseUpdateAfter.previousUpdate;
 
@@ -156,8 +172,10 @@ public class PoseEstimator {
 
       var existingPoseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
       if (existingPoseUpdateAfter.twist == null)
-        // This means that we have no drive data, ignore vision.
+      // This means that we have no drive data, ignore vision.
+      {
         continue;
+      }
 
       if (existingPoseUpdateAfter.timestamp == timestamp) {
         // There was already an update at this timestamp, add to it

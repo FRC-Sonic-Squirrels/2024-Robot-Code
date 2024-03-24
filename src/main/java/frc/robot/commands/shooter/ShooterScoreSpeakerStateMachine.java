@@ -44,6 +44,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       logGroupConfirmation.buildBoolean("pivotAtAngle");
   private static final LoggerEntry.Bool log_shootingPosition =
       logGroupConfirmation.buildBoolean("shootingPosition");
+  private static final LoggerEntry.Bool log_recentVisionUpdates =
+      logGroupConfirmation.buildBoolean("recentVisionUpdates");
   private static final LoggerEntry.Bool log_driverConfirmation =
       logGroupConfirmation.buildBoolean("driverConfirmation");
   private static final LoggerEntry.Bool log_atThetaTarget =
@@ -79,6 +81,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
+  private static final LoggedTunableNumber tunableVisionStaleness =
+      group.build("tunableVisionStaleness", 0.5);
   private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8750.0);
   private static final LoggedTunableNumber tunablePitchOffset =
       group.build("tunablePitchOffset", 0.0);
@@ -391,12 +395,15 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     }
 
     var forceShoot = stateRunningLongerThan(forceShotIn);
+    var recentVisionUpdates = recentVisionUpdates();
+    var validShootingPosition = validShootingPosition();
 
     log_simpleShot.info(simpleShot);
 
     log_launcherAtRPM.info(launcherAtRpm);
     log_pivotAtAngle.info(pivotAtAngle);
-    log_shootingPosition.info(validShootingPosition());
+    log_shootingPosition.info(validShootingPosition);
+    log_recentVisionUpdates.info(recentVisionUpdates);
     log_forceShoot.info(forceShoot);
     log_driverConfirmation.info(externalConfirmation);
     log_atThetaTarget.info(atThetaTarget);
@@ -405,7 +412,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     if ((launcherAtRpm
             && pivotAtAngle
-            && validShootingPosition()
+            && recentVisionUpdates
+            && validShootingPosition
             && atThetaTarget
             && belowMaxSpeed
             && belowMaxRotVel)
@@ -478,6 +486,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     }
 
     log_CurrentHeadingDegrees.info(drivetrainWrapper.getRotationGyroOnly().getDegrees());
+  }
+
+  private boolean recentVisionUpdates() {
+    return drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
   }
 
   private boolean validShootingPosition() {

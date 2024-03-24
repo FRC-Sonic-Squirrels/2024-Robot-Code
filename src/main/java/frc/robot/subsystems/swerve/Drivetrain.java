@@ -514,6 +514,15 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
+  public double getVisionStaleness() {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      try (var ignored2 = timing_pose.start()) {
+        return poseEstimator.getVisionStaleness();
+      }
+    }
+  }
+
   public Pose2d getPoseEstimatorPoseAtTimestamp(double timestamp) {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
