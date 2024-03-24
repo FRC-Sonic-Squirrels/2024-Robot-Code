@@ -115,6 +115,8 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerGroup logGroupRobot = LoggerGroup.build("Robot");
   private static final LoggerEntry.Struct<Pose2d> log_FieldRelativeVel =
       logGroupRobot.buildStruct(Pose2d.class, "FieldRelativeVel");
+  private static final LoggerEntry.Decimal log_FieldRelativeAcceleration =
+      logGroupRobot.buildDecimal("FieldRelativeAcceleration");
 
   public static final AutoLock odometryLock = new AutoLock("odometry", 100);
 
@@ -143,6 +145,8 @@ public class Drivetrain extends SubsystemBase {
 
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
+
+  private Pose2d prevVel = new Pose2d();
 
   public Drivetrain(
       RobotConfig config,
@@ -203,6 +207,11 @@ public class Drivetrain extends SubsystemBase {
       logSwerveStatesMeasured.info(getModuleStates());
 
       log_FieldRelativeVel.info(getFieldRelativeVelocities());
+      log_FieldRelativeAcceleration.info(getFieldRelativeAccelerationMagnitude(prevVel.getTranslation().getNorm
+     () ));
+
+      prevVel = getFieldRelativeVelocities();
+
       logLocalization_RobotPosition.info(getPoseEstimatorPose());
       logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
 
@@ -457,6 +466,18 @@ public class Drivetrain extends SubsystemBase {
                 getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond)
             .rotateBy(getRawOdometryPose().getRotation());
     return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+  }
+
+  public Pose2d getRobotCentricVelocities() {
+    Translation2d translation =
+        new Translation2d(
+                getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond);
+    return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+  }
+
+  public double getFieldRelativeAccelerationMagnitude(double prevVelMagnitude) {
+    Pose2d currentVel = getFieldRelativeVelocities();
+    return (currentVel.getTranslation().getNorm() - prevVelMagnitude) / 0.02;
   }
 
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {

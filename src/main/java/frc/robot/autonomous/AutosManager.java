@@ -232,6 +232,7 @@ public class AutosManager {
                     drivetrain.getPoseEstimatorPose(true),
                     traj,
                     config.getDriveBaseRadius() / 2,
+                    1.0,
                     config.getAutoTranslationPidController(),
                     config.getAutoTranslationPidController(),
                     config.getAutoThetaPidController());

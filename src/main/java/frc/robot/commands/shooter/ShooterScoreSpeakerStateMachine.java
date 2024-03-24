@@ -72,6 +72,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       logGroupData.buildDecimal("pitchOffset");
   private static final LoggerEntry.Decimal log_xyDistanceFromSpeaker =
       logGroupData.buildDecimal("xyDistanceFromSpeaker");
+      private static final LoggerEntry.Decimal log_shooterPitchError =
+      logGroupData.buildDecimal("log_shooterPitchError");
 
   // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
@@ -355,7 +357,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       shooter.setPivotPosition(desiredShootingPitch);
       pivotAtAngle =
           shooter.isPivotIsAtTarget(
-              desiredShootingPitch, getPitchTolerance(Units.Meters.of(solverResult.xyDistance())));
+              desiredShootingPitch
+              // , getPitchTolerance(Units.Meters.of(solverResult.xyDistance()))
+              );
     } else {
       pivotAtAngle = false;
     }
@@ -383,6 +387,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     var forceShoot = stateRunningLongerThan(forceShotIn);
 
     log_simpleShot.info(simpleShot);
+
 
     log_launcherAtRPM.info(launcherAtRpm);
     log_pivotAtAngle.info(pivotAtAngle);
@@ -530,6 +535,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       log_pitchTargetDegrees.info(desiredShootingPitch);
       log_pitchOffset.info(offset);
       log_xyDistanceFromSpeaker.info(distance);
+      double pivotError = desiredShootingPitch.getDegrees() - shooter.getPitch().getDegrees();
+      log_shooterPitchError.info(pivotError);
     }
   }
 

@@ -35,12 +35,18 @@ public class ChoreoHelper {
       logGroup.buildDecimal("distanceError");
   private static final LoggerEntry.Decimal log_headingError = logGroup.buildDecimal("headingError");
 
+  private static final LoggerEntry.Bool log_isPaused =
+      logGroup.buildBoolean("isPaused");
+
+
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
   private final PIDController yFeedback;
   private final PIDController rotationalFeedback;
   private final double initialTime;
   private final double lagThreshold;
+  private final double minVelToPause; 
+
   private double timeOffset;
   private double pausedTime = Double.NaN;
   private ChoreoTrajectoryState stateTooBehind;
@@ -58,11 +64,13 @@ public class ChoreoHelper {
       Pose2d initialPose,
       ChoreoTrajectoryWithName trajWithName,
       double lagThreshold,
+      double minVelToPause,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
       PIDController rotationalFeedback) {
     this.traj = trajWithName.states();
     this.lagThreshold = lagThreshold;
+    this.minVelToPause = minVelToPause;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
@@ -99,12 +107,14 @@ public class ChoreoHelper {
 
   public void pause(double timestamp) {
     if (Double.isNaN(pausedTime)) {
+      log_isPaused.info(true);
       pausedTime = timestamp;
     }
   }
 
   public void resume(double timestamp) {
     if (!Double.isNaN(pausedTime)) {
+      log_isPaused.info(false);
       timeOffset += (pausedTime - timestamp);
       pausedTime = Double.NaN;
     }
@@ -120,12 +130,13 @@ public class ChoreoHelper {
     ChoreoTrajectoryState state;
     boolean endOfPath;
 
+    double timestampCorrected = timestamp - initialTime + timeOffset;
+
     if (stateTooBehind != null) {
       state = stateTooBehind;
       endOfPath = false;
     } else {
       while (true) {
-        var timestampCorrected = timestamp - initialTime + timeOffset;
         log_stateTimestamp.info(timestampCorrected);
         log_stateTimeOffset.info(timeOffset);
 
@@ -144,6 +155,7 @@ public class ChoreoHelper {
         }
 
         timeOffset += lookaheadTime;
+        timestampCorrected = timestamp - initialTime + timeOffset;
       }
     }
 
@@ -154,6 +166,7 @@ public class ChoreoHelper {
     double yDesired = state.y;
 
     var distanceError = Math.hypot(xDesired - xRobot, yDesired - yRobot);
+    
     log_distanceError.info(distanceError);
     if (distanceError < lagThreshold) {
       if (stateTooBehind != null) {
@@ -161,7 +174,8 @@ public class ChoreoHelper {
         resume(timestamp);
       }
     } else {
-      if (stateTooBehind == null) {
+      var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
+      if (stateTooBehind == null && velMagnitude >= minVelToPause && timestampCorrected > 1) {
         stateTooBehind = state;
         pause(timestamp);
       }

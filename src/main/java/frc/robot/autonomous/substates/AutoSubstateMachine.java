@@ -59,6 +59,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
   private static final LoggedTunableNumber distFromExpectedToAcceptVisionGamepiece =
       groupTunable.build("distFromExpectedToAcceptVisionGamepiece", 1.0);
 
+      protected static final LoggedTunableNumber minVelToPause =
+      groupTunable.build("minVelToPause", 2.0);
+
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
       String name,
@@ -128,6 +131,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
               drive.getPoseEstimatorPose(true),
               trajToShoot.rescale(slowDownFactor.get()),
               config.getDriveBaseRadius() / 2,
+              minVelToPause.get(),
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),
               config.getAutoThetaPidController());

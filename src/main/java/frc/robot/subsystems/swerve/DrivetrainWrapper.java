@@ -133,6 +133,10 @@ public class DrivetrainWrapper {
     return drivetrain.getFieldRelativeVelocities();
   }
 
+  public Pose2d getRobotCentricVelocities() {
+    return drivetrain.getRobotCentricVelocities();
+  }
+
   public Rotation2d getRotationGyroOnly() {
     return drivetrain.getRotationGyroOnly();
   }
