@@ -4,7 +4,6 @@
 
 package frc.robot.autonomous.substates;
 
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,6 +13,7 @@ import frc.lib.team2930.StateMachine;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.autonomous.ChoreoHelper;
+import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
@@ -35,7 +35,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final Elevator elevator;
   protected final Arm arm;
   protected final RobotConfig config;
-  protected final ChoreoTrajectory trajToShoot;
+  protected final ChoreoTrajectoryWithName trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
   private final boolean useVision;
   protected ChoreoHelper choreoHelper;
@@ -60,6 +60,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
+      String name,
       DrivetrainWrapper drive,
       Shooter shooter,
       EndEffector endEffector,
@@ -68,10 +69,10 @@ public abstract class AutoSubstateMachine extends StateMachine {
       Elevator elevator,
       Arm arm,
       boolean useVision,
-      ChoreoTrajectory trajToShoot,
+      ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
-    super(String.format("AutoSub %s", trajToShoot));
+    super(name);
 
     this.drive = drive;
     this.shooter = shooter;
@@ -125,12 +126,11 @@ public abstract class AutoSubstateMachine extends StateMachine {
         });
 
     if (trajToShoot != null) {
-      var traj = ChoreoHelper.rescale(trajToShoot, slowDownFactor.get());
       choreoHelper =
           new ChoreoHelper(
               timeFromStart(),
               drive.getPoseEstimatorPose(true),
-              traj,
+              trajToShoot.rescale(slowDownFactor.get()),
               config.getDriveBaseRadius() / 2,
               config.getAutoTranslationPidController(),
               config.getAutoTranslationPidController(),

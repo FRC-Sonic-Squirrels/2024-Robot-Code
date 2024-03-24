@@ -1,8 +1,8 @@
 package frc.robot.autonomous.substates;
 
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
@@ -29,9 +29,10 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       Arm arm,
       boolean useVision,
       Translation2d gamepieceTranslation,
-      ChoreoTrajectory trajToShoot,
+      ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
     super(
+        String.format("AutoSub %s", trajToShoot.name()),
         drive,
         shooter,
         endEffector,

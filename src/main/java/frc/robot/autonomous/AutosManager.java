@@ -1,7 +1,6 @@
 package frc.robot.autonomous;
 
 import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -291,7 +290,7 @@ public class AutosManager {
   }
 
   private Auto testPath(String pathName, boolean useInitialPose, String autoName) {
-    ChoreoTrajectory traj = Choreo.getTrajectory(pathName);
+    var traj = ChoreoTrajectoryWithName.getTrajectory(pathName);
     return new Auto(
         autoName,
         new Command() {
@@ -329,7 +328,7 @@ public class AutosManager {
             return speeds == null;
           }
         },
-        useInitialPose ? traj.getInitialPose() : null);
+        useInitialPose ? traj.getInitialPose(true) : null);
   }
 
   private Auto characterization() {

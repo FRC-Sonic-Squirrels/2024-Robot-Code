@@ -48,7 +48,7 @@ public class ChoreoHelper {
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
-   * @param traj trajectory to follow
+   * @param trajWithName trajectory to follow
    * @param translationalFeedbackX pid in x directions
    * @param translationalFeedbackY pid in y directions
    * @param rotationalFeedback pid for angular velocity
@@ -56,12 +56,12 @@ public class ChoreoHelper {
   public ChoreoHelper(
       double initialTime,
       Pose2d initialPose,
-      ChoreoTrajectory traj,
+      ChoreoTrajectoryWithName trajWithName,
       double lagThreshold,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
       PIDController rotationalFeedback) {
-    this.traj = traj;
+    this.traj = trajWithName.states();
     this.lagThreshold = lagThreshold;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;

@@ -4,10 +4,7 @@
 
 package frc.robot.autonomous;
 
-import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
 import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
@@ -33,8 +30,8 @@ public class AutoStateMachine extends StateMachine {
   private final Intake intake;
   private final VisionGamepiece visionGamepiece;
   private final RobotConfig config;
-  private final ChoreoTrajectory[] intakingTrajs;
-  private final ChoreoTrajectory[] shootingTrajs;
+  private final ChoreoTrajectoryWithName[] intakingTrajs;
+  private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
   private int currentSubState;
@@ -122,17 +119,15 @@ public class AutoStateMachine extends StateMachine {
       subStateTrajNames = new ArrayList<>();
     }
 
-    intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
-    shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+    intakingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
+    shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
-      String intakingTraj = path.intakingTraj();
-      String shootingTraj = path.shootingTraj();
       useVision[i] = path.useVision();
-      intakingTrajs[i] = intakingTraj != null ? Choreo.getTrajectory(intakingTraj) : null;
-      shootingTrajs[i] = shootingTraj != null ? Choreo.getTrajectory(shootingTraj) : null;
+      intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
+      shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
 
     setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -172,9 +167,7 @@ public class AutoStateMachine extends StateMachine {
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
-                    AllianceFlipUtil.flipPoseForAlliance(
-                            intakingTrajs[currentSubState].getFinalPose())
-                        .getTranslation()),
+                    intakingTrajs[currentSubState].getFinalPose(true).getTranslation()),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =
@@ -188,9 +181,7 @@ public class AutoStateMachine extends StateMachine {
                     elevator,
                     arm,
                     useVision[currentSubState],
-                    AllianceFlipUtil.flipPoseForAlliance(
-                            intakingTrajs[currentSubState].getFinalPose())
-                        .getTranslation(),
+                    intakingTrajs[currentSubState].getFinalPose(true).getTranslation(),
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));

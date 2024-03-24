@@ -1,9 +1,9 @@
 package frc.robot.autonomous.substates;
 
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.autonomous.ChoreoHelper;
+import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
@@ -17,7 +17,7 @@ import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
-  private final ChoreoTrajectory trajToGamepiece;
+  private final ChoreoTrajectoryWithName trajToGamepiece;
 
   /** Creates a new AutoSubstateMachine. */
   public AutoSubstateMachineChoreo(
@@ -29,11 +29,12 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       Elevator elevator,
       Arm arm,
       boolean useVision,
-      ChoreoTrajectory trajToGamepiece,
-      ChoreoTrajectory trajToShoot,
+      ChoreoTrajectoryWithName trajToGamepiece,
+      ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
     super(
+        String.format("AutoSub %s # %s", trajToGamepiece.name(), trajToShoot.name()),
         drive,
         shooter,
         endEffector,
@@ -56,7 +57,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
     super.intakeCommand.schedule();
 
     if (trajToGamepiece != null) {
-      var traj = ChoreoHelper.rescale(trajToGamepiece, slowDownFactor.get());
+      var traj = trajToGamepiece.rescale(slowDownFactor.get());
       choreoHelper =
           new ChoreoHelper(
               timeFromStart(),
