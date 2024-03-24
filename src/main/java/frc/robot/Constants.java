@@ -194,6 +194,13 @@ public final class Constants {
       public static final Measure<Distance> NOTE_TOLERANCE = Units.Inches.of(20.0);
       public static final double NOTE_PERSISTENCE = 0.5;
     }
+
+    public static final Measure<Distance> SPEAKER_GOAL_LENGTH = Units.Inches.of(19);
+
+    /** distance from bottom of opening to bottom lip of the upper guard */
+    public static final Measure<Distance> SPEAKER_GOAL_HEIGHT = Units.Inches.of(6.0);
+
+    public static final Measure<Distance> SPEAKER_GOAL_WIDTH = Units.Inches.of(41);
   }
 
   public static class MotorConstants {

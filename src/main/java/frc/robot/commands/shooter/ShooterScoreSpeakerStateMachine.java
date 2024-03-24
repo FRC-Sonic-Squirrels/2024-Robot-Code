@@ -8,6 +8,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -351,7 +353,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     var launcherAtRpm = shooter.isAtTargetRPM();
     if (solverResult != null) {
       shooter.setPivotPosition(desiredShootingPitch);
-      pivotAtAngle = shooter.isPivotIsAtTarget(desiredShootingPitch);
+      pivotAtAngle =
+          shooter.isPivotIsAtTarget(
+              desiredShootingPitch, getPitchTolerance(Units.Meters.of(solverResult.xyDistance())));
     } else {
       pivotAtAngle = false;
     }
@@ -527,5 +531,20 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       log_pitchOffset.info(offset);
       log_xyDistanceFromSpeaker.info(distance);
     }
+  }
+
+  private Rotation2d getPitchTolerance(Measure<Distance> distance) {
+    return Rotation2d.fromRadians(
+        Math.max(
+            Math.atan2(
+                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters)
+                        + Constants.FieldConstants.SPEAKER_GOAL_HEIGHT.in(Units.Meters),
+                    distance.in(Units.Meters)
+                        - Constants.FieldConstants.SPEAKER_GOAL_LENGTH.in(Units.Meters))
+                - Math.atan2(
+                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters),
+                    distance.in(Units.Meters))
+                - Math.toRadians(0.3),
+            Math.toRadians(0.2)));
   }
 }
