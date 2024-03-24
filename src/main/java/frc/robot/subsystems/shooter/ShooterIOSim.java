@@ -78,9 +78,9 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void updateInputs(Inputs inputs) {
 
-    pivot.update(0.02);
-    launcherMotorSim.update(0.02);
-    kickerMotorSim.update(0.02);
+    pivot.update(Constants.kDefaultPeriod);
+    launcherMotorSim.update(Constants.kDefaultPeriod);
+    kickerMotorSim.update(Constants.kDefaultPeriod);
 
     pivotFeedback.setTolerance(1.0);
 

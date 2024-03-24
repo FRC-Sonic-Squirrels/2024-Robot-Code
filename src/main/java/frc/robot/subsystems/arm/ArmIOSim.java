@@ -59,7 +59,7 @@ public class ArmIOSim implements ArmIO {
     controlEffort = MathUtil.clamp(controlEffort, -12, 12);
 
     armSim.setInputVoltage(controlEffort);
-    armSim.update(0.02);
+    armSim.update(Constants.kDefaultPeriod);
 
     inputs.armPosition = Rotation2d.fromRadians(armSim.getAngleRads());
     inputs.armAngleDegrees = inputs.armPosition.getDegrees();

@@ -44,6 +44,7 @@ import java.util.function.Supplier;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double kDefaultPeriod = 0.02;
   public static final Translation2d zeroTranslation2d = new Translation2d();
   public static final Rotation2d zeroRotation2d = new Rotation2d();
 

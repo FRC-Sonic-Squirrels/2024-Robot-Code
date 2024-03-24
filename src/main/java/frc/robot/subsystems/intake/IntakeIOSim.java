@@ -21,7 +21,7 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    motor.update(0.02);
+    motor.update(Constants.kDefaultPeriod);
     motor.setInputVoltage(voltage);
     inputs.currentAmps = motor.getCurrentDrawAmps();
     inputs.beamBreak = beamBreak.get();

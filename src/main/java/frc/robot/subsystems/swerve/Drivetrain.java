@@ -400,7 +400,7 @@ public class Drivetrain extends SubsystemBase {
     logDrivetrain_speedsRot.info(speeds.omegaRadiansPerSecond);
 
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, Constants.kDefaultPeriod);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, config.getRobotMaxLinearVelocity());
 
