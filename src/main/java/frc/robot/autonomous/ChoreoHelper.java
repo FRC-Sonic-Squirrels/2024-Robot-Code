@@ -142,7 +142,7 @@ public class ChoreoHelper {
       var lookaheadTime = Constants.kDefaultPeriod;
 
       var stateAhead = isFutureStateCloser(robotPose, state, lookaheadTime);
-      if (stateAhead != null) break;
+      if (stateAhead == null) break;
 
       timeOffset += lookaheadTime;
       state = stateAhead;
