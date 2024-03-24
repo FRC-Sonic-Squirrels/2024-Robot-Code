@@ -20,13 +20,7 @@ import frc.robot.autonomous.substates.DriveAfterSimpleShot;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.MechanismActionsSafe;
 import frc.robot.configs.RobotConfig;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.endEffector.EndEffector;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
-import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +32,7 @@ public class AutosManager {
   private static final LoggerEntry.EnumValue<SysIdRoutineLog.State> logSwerveSysidState =
       logGroupSysid.buildEnum("swervesysidstate");
 
-  private final DrivetrainWrapper drivetrain;
-  private final Shooter shooter;
-  private final EndEffector endEffector;
-  private final Intake intake;
-  private final Elevator elevator;
-  private final Arm arm;
-  private final VisionGamepiece visionGamepiece;
-
+  private final AutosSubsystems subsystems;
   private final RobotConfig config;
 
   public final boolean includeDebugPaths = true;
@@ -53,24 +40,11 @@ public class AutosManager {
   public record Auto(String name, Command command, Pose2d initPose) {}
 
   public AutosManager(
-      DrivetrainWrapper drivetrain,
-      Shooter shooter,
-      Intake intake,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      VisionGamepiece visionGamepiece,
+      AutosSubsystems subsystems,
       RobotConfig config,
       LoggedDashboardChooser<String> chooser,
       HashMap<String, Supplier<Auto>> stringToAutoSupplierMap) {
-    this.drivetrain = drivetrain;
-    this.shooter = shooter;
-    this.endEffector = endEffector;
-    this.intake = intake;
-    this.elevator = elevator;
-    this.arm = arm;
-    this.visionGamepiece = visionGamepiece;
-
+    this.subsystems = subsystems;
     this.config = config;
 
     fillChooserAndMap(chooser, stringToAutoSupplierMap);
@@ -100,6 +74,9 @@ public class AutosManager {
       list.add(this::characterization);
       list.add(
           () -> {
+            var elevator = subsystems.elevator();
+            var arm = subsystems.arm();
+
             var cmd = MechanismActions.loadingPosition(elevator, arm);
 
             cmd = cmd.andThen(MechanismActions.ampPosition(elevator, arm));
@@ -111,6 +88,9 @@ public class AutosManager {
 
       list.add(
           () -> {
+            var elevator = subsystems.elevator();
+            var arm = subsystems.arm();
+
             var cmd = MechanismActionsSafe.loadingPosition(elevator, arm);
 
             cmd = cmd.andThen(MechanismActionsSafe.ampPosition(elevator, arm));
@@ -161,7 +141,7 @@ public class AutosManager {
               }
             });
 
-    var mechanism = new SysIdRoutine(sysidConfig, drivetrain.getSysIdMechanism());
+    var mechanism = new SysIdRoutine(sysidConfig, subsystems.drivetrain().getSysIdMechanism());
 
     var command1 = mechanism.quasistatic(Direction.kForward);
     var command2 = mechanism.quasistatic(Direction.kReverse);
@@ -187,18 +167,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("S3-G4", "G4-S2", true));
     paths.add(new PathDescriptor("S2-G3", "G3-S1", true));
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
-    AutoStateMachine state =
-        new AutoStateMachine(
-            drivetrain,
-            shooter,
-            endEffector,
-            elevator,
-            arm,
-            intake,
-            visionGamepiece,
-            paths,
-            0.47,
-            config);
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "sourceAuto", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
@@ -209,18 +178,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("CG1-G1", "G1-S1", true));
     paths.add(new PathDescriptor("S1-G2", "G2-S2", false));
     paths.add(new PathDescriptor("S2-G3", "G3-S2", false));
-    AutoStateMachine state =
-        new AutoStateMachine(
-            drivetrain,
-            shooter,
-            endEffector,
-            elevator,
-            arm,
-            intake,
-            visionGamepiece,
-            paths,
-            0.47,
-            config);
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-CG1").getInitialPose());
   }
@@ -232,18 +190,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("CG2-CG1", null, false));
     paths.add(new PathDescriptor("CG1-G1", "G1-S1", false));
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
-    AutoStateMachine state =
-        new AutoStateMachine(
-            drivetrain,
-            shooter,
-            endEffector,
-            elevator,
-            arm,
-            intake,
-            visionGamepiece,
-            paths,
-            0.47,
-            config);
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "middleAuto", state.asCommand(), Choreo.getTrajectory("Smiddle-CG3").getInitialPose());
   }
@@ -252,35 +199,14 @@ public class AutosManager {
     List<PathDescriptor> paths = new ArrayList<>();
     paths.add(new PathDescriptor("TestPortable1", "TestPortable2", true));
     paths.add(new PathDescriptor("TestPortable3", "TestPortable4", true));
-    AutoStateMachine state =
-        new AutoStateMachine(
-            drivetrain,
-            shooter,
-            endEffector,
-            elevator,
-            arm,
-            intake,
-            visionGamepiece,
-            paths,
-            2.0,
-            config);
+    var state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "TestPortable", state.asCommand(), Choreo.getTrajectory("TestPortable1").getInitialPose());
   }
 
   private Auto simpleShootAuto() {
-    AutoStateMachine state =
-        new AutoStateMachine(
-            drivetrain,
-            shooter,
-            endEffector,
-            elevator,
-            arm,
-            intake,
-            visionGamepiece,
-            new StateMachine[] {new DriveAfterSimpleShot(drivetrain)},
-            10.0,
-            config);
+    StateMachine[] paths = new StateMachine[] {new DriveAfterSimpleShot(subsystems.drivetrain())};
+    var state = new AutoStateMachine(subsystems, config, paths);
 
     return new Auto("simpleShootAuto", state.asCommand(), null);
   }
@@ -294,6 +220,7 @@ public class AutosManager {
     return new Auto(
         autoName,
         new Command() {
+          private final DrivetrainWrapper drivetrain = subsystems.drivetrain();
           ChoreoHelper helper;
           ChassisSpeeds speeds;
 
@@ -335,7 +262,7 @@ public class AutosManager {
     PathPlannerPath path = PathPlannerPath.fromPathFile("Characterization");
     return new Auto(
         "Characterization",
-        AutoBuilder.followPath(path).finallyDo(drivetrain::resetVelocityOverride),
+        AutoBuilder.followPath(path).finallyDo(subsystems.drivetrain()::resetVelocityOverride),
         new Pose2d());
   }
 

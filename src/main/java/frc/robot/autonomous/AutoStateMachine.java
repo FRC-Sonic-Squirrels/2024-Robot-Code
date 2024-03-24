@@ -22,6 +22,7 @@ import java.util.List;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
+  private final AutosSubsystems subsystems;
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -35,83 +36,34 @@ public class AutoStateMachine extends StateMachine {
   private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
   private int currentSubState;
-  private double initShootDeadline;
-  private boolean shootingDone;
 
   public AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      StateMachine[] overrideStateMachines,
-      double initShootDeadline,
-      RobotConfig config) {
-    this(
-        drive,
-        shooter,
-        endEffector,
-        elevator,
-        arm,
-        intake,
-        visionGamepiece,
-        null,
-        initShootDeadline,
-        config,
-        overrideStateMachines);
+      AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
+    this(subsystems, config, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      List<PathDescriptor> subStateTrajNames,
-      double initShootDeadline,
-      RobotConfig config) {
-    this(
-        drive,
-        shooter,
-        endEffector,
-        elevator,
-        arm,
-        intake,
-        visionGamepiece,
-        subStateTrajNames,
-        initShootDeadline,
-        config,
-        null);
+      AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
+    this(subsystems, config, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
   private AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      List<PathDescriptor> subStateTrajNames,
-      double initShootDeadline,
+      AutosSubsystems subsystems,
       RobotConfig config,
+      List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
 
-    this.drive = drive;
-    this.shooter = shooter;
-    this.endEffector = endEffector;
-    this.elevator = elevator;
-    this.arm = arm;
-    this.intake = intake;
-    this.visionGamepiece = visionGamepiece;
+    this.subsystems = subsystems;
+    this.drive = subsystems.drivetrain();
+    this.shooter = subsystems.shooter();
+    this.endEffector = subsystems.endEffector();
+    this.elevator = subsystems.elevator();
+    this.arm = subsystems.arm();
+    this.intake = subsystems.intake();
+    this.visionGamepiece = subsystems.visionGamepiece();
     this.config = config;
-    this.initShootDeadline = initShootDeadline;
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
 
@@ -141,7 +93,6 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler shotDone(Command command) {
-    shootingDone = true;
     return nextSubState(true);
   }
 
@@ -152,36 +103,28 @@ public class AutoStateMachine extends StateMachine {
         return setDone();
       }
 
+      var targetGPPose = intakingTrajs[currentSubState].getFinalPose(true).getTranslation();
+
       if (followPath) {
         nextState =
             suspendForSubStateMachine(
                 new AutoSubstateMachineChoreo(
-                    drive,
-                    shooter,
-                    endEffector,
-                    intake,
+                    subsystems,
                     config,
-                    elevator,
-                    arm,
                     useVision[currentSubState],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
-                    intakingTrajs[currentSubState].getFinalPose(true).getTranslation()),
+                    targetGPPose),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =
             suspendForSubStateMachine(
                 new AutoSubstateMachineDriveTranslation(
-                    drive,
-                    shooter,
-                    endEffector,
-                    intake,
+                    subsystems,
                     config,
-                    elevator,
-                    arm,
                     useVision[currentSubState],
-                    intakingTrajs[currentSubState].getFinalPose(true).getTranslation(),
+                    targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.autonomous.AutosSubsystems;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
@@ -61,25 +62,20 @@ public abstract class AutoSubstateMachine extends StateMachine {
   /** Creates a new AutoSubstateMachine. */
   protected AutoSubstateMachine(
       String name,
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Intake intake,
+      AutosSubsystems subsystems,
       RobotConfig config,
-      Elevator elevator,
-      Arm arm,
       boolean useVision,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
     super(name);
 
-    this.drive = drive;
-    this.shooter = shooter;
-    this.endEffector = endEffector;
-    this.intake = intake;
-    this.elevator = elevator;
-    this.arm = arm;
+    this.drive = subsystems.drivetrain();
+    this.shooter = subsystems.shooter();
+    this.endEffector = subsystems.endEffector();
+    this.intake = subsystems.intake();
+    this.elevator = subsystems.elevator();
+    this.arm = subsystems.arm();
     this.useVision = useVision;
     this.config = config;
     this.trajToShoot = trajToShoot;

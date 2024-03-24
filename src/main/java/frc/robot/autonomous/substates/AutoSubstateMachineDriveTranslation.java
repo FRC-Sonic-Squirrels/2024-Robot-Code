@@ -2,44 +2,29 @@ package frc.robot.autonomous.substates;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.autonomous.AutosSubsystems;
 import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.endEffector.EndEffector;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
-  private Translation2d gamepieceTranslation;
+  private final Translation2d gamepieceTranslation;
 
   /** Creates a new AutoSubstateMachineDriveTranslation. */
   public AutoSubstateMachineDriveTranslation(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Intake intake,
+      AutosSubsystems subsystems,
       RobotConfig config,
-      Elevator elevator,
-      Arm arm,
       boolean useVision,
       Translation2d gamepieceTranslation,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
     super(
         String.format("AutoSub %s", trajToShoot.name()),
-        drive,
-        shooter,
-        endEffector,
-        intake,
+        subsystems,
         config,
-        elevator,
-        arm,
         useVision,
         trajToShoot,
         closestGamepiece,
