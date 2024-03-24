@@ -167,7 +167,7 @@ public class ChoreoHelper {
       }
     } else {
       var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
-      if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 1) {
+      if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 0.25) {
         stateTooBehind = state;
         pause(timestamp);
       }
