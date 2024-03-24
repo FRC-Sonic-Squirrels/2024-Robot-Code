@@ -412,7 +412,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     if ((launcherAtRpm
             && pivotAtAngle
-            && recentVisionUpdates
+            // && recentVisionUpdates
             && validShootingPosition
             && atThetaTarget
             && belowMaxSpeed
@@ -591,7 +591,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                                         Units.Meters)
                                     / 2.0,
                             offset.getX()))
-                - 1.0,
-            0.5));
+                - Math.toRadians(1.0),
+            Math.toRadians(0.5)));
   }
 }
