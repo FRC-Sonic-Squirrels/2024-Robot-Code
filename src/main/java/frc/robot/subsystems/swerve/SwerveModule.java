@@ -68,7 +68,7 @@ public class SwerveModule {
   public SwerveModule(int index, RobotConfig config, SwerveModuleIO io) {
     this.io = io;
 
-    String key = String.format("SwerveModule%d", index);
+    String key = "SwerveModule" + index;
     var group = LoggerGroup.build(key);
     log_drivePositionRad = group.buildDecimal("DrivePositionRad");
     log_driveVelocityRadPerSec = group.buildDecimal("DriveVelocityRadPerSec");

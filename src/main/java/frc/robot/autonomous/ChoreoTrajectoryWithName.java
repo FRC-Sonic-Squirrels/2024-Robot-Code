@@ -11,6 +11,10 @@ public record ChoreoTrajectoryWithName(String name, ChoreoTrajectory states) {
     return new ChoreoTrajectoryWithName(name, Choreo.getTrajectory(name));
   }
 
+  public static String getName(ChoreoTrajectoryWithName trajWithName) {
+    return trajWithName == null ? "NULL" : trajWithName.name();
+  }
+
   public ChoreoTrajectoryWithName rescale(double speedScaling) {
     return new ChoreoTrajectoryWithName(name, ChoreoHelper.rescale(states, speedScaling));
   }

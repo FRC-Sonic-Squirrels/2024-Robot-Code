@@ -22,7 +22,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
     super(
-        String.format("AutoSub %s", trajToShoot ==null ?"NULL": trajToShoot.name()),
+        "AutoSub " + ChoreoTrajectoryWithName.getName(trajToShoot),
         subsystems,
         config,
         useVision,

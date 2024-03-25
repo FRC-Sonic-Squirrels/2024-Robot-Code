@@ -24,7 +24,10 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
     super(
-        String.format("AutoSub %s # %s", trajToGamepiece ==null ?"NULL": trajToGamepiece.name(), trajToShoot ==null ?"NULL": trajToShoot.name()),
+        "AutoSub "
+            + ChoreoTrajectoryWithName.getName(trajToGamepiece)
+            + " # "
+            + ChoreoTrajectoryWithName.getName(trajToShoot),
         subsystems,
         config,
         useVision,

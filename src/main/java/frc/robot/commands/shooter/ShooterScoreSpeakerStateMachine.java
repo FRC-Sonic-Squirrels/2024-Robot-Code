@@ -489,7 +489,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private boolean recentVisionUpdates() {
-    return false;// drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
+    return false; // drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
   }
 
   private boolean validShootingPosition() {

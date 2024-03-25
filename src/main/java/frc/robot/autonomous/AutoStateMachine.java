@@ -141,6 +141,6 @@ public class AutoStateMachine extends StateMachine {
               subStateMachine -> () -> this.nextSubState(false));
     }
 
-    return stateWithName(String.format("State %d", currentSubState), nextState);
+    return stateWithName("State " + currentSubState, nextState);
   }
 }
