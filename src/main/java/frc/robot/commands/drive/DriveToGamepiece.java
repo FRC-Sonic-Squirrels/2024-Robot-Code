@@ -20,7 +20,7 @@ public class DriveToGamepiece extends Command {
 
   private Supplier<Boolean> gamepieceIntaked;
 
-  private DriveToGamepieceHelper helper = new DriveToGamepieceHelper();
+  private DriveToGamepieceHelper helper;
 
   private Supplier<Pose2d> pose;
 

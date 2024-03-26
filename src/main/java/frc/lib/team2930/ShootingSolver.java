@@ -24,7 +24,8 @@ public class ShootingSolver {
       Rotation2d heading,
       double rotationSpeed,
       Rotation2d pitch,
-      double xyDistance) {}
+      double xyDistance,
+      Translation3d xyOffset) {}
 
   public ShootingSolver(
       Translation3d Pspeaker,
@@ -259,6 +260,7 @@ public class ShootingSolver {
         new Rotation2d(targetTheta),
         rateOfRotation,
         new Rotation2d(shooterPitch),
-        xyDistToSpeaker);
+        xyDistToSpeaker,
+        dPspeaker);
   }
 }

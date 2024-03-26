@@ -44,6 +44,7 @@ import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
+import frc.robot.autonomous.AutosSubsystems;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
@@ -399,18 +400,11 @@ public class RobotContainer {
         () -> false,
         drivetrain);
 
-    autoManager =
-        new AutosManager(
-            drivetrainWrapper,
-            shooter,
-            intake,
-            endEffector,
-            elevator,
-            arm,
-            visionGamepiece,
-            config,
-            autoChooser,
-            stringToAutoSupplierMap);
+    var subsystems =
+        new AutosSubsystems(
+            drivetrainWrapper, elevator, arm, intake, endEffector, shooter, visionGamepiece);
+
+    autoManager = new AutosManager(subsystems, config, autoChooser, stringToAutoSupplierMap);
 
     drivetrain.setDefaultCommand(
         new DrivetrainDefaultTeleopDrive(
@@ -606,7 +600,8 @@ public class RobotContainer {
                 intake,
                 shooter,
                 true,
-                driverController.a()))
+                driverController.a(),
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)))
         .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     driverController
@@ -743,6 +738,13 @@ public class RobotContainer {
                           Units.Degrees.of(90.0).in(Units.Radians)));
                 }));
 
+    if (Constants.unusedCode) {
+
+      driverController
+          .povUp()
+          .whileTrue(
+              new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
+    }
     // driverController
     // .y()
     // .whileTrue(

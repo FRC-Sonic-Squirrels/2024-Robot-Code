@@ -293,8 +293,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isPivotIsAtTarget(Rotation2d target) {
+    return isPivotIsAtTarget(target, Rotation2d.fromDegrees(pivotToleranceDegrees.get()));
+  }
+
+  public boolean isPivotIsAtTarget(Rotation2d target, Rotation2d tolerance) {
     return Math.abs(inputs.pivotPosition.getRadians() - target.getRadians())
-        <= Math.toRadians(pivotToleranceDegrees.get());
+        <= tolerance.getRadians();
   }
 
   public void markStartOfNoteLoading() {

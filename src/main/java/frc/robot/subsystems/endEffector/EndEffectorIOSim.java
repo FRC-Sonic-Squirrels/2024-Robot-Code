@@ -25,7 +25,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    motor.update(0.02);
+    motor.update(Constants.kDefaultPeriod);
     motor.setInputVoltage(voltage);
 
     var now = Timer.getFPGATimestamp();

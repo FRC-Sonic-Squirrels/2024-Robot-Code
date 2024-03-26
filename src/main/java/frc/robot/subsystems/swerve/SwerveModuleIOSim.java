@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants;
 import frc.robot.configs.RobotConfig2024;
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * approximation for the behavior of the module.
  */
 public class SwerveModuleIOSim implements SwerveModuleIO {
-  private static final double LOOP_PERIOD_SECS = 0.02;
+  private static final double LOOP_PERIOD_SECS = Constants.kDefaultPeriod;
 
   private final DCMotorSim driveSim =
       new DCMotorSim(DCMotor.getKrakenX60(1), RobotConfig2024.SWERVE_DRIVE_GEAR_RATIO, 0.025);

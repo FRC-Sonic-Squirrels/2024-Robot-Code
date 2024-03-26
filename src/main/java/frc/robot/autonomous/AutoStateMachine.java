@@ -4,10 +4,7 @@
 
 package frc.robot.autonomous;
 
-import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
 import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
@@ -25,6 +22,7 @@ import java.util.List;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
+  private final AutosSubsystems subsystems;
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final EndEffector endEffector;
@@ -33,88 +31,39 @@ public class AutoStateMachine extends StateMachine {
   private final Intake intake;
   private final VisionGamepiece visionGamepiece;
   private final RobotConfig config;
-  private final ChoreoTrajectory[] intakingTrajs;
-  private final ChoreoTrajectory[] shootingTrajs;
+  private final ChoreoTrajectoryWithName[] intakingTrajs;
+  private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
   private int currentSubState;
-  private double initShootDeadline;
-  private boolean shootingDone;
 
   public AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      StateMachine[] overrideStateMachines,
-      double initShootDeadline,
-      RobotConfig config) {
-    this(
-        drive,
-        shooter,
-        endEffector,
-        elevator,
-        arm,
-        intake,
-        visionGamepiece,
-        null,
-        initShootDeadline,
-        config,
-        overrideStateMachines);
+      AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
+    this(subsystems, config, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      List<PathDescriptor> subStateTrajNames,
-      double initShootDeadline,
-      RobotConfig config) {
-    this(
-        drive,
-        shooter,
-        endEffector,
-        elevator,
-        arm,
-        intake,
-        visionGamepiece,
-        subStateTrajNames,
-        initShootDeadline,
-        config,
-        null);
+      AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
+    this(subsystems, config, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
   private AutoStateMachine(
-      DrivetrainWrapper drive,
-      Shooter shooter,
-      EndEffector endEffector,
-      Elevator elevator,
-      Arm arm,
-      Intake intake,
-      VisionGamepiece visionGamepiece,
-      List<PathDescriptor> subStateTrajNames,
-      double initShootDeadline,
+      AutosSubsystems subsystems,
       RobotConfig config,
+      List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
 
-    this.drive = drive;
-    this.shooter = shooter;
-    this.endEffector = endEffector;
-    this.elevator = elevator;
-    this.arm = arm;
-    this.intake = intake;
-    this.visionGamepiece = visionGamepiece;
+    this.subsystems = subsystems;
+    this.drive = subsystems.drivetrain();
+    this.shooter = subsystems.shooter();
+    this.endEffector = subsystems.endEffector();
+    this.elevator = subsystems.elevator();
+    this.arm = subsystems.arm();
+    this.intake = subsystems.intake();
+    this.visionGamepiece = subsystems.visionGamepiece();
     this.config = config;
-    this.initShootDeadline = initShootDeadline;
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
 
@@ -122,17 +71,15 @@ public class AutoStateMachine extends StateMachine {
       subStateTrajNames = new ArrayList<>();
     }
 
-    intakingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
-    shootingTrajs = new ChoreoTrajectory[subStateTrajNames.size()];
+    intakingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
+    shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
-      String intakingTraj = path.intakingTraj();
-      String shootingTraj = path.shootingTraj();
       useVision[i] = path.useVision();
-      intakingTrajs[i] = intakingTraj != null ? Choreo.getTrajectory(intakingTraj) : null;
-      shootingTrajs[i] = shootingTraj != null ? Choreo.getTrajectory(shootingTraj) : null;
+      intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
+      shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
 
     setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -146,7 +93,6 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler shotDone(Command command) {
-    shootingDone = true;
     return nextSubState(true);
   }
 
@@ -157,40 +103,28 @@ public class AutoStateMachine extends StateMachine {
         return setDone();
       }
 
+      var targetGPPose = intakingTrajs[currentSubState].getFinalPose(true).getTranslation();
+
       if (followPath) {
         nextState =
             suspendForSubStateMachine(
                 new AutoSubstateMachineChoreo(
-                    drive,
-                    shooter,
-                    endEffector,
-                    intake,
+                    subsystems,
                     config,
-                    elevator,
-                    arm,
                     useVision[currentSubState],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
-                    AllianceFlipUtil.flipPoseForAlliance(
-                            intakingTrajs[currentSubState].getFinalPose())
-                        .getTranslation()),
+                    targetGPPose),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =
             suspendForSubStateMachine(
                 new AutoSubstateMachineDriveTranslation(
-                    drive,
-                    shooter,
-                    endEffector,
-                    intake,
+                    subsystems,
                     config,
-                    elevator,
-                    arm,
                     useVision[currentSubState],
-                    AllianceFlipUtil.flipPoseForAlliance(
-                            intakingTrajs[currentSubState].getFinalPose())
-                        .getTranslation(),
+                    targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
@@ -207,6 +141,6 @@ public class AutoStateMachine extends StateMachine {
               subStateMachine -> () -> this.nextSubState(false));
     }
 
-    return stateWithName(String.format("State %d", currentSubState), nextState);
+    return stateWithName("State " + currentSubState, nextState);
   }
 }

@@ -19,6 +19,12 @@ public class ChoreoHelper {
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal log_stateLinearVel =
       logGroup.buildDecimal("stateLinearVel");
+  private static final LoggerEntry.Decimal log_stateScaleVel =
+      logGroup.buildDecimal("stateScaleVel");
+  private static final LoggerEntry.Decimal log_stateTimeOffset =
+      logGroup.buildDecimal("stateTimeOffset");
+  private static final LoggerEntry.Decimal log_stateTimestamp =
+      logGroup.buildDecimal("stateTimestamp");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
       logGroup.buildStruct(Pose2d.class, "closestPose");
   private static final LoggerEntry.Struct<Pose2d> log_optimalPose =
@@ -29,12 +35,16 @@ public class ChoreoHelper {
       logGroup.buildDecimal("distanceError");
   private static final LoggerEntry.Decimal log_headingError = logGroup.buildDecimal("headingError");
 
+  private static final LoggerEntry.Bool log_isPaused = logGroup.buildBoolean("isPaused");
+
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
   private final PIDController yFeedback;
   private final PIDController rotationalFeedback;
   private final double initialTime;
   private final double lagThreshold;
+  private final double minVelToPause;
+
   private double timeOffset;
   private double pausedTime = Double.NaN;
   private ChoreoTrajectoryState stateTooBehind;
@@ -42,7 +52,7 @@ public class ChoreoHelper {
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
-   * @param traj trajectory to follow
+   * @param trajWithName trajectory to follow
    * @param translationalFeedbackX pid in x directions
    * @param translationalFeedbackY pid in y directions
    * @param rotationalFeedback pid for angular velocity
@@ -50,13 +60,15 @@ public class ChoreoHelper {
   public ChoreoHelper(
       double initialTime,
       Pose2d initialPose,
-      ChoreoTrajectory traj,
+      ChoreoTrajectoryWithName trajWithName,
       double lagThreshold,
+      double minVelToPause,
       PIDController translationalFeedbackX,
       PIDController translationalFeedbackY,
       PIDController rotationalFeedback) {
-    this.traj = traj;
+    this.traj = trajWithName.states();
     this.lagThreshold = lagThreshold;
+    this.minVelToPause = minVelToPause;
     this.xFeedback = translationalFeedbackX;
     this.yFeedback = translationalFeedbackY;
     this.rotationalFeedback = rotationalFeedback;
@@ -93,12 +105,14 @@ public class ChoreoHelper {
 
   public void pause(double timestamp) {
     if (Double.isNaN(pausedTime)) {
+      log_isPaused.info(true);
       pausedTime = timestamp;
     }
   }
 
   public void resume(double timestamp) {
     if (!Double.isNaN(pausedTime)) {
+      log_isPaused.info(false);
       timeOffset += (pausedTime - timestamp);
       pausedTime = Double.NaN;
     }
@@ -112,16 +126,30 @@ public class ChoreoHelper {
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     ChoreoTrajectoryState state;
-    boolean endOfPath;
 
     if (stateTooBehind != null) {
       state = stateTooBehind;
-      endOfPath = false;
     } else {
       var timestampCorrected = timestamp - initialTime + timeOffset;
+
       state = traj.sample(timestampCorrected, Constants.isRedAlliance());
-      endOfPath = timestampCorrected > traj.getTotalTime();
+      if (timestampCorrected >= traj.getTotalTime()) {
+        return null;
+      }
     }
+
+    while (true) {
+      var lookaheadTime = Constants.kDefaultPeriod;
+
+      var stateAhead = isFutureStateCloser(robotPose, state, lookaheadTime);
+      if (stateAhead == null) break;
+
+      timeOffset += lookaheadTime;
+      state = stateAhead;
+    }
+
+    log_stateTimestamp.info(state.timestamp);
+    log_stateTimeOffset.info(timeOffset);
 
     double xRobot = robotPose.getX();
     double yRobot = robotPose.getY();
@@ -130,6 +158,7 @@ public class ChoreoHelper {
     double yDesired = state.y;
 
     var distanceError = Math.hypot(xDesired - xRobot, yDesired - yRobot);
+
     log_distanceError.info(distanceError);
     if (distanceError < lagThreshold) {
       if (stateTooBehind != null) {
@@ -137,18 +166,28 @@ public class ChoreoHelper {
         resume(timestamp);
       }
     } else {
-      if (stateTooBehind == null) {
+      var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
+      if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 0.25) {
         stateTooBehind = state;
         pause(timestamp);
       }
     }
 
-    if (stateTooBehind == null && !Double.isNaN(pausedTime)) {
-      return null;
+    double scaleVelocity = 1.0;
+
+    if (Double.isFinite(pausedTime)) {
+      if (stateTooBehind == null) {
+        return null;
+      }
+
+      // If we are paused, scale down the velocity, to avoid fighting the Feedback PID.
+      scaleVelocity *= Math.exp(-(timestamp - pausedTime));
     }
 
-    double xVel = state.velocityX + xFeedback.calculate(xRobot, xDesired);
-    double yVel = state.velocityY + yFeedback.calculate(yRobot, yDesired);
+    log_stateScaleVel.info(scaleVelocity);
+
+    double xVel = state.velocityX * scaleVelocity + xFeedback.calculate(xRobot, xDesired);
+    double yVel = state.velocityY * scaleVelocity + yFeedback.calculate(yRobot, yDesired);
 
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
 
@@ -160,9 +199,26 @@ public class ChoreoHelper {
     log_desiredVelocity.info(new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
     log_headingError.info(Math.toDegrees(GeometryUtil.optimizeRotation(theta - state.heading)));
 
-    return endOfPath
-        ? null
-        : ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+  }
+
+  private ChoreoTrajectoryState isFutureStateCloser(
+      Pose2d robotPose, ChoreoTrajectoryState state, double lookaheadTime) {
+    var stateAhead = traj.sample(state.timestamp + lookaheadTime, Constants.isRedAlliance());
+
+    double stateDistance = distanceToState(robotPose, state);
+    double stateDistanceAhead = distanceToState(robotPose, stateAhead);
+    return stateDistanceAhead < stateDistance ? stateAhead : null;
+  }
+
+  private static double distanceToState(Pose2d robotPose, ChoreoTrajectoryState state) {
+    double xRobot = robotPose.getX();
+    double yRobot = robotPose.getY();
+
+    double xDesired = state.x;
+    double yDesired = state.y;
+
+    return Math.hypot(xDesired - xRobot, yDesired - yRobot);
   }
 
   public static ChoreoTrajectory rescale(ChoreoTrajectory traj, double speedScaling) {

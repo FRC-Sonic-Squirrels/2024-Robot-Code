@@ -109,9 +109,14 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry.Struct<Pose2d> logLocalization_StageBlueOnly =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_stage_Blue");
 
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_Global =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_global");
+
   private static final LoggerGroup logGroupRobot = LoggerGroup.build("Robot");
   private static final LoggerEntry.Struct<Pose2d> log_FieldRelativeVel =
       logGroupRobot.buildStruct(Pose2d.class, "FieldRelativeVel");
+  private static final LoggerEntry.Decimal log_FieldRelativeAcceleration =
+      logGroupRobot.buildDecimal("FieldRelativeAcceleration");
 
   public static final AutoLock odometryLock = new AutoLock("odometry", 100);
 
@@ -141,6 +146,8 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
 
+  private Pose2d prevVel = new Pose2d();
+
   public Drivetrain(
       RobotConfig config,
       GyroIO gyroIO,
@@ -160,7 +167,7 @@ public class Drivetrain extends SubsystemBase {
 
     kinematics = config.getSwerveDriveKinematics();
 
-    int[] tagsSpeakersAndAmps = new int[] {3, 4, 5, 6, 7, 8};
+    int[] tagsSpeakersAndAmps = new int[] {3, 4, /*5, 6 , */ 7, 8};
     int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16};
 
     poseEstimator = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
@@ -200,11 +207,18 @@ public class Drivetrain extends SubsystemBase {
       logSwerveStatesMeasured.info(getModuleStates());
 
       log_FieldRelativeVel.info(getFieldRelativeVelocities());
+      log_FieldRelativeAcceleration.info(
+          getFieldRelativeAccelerationMagnitude(prevVel.getTranslation().getNorm()));
+
+      prevVel = getFieldRelativeVelocities();
+
       logLocalization_RobotPosition.info(getPoseEstimatorPose());
       logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
 
       logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
       logLocalization_StageBlueOnly.info(getPoseEstimatorPoseStageBlue());
+
+      logLocalization_Global.info(getPoseEstimatorPoseAllTags());
 
       field2d.setRobotPose(getPoseEstimatorPose());
       SmartDashboard.putData("Localization/field2d", field2d);
@@ -298,7 +312,7 @@ public class Drivetrain extends SubsystemBase {
             poseEstimator.addDriveData(timestamp, twist);
             poseEstimatorStageRed.addDriveData(timestamp, twist);
             poseEstimatorStageBlue.addDriveData(timestamp, twist);
-            if (Constants.unusedCode) {
+            if (!Constants.unusedCode) {
               poseEstimatorGlobal.addDriveData(timestamp, twist);
             }
           }
@@ -386,7 +400,7 @@ public class Drivetrain extends SubsystemBase {
     logDrivetrain_speedsRot.info(speeds.omegaRadiansPerSecond);
 
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, Constants.kDefaultPeriod);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, config.getRobotMaxLinearVelocity());
 
@@ -454,6 +468,18 @@ public class Drivetrain extends SubsystemBase {
     return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
   }
 
+  public Pose2d getRobotCentricVelocities() {
+    Translation2d translation =
+        new Translation2d(
+            getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().vyMetersPerSecond);
+    return new Pose2d(translation, new Rotation2d(getChassisSpeeds().omegaRadiansPerSecond));
+  }
+
+  public double getFieldRelativeAccelerationMagnitude(double prevVelMagnitude) {
+    Pose2d currentVel = getFieldRelativeVelocities();
+    return (currentVel.getTranslation().getNorm() - prevVelMagnitude) / 0.02;
+  }
+
   public void addVisionEstimate(List<TimestampedVisionUpdate> visionData) {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
@@ -464,7 +490,7 @@ public class Drivetrain extends SubsystemBase {
         } else {
           poseEstimatorStageBlue.addVisionData(visionData);
         }
-        if (Constants.unusedCode) {
+        if (!Constants.unusedCode) {
           poseEstimatorGlobal.addVisionData(visionData);
         }
       }
@@ -484,6 +510,15 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_pose.start()) {
         return poseEstimator.getLatestPose();
+      }
+    }
+  }
+
+  public double getVisionStaleness() {
+    try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
+    {
+      try (var ignored2 = timing_pose.start()) {
+        return poseEstimator.getVisionStaleness();
       }
     }
   }

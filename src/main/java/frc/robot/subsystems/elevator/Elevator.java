@@ -219,6 +219,14 @@ public class Elevator extends SubsystemBase {
     io.resetReactionArmPosition();
   }
 
+  public void setReactionArmsAngle(double rotations) {
+    io.setReactionArmPosition(rotations);
+  }
+
+  public double getReationsArmsRotations() {
+    return inputs.reactionArmRotations;
+  }
+
   public void setReactionArmIdleMode(IdleMode idleMode) {
     io.setReactionArmIdleMode(idleMode);
   }

@@ -44,6 +44,7 @@ import java.util.function.Supplier;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double kDefaultPeriod = 0.02;
   public static final Translation2d zeroTranslation2d = new Translation2d();
   public static final Rotation2d zeroRotation2d = new Rotation2d();
 
@@ -126,11 +127,10 @@ public final class Constants {
     public static double FIELD_WIDTH = 8.211;
 
     // FIXME: double check this number
-    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 8.5);
+    public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 12.5);
 
     // TODO: move to right
-    public static final Translation2d BLUE_SPEAKER_TRANSLATION =
-        new Translation2d(0.24, 5.508944988250732);
+    public static final Translation2d BLUE_SPEAKER_TRANSLATION = new Translation2d(0.0, 5.6);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
 
@@ -184,8 +184,8 @@ public final class Constants {
 
     public static Pose2d getAmpScoringPose() {
       return new Pose2d(
-          Constants.isRedAlliance() ? 14.66 : Constants.FieldConstants.FIELD_LENGTH - 14.66,
-          7.8,
+          Constants.isRedAlliance() ? 14.76 : Constants.FieldConstants.FIELD_LENGTH - 14.76,
+          7.65,
           Rotation2d.fromDegrees(90.0));
     }
 
@@ -195,6 +195,13 @@ public final class Constants {
       public static final Measure<Distance> NOTE_TOLERANCE = Units.Inches.of(20.0);
       public static final double NOTE_PERSISTENCE = 0.5;
     }
+
+    public static final Measure<Distance> SPEAKER_GOAL_LENGTH = Units.Inches.of(19);
+
+    /** distance from bottom of opening to bottom lip of the upper guard */
+    public static final Measure<Distance> SPEAKER_GOAL_HEIGHT = Units.Inches.of(6.0);
+
+    public static final Measure<Distance> SPEAKER_GOAL_WIDTH = Units.Inches.of(41);
   }
 
   public static class MotorConstants {
@@ -316,22 +323,28 @@ public final class Constants {
 
       public static final InterpolatingDoubleTreeMap PITCH_ADJUSTMENT_MAP;
 
-      public static final Measure<Distance> MIN_DISTANCE = Units.Inches.of(80.0);
+      public static final Measure<Distance> MIN_DISTANCE = Units.Inches.of(40.0);
 
       static {
         PITCH_ADJUSTMENT_MAP = new InterpolatingDoubleTreeMap();
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 1.0);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 2.0);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(110.0).in(Units.Meters), 3.5); // 4.0
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 4.0); // 4.5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(130.0).in(Units.Meters), 4.5); // 5.0
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(140.0).in(Units.Meters), 5.0); // 5.5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(150.0).in(Units.Meters), 5.25); // 5.75
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 6.0 - 1.0);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 6.25 - 1.0);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 6.375 - 0.5);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.375 - 0.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 3.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 3.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 3.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 3.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 5.0);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 6.7);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 7.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 8.3);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(110.0).in(Units.Meters), 3.5); // 4.0
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 4.0); // 4.5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(130.0).in(Units.Meters), 4.5); // 5.0
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(140.0).in(Units.Meters), 5.0); // 5.5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(150.0).in(Units.Meters), 5.25); // 5.75
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 7.0);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 7.25);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 7.5);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.75);
       }
 
       public static double getPitchOffset(Measure<Distance> distance) {

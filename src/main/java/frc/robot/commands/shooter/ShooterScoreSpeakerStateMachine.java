@@ -8,6 +8,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -34,56 +36,67 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final LoggerEntry.Decimal log_TimeToShoot = logGroup.buildDecimal("TimeToShoot");
   private static final LoggerEntry.Bool log_simpleShot = logGroup.buildBoolean("simpleShot");
 
-  private static final LoggerGroup logGroupSub = logGroup.subgroup("shootingConfimation");
+  // --
+  private static final LoggerGroup logGroupConfirmation = logGroup.subgroup("shootingConfimation");
   private static final LoggerEntry.Bool log_launcherAtRPM =
-      logGroupSub.buildBoolean("launcherAtRPM");
-  private static final LoggerEntry.Bool log_pivotAtAngle = logGroupSub.buildBoolean("pivotAtAngle");
+      logGroupConfirmation.buildBoolean("launcherAtRPM");
+  private static final LoggerEntry.Bool log_pivotAtAngle =
+      logGroupConfirmation.buildBoolean("pivotAtAngle");
   private static final LoggerEntry.Bool log_shootingPosition =
-      logGroupSub.buildBoolean("shootingPosition");
-  private static final LoggerEntry.Bool log_forceShoot = logGroupSub.buildBoolean("forceShoot");
+      logGroupConfirmation.buildBoolean("shootingPosition");
+  private static final LoggerEntry.Bool log_recentVisionUpdates =
+      logGroupConfirmation.buildBoolean("recentVisionUpdates");
   private static final LoggerEntry.Bool log_driverConfirmation =
-      logGroupSub.buildBoolean("driverConfirmation");
+      logGroupConfirmation.buildBoolean("driverConfirmation");
   private static final LoggerEntry.Bool log_atThetaTarget =
-      logGroupSub.buildBoolean("atThetaTarget");
+      logGroupConfirmation.buildBoolean("atThetaTarget");
   private static final LoggerEntry.Bool log_belowMaxSpeed =
-      logGroupSub.buildBoolean("belowMaxSpeed");
+      logGroupConfirmation.buildBoolean("belowMaxSpeed");
   private static final LoggerEntry.Bool log_belowMaxRotVel =
-      logGroupSub.buildBoolean("belowMaxRotVel");
+      logGroupConfirmation.buildBoolean("belowMaxRotVel");
   private static final LoggerEntry.Bool log_shooterSolver =
-      logGroupSub.buildBoolean("shooterSolver");
-  private static final LoggerEntry.Decimal log_omega = logGroupSub.buildDecimal("omega");
+      logGroupConfirmation.buildBoolean("shooterSolver");
+  private static final LoggerEntry.Bool log_forceShoot =
+      logGroupConfirmation.buildBoolean("forceShoot");
+
+  // --
+  private static final LoggerGroup logGroupData = logGroup.subgroup("data");
+  private static final LoggerEntry.Decimal log_omega = logGroupData.buildDecimal("omega");
   private static final LoggerEntry.Decimal log_rotationalError =
-      logGroupSub.buildDecimal("rotationalError");
+      logGroupData.buildDecimal("rotationalError");
   private static final LoggerEntry.Decimal log_CurrentHeadingDegrees =
-      logGroupSub.buildDecimal("CurrentHeadingDegrees");
+      logGroupData.buildDecimal("CurrentHeadingDegrees");
   private static final LoggerEntry.Decimal log_headingTargetDegrees =
-      logGroupSub.buildDecimal("headingTargetDegrees");
+      logGroupData.buildDecimal("headingTargetDegrees");
+  private static final LoggerEntry.Decimal log_headingTolerance =
+      logGroupData.buildDecimal("log_headingTolerance");
   private static final LoggerEntry.Decimal log_pitchTargetDegrees =
-      logGroupSub.buildDecimal("pitchTargetDegrees");
+      logGroupData.buildDecimal("pitchTargetDegrees");
   private static final LoggerEntry.Decimal log_pitchOffset =
-      logGroupSub.buildDecimal("pitchOffset");
+      logGroupData.buildDecimal("pitchOffset");
   private static final LoggerEntry.Decimal log_xyDistanceFromSpeaker =
-      logGroupSub.buildDecimal("xyDistanceFromSpeaker");
+      logGroupData.buildDecimal("xyDistanceFromSpeaker");
+  private static final LoggerEntry.Decimal log_shooterPitchError =
+      logGroupData.buildDecimal("log_shooterPitchError");
 
+  // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
-
-  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 9000.0);
-
+  private static final LoggedTunableNumber tunableVisionStaleness =
+      group.build("tunableVisionStaleness", 0.5);
+  private static final LoggedTunableNumber tunableRPM = group.build("tunableRPM", 8750.0);
   private static final LoggedTunableNumber tunablePitchOffset =
       group.build("tunablePitchOffset", 0.0);
-
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
   private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
-
   private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);
-
   public static final LoggedTunableNumber loadingRPM = group.build("loading/LoadingRPM", 1200);
-
   public static final LoggedTunableNumber slowLoadingRPM =
       group.build("loading/slowLoadingRPM", 500);
-
   private static final LoggedTunableNumber shootingLoadingVelocity =
       group.build("shootingLoadingVelocity", 3000);
+  private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
+
+  private static final LoggedTunableNumber maxVel = group.build("maxVelMetersPerSec", 1);
 
   private final DrivetrainWrapper drivetrainWrapper;
   private final Shooter shooter;
@@ -111,7 +124,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
               Units.Inches.of(0), Units.Inches.of(-10), Units.Inches.of(0.0)),
           Constants.ShooterConstants.SHOOTING_SPEED,
           Constants.ShooterConstants.SHOOTING_TIME,
-          false);
+          true);
 
   private final PIDController rotationController;
 
@@ -202,7 +215,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
             shooter,
             endEffector);
 
-    // FIXME: probably dont need this add requirments here once we add the asCommand(Subsytem...
+    // FIXME: probably dont need this add requirments here once we add the
+    // asCommand(Subsytem...
     // requirments) method to the StateMachine class
     command.addRequirements(shooter, endEffector, intake);
     command.setName("ShooterScoreSpeakerStateMachine");
@@ -286,7 +300,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           "finalConfirmationsBeforeShooting", this::finalConfirmationsBeforeShooting);
     }
 
-    // FIXME: look into calculating gear ratio to make it so kicker and EE spin at same speed
+    // FIXME: look into calculating gear ratio to make it so kicker and EE spin at
+    // same speed
     shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
     if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
       shooter.markStartOfNoteLoading();
@@ -332,23 +347,27 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check are we in valid shooting position
     // check if we are below max vel
 
-    double maxVel = 1.0;
+    double maxVelMetersPerSec = maxVel.get();
     boolean belowMaxSpeed =
         drivetrainWrapper
                 .getFieldRelativeVelocities()
                 .getTranslation()
                 .getDistance(new Translation2d())
-            <= maxVel;
+            <= maxVelMetersPerSec;
 
-    double maxRotVel = 0.03;
+    double maxRotVelRads = Math.toRadians(maxRotVel.get());
     boolean belowMaxRotVel =
-        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVel;
+        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVelRads;
 
     boolean pivotAtAngle;
     var launcherAtRpm = shooter.isAtTargetRPM();
     if (solverResult != null) {
       shooter.setPivotPosition(desiredShootingPitch);
-      pivotAtAngle = shooter.isPivotIsAtTarget(desiredShootingPitch);
+      pivotAtAngle =
+          shooter.isPivotIsAtTarget(
+              desiredShootingPitch
+              // , getPitchTolerance(Units.Meters.of(solverResult.xyDistance()))
+              );
     } else {
       pivotAtAngle = false;
     }
@@ -367,19 +386,24 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                 - drivetrainWrapper.getRotationGyroOnly().getRadians();
 
         thetaError = GeometryUtil.optimizeRotation(thetaError);
-        atThetaTarget = Math.abs(thetaError) <= Math.toRadians(5.0);
+        double tolerance = getYawTolerance(solverResult.xyOffset().toTranslation2d()).getRadians();
+        log_headingTolerance.info(Math.toDegrees(tolerance));
+        atThetaTarget = Math.abs(thetaError) <= Math.toRadians(2.0);
       } else {
         atThetaTarget = false;
       }
     }
 
     var forceShoot = stateRunningLongerThan(forceShotIn);
+    var recentVisionUpdates = recentVisionUpdates();
+    var validShootingPosition = validShootingPosition();
 
     log_simpleShot.info(simpleShot);
 
     log_launcherAtRPM.info(launcherAtRpm);
     log_pivotAtAngle.info(pivotAtAngle);
-    log_shootingPosition.info(validShootingPosition());
+    log_shootingPosition.info(validShootingPosition);
+    log_recentVisionUpdates.info(recentVisionUpdates);
     log_forceShoot.info(forceShoot);
     log_driverConfirmation.info(externalConfirmation);
     log_atThetaTarget.info(atThetaTarget);
@@ -388,7 +412,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     if ((launcherAtRpm
             && pivotAtAngle
-            && validShootingPosition()
+            // && recentVisionUpdates
+            && validShootingPosition
             && atThetaTarget
             && belowMaxSpeed
             && belowMaxRotVel)
@@ -396,6 +421,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       rumbleConsumer.accept(rumbleIntensity.get());
       if (externalConfirmation) {
         startOfShooting = Timer.getFPGATimestamp();
+        solver.startShooting(startOfShooting);
+        shooter.markStartOfNoteShooting();
         return stateWithName("shoot", this::shoot);
       }
     }
@@ -409,14 +436,12 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     updateSolver();
     rotateToSpeaker();
 
-    shooter.markStartOfNoteShooting();
     shooter.setPivotPosition(desiredShootingPitch);
     // run kicker for X seconds
     shooter.setKickerVelocity(shootingLoadingVelocity.get());
     endEffector.setVelocity(shootingLoadingVelocity.get());
 
     if (!shooter.noteInShooter()) {
-      log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
       return stateWithName("shootEnding", this::shootEnding);
     }
     return null;
@@ -428,6 +453,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     if (!stateRunningLongerThan(0.2)) return null;
     // visualize gamepiece
 
+    log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
     return visualizeGamepiece();
   }
 
@@ -462,6 +488,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     log_CurrentHeadingDegrees.info(drivetrainWrapper.getRotationGyroOnly().getDegrees());
   }
 
+  private boolean recentVisionUpdates() {
+    return false; // drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
+  }
+
   private boolean validShootingPosition() {
     if (simpleShot) return true;
     Pose2d reflectedPose =
@@ -483,7 +513,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return false;
     }
 
-    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR CLUTCH SHOTS IN
+    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR
+    // CLUTCH SHOTS IN
     // TELEOP
     var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
     if (solverResult == null
@@ -522,6 +553,45 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       log_pitchTargetDegrees.info(desiredShootingPitch);
       log_pitchOffset.info(offset);
       log_xyDistanceFromSpeaker.info(distance);
+      double pivotError = desiredShootingPitch.getDegrees() - shooter.getPitch().getDegrees();
+      log_shooterPitchError.info(pivotError);
     }
+  }
+
+  private Rotation2d getPitchTolerance(Measure<Distance> distance) {
+    return Rotation2d.fromRadians(
+        Math.max(
+            Math.atan2(
+                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters)
+                        + Constants.FieldConstants.SPEAKER_GOAL_HEIGHT.in(Units.Meters),
+                    distance.in(Units.Meters)
+                        - Constants.FieldConstants.SPEAKER_GOAL_LENGTH.in(Units.Meters))
+                - Math.atan2(
+                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters),
+                    distance.in(Units.Meters))
+                - Math.toRadians(0.3),
+            Math.toRadians(0.2)));
+  }
+
+  private Rotation2d getYawTolerance(Translation2d offset) {
+    return Rotation2d.fromRadians(
+        Math.max(
+            Math.abs(
+                    Math.atan2(
+                            offset.getY()
+                                - Constants.FieldConstants.SPEAKER_GOAL_WIDTH.in(Units.Meters) / 2.0
+                                + Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS.in(
+                                        Units.Meters)
+                                    / 2.0,
+                            offset.getX())
+                        - Math.atan2(
+                            offset.getY()
+                                + Constants.FieldConstants.SPEAKER_GOAL_WIDTH.in(Units.Meters) / 2.0
+                                - Constants.FieldConstants.Gamepieces.NOTE_OUTER_RADIUS.in(
+                                        Units.Meters)
+                                    / 2.0,
+                            offset.getX()))
+                - Math.toRadians(1.0),
+            Math.toRadians(0.5)));
   }
 }

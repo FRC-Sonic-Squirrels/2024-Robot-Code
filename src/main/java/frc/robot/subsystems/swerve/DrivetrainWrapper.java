@@ -103,6 +103,10 @@ public class DrivetrainWrapper {
     return pose;
   }
 
+  public double getVisionStaleness() {
+    return drivetrain.getVisionStaleness();
+  }
+
   public Pose2d getPoseEstimatorPoseStageBlue(boolean prioritizeGyro) {
     var pose = drivetrain.getPoseEstimatorPoseStageBlue();
     if (prioritizeGyro) {
@@ -131,6 +135,10 @@ public class DrivetrainWrapper {
 
   public Pose2d getFieldRelativeVelocities() {
     return drivetrain.getFieldRelativeVelocities();
+  }
+
+  public Pose2d getRobotCentricVelocities() {
+    return drivetrain.getRobotCentricVelocities();
   }
 
   public Rotation2d getRotationGyroOnly() {

@@ -39,7 +39,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    sim.update(0.02);
+    sim.update(Constants.kDefaultPeriod);
     Elevator.logSIM_ActualTargetHeight.info(targetHeight.in(Units.Inches));
     if (controlMode.equals(ControlMode.CLOSED_LOOP)) {
       appliedVolts = feedback.calculate(inputs.heightInches, targetHeight.in(Units.Inches)) + kG;
