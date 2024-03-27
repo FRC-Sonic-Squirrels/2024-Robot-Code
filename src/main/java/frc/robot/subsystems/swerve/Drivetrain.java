@@ -567,6 +567,9 @@ public class Drivetrain extends SubsystemBase {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
       this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorStageBlue.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorStageRed.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorGlobal.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.rawOdometryPose = pose;
     }
   }
