@@ -641,7 +641,7 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_OFF, 1))
+                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_OFF, 1.5))
                 .ignoringDisable(true),
             Commands.runOnce(
                     () -> {
@@ -653,7 +653,7 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_ON, 1))
+                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_ON, 1.5))
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 

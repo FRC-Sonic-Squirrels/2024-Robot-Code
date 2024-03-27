@@ -310,9 +310,9 @@ public final class Constants {
 
       public static final Rotation2d MIN_ANGLE_RAD = Rotation2d.fromDegrees(12.0);
       public static final Rotation2d MAX_ANGLE_RAD =
-          Rotation2d.fromDegrees(60.5); // TRUE HARD STOP 61
+          Rotation2d.fromDegrees(59); // TRUE HARD STOP 59.67
       public static final Rotation2d HOME_POSITION = MIN_ANGLE_RAD;
-      public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(61.0);
+      public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(59.67);
 
       public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
 
@@ -369,7 +369,7 @@ public final class Constants {
   }
 
   public static class LEDConstants {
-    public static final int PWM_PORT = 8;
+    public static final int PWM_PORT = 9;
     public static final int MAX_LED_LENGTH = 60;
   }
 

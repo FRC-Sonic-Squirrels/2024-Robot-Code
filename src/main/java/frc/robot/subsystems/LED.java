@@ -20,7 +20,7 @@ public class LED extends SubsystemBase {
 
   int snakeShade = 0;
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.NOTHING;
+  robotStates robotState = robotStates.DEFAULT;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -33,7 +33,7 @@ public class LED extends SubsystemBase {
     // This method will be called once per scheduler run
     switch (robotState) {
       case DEFAULT:
-        setAllSolidColor(Color.ORANGE);
+        setAllSolidColor(new Color(255, 45, 0));
         break;
       case SHOOTER_SUCCESS:
         // test writing solid color
@@ -80,11 +80,11 @@ public class LED extends SubsystemBase {
         break;
 
       case BREAK_MODE_ON:
-        setAllBlinking(Color.YELLOW, Color.RED);
+        setAllBlinking(Color.RED, Color.BLACK);
         break;
 
       case BREAK_MODE_OFF:
-        setAllBlinking(Color.BLUE, new Color(0, 212, 255), 0.3);
+        setAllBlinking(Color.BLUE, Color.BLACK, 0.3);
         break;
     }
 

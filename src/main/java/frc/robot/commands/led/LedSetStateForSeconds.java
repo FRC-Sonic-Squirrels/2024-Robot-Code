@@ -19,7 +19,7 @@ public class LedSetStateForSeconds extends Command {
 
   /** Creates a new LedSetStateForSeconds. */
   public LedSetStateForSeconds(LED led, robotStates state, double seconds) {
-    this(led, state, seconds, false);
+    this(led, state, seconds, true);
   }
 
   public LedSetStateForSeconds(
