@@ -15,10 +15,9 @@ public class LED extends SubsystemBase {
   /** Creates a new LED. */
   AddressableLED led = new AddressableLED(Constants.LEDConstants.PWM_PORT);
 
-  individualLED led1 = new individualLED(0, 25);
-  individualLED led2 = new individualLED(26, 60);
+  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(13);
+  AddressableLEDBuffer previousBuffer = new AddressableLEDBuffer(13);
 
-  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(led1.getLength() + led2.getLength());
   int snakeShade = 0;
   int rainbowFirstPixelHue = 0;
   robotStates robotState = robotStates.NOTHING;
@@ -33,6 +32,9 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
+      case DEFAULT:
+        setAllSolidColor(Color.ORANGE);
+        break;
       case SHOOTER_SUCCESS:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
@@ -52,41 +54,46 @@ public class LED extends SubsystemBase {
         setAllRainbow();
         break;
       case AUTO_MODE:
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          ledBuffer.setRGB(i, Color.white.getRed(), Color.white.getGreen(), Color.white.getBlue());
-        }
+        setAllSolidColor(Color.WHITE);
         break;
       case NOTHING:
-        // when the case of the robot is nothing it will be set to red
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          ledBuffer.setRGB(i, Color.red.getRed(), 0, 0);
-        }
+        setAllSolidColor(Color.BLACK);
         break;
       case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(Color.magenta, Color.BLACK);
-        }
+
+        setAllBlinking(Color.magenta, Color.BLACK);
+
         break;
       case AMP_LINING_UP:
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-          setAllBlinking(Color.yellow, Color.BLACK);
-        }
+        setAllBlinking(Color.yellow, Color.BLACK);
+
       case GAMEPIECE_IN_ROBOT:
         setAllSolidColor(Color.ORANGE);
         break;
       case CLIMB_MODE:
-        setSingleStripSolidColor(Color.GREEN, 20, 40);
+        setAllSolidColor(Color.GREEN);
+        break;
+
+      case HOME_SUBSYSTEMS:
+        setAllBlinking(Color.GREEN, Color.BLACK);
+        break;
+
+      case BREAK_MODE_ON:
+        setAllBlinking(Color.YELLOW, Color.RED);
+        break;
+
+      case BREAK_MODE_OFF:
+        setAllBlinking(Color.BLUE, new Color(0, 212, 255), 0.3);
         break;
     }
 
-    led.setData(ledBuffer);
-  }
+    if (!sameAsPrevBuffer()) led.setData(ledBuffer);
 
-  private void setSingleStripSolidColor(Color color, int startingLED, int endingLED) {
-    for (int i = startingLED; i <= endingLED; i++) {
-      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
-    }
+    ledBuffer.forEach(
+        (i, r, g, b) -> {
+          previousBuffer.setRGB(i, r, g, b);
+        });
   }
 
   private void setAllSolidColor(Color color) {
@@ -95,34 +102,17 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setSingleStripBlinking(
-      int redValue1,
-      int redValue2,
-      int greenValue1,
-      int greenValue2,
-      int blueValue1,
-      int blueValue2,
-      int startingLED,
-      int endingLED) {
-
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
-      for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue1, greenValue1, blueValue1);
-      }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
-      for (int i = startingLED; i <= endingLED; i++) {
-        ledBuffer.setRGB(i, redValue2, greenValue2, blueValue2);
-      }
-    }
+  private void setAllBlinking(Color color1, Color color2) {
+    setAllBlinking(color1, color2, 0.1);
   }
 
-  private void setAllBlinking(Color color1, Color color2) {
+  private void setAllBlinking(Color color1, Color color2, double period) {
 
-    if (Math.sin(Timer.getFPGATimestamp()) >= 0) {
+    if (Math.sin(Timer.getFPGATimestamp() * Math.PI / period) >= 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
         ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
       }
-    } else if (Math.sin(Timer.getFPGATimestamp()) < 0) {
+    } else {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
         ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
       }
@@ -138,16 +128,6 @@ public class LED extends SubsystemBase {
       snakeShade += 3;
       snakeShade %= 255;
     }
-  }
-
-  private void setSingleStripRainbow(int startingLED, int endingLED) {
-    for (var i = startingLED; i <= endingLED; i++) {
-      final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
-      ledBuffer.setHSV(i, hue, 255, 128);
-    }
-
-    rainbowFirstPixelHue += 3;
-    rainbowFirstPixelHue %= 180;
   }
 
   private void setAllRainbow() {
@@ -184,19 +164,35 @@ public class LED extends SubsystemBase {
     }
   }
 
+  public boolean sameAsPrevBuffer() {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      if (!ledBuffer.getLED(i).equals(previousBuffer.getLED(i))) return false;
+    }
+
+    return true;
+  }
+
+  public robotStates getCurrentState() {
+    return robotState;
+  }
+
   public enum robotStates {
-    SHOOTER_SUCCESS(), //
-    SHOOTER_LINED_UP(), //
-    DRIVING_TO_GAMEPIECE(), //
-    AUTO_MODE(), //
-    NOTHING(), //
-    TWENTY_SECOND_WARNING(), //
-    AMP_LINING_UP(),
-    SHOOTER_LINING_UP(),
-    AMP_READY_TO_SCORE(),
-    GAMEPIECE_IN_ROBOT(),
-    CLIMB_MODE(),
-    TEST()
+    SHOOTER_SUCCESS,
+    SHOOTER_LINED_UP,
+    DRIVING_TO_GAMEPIECE,
+    AUTO_MODE,
+    NOTHING,
+    TWENTY_SECOND_WARNING,
+    AMP_LINING_UP,
+    SHOOTER_LINING_UP,
+    AMP_READY_TO_SCORE,
+    GAMEPIECE_IN_ROBOT,
+    CLIMB_MODE,
+    TEST,
+    HOME_SUBSYSTEMS,
+    BREAK_MODE_OFF,
+    BREAK_MODE_ON,
+    DEFAULT
   }
 
   public void setRobotState(robotStates robotState) {

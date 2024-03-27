@@ -34,7 +34,8 @@ public class AutoClimb extends Command {
       logGroup.buildBoolean("armIsAtPosition");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
       logGroup.buildStruct(Pose2d.class, "closestPose");
-  private static final LoggedTunableNumber distFromStage = new LoggedTunableNumber("StageAlign/distFromStage", 1.738);
+  private static final LoggedTunableNumber distFromStage =
+      new LoggedTunableNumber("StageAlign/distFromStage", 1.738);
 
   private final DrivetrainWrapper drive;
   private final Elevator elevator;

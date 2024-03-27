@@ -21,10 +21,8 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,10 +32,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.team2930.*;
+import frc.lib.team2930.ArrayUtil;
+import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
+import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants.RobotMode.Mode;
@@ -54,13 +55,14 @@ import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.intake.IntakeEject;
 import frc.robot.commands.intake.IntakeGamepiece;
-import frc.robot.commands.mechanism.HomeMechanism;
+import frc.robot.commands.led.LedSetStateForSeconds;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.arm.ArmSetAngle;
 import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
-import frc.robot.commands.shooter.HomeShooter;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.robotStates;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -120,6 +122,7 @@ public class RobotContainer {
   private final Shooter shooter;
   private final EndEffector endEffector;
   private final VisionGamepiece visionGamepiece;
+  private final LED led;
 
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -199,7 +202,7 @@ public class RobotContainer {
       visionGamepiece =
           new VisionGamepiece(
               new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
-
+      led = new LED();
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_SIMBOT_REAL_CAMERAS:
@@ -266,6 +269,7 @@ public class RobotContainer {
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
+          led = new LED();
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -291,6 +295,8 @@ public class RobotContainer {
           visionGamepiece =
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
+
+          led = new LED();
           break;
 
         case ROBOT_2024_MAESTRO:
@@ -346,7 +352,7 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
-          // led = new LED();
+          led = new LED();
           break;
 
         default:
@@ -371,6 +377,8 @@ public class RobotContainer {
           visionGamepiece =
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
+
+          led = new LED();
           break;
       }
     }
@@ -412,32 +420,6 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    // arm.setDefaultCommand(autoClimb);
-
-    // shooter.setDefaultCommand(new ShooterStowMode(shooter));
-
-    // Set up named commands for PathPlanner
-    // NamedCommands.registerCommand(
-    // "Run Flywheel",
-    // Commands.startEnd(
-    // () -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop,
-    // flywheel));
-
-    // Set up auto routines
-    // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
-    // AutoBuilder.buildAutoChooser());
-
-    // Set up FF characterization routines
-    // autoChooser.addOption(
-    // "Drive FF Characterization",
-    // new FeedForwardCharacterization(
-    // drive, drive::runCharacterizationVolts, drive::getCharacterizationVelocity));
-    // autoChooser.addOption(
-    // "Flywheel FF Characterization",
-    // new FeedForwardCharacterization(
-    // flywheel, flywheel::runCharacterizationVolts,
-    // flywheel::getCharacterizationVelocity));
-
     shuffleBoardLayouts =
         new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
@@ -454,67 +436,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    /*
-     * Button binding summary:
-     *
-     * Driver:
-     *
-     * right trigger: spin intake
-     *
-     * left trigger: drive to GP
-     *
-     * right bumper: speaker mode
-     *
-     * A button: confirm speaker shot
-     *
-     * left bumper: score in amp (may have A button confirmation)
-     *
-     * B button: force stow everything
-     *
-     * X button: move all position controlled subsystems to hard stops to reset
-     * sensor position
-     *
-     * Y button: toggle climb mode
-     *
-     * Start: reset odometry
-     *
-     * POV down: eject gamepiece (through intake)
-     *
-     * Operator:
-     *
-     * B: (when not connected to FMS) run systems check command: press B to continue
-     * onto next stage of systems check
-     * Drivetrain
-     * 1. Forward
-     * 2. Spin
-     * Intake
-     * 3. Spin
-     * Shooter
-     * 4. Pivot
-     * 5. Flywheel + kicker
-     * Elevator
-     * 6. up
-     * Arm
-     * 7. Rotate to amp or trap position
-     * Wrist
-     * 8. move through range of motion
-     * End Effector
-     * 9. (after moving mech back to stow position) spin
-     * ----- end command -----
-     * Vision
-     * 10. check localization vision (preferably with april tag)
-     *
-     * 12. look at LEDs
-     * 13. double check connection from pigeon
-     *
-     * X: cancel systems check
-     *
-     * Right trigger (plus right stick): manual control of elevator
-     *
-     * POV down: initiate no vision mode?
-     *
-     *
-     */
     // ----------- DRIVER CONTROLS ------------
 
     driverController
@@ -560,10 +481,6 @@ public class RobotContainer {
 
     driverController.povUp().whileTrue(CommandComposer.driveToChain(drivetrainWrapper));
 
-    // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
-    // .andThen(new
-    // EndEffectorCenterNoteBetweenToFs(endEffector).withTimeout(1.5)));
-
     driverController
         .rightTrigger()
         .whileTrue(
@@ -575,19 +492,6 @@ public class RobotContainer {
                 1000,
                 () -> true,
                 (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble)));
-
-    // driverController
-    // .leftBumper()
-    // .onTrue(Commands.run(() ->
-    // shooter.setPivotPosition(Rotation2d.fromDegrees(45)),
-    // shooter));
-
-    // driverController
-    // .leftBumper()
-    // .whileTrue(CommandComposer.scoreAmp(endEffector, drivetrainWrapper, elevator,
-    // arm))
-    // .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector,
-    // elevator, arm));
 
     driverController
         .leftBumper()
@@ -629,81 +533,6 @@ public class RobotContainer {
                 endEffector,
                 intake));
 
-    // operatorController.start().whileTrue(new Shimmy(intake, endEffector, shooter));
-
-    if (Constants.unusedCode) {
-      driverController
-          .y()
-          .onTrue(
-              Commands.runOnce(
-                  () ->
-                      drivetrain.setPose(
-                          new Pose2d(
-                              Constants.FieldConstants.getSpeakerTranslation()
-                                  .plus(
-                                      new Translation2d(
-                                          Units.Inches.of(tunableX.get()).in(Units.Meters), 0.0)),
-                              Constants.zeroRotation2d))));
-    }
-
-    // driverController
-    // .rightTrigger()
-    // .whileTrue(
-    // Commands.parallel(
-    // Commands.run(() -> intake.setPercentOut(0.75), intake),
-    // Commands.run(() -> endEffector.setPercentOut(0.75), endEffector),
-    // Commands.run(
-    // () -> {
-    // shooter.setKickerPercentOut(0.75);
-    // shooter.setLauncherVoltage(11.0);
-    // },
-    // shooter)))
-    // .onFalse(
-    // Commands.parallel(
-    // Commands.run(() -> intake.setPercentOut(0.0), intake),
-    // Commands.run(() -> endEffector.setPercentOut(0.0), endEffector),
-    // Commands.run(
-    // () -> {
-    // shooter.setKickerPercentOut(0.0);
-    // shooter.setLauncherVoltage(0.0);
-    // },
-    // shooter)));
-
-    // driverController
-    // .a()
-    // .whileTrue(
-    // new ShooterSimpleShoot(
-    // shooter,
-    // endEffector,
-    // () -> 11,
-    // () -> Rotation2d.fromDegrees(tunablePivotPitch.get()),
-    // () -> 0.95,
-    // () -> 0.5)
-    // .alongWith(Commands.runOnce(() -> intake.setPercentOut(0.5), intake)))
-    // .onFalse(Commands.runOnce(() -> intake.setPercentOut(0.0), intake));
-
-    // driverController
-    // .start()
-    // .onTrue(
-    // new InstantCommand(
-    // () -> arm.setAngle(Rotation2d.fromDegrees(tunablePivotPitch.get())), arm));
-
-    if (Constants.unusedCode) {
-      driverController
-          .x()
-          .whileTrue(
-              new DrivetrainDefaultTeleopDrive(
-                  drivetrainWrapper,
-                  () -> -driverController.getLeftY(),
-                  () -> -driverController.getLeftX(),
-                  () -> -driverController.getRightX()));
-    }
-
-    // driverController
-    // .y()
-    // .whileTrue(CommandComposer.autoClimb(drivetrainWrapper, elevator, arm,
-    // endEffector));
-
     driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
 
     driverController
@@ -720,24 +549,6 @@ public class RobotContainer {
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
-    // driverController
-    // .leftTrigger()
-    // .whileTrue(new DriveToPose(drivetrainWrapper,
-    // Constants.FieldConstants::getAmpScoringPose));
-
-    PIDController rotationController = new PIDController(4.9, 0, 0);
-
-    driverController
-        .povRight()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  drivetrainWrapper.setRotationOverride(
-                      rotationController.calculate(
-                          drivetrainWrapper.getRotationGyroOnly().getRadians(),
-                          Units.Degrees.of(90.0).in(Units.Radians)));
-                }));
-
     if (Constants.unusedCode) {
 
       driverController
@@ -745,59 +556,8 @@ public class RobotContainer {
           .whileTrue(
               new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
     }
-    // driverController
-    // .y()
-    // .whileTrue(
-    // new DriveToPose(
-    // drivetrainWrapper,
-    // () ->
-    // new Pose2d(
-    // Constants.FieldConstants.getSpeakerTranslation()
-    // .plus(
-    // new Translation2d(
-    // Units.Inches.of(tunableX.get()).in(Units.Meters),
-    // Units.Inches.of(tunableY.get()).in(Units.Meters))),
-    // Constants.zeroRotation2d)));
-    // driverController
-    // .povUp()
-    // .onTrue(
-    // new InstantCommand(
-    // () -> elevator.setHeight(Units.Inches.of(tunableElevatorHeightOne.get())),
-    // elevator));
-    // driverController
-    // .povRight()
-    // .onTrue(
-    // new InstantCommand(
-    // () -> elevator.setHeight(Units.Inches.of(tunableElevatorHeightTwo.get())),
-    // elevator));
 
-    // driverController.povLeft().onTrue(MechanismActions.ampFast(elevator, arm));
-
-    // driverController.povUp().onTrue(MechanismActions.ampPosition(elevator, arm));
-
-    // driverController.povRight().onTrue(MechanismActions.ampPositionToLoadPosition(elevator,
-    // arm));
-
-    // driverController
-    // .x()
-    // .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
-    // .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0),
-    // endEffector));
-
-    // driverController.povRight().onTrue(MechanismActions.climbPrepPosition(elevator,
-    // arm));
-    // driverController
-    // .b()
-    // .onTrue(new InstantCommand(() -> elevator.setHeight(Units.Meters.of(0.0)),
-    // elevator));
-
-    // driverController.b().onTrue(new InstantCommand(() ->
-    // elevator.setVoltage(0.0), elevator));
-
-    // driverController
-    //     .povRight()
-    //     .whileTrue(new RotateToAngle(drivetrainWrapper, Rotation2d.fromDegrees(-90.0)));
-
+    // ---------- OPERATOR CONTROLS -----------
     DoubleSupplier elevatorDelta =
         () -> MathUtil.applyDeadband(-operatorController.getLeftY() * 1, 0.3) / 5.0;
     DoubleSupplier armDelta =
@@ -814,26 +574,6 @@ public class RobotContainer {
                 new ArmSetAngle(
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
-
-    // ---------- OPERATOR CONTROLS -----------
-    if (Constants.unusedCode) {
-      operatorController.a().whileTrue(new HomeMechanism(elevator, arm));
-      operatorController.b().whileTrue(new HomeShooter(shooter));
-
-      operatorController
-          .y()
-          .onTrue(Commands.runOnce(() -> shooter.setKickerPercentOut(0.8), shooter))
-          .onFalse(Commands.runOnce(() -> shooter.setKickerPercentOut(0.0), shooter));
-
-      operatorController
-          .povLeft()
-          .onTrue(new InstantCommand(elevator::resetSensorToHomePosition, elevator));
-      operatorController.povUp().onTrue(new InstantCommand(arm::resetSensorToHomePosition, arm));
-      operatorController
-          .a()
-          .onTrue(new InstantCommand(() -> endEffector.setPercentOut(0.8), endEffector))
-          .onFalse(new InstantCommand(() -> endEffector.setPercentOut(0.0), endEffector));
-    }
 
     operatorController
         .leftBumper()
@@ -862,8 +602,7 @@ public class RobotContainer {
 
     operatorController.y().onTrue(MechanismActions.deployReactionArms(elevator, arm));
     operatorController.x().onTrue(MechanismActions.climbFinalRestPosition(elevator, arm));
-    // operatorController.povLeft().onTrue(MechanismActions.climbTrapPushPosition(elevator,
-    // arm));
+
     operatorController
         .b()
         .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
@@ -872,11 +611,6 @@ public class RobotContainer {
     operatorController
         .a()
         .whileTrue(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter));
-
-    // operatorController
-    // .rightBumper()
-    // .onTrue(Commands.runOnce(() -> vision.setUsingVision(false), vision))
-    // .onFalse(Commands.runOnce(() -> vision.setUsingVision(true), vision));
 
     operatorController
         .rightBumper()
@@ -887,12 +621,12 @@ public class RobotContainer {
     operatorController.start().onTrue(new EndEffectorPrepareNoteForTrap(endEffector));
 
     // -- buttons on robot
-
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
             .andThen(arm::resetSensorToHomePosition, arm)
             .andThen(shooter::pivotResetHomePosition, shooter)
             .andThen(elevator::resetReactionArmPositions)
+            .andThen(new LedSetStateForSeconds(led, robotStates.HOME_SUBSYSTEMS, 1.5))
             .ignoringDisable(true));
 
     breakModeButtonTrigger.onTrue(
@@ -907,6 +641,7 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
+                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_OFF, 1))
                 .ignoringDisable(true),
             Commands.runOnce(
                     () -> {
@@ -918,6 +653,7 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
+                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_ON, 1))
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 
