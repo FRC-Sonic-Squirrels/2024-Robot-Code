@@ -170,8 +170,7 @@ public final class Constants {
       for (int i = 0; i < poses.length; i++) {
         Translation2d offset = new Translation2d(distFromCenter, Rotation2d.fromDegrees(i * 120.0));
         poses[i] =
-            new Pose2d(
-                STAGE_CENTER_BLUE_ALLIANCE.plus(offset), Rotation2d.fromDegrees(i * 120.0 - 180.0));
+            new Pose2d(STAGE_CENTER_BLUE_ALLIANCE.plus(offset), Rotation2d.fromDegrees(i * 120.0));
       }
       return poses;
     }

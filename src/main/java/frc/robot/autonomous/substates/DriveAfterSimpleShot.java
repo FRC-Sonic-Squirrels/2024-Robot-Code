@@ -47,7 +47,8 @@ public class DriveAfterSimpleShot extends StateMachine {
 
               log_targetPose.info(targetPose);
               return targetPose;
-            });
+            },
+            () -> drive.getPoseEstimatorPose(true));
     return suspendForCommand(driveToPose, (command) -> setDone());
   }
 }

@@ -329,7 +329,10 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
-    if (prioritizeRotation) {
+    // new Double().compareTo(null)
+    if (prioritizeRotation
+        && speeds.vxMetersPerSecond > 0.001
+        && speeds.vyMetersPerSecond > 0.001) {
       // Calculate module setpoints
 
       SwerveModuleState[] justRotationSetpointStates =

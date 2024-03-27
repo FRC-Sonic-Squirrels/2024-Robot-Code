@@ -50,7 +50,6 @@ import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
-import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.intake.IntakeEject;
@@ -557,8 +556,9 @@ public class RobotContainer {
         .whileTrue(
             CommandComposer.stageAlign(
                 drivetrainWrapper,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX()));
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
+
+    driverController.povUp().whileTrue(CommandComposer.driveToChain(drivetrainWrapper));
 
     // .beforeStarting(MechanismActions.loadingPosition(elevator, arm))
     // .andThen(new
@@ -794,9 +794,9 @@ public class RobotContainer {
     // driverController.b().onTrue(new InstantCommand(() ->
     // elevator.setVoltage(0.0), elevator));
 
-    driverController
-        .povRight()
-        .whileTrue(new RotateToAngle(drivetrainWrapper, Rotation2d.fromDegrees(-90.0)));
+    // driverController
+    //     .povRight()
+    //     .whileTrue(new RotateToAngle(drivetrainWrapper, Rotation2d.fromDegrees(-90.0)));
 
     DoubleSupplier elevatorDelta =
         () -> MathUtil.applyDeadband(-operatorController.getLeftY() * 1, 0.3) / 5.0;
