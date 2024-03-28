@@ -1,5 +1,6 @@
 package frc.robot.autonomous;
 
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -15,4 +16,5 @@ public record AutosSubsystems(
     Intake intake,
     EndEffector endEffector,
     Shooter shooter,
-    VisionGamepiece visionGamepiece) {}
+    VisionGamepiece visionGamepiece,
+    LED led) {}

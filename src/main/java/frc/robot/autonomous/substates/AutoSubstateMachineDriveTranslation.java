@@ -39,7 +39,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
     intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
     intakeCommand.schedule();
 
-    driveToGamepieceHelper = new DriveToGamepieceHelper();
+    driveToGamepieceHelper = new DriveToGamepieceHelper(led);
 
     return stateWithName("followPathToGamePiece", this::pickupGamepiece);
   }

@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,18 +14,18 @@ import org.littletonrobotics.junction.Logger;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
-  AddressableLED led = new AddressableLED(Constants.LEDConstants.PWM_PORT);
+  private AddressableLED led = new AddressableLED(Constants.LEDConstants.PWM_PORT);
 
-  AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(13);
-  AddressableLEDBuffer previousBuffer = new AddressableLEDBuffer(13);
+  private AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(13);
+  private AddressableLEDBuffer previousBuffer = new AddressableLEDBuffer(13);
 
-  int snakeShade = 0;
-  int levelMeterCount = 0;
-  int rainbowFirstPixelHue = 0;
-
+  private int snakeShade = 0;
+  private int rainbowFirstPixelHue = 0;
+  private int levelMeterCount = 0;
   private RobotState robotState = RobotState.BASE;
   private BaseRobotState baseRobotState = BaseRobotState.NOTE_STATUS;
   private boolean noteInRobot;
+  private Color squirrelOrange = new Color(255, 45, 0);
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -42,7 +41,7 @@ public class LED extends SubsystemBase {
         switch (baseRobotState) {
           case NOTE_STATUS:
             if (noteInRobot) {
-              setSolidColor(new Color(255, 45, 0));
+              setSolidColor(squirrelOrange);
 
             } else {
               setSolidColor(Color.kBlack);
@@ -62,58 +61,23 @@ public class LED extends SubsystemBase {
             break;
 
           case SHOOTING_PREP:
-            setBlinking(Color.kWhite, Color.kRED);
+            setBlinking(Color.kWhite, Color.kRed);
             break;
           case SHOOTER_SUCCESS:
             setSolidColor(Color.kGreen);
             break;
 
           default:
+            setAudioLevelMeter(100);
             break;
         }
         break;
 
-      case TEST:
-      case SHOOTER_LINING_UP:
-      case DEFAULT:
-        setAudioLevelMeter(100);
-        // setSolidColor(new Color(255, 45, 0)); // set solid orange
-        break;
-      case SHOOTER_SUCCESS:
-        // test writing solid color
-        // FIXME: if wanted, inside of setSolidColor could remove parameters once we have certain
-        // values we want to use
-        setSolidColor(Color.kGreen);
-        break;
-      case SHOOTER_LINED_UP:
-        // test of writing blinking
-        // FIXME: if wanted, inside of setBlinking could remove paramters once we have certain
-        // values we want to use
-        setBlinking(Color.kBlack, Color.kWhite);
-        break;
       case AMP_READY_TO_SCORE:
         setSolidColor(Color.kGreen);
         break;
-      case DRIVING_TO_GAMEPIECE:
-        setAllRainbow();
-        break;
-      case AUTO_MODE:
-        setSolidColor(Color.kWhite);
-        break;
-      case NOTHING:
-        setSolidColor(Color.kBlack);
-        break;
       case TWENTY_SECOND_WARNING:
-        // when the match has 20 seconds left this code will change the color to magenta
         setBlinking(Color.kMagenta, Color.kBlack);
-        break;
-      case AMP_LINING_UP:
-        setBlinking(Color.kYellow, Color.kBlack);
-      case GAMEPIECE_IN_ROBOT:
-        setSolidColor(Color.kOrange);
-        break;
-      case CLIMB_MODE:
-        setSolidColor(Color.kGreen);
         break;
       case HOME_SUBSYSTEMS:
         setBlinking(Color.kGreen, Color.kBlack);
@@ -124,8 +88,13 @@ public class LED extends SubsystemBase {
       case BREAK_MODE_OFF:
         setBlinking(Color.kBlue, Color.kBlack, 0.3);
         break;
+      case TEST:
+        setSolidColor(Color.kCyan);
+        break;
+      case INTAKE_SUCCESS:
+        setBlinking(squirrelOrange, Color.kBlack);
+        break;
     }
-
     Logger.recordOutput("LED/robotState", robotState);
     Logger.recordOutput("LED/baseRobotState", baseRobotState);
     Logger.recordOutput("LED/noteInRobot", noteInRobot);
@@ -161,7 +130,7 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllSnake(Color color) {
+  private void setSnake(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
       ledBuffer.setRGB(
@@ -172,7 +141,7 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setAllRainbow() {
+  private void setRainbow() {
     for (var i = 0; i < ledBuffer.getLength(); i++) {
       final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
       ledBuffer.setHSV(i, hue, 255, 128);
@@ -180,6 +149,10 @@ public class LED extends SubsystemBase {
 
     rainbowFirstPixelHue += 3;
     rainbowFirstPixelHue %= 180;
+  }
+
+  public void setRobotState(RobotState robotState) {
+    this.robotState = robotState;
   }
 
   /**
@@ -221,22 +194,44 @@ public class LED extends SubsystemBase {
     setSolidColor(Color.kBlack);
   }
 
-  private class individualLED {
-    int start;
-    int end;
+  public RobotState getCurrentState() {
+    return robotState;
+  }
 
-    public individualLED(int start, int end) {
-      this.start = start;
-      this.end = end;
-    }
+  public void setBaseRobotState(BaseRobotState baseRobotState) {
+    this.baseRobotState = baseRobotState;
+  }
 
-    public int getLength() {
-      if (start == 0) {
-        return Math.abs(end - start);
-      } else {
-        return Math.abs(end - start) + 1;
-      }
-    }
+  public BaseRobotState getCurrentBaseState() {
+    return baseRobotState;
+  }
+
+  public void setNoteStatus(boolean noteInRobot) {
+    this.noteInRobot = noteInRobot;
+  }
+
+  public boolean getNoteStatus() {
+    return noteInRobot;
+  }
+
+  public enum RobotState {
+    TWENTY_SECOND_WARNING,
+    AMP_READY_TO_SCORE,
+    TEST,
+    HOME_SUBSYSTEMS,
+    BREAK_MODE_OFF,
+    BREAK_MODE_ON,
+    BASE,
+    INTAKE_SUCCESS
+  }
+
+  public enum BaseRobotState {
+    NOTE_STATUS,
+    AUTO_NOTE_PICKUP,
+    AMP_LINE_UP,
+    CLIMB_LINE_UP,
+    SHOOTING_PREP,
+    SHOOTER_SUCCESS
   }
 
   public boolean sameAsPrevBuffer() {
@@ -245,32 +240,5 @@ public class LED extends SubsystemBase {
     }
 
     return true;
-  }
-
-  public robotStates getCurrentState() {
-    return robotState;
-  }
-
-  public enum robotStates {
-    SHOOTER_SUCCESS,
-    SHOOTER_LINED_UP,
-    DRIVING_TO_GAMEPIECE,
-    AUTO_MODE,
-    NOTHING,
-    TWENTY_SECOND_WARNING,
-    AMP_LINING_UP,
-    SHOOTER_LINING_UP,
-    AMP_READY_TO_SCORE,
-    GAMEPIECE_IN_ROBOT,
-    CLIMB_MODE,
-    TEST,
-    HOME_SUBSYSTEMS,
-    BREAK_MODE_OFF,
-    BREAK_MODE_ON,
-    DEFAULT
-  }
-
-  public void setRobotState(robotStates robotState) {
-    this.robotState = robotState;
   }
 }

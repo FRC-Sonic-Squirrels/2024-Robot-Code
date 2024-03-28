@@ -6,14 +6,14 @@ package frc.robot.commands.led;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.LED.robotStates;
+import frc.robot.subsystems.LED.BaseRobotState;
 
-public class LedSetState extends Command {
+public class LedSetBaseState extends Command {
   LED led;
-  robotStates state;
+  BaseRobotState state;
 
   /** Creates a new LedSetState. */
-  public LedSetState(LED led, robotStates state) {
+  public LedSetBaseState(LED led, BaseRobotState state) {
     this.led = led;
     this.state = state;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -23,7 +23,7 @@ public class LedSetState extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    led.setRobotState(state);
+    led.setBaseRobotState(state);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

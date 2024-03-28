@@ -11,6 +11,8 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
 
 public class DriveToGamepieceHelper {
   private static final String ROOT_TABLE = "DriveToGamepiece";
@@ -43,7 +45,10 @@ public class DriveToGamepieceHelper {
 
   private Rotation2d gamepieceDirection = Constants.zeroRotation2d;
 
-  public DriveToGamepieceHelper() {
+  private final LED led;
+
+  public DriveToGamepieceHelper(LED led) {
+    this.led = led;
     xController.reset();
     xController.setP(kP.get());
     xController.setI(kI.get());
@@ -60,6 +65,7 @@ public class DriveToGamepieceHelper {
     rotController.enableContinuousInput(-Math.PI, Math.PI);
     rotController.setP(rotationKp.get());
     rotController.setTolerance(2);
+    led.setBaseRobotState(BaseRobotState.AUTO_NOTE_PICKUP);
   }
 
   public ChassisSpeeds calculateChassisSpeeds(Translation2d targetGamepiece, Pose2d pose) {
