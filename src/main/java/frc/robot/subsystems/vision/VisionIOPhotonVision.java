@@ -17,9 +17,9 @@ public class VisionIOPhotonVision implements VisionIO {
   private PhotonPipelineResult lastResult = new PhotonPipelineResult();
 
   public double medianLatency = 0.0;
-  MedianFilter latencyMedianFilter = new MedianFilter(50);
+  MedianFilter latencyMedianFilter = new MedianFilter(10);
   public double medianUpdateTime = 0.0;
-  MedianFilter updateTimeMedianFilter = new MedianFilter(50);
+  MedianFilter updateTimeMedianFilter = new MedianFilter(10);
 
   public VisionIOPhotonVision(String cameraName) {
     camera = new PhotonCamera(cameraName);

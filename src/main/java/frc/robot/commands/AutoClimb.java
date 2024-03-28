@@ -15,6 +15,7 @@ import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.commands.mechanism.MechanismPositions;
 import frc.robot.commands.mechanism.MechanismPositions.MechanismPosition;
@@ -33,6 +34,8 @@ public class AutoClimb extends Command {
       logGroup.buildBoolean("armIsAtPosition");
   private static final LoggerEntry.Struct<Pose2d> log_closestPose =
       logGroup.buildStruct(Pose2d.class, "closestPose");
+  private static final LoggedTunableNumber distFromStage =
+      new LoggedTunableNumber("StageAlign/distFromStage", 1.738);
 
   private final DrivetrainWrapper drive;
   private final Elevator elevator;
@@ -165,26 +168,23 @@ public class AutoClimb extends Command {
   }
 
   public static Pose2d getTargetPose(Pose2d robotPose) {
-    // FIXME: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! BRING THIS CODE BACK, IT ALLOWS FOR
     // MORE CLIMB POSITIONS
-    // Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
-    // Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(1.738);
-    // log_poses.info(poses);
-    // Pose2d closestPose = null;
-    // for (int i = 0; i < poses.length; i++) {
-    //   if (closestPose == null) {
-    //     closestPose = poses[i];
-    //   } else {
-    //     logGroup.build(i + "_Distance").info(GeometryUtil.getDist(poses[i], flippedPose));
+    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
+    Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(distFromStage.get());
+    Pose2d closestPose = null;
+    for (int i = 0; i < poses.length; i++) {
+      if (closestPose == null) {
+        closestPose = poses[i];
+      } else {
 
-    //     if (GeometryUtil.getDist(poses[i], flippedPose)
-    //         < GeometryUtil.getDist(closestPose, flippedPose)) {
-    //       closestPose = poses[i];
-    //     }
-    //   }
-    // }
+        if (GeometryUtil.getDist(poses[i], flippedPose)
+            < GeometryUtil.getDist(closestPose, flippedPose)) {
+          closestPose = poses[i];
+        }
+      }
+    }
 
-    Pose2d closestPose = new Pose2d(6.6, 4.1, new Rotation2d(3.141));
+    // Pose2d closestPose = new Pose2d(6.6, 4.1, new Rotation2d(3.141));
 
     closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 

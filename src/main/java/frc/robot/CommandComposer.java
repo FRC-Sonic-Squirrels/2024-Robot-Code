@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,8 +11,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.DriveToPose;
+import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -51,7 +52,8 @@ public class CommandComposer {
     DriveToPose driveToClimbPos =
         new DriveToPose(
             drivetrainWrapper,
-            () -> AutoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose(true)));
+            () -> AutoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose(true)),
+            () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
     BooleanSupplier withinRangeOfStage =
         () ->
@@ -112,7 +114,10 @@ public class CommandComposer {
             .debounce(0.4);
 
     DriveToPose driveToAmp =
-        new DriveToPose(drivetrainWrapper, Constants.FieldConstants::getAmpScoringPose);
+        new DriveToPose(
+            drivetrainWrapper,
+            Constants.FieldConstants::getAmpScoringPose,
+            () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
     Measure<Distance> distToElevateMech = Units.Meters.of(3.5);
 
@@ -182,30 +187,61 @@ public class CommandComposer {
     return cancelScoreAmp;
   }
 
-  public static Command stageAlign(
-      DrivetrainWrapper wrapper,
-      Supplier<Double> driveMagnitudeX,
-      Supplier<Double> driveMagnitudeY) {
-    PIDController rotationalPID = new PIDController(5.0, 0, 0);
+  public static Command stageAlign(DrivetrainWrapper wrapper, Consumer<Double> rumbleMagnitude) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
-                ? wrapper.getPoseEstimatorPoseStageBlue(true)
-                : wrapper.getPoseEstimatorPoseStageRed(true);
+                ? wrapper.getPoseEstimatorPoseStageRed(false)
+                : wrapper.getPoseEstimatorPoseStageBlue(false);
     Supplier<Pose2d> targetPose = () -> AutoClimb.getTargetPose(robotLocalization.get());
-    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose);
-    return driveCommand
-        .until(() -> driveCommand.withinTolerance(0.05, new Rotation2d(0.05)))
-        .andThen(
-            Commands.run(
+    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, false);
+    Command stageAlign =
+        driveCommand
+            .alongWith(
+                Commands.run(
+                    () ->
+                        rumbleMagnitude.accept(
+                            driveCommand.withinTolerance(0.05, new Rotation2d(0.05)) ? 0.5 : 0.0)))
+            .finallyDo(() -> rumbleMagnitude.accept(0.0));
+    stageAlign.setName("stageAlign");
+    return stageAlign;
+  }
+
+  private static LoggedTunableNumber stageApproachSpeed =
+      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 0.5);
+
+  public static Command driveToChain(DrivetrainWrapper wrapper) {
+    Supplier<Pose2d> robotLocalization =
+        () ->
+            Constants.isRedAlliance()
+                ? wrapper.getPoseEstimatorPoseStageRed(false)
+                : wrapper.getPoseEstimatorPoseStageBlue(false);
+    RotateToAngle rotateToAngle =
+        new RotateToAngle(
+            wrapper,
+            () ->
+                AutoClimb.getTargetPose(robotLocalization.get())
+                    .getRotation()
+                    .plus(Rotation2d.fromDegrees(180)),
+            robotLocalization);
+
+    Command stageApproach =
+        Commands.run(
                 () ->
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
-                            driveMagnitudeX.get(),
-                            driveMagnitudeY.get(),
-                            rotationalPID.calculate(
-                                robotLocalization.get().getRotation().getRadians(),
-                                targetPose.get().getRotation().getRadians())))))
-        .finallyDo(wrapper::resetVelocityOverride);
+                            rotateToAngle.withinTolerance() ? stageApproachSpeed.get() : 0.0,
+                            0.0,
+                            0.0)))
+            .alongWith(rotateToAngle)
+            .finallyDo(
+                () -> {
+                  wrapper.resetVelocityOverride();
+                  wrapper.resetRotationOverride();
+                });
+
+    stageApproach.setName("stageApproach");
+
+    return stageApproach;
   }
 }

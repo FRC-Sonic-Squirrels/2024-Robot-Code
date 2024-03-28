@@ -329,7 +329,10 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
-    if (prioritizeRotation) {
+    // new Double().compareTo(null)
+    if (prioritizeRotation
+        && speeds.vxMetersPerSecond > 0.001
+        && speeds.vyMetersPerSecond > 0.001) {
       // Calculate module setpoints
 
       SwerveModuleState[] justRotationSetpointStates =
@@ -564,6 +567,9 @@ public class Drivetrain extends SubsystemBase {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
       this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorStageBlue.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorStageRed.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      this.poseEstimatorGlobal.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.rawOdometryPose = pose;
     }
   }
