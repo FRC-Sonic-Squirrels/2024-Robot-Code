@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -467,7 +468,14 @@ public class RobotContainer {
 
     driverController
         .rightBumper()
-        .whileTrue(new IntakeGamepiece(intake, endEffector, shooter, arm, elevator, (rumble) -> {}))
+        .whileTrue(
+            new IntakeGamepiece(intake, endEffector, shooter, arm, elevator, (rumble) -> {})
+                .finallyDo(
+                    (interrupted) -> {
+                      if (!interrupted)
+                        CommandScheduler.getInstance()
+                            .schedule(new LedSetStateForSeconds(led, RobotState.INTAKE_SUCCESS, 1));
+                    }))
         .whileTrue(
             Commands.run(
                     () -> {

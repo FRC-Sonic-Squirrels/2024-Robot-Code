@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
+import java.awt.Color;
+import org.littletonrobotics.junction.Logger;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
@@ -42,6 +44,7 @@ public class LED extends SubsystemBase {
           case NOTE_STATUS:
             if (noteInRobot) {
               setSolidColor(squirrelOrange);
+              setSolidColor(new Color(255, 45, 0));
 
             } else {
               setSolidColor(Color.kBlack);
@@ -94,7 +97,13 @@ public class LED extends SubsystemBase {
       case INTAKE_SUCCESS:
         setBlinking(squirrelOrange, Color.kBlack);
         break;
+      case INTAKE_SUCCESS:
+        setBlinking(new Color(255, 45, 0), Color.BLACK);
+        break;
     }
+    Logger.recordOutput("LED/robotState", robotState);
+    Logger.recordOutput("LED/baseRobotState", baseRobotState);
+    Logger.recordOutput("LED/noteInRobot", noteInRobot);
     Logger.recordOutput("LED/robotState", robotState);
     Logger.recordOutput("LED/baseRobotState", baseRobotState);
     Logger.recordOutput("LED/noteInRobot", noteInRobot);
@@ -221,6 +230,8 @@ public class LED extends SubsystemBase {
     HOME_SUBSYSTEMS,
     BREAK_MODE_OFF,
     BREAK_MODE_ON,
+    BASE,
+    INTAKE_SUCCESS
     BASE,
     INTAKE_SUCCESS
   }
