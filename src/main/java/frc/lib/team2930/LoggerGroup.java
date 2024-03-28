@@ -1,16 +1,74 @@
 package frc.lib.team2930;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.networktables.*;
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.struct.StructSerializable;
-import java.util.Arrays;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import org.littletonrobotics.junction.LogDataReceiver;
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.Logger;
 
 public class LoggerGroup {
+  private static final String logWriter_extraHeader = "AdvantageKit";
+  private static final String logWriter_entryMetadata = "{\"source\":\"AdvantageKit\"}";
+
+  private static final double logWriter_timestampUpdateDelay =
+      5.0; // Wait several seconds after DS attached to
+  // ensure timestamp/timezone is updated
+  private static final double logWriter_defaultWritePeriodRio = 0.1;
+  private static final double logWriter_defaultWritePeriodSim = 0.01;
+
+  private static final Object g_lock = new Object();
+  private static final Map<Class<?>, edu.wpi.first.util.struct.Struct<?>> structTypeCache;
+  private static final List<edu.wpi.first.util.struct.Struct<?>> structTypePendingSchema;
+
+  static {
+    structTypeCache = new HashMap<>();
+    structTypePendingSchema = new ArrayList<>();
+  }
+
+  static int dataLogIdNotInitialized = -2;
+
   @FunctionalInterface
   public interface EntrySupplier<T extends LoggerEntry> {
     T apply(String name, int updateFrequency);
   }
 
+  private static final String rootKey = "/AdvantageKit";
+  public static final String timestampKey = "/Timestamp";
+
+  private static final NetworkTable akitTable;
+  private static final IntegerPublisher timestampPublisher;
   private static double currentTimestmap;
+  private static long currentTimestmapLog;
+
+  private static DataLog dataLog_handle;
+  private static boolean dataLog_autoRename;
+  private static String dataLog_folder;
+  private static String dataLog_filename;
+  private static String dataLog_randomIdentifier;
+  private static double dataLog_writePeriodSecs;
+  private static Double dataLog_dsAttachedTime;
+
+  private static LocalDateTime dataLog_logDate;
+  private static String dataLog_logMatchText;
+  private static int dataLog_timestampID;
+
+  //
+
+  private static final Object spoolerSignal = new Object();
+  private static Thread spoolerThread;
+
   public static final LoggerGroup root;
 
   private final String path;
@@ -19,10 +77,334 @@ public class LoggerGroup {
 
   static {
     root = new LoggerGroup("");
+    akitTable = NetworkTableInstance.getDefault().getTable(rootKey);
+    timestampPublisher =
+        akitTable.getIntegerTopic(timestampKey.substring(1)).publish(PubSubOption.sendAll(true));
+  }
+
+  static Topic getNetworkTableTopic(LoggerEntry entry) {
+    return akitTable.getTopic(entry.key);
+  }
+
+  static int getDataLogTopic(LoggerEntry entry) {
+    if (dataLog_handle != null) {
+      return dataLog_handle.start(
+          "NT:/" + logWriter_extraHeader + "/" + entry.key,
+          entry.getWpiLogType(),
+          logWriter_entryMetadata,
+          currentTimestmapLog);
+    }
+
+    return dataLogIdNotInitialized;
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T extends StructSerializable> edu.wpi.first.util.struct.Struct<T> findStructType(
+      Class<T> classObj) {
+    synchronized (g_lock) {
+      var res = (edu.wpi.first.util.struct.Struct<T>) structTypeCache.get(classObj);
+      if (res == null) {
+        try {
+          Field field = classObj.getDeclaredField("struct");
+          res = (edu.wpi.first.util.struct.Struct<T>) field.get(null);
+
+          structTypePendingSchema.add(res);
+        } catch (NoSuchFieldException
+            | SecurityException
+            | IllegalArgumentException
+            | IllegalAccessException ignored) {
+        }
+
+        structTypeCache.put(classObj, res);
+      }
+
+      return res;
+    }
+  }
+
+  //
+
+  static void emit(GenericPublisher publisher, byte[] value, int dataLogId) {
+    publisher.setRaw(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendRaw(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, boolean value, int dataLogId) {
+    publisher.setBoolean(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendBoolean(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, boolean[] value, int dataLogId) {
+    publisher.setBooleanArray(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendBooleanArray(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, String value, int dataLogId) {
+    publisher.setString(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendString(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, String[] value, int dataLogId) {
+    publisher.setStringArray(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendStringArray(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, long value, int dataLogId) {
+    publisher.setInteger(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendInteger(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, long[] value, int dataLogId) {
+    publisher.setIntegerArray(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendIntegerArray(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, float value, int dataLogId) {
+    publisher.setFloat(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendFloat(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, float[] value, int dataLogId) {
+    publisher.setFloatArray(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendFloatArray(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, double value, int dataLogId) {
+    publisher.setDouble(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendDouble(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  static void emit(GenericPublisher publisher, double[] value, int dataLogId) {
+    publisher.setDoubleArray(value, currentTimestmapLog);
+
+    if (dataLog_handle != null && dataLogId != LoggerGroup.dataLogIdNotInitialized) {
+      dataLog_handle.appendDoubleArray(dataLogId, value, currentTimestmapLog);
+    }
+  }
+
+  //
+
+  public static void setDataLog(String filePath) {
+    dataLog_writePeriodSecs =
+        RobotBase.isSimulation()
+            ? logWriter_defaultWritePeriodSim
+            : logWriter_defaultWritePeriodRio;
+
+    // Create random identifier
+    Random random = new Random();
+    StringBuilder randomIdentifierBuilder = new StringBuilder();
+    for (int i = 0; i < 4; i++) {
+      randomIdentifierBuilder.append(String.format("%04x", random.nextInt(0x10000)));
+    }
+    dataLog_randomIdentifier = randomIdentifierBuilder.toString();
+
+    // Set up folder and filename
+    if (filePath.endsWith(".wpilog")) {
+      File pathFile = new File(filePath);
+      dataLog_folder = pathFile.getParent();
+      dataLog_filename = pathFile.getName();
+      dataLog_autoRename = false;
+    } else {
+      dataLog_folder = filePath;
+      dataLog_filename = "Log_" + dataLog_randomIdentifier + ".wpilog";
+      dataLog_autoRename = true;
+    }
+
+    // Create folder if necessary
+    File logFolder = new File(dataLog_folder);
+    if (!logFolder.exists()) {
+      logFolder.mkdirs();
+    }
+
+    // Delete log if it already exists
+    File logFile = new File(dataLog_folder, dataLog_filename);
+    if (logFile.exists()) {
+      logFile.delete();
+    }
+
+    // Create new log
+    dataLog_handle =
+        new DataLog(
+            dataLog_folder, dataLog_filename, dataLog_writePeriodSecs, logWriter_extraHeader);
+    dataLog_timestampID = dataLog_handle.start(timestampKey, "int", logWriter_entryMetadata, 0);
+
+    // Reset data
+    dataLog_logDate = null;
+    dataLog_logMatchText = null;
   }
 
   public static void periodic() {
     currentTimestmap = Utils.getCurrentTimeSeconds();
+    currentTimestmapLog = HALUtil.getFPGATime();
+  }
+
+  public static void publish() {
+    timestampPublisher.set(currentTimestmapLog, currentTimestmapLog);
+
+    if (spoolerThread == null) {
+      var thread = new Thread(LoggerGroup::runSpooler);
+      thread.setName("LoggerSpooler");
+      thread.setDaemon(true);
+      thread.start();
+      spoolerThread = thread;
+    }
+
+    synchronized (spoolerSignal) {
+      spoolerSignal.notify();
+    }
+  }
+
+  private static void runSpooler() {
+    while (true) {
+      try {
+        synchronized (spoolerSignal) {
+          try {
+            spoolerSignal.wait();
+          } catch (InterruptedException ignored) {
+          }
+        }
+
+        if (dataLog_handle != null) {
+          // Auto rename
+          if (dataLog_autoRename) {
+            // Update timestamp
+            if (dataLog_logDate == null) {
+              if ((DriverStation.isDSAttached() && RobotController.isSystemTimeValid())
+                  || RobotBase.isSimulation()) {
+                if (dataLog_dsAttachedTime == null) {
+                  dataLog_dsAttachedTime = Logger.getRealTimestamp() / 1000000.0;
+                } else if (Logger.getRealTimestamp() / 1000000.0 - dataLog_dsAttachedTime
+                        > logWriter_timestampUpdateDelay
+                    || RobotBase.isSimulation()) {
+                  dataLog_logDate = LocalDateTime.now();
+                }
+              } else {
+                dataLog_dsAttachedTime = null;
+              }
+            }
+
+            // Update match
+            var matchType = DriverStation.getMatchType();
+            if (dataLog_logMatchText == null && matchType != DriverStation.MatchType.None) {
+              dataLog_logMatchText = "";
+              switch (matchType) {
+                case Practice:
+                  dataLog_logMatchText = "p";
+                  break;
+                case Qualification:
+                  dataLog_logMatchText = "q";
+                  break;
+                case Elimination:
+                  dataLog_logMatchText = "e";
+                  break;
+                default:
+                  break;
+              }
+              dataLog_logMatchText += DriverStation.getMatchNumber();
+            }
+
+            // Update filename
+            StringBuilder newFilenameBuilder = new StringBuilder();
+            newFilenameBuilder.append("Log_");
+            if (dataLog_logDate == null) {
+              newFilenameBuilder.append(dataLog_randomIdentifier);
+            } else {
+              var timeFormatter = DateTimeFormatter.ofPattern("yy-MM-dd_HH-mm-ss");
+              newFilenameBuilder.append(timeFormatter.format(dataLog_logDate));
+            }
+            if (dataLog_logMatchText != null) {
+              newFilenameBuilder.append("_");
+              newFilenameBuilder.append(dataLog_logMatchText);
+            }
+            newFilenameBuilder.append(".wpilog");
+            String newFilename = newFilenameBuilder.toString();
+            if (!newFilename.equals(dataLog_filename)) {
+              dataLog_handle.setFilename(newFilename);
+              dataLog_filename = newFilename;
+            }
+          }
+
+          // Save timestamp
+          dataLog_handle.appendInteger(
+              dataLog_timestampID, currentTimestmapLog, currentTimestmapLog);
+        }
+
+        synchronized (g_lock) {
+          if (!structTypePendingSchema.isEmpty()) {
+            for (var struct : structTypePendingSchema) {
+              publishSchema(struct, new HashSet<>());
+
+              if (dataLog_handle != null) {
+                dataLog_handle.addSchema(struct, currentTimestmapLog);
+              }
+            }
+            structTypePendingSchema.clear();
+          }
+        }
+
+        root.publishInner();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private static void publishSchema(edu.wpi.first.util.struct.Struct<?> struct, Set<String> seen) {
+    String typeString = struct.getTypeString();
+    if (!seen.add(typeString)) {
+      throw new UnsupportedOperationException(typeString + ": circular reference with " + seen);
+    }
+
+    var topic = akitTable.getTopic(".schema/" + typeString);
+
+    @SuppressWarnings("resource")
+    var publisher = topic.genericPublish("structschema", PubSubOption.sendAll(true));
+    publisher.setRaw(struct.getSchema().getBytes(StandardCharsets.UTF_8), currentTimestmapLog);
+
+    for (var inner : struct.getNested()) {
+      publishSchema(inner, seen);
+    }
+    seen.remove(typeString);
+  }
+
+  private void publishInner() {
+    for (var group : groups) {
+      group.publishInner();
+    }
+
+    for (var entry : entries) {
+      entry.publishIfNeeded();
+    }
   }
 
   static double shouldRefresh(double lastRefresh, double updateFrequency) {
@@ -46,6 +428,15 @@ public class LoggerGroup {
   public LoggerEntry.Text buildString(String name, int updateFrequencyInSeconds) {
     return buildInner(
         name, updateFrequencyInSeconds, LoggerEntry.Text.class, LoggerEntry.Text::new);
+  }
+
+  public LoggerEntry.TextArray buildStringArray(String name) {
+    return buildStringArray(name, 50);
+  }
+
+  public LoggerEntry.TextArray buildStringArray(String name, int updateFrequencyInSeconds) {
+    return buildInner(
+        name, updateFrequencyInSeconds, LoggerEntry.TextArray.class, LoggerEntry.TextArray::new);
   }
 
   // -- //
@@ -74,6 +465,17 @@ public class LoggerGroup {
 
   // -- //
 
+  public LoggerEntry.BoolArray buildBooleanArray(String name) {
+    return buildBooleanArray(name, 50);
+  }
+
+  public LoggerEntry.BoolArray buildBooleanArray(String name, int updateFrequencyInSeconds) {
+    return buildInner(
+        name, updateFrequencyInSeconds, LoggerEntry.BoolArray.class, LoggerEntry.BoolArray::new);
+  }
+
+  // -- //
+
   public LoggerEntry.Integer buildInteger(String name) {
     return buildInteger(name, 50);
   }
@@ -93,6 +495,33 @@ public class LoggerGroup {
         updateFrequencyInSeconds,
         LoggerEntry.IntegerArray.class,
         LoggerEntry.IntegerArray::new);
+  }
+
+  // -- //
+
+  public LoggerEntry.DecimalFloat buildDecimalFloat(String name) {
+    return buildDecimalFloat(name, 50);
+  }
+
+  public LoggerEntry.DecimalFloat buildDecimalFloat(String name, int updateFrequencyInSeconds) {
+    return buildInner(
+        name,
+        updateFrequencyInSeconds,
+        LoggerEntry.DecimalFloat.class,
+        LoggerEntry.DecimalFloat::new);
+  }
+
+  public LoggerEntry.DecimalFloatArray buildDecimalFloatArray(String name) {
+    return buildDecimalFloatArray(name, 50);
+  }
+
+  public LoggerEntry.DecimalFloatArray buildDecimalFloatArray(
+      String name, int updateFrequencyInSeconds) {
+    return buildInner(
+        name,
+        updateFrequencyInSeconds,
+        LoggerEntry.DecimalFloatArray.class,
+        LoggerEntry.DecimalFloatArray::new);
   }
 
   // -- //
@@ -140,7 +569,10 @@ public class LoggerGroup {
       Class<T> clz, String name, int updateFrequencyInSeconds) {
     //noinspection unchecked
     return buildInner(
-        name, updateFrequencyInSeconds, LoggerEntry.Struct.class, LoggerEntry.Struct::new);
+        name,
+        updateFrequencyInSeconds,
+        LoggerEntry.Struct.class,
+        (key, u) -> new LoggerEntry.Struct<>(clz, key, u));
   }
 
   // -- //
@@ -157,7 +589,7 @@ public class LoggerGroup {
         name,
         updateFrequencyInSeconds,
         LoggerEntry.StructArray.class,
-        LoggerEntry.StructArray::new);
+        (key, u) -> new LoggerEntry.StructArray<>(clz, key, u));
   }
 
   public LoggerEntry.ByteArray buildBytes(String name) {
@@ -168,8 +600,6 @@ public class LoggerGroup {
     return buildInner(
         name, updateFrequencyInSeconds, LoggerEntry.ByteArray.class, LoggerEntry.ByteArray::new);
   }
-
-  // -- //
 
   // -- //
 
@@ -196,6 +626,7 @@ public class LoggerGroup {
     }
 
     var newEntry = supplier.apply(key, updateFrequencyInSeconds);
+    newEntry.registerPublisher();
     entries = Arrays.copyOf(entries, entries.length + 1);
     entries[entries.length - 1] = newEntry;
     return newEntry;
@@ -230,5 +661,66 @@ public class LoggerGroup {
     groups = Arrays.copyOf(groups, groups.length + 1);
     groups[groups.length - 1] = newGroup;
     return newGroup;
+  }
+
+  public static class Redirector implements LogDataReceiver {
+    @Override
+    public void putTable(LogTable table) throws InterruptedException {
+      // Encode new/changed fields
+      var newMap = table.getAll(false);
+
+      for (var field : newMap.entrySet()) {
+        // Check if field has changed
+        var key = field.getKey();
+        var value = field.getValue();
+
+        // Write new data
+        switch (value.type) {
+          case Raw:
+            root.buildBytes(key).info(value.getRaw());
+            break;
+
+          case Boolean:
+            root.buildBoolean(key).info(value.getBoolean());
+            break;
+
+          case BooleanArray:
+            root.buildBooleanArray(key).info(value.getBooleanArray());
+            break;
+
+          case Integer:
+            root.buildInteger(key).info(value.getInteger());
+            break;
+
+          case IntegerArray:
+            root.buildIntegerArray(key).info(value.getIntegerArray());
+            break;
+
+          case Float:
+            root.buildDecimalFloat(key).info(value.getFloat());
+            break;
+
+          case FloatArray:
+            root.buildDecimalFloatArray(key).info(value.getFloatArray());
+            break;
+
+          case Double:
+            root.buildDecimal(key).info(value.getDouble());
+            break;
+
+          case DoubleArray:
+            root.buildDecimalArray(key).info(value.getDoubleArray());
+            break;
+
+          case String:
+            root.buildString(key).info(value.getString());
+            break;
+
+          case StringArray:
+            root.buildStringArray(key).info(value.getStringArray());
+            break;
+        }
+      }
+    }
   }
 }

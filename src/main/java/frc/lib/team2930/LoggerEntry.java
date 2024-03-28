@@ -1,22 +1,53 @@
 package frc.lib.team2930;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.GenericPublisher;
+import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Objects;
 import org.littletonrobotics.junction.Logger;
 
 public abstract class LoggerEntry {
-  private static final Object g_lock = new Object();
-
   public final String key;
   public final double updateFrequency;
   public double lastRefresh;
+  protected GenericPublisher publisher;
   boolean changed;
+  int dataLogId = LoggerGroup.dataLogIdNotInitialized;
 
   protected LoggerEntry(String key, int updateFrequencyInSeconds) {
     this.key = key;
     this.updateFrequency = 1.0 / updateFrequencyInSeconds;
   }
+
+  void registerPublisher() {
+    String nt4Type = getNT4Type();
+    if (nt4Type != null) {
+      this.publisher =
+          LoggerGroup.getNetworkTableTopic(this)
+              .genericPublish(nt4Type, PubSubOption.sendAll(true));
+    }
+  }
+
+  public abstract String getNT4Type();
+
+  public abstract String getWpiLogType();
+
+  public abstract void publish();
+
+  protected int getDataLogId() {
+    if (dataLogId == LoggerGroup.dataLogIdNotInitialized) {
+      dataLogId = LoggerGroup.getDataLogTopic(this);
+    }
+
+    return dataLogId;
+  }
+
+  // ############
 
   public static class Text extends LoggerEntry {
     private String valuePrevious;
@@ -26,15 +57,59 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "string";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "string";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(String value) {
       if (shouldNotRefresh()) return;
 
       this.value = value;
-      this.changed = true;
+      this.changed = !Objects.equals(value, valuePrevious);
+    }
+  }
 
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+  public static class TextArray extends LoggerEntry {
+    private String[] valuePrevious;
+    private String[] value;
+
+    TextArray(String key, int updateFrequencyInSeconds) {
+      super(key, updateFrequencyInSeconds);
+    }
+
+    @Override
+    public String getNT4Type() {
+      return "string[]";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "string[]";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
+    public void info(String... value) {
+      if (shouldNotRefresh()) return;
+
+      this.value = value;
+      this.changed = !Arrays.equals(value, valuePrevious);
     }
   }
 
@@ -46,15 +121,28 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
-    public void info(E value) {
-      if (shouldNotRefresh()) return;
+    @Override
+    public String getNT4Type() {
+      return "string";
+    }
 
-      this.value = value;
-      this.changed = true;
+    @Override
+    public String getWpiLogType() {
+      return "string";
+    }
 
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
+    @Override
+    public void publish() {
+      if (value != null) {
+        LoggerGroup.emit(publisher, value.name(), getDataLogId());
       }
+
+      valuePrevious = value;
+    }
+
+    public void info(E value) {
+      this.value = value;
+      this.changed = value != valuePrevious;
     }
   }
 
@@ -66,15 +154,55 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "boolean";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "boolean";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(boolean value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
+      this.changed = value != valuePrevious;
+    }
+  }
 
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+  public static class BoolArray extends LoggerEntry {
+    private boolean[] valuePrevious;
+    private boolean[] value;
+
+    BoolArray(String key, int updateFrequencyInSeconds) {
+      super(key, updateFrequencyInSeconds);
+    }
+
+    @Override
+    public String getNT4Type() {
+      return "boolean[]";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "boolean[]";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
+    public void info(boolean... value) {
+      this.value = value;
+      this.changed = value != valuePrevious;
     }
   }
 
@@ -86,15 +214,25 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "int";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "int64";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(long value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+      this.changed = value != valuePrevious;
     }
   }
 
@@ -106,15 +244,25 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "int[]";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "int64[]";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(long... value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+      this.changed = !Arrays.equals(value, valuePrevious);
     }
   }
 
@@ -126,15 +274,25 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "double";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "double";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(double value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+      this.changed = value != valuePrevious;
     }
 
     public void info(Rotation2d value) {
@@ -150,15 +308,85 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "double[]";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "double[]";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(double... value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
+      this.changed = !Arrays.equals(value, valuePrevious);
+    }
+  }
 
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+  public static class DecimalFloat extends LoggerEntry {
+    private float valuePrevious;
+    private float value;
+
+    DecimalFloat(String key, int updateFrequencyInSeconds) {
+      super(key, updateFrequencyInSeconds);
+    }
+
+    @Override
+    public String getNT4Type() {
+      return "float";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "float";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
+    public void info(float value) {
+      this.value = value;
+      this.changed = value != valuePrevious;
+    }
+  }
+
+  public static class DecimalFloatArray extends LoggerEntry {
+    private float[] valuePrevious;
+    private float[] value;
+
+    DecimalFloatArray(String key, int updateFrequencyInSeconds) {
+      super(key, updateFrequencyInSeconds);
+    }
+
+    @Override
+    public String getNT4Type() {
+      return "float[]";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "float[]";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
+    public void info(float... value) {
+      this.value = value;
+      this.changed = !Arrays.equals(value, valuePrevious);
     }
   }
 
@@ -170,15 +398,25 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
+    @Override
+    public String getNT4Type() {
+      return "raw";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return "raw";
+    }
+
+    @Override
+    public void publish() {
+      LoggerGroup.emit(publisher, value, getDataLogId());
+      valuePrevious = value;
+    }
+
     public void info(byte[] value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
-      this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
+      this.changed = !Arrays.equals(value, valuePrevious);
     }
   }
 
@@ -190,55 +428,121 @@ public abstract class LoggerEntry {
       super(key, updateFrequencyInSeconds);
     }
 
-    public void info(Mechanism2d value) {
-      if (shouldNotRefresh()) return;
+    @Override
+    public String getNT4Type() {
+      return null;
+    }
 
+    @Override
+    public String getWpiLogType() {
+      return null;
+    }
+
+    @Override
+    public void publish() {
+      // This uses internal implementation details of Mechanism2d, keeping it on AdvantageKit
+      // logging.
+      Logger.recordOutput(key, value);
+      valuePrevious = value;
+    }
+
+    public void info(Mechanism2d value) {
       this.value = value;
       this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
     }
   }
 
   public static class Struct<T extends StructSerializable> extends LoggerEntry {
+    private final edu.wpi.first.util.struct.Struct<T> struct;
+    private final StructBuffer<T> structBuffer;
     private T valuePrevious;
     private T value;
 
-    Struct(String key, int updateFrequencyInSeconds) {
+    Struct(Class<T> clz, String key, int updateFrequencyInSeconds) {
       super(key, updateFrequencyInSeconds);
+
+      struct = LoggerGroup.findStructType(clz);
+      structBuffer = struct != null ? StructBuffer.create(struct) : null;
+    }
+
+    @Override
+    public String getNT4Type() {
+      if (struct != null) {
+        return struct.getTypeString();
+      }
+
+      return "raw";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return getNT4Type();
+    }
+
+    @Override
+    public void publish() {
+      if (structBuffer != null) {
+        ByteBuffer bb = structBuffer.write(value);
+        byte[] array = new byte[bb.position()];
+        bb.position(0);
+        bb.get(array);
+
+        //        Logger.recordOutput(key, value);
+        LoggerGroup.emit(publisher, array, getDataLogId());
+        valuePrevious = value;
+      }
     }
 
     public void info(T value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
       this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
     }
   }
 
   public static class StructArray<T extends StructSerializable> extends LoggerEntry {
+    private final edu.wpi.first.util.struct.Struct<T> struct;
+    private final StructBuffer<T> structBuffer;
     private T[] valuePrevious;
     private T[] value;
 
-    StructArray(String key, int updateFrequencyInSeconds) {
+    StructArray(Class<T> clz, String key, int updateFrequencyInSeconds) {
       super(key, updateFrequencyInSeconds);
+
+      struct = LoggerGroup.findStructType(clz);
+      structBuffer = struct != null ? StructBuffer.create(struct) : null;
+    }
+
+    @Override
+    public String getNT4Type() {
+      if (struct != null) {
+        return struct.getTypeString() + "[]";
+      }
+
+      return "raw";
+    }
+
+    @Override
+    public String getWpiLogType() {
+      return getNT4Type();
+    }
+
+    @Override
+    public void publish() {
+      if (structBuffer != null) {
+        ByteBuffer bb = structBuffer.writeArray(value);
+        byte[] array = new byte[bb.position()];
+        bb.position(0);
+        bb.get(array);
+
+        //        Logger.recordOutput(key, value);
+        LoggerGroup.emit(publisher, array, getDataLogId());
+        valuePrevious = value;
+      }
     }
 
     public void info(T[] value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
       this.changed = true;
-
-      synchronized (g_lock) {
-        Logger.recordOutput(key, value);
-      }
     }
   }
 
@@ -250,5 +554,14 @@ public abstract class LoggerEntry {
     }
 
     return true;
+  }
+
+  void publishIfNeeded() {
+    if (shouldNotRefresh()) return;
+
+    if (changed) {
+      changed = false;
+      publish();
+    }
   }
 }

@@ -33,7 +33,6 @@ import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
@@ -109,13 +108,16 @@ public class Robot extends LoggedRobot {
     switch (Constants.RobotMode.getMode()) {
       case REAL:
         // Running on a real robot, log to a USB stick
-        Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));
-        Logger.addDataReceiver(new NT4Publisher());
+        Logger.addDataReceiver(new LoggerGroup.Redirector());
+        LoggerGroup.setDataLog("/media/sda1");
         break;
 
       case SIM:
         // Running a physics simulator, log to NT
-        Logger.addDataReceiver(new NT4Publisher());
+        Logger.addDataReceiver(new LoggerGroup.Redirector());
+        if (Constants.unusedCode) {
+          LoggerGroup.setDataLog("logs");
+        }
         // FIXME: add a git ignored folder where logs are saved
         break;
 
@@ -159,7 +161,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    // Update the timestmap for logging.
+    // Update the timestamp for logging.
     LoggerGroup.periodic();
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
@@ -178,6 +180,8 @@ public class Robot extends LoggedRobot {
 
     logBreakModeButton.info(robotContainer.breakModeButton.get());
     logHomeSensorsButton.info(robotContainer.homeSensorsButton.get());
+
+    LoggerGroup.publish();
   }
 
   /** This function is called once when the robot is disabled. */
