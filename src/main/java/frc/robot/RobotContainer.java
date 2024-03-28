@@ -605,7 +605,7 @@ public class RobotContainer {
 
     operatorController
         .b()
-        .onTrue(Commands.runOnce(() -> endEffector.setPercentOut(0.5), endEffector))
+        .onTrue(Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector))
         .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
     operatorController
