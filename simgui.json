@@ -1,6 +1,9 @@
 {
   "HALProvider": {
     "Addressable LEDs": {
+      "0": {
+        "columns": 13
+      },
       "window": {
         "visible": true
       }
@@ -33,20 +36,12 @@
       "/SmartDashboard/PV Camera power ON": "Command",
       "/SmartDashboard/PV REBOOT 1_Shooter_Left": "Command",
       "/SmartDashboard/PV REBOOT 2_Shooter_Right": "Command",
-      "/SmartDashboard/PV REBOOT 3_Intake_Left": "Command",
-      "/SmartDashboard/PV REBOOT 4_Intake_Right": "Command",
       "/SmartDashboard/PV Restart SW 1_Shooter_Left": "Command",
       "/SmartDashboard/PV Restart SW 2_Shooter_Right": "Command",
-      "/SmartDashboard/PV Restart SW 3_Intake_Left": "Command",
-      "/SmartDashboard/PV Restart SW 4_Intake_Right": "Command",
       "/SmartDashboard/VisionSystemSim-1_Shooter_Left_See3Cam/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-2_Shooter_Right_See3Cam/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-3_Intake_Left_See3Cam/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-4_Intake_Right_See3Cam/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_LEFT/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-INTAKE_SIDE_RIGHT/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_LEFT/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-SHOOTER_SIDE_RIGHT/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-4_Intake_Right_See3Cam/Sim Field": "Field2d"
     }
   },
   "NetworkTables Info": {
