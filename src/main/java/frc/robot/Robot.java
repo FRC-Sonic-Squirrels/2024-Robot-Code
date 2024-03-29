@@ -174,6 +174,7 @@ public class Robot extends LoggedRobot {
 
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();
+    robotContainer.updateLedGamepieceState();
 
     logBreakModeButton.info(robotContainer.breakModeButton.get());
     logHomeSensorsButton.info(robotContainer.homeSensorsButton.get());
