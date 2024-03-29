@@ -42,9 +42,9 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.autonomous.AutosSubsystems;
@@ -135,7 +135,8 @@ public class RobotContainer {
   private static final LoggedTunableNumber passThroughVel =
       groupTunable.build("PlopThroughVel", 1000);
 
-private static final LoggedTunableNumber passThroughPivotPitch = groupTunable.build("plopThroughPivotPitch", 12.0);
+  private static final LoggedTunableNumber passThroughPivotPitch =
+      groupTunable.build("plopThroughPivotPitch", 12.0);
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
@@ -547,7 +548,7 @@ private static final LoggedTunableNumber passThroughPivotPitch = groupTunable.bu
         .onFalse(
             Commands.runOnce(
                 () -> {
-                shooter.setPercentOut(0);
+                  shooter.setPercentOut(0);
                   shooter.setKickerPercentOut(0.0);
                   endEffector.setPercentOut(0.0);
                   intake.setPercentOut(0.0);

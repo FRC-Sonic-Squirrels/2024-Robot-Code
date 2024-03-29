@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team6328.GeomUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.DriveToPose;
@@ -125,6 +126,15 @@ public class CommandComposer {
             Constants.FieldConstants::getAmpScoringPose,
             () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
+    DriveToPose driveToPrep =
+        new DriveToPose(
+            drivetrainWrapper,
+            () ->
+                GeomUtil.transformToPose(
+                    Constants.FieldConstants.getAmpScoringPose()
+                        .minus(new Pose2d(0.0, 0.5, new Rotation2d()))),
+            () -> drivetrainWrapper.getPoseEstimatorPose(true));
+
     Measure<Distance> distToElevateMech = Units.Meters.of(3.5);
 
     BooleanSupplier withinRangeOfAmp =
@@ -134,35 +144,35 @@ public class CommandComposer {
                     Constants.FieldConstants.getAmpScoringPose())
                 <= distToElevateMech.in(Units.Meters);
 
+    Command goToAmpPosition =
+        new ReactionArmsSetAngle(
+                elevator,
+                Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+            .andThen(MechanismActions.ampPrepPosition(elevator, arm))
+            .andThen(
+                new ReactionArmsSetAngle(
+                    elevator,
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS));
+
     Command scoreAmp =
-        new ConditionalCommand(
+        goToAmpPosition
+            .deadlineWith(driveToPrep)
+            .andThen(
                 driveToAmp
                     .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
                     .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
                     .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
                     .finallyDo(() -> rumbleCommand.accept(0.0))
-                    .andThen(Commands.waitUntil(() -> false))
-                    .until(() -> confirmation.getAsBoolean()),
-                Commands.waitUntil(() -> confirmation.getAsBoolean()),
-                () -> doDrive)
-            .asProxy()
-            .alongWith(
-                new ReactionArmsSetAngle(
-                        elevator,
-                        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
-                    .andThen(MechanismActions.ampPrepPosition(elevator, arm))
+                    .andThen(Commands.waitUntil(confirmation::getAsBoolean))
+                    .asProxy()
+                    .deadlineWith(
+                        new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
                     .andThen(
-                        new ReactionArmsSetAngle(
-                            elevator,
-                            Constants.ElevatorConstants.ReactionArmConstants
-                                .REACTION_ARM_HOME_ROTATIONS)))
-            .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-            .andThen(
-                MechanismActions.ampPosition(elevator, arm)
-                    .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
-                    .until(noGamepieceInEE))
-            .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
-            .finallyDo(() -> rumbleCommand.accept(0.0));
+                        MechanismActions.ampPosition(elevator, arm)
+                            .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
+                            .until(noGamepieceInEE))
+                    .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
+                    .finallyDo(() -> rumbleCommand.accept(0.0)));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");
@@ -177,24 +187,24 @@ public class CommandComposer {
       Arm arm,
       LED led) {
     Command cancelScoreAmp =
-        // MechanismActions.ampPositionToLoadPosition(elevator, arm)
-        // .until(
-        // () ->
-        // GeometryUtil.getDist(
-        // drivetrainWrapper.getPoseEstimatorPose(true),
-        // Constants.FieldConstants.getAmpScoringPose())
-        // >= 0.5)
-        // .andThen(
-        new ReactionArmsSetAngle(
-                elevator,
-                Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
-            .andThen(MechanismActions.loadingPosition(elevator, arm))
+        Commands.waitUntil(
+                () ->
+                    GeometryUtil.getDist(
+                            drivetrainWrapper.getPoseEstimatorPose(true),
+                            Constants.FieldConstants.getAmpScoringPose())
+                        >= 0.2)
             .andThen(
                 new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
-            .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
-            .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS));
+                        elevator,
+                        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+                    .andThen(MechanismActions.loadingPosition(elevator, arm))
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_HOME_ROTATIONS))
+                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
+                    .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS)));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
