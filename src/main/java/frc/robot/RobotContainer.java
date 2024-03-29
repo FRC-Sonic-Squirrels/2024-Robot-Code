@@ -683,9 +683,6 @@ public class RobotContainer {
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 
-    noteInRobot.onTrue(Commands.runOnce(() -> led.setNoteStatus(true)));
-    noteInRobot.onFalse(Commands.runOnce(() -> led.setNoteStatus(false)));
-
     twenty_Second_Warning.onTrue(
         new LedSetStateForSeconds(led, RobotState.TWENTY_SECOND_WARNING, 0.5));
 
@@ -816,5 +813,14 @@ public class RobotContainer {
     elevator.setNeutralMode(NeutralModeValue.Brake);
     arm.setNeutralMode(NeutralModeValue.Brake);
     shooter.setNeutralMode(NeutralModeValue.Brake);
+  }
+
+  public void updateLedGamepieceState() {
+    if (noteInRobot.getAsBoolean() && !led.getNoteStatus()) {
+      led.setNoteStatus(true);
+    }
+    if (!noteInRobot.getAsBoolean() && led.getNoteStatus()) {
+      led.setNoteStatus(false);
+    }
   }
 }
