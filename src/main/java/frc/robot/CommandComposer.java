@@ -192,7 +192,7 @@ public class CommandComposer {
                     GeometryUtil.getDist(
                             drivetrainWrapper.getPoseEstimatorPose(true),
                             Constants.FieldConstants.getAmpScoringPose())
-                        >= 0.5)
+                        >= 0.2)
             .andThen(
                 new ReactionArmsSetAngle(
                         elevator,
