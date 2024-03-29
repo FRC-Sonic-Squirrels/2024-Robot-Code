@@ -7,9 +7,9 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import java.awt.Color;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
@@ -19,6 +19,7 @@ public class LED extends SubsystemBase {
   AddressableLEDBuffer previousBuffer = new AddressableLEDBuffer(13);
 
   int snakeShade = 0;
+  int levelMeterCount = 0;
   int rainbowFirstPixelHue = 0;
   robotStates robotState = robotStates.DEFAULT;
 
@@ -32,59 +33,56 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
+      case TEST:
+      case SHOOTER_LINING_UP:
       case DEFAULT:
-        setAllSolidColor(new Color(255, 45, 0));
+        setAudioLevelMeter(100);
+        // setAllSolidColor(new Color(255, 45, 0)); // set solid orange
         break;
       case SHOOTER_SUCCESS:
         // test writing solid color
         // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(Color.GREEN);
+        setAllSolidColor(Color.kGreen);
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
         // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(Color.BLACK, Color.WHITE);
+        setAllBlinking(Color.kBlack, Color.kWhite);
         break;
       case AMP_READY_TO_SCORE:
-        setAllSolidColor(Color.GREEN);
+        setAllSolidColor(Color.kGreen);
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
         break;
       case AUTO_MODE:
-        setAllSolidColor(Color.WHITE);
+        setAllSolidColor(Color.kWhite);
         break;
       case NOTHING:
-        setAllSolidColor(Color.BLACK);
+        setAllSolidColor(Color.kBlack);
         break;
       case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
-
-        setAllBlinking(Color.magenta, Color.BLACK);
-
+        setAllBlinking(Color.kMagenta, Color.kBlack);
         break;
       case AMP_LINING_UP:
-        setAllBlinking(Color.yellow, Color.BLACK);
-
+        setAllBlinking(Color.kYellow, Color.kBlack);
       case GAMEPIECE_IN_ROBOT:
-        setAllSolidColor(Color.ORANGE);
+        setAllSolidColor(Color.kOrange);
         break;
       case CLIMB_MODE:
-        setAllSolidColor(Color.GREEN);
+        setAllSolidColor(Color.kGreen);
         break;
-
       case HOME_SUBSYSTEMS:
-        setAllBlinking(Color.GREEN, Color.BLACK);
+        setAllBlinking(Color.kGreen, Color.kBlack);
         break;
-
       case BREAK_MODE_ON:
-        setAllBlinking(Color.RED, Color.BLACK);
+        setAllBlinking(Color.kRed, Color.kBlack);
         break;
-
       case BREAK_MODE_OFF:
-        setAllBlinking(Color.BLUE, Color.BLACK, 0.3);
+        setAllBlinking(Color.kBlue, Color.kBlack, 0.3);
         break;
     }
 
@@ -98,7 +96,7 @@ public class LED extends SubsystemBase {
 
   private void setAllSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, color.getRed(), color.getGreen(), color.getBlue());
+      ledBuffer.setLED(i, color);
     }
   }
 
@@ -110,11 +108,11 @@ public class LED extends SubsystemBase {
 
     if (Math.sin(Timer.getFPGATimestamp() * Math.PI / period) >= 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color1.getRed(), color1.getGreen(), color1.getBlue());
+        ledBuffer.setLED(i, color1);
       }
     } else {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
-        ledBuffer.setRGB(i, color2.getRed(), color2.getGreen(), color2.getBlue());
+        ledBuffer.setLED(i, color2);
       }
     }
   }
@@ -123,7 +121,7 @@ public class LED extends SubsystemBase {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
       ledBuffer.setRGB(
-          i, shade * color.getRed(), shade * color.getGreen(), shade * color.getBlue());
+          i, (int) (shade * color.red), (int) (shade * color.green), (int) (shade * color.blue));
 
       snakeShade += 3;
       snakeShade %= 255;
@@ -140,10 +138,43 @@ public class LED extends SubsystemBase {
     rainbowFirstPixelHue %= 180;
   }
 
-  private void setNothing() {
+  /**
+   * setAudioLevelMeter() - looks like an audio level meter
+   *
+   * @param bpm beats per minute
+   */
+  private void setAudioLevelMeter(int bpm) {
+
+    int max = ledBuffer.getLength();
+    double theta = levelMeterCount * 0.02 * Math.PI * bpm / 60.0;
+    int volume =
+        (int)
+            Math.round(
+                1
+                    + Math.abs(11.0 * Math.sin(theta))
+                    + (3.0 * Math.sin(theta * 7.0))
+                    + (1.0 * Math.sin(theta * 17.0)));
+
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue());
+      if (i <= volume) {
+        if (i <= (0.6 * max)) {
+          ledBuffer.setLED(i, Color.kGreen);
+        } else if (i <= 0.8 * max) {
+          ledBuffer.setLED(i, Color.kYellow);
+        } else {
+          ledBuffer.setLED(i, Color.kRed);
+        }
+      } else {
+        ledBuffer.setLED(i, Color.kBlack);
+      }
     }
+    levelMeterCount += 1;
+
+    // System.out.println("LED: count=" + levelMeterCount + " vol=" + volume + " theta=" + theta);
+  }
+
+  private void setNothing() {
+    setAllSolidColor(Color.kBlack);
   }
 
   private class individualLED {
