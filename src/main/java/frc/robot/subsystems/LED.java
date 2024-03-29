@@ -6,10 +6,12 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class LED extends SubsystemBase {
   /** Creates a new LED. */
@@ -21,7 +23,10 @@ public class LED extends SubsystemBase {
   int snakeShade = 0;
   int levelMeterCount = 0;
   int rainbowFirstPixelHue = 0;
-  robotStates robotState = robotStates.DEFAULT;
+
+  private RobotState robotState = RobotState.BASE;
+  private BaseRobotState baseRobotState = BaseRobotState.NOTE_STATUS;
+  private boolean noteInRobot;
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -33,58 +38,97 @@ public class LED extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     switch (robotState) {
+      case BASE:
+        switch (baseRobotState) {
+          case NOTE_STATUS:
+            if (noteInRobot) {
+              setSolidColor(new Color(255, 45, 0));
+
+            } else {
+              setSolidColor(Color.kBlack);
+            }
+            break;
+
+          case AUTO_NOTE_PICKUP:
+            setBlinking(Color.kWhite, Color.kBlack);
+            break;
+
+          case AMP_LINE_UP:
+            setBlinking(Color.kWhite, Color.kGreen);
+            break;
+
+          case CLIMB_LINE_UP:
+            setBlinking(Color.kWhite, Color.kBlue);
+            break;
+
+          case SHOOTING_PREP:
+            setBlinking(Color.kWhite, Color.kRED);
+            break;
+          case SHOOTER_SUCCESS:
+            setSolidColor(Color.kGreen);
+            break;
+
+          default:
+            break;
+        }
+        break;
+
       case TEST:
       case SHOOTER_LINING_UP:
       case DEFAULT:
         setAudioLevelMeter(100);
-        // setAllSolidColor(new Color(255, 45, 0)); // set solid orange
+        // setSolidColor(new Color(255, 45, 0)); // set solid orange
         break;
       case SHOOTER_SUCCESS:
         // test writing solid color
-        // FIXME: if wanted, inside of setallsolidcolor could remove parameters once we have certain
+        // FIXME: if wanted, inside of setSolidColor could remove parameters once we have certain
         // values we want to use
-        setAllSolidColor(Color.kGreen);
+        setSolidColor(Color.kGreen);
         break;
       case SHOOTER_LINED_UP:
         // test of writing blinking
-        // FIXME: if wanted, inside of setallblinking could remove paramters once we have certain
+        // FIXME: if wanted, inside of setBlinking could remove paramters once we have certain
         // values we want to use
-        setAllBlinking(Color.kBlack, Color.kWhite);
+        setBlinking(Color.kBlack, Color.kWhite);
         break;
       case AMP_READY_TO_SCORE:
-        setAllSolidColor(Color.kGreen);
+        setSolidColor(Color.kGreen);
         break;
       case DRIVING_TO_GAMEPIECE:
         setAllRainbow();
         break;
       case AUTO_MODE:
-        setAllSolidColor(Color.kWhite);
+        setSolidColor(Color.kWhite);
         break;
       case NOTHING:
-        setAllSolidColor(Color.kBlack);
+        setSolidColor(Color.kBlack);
         break;
       case TWENTY_SECOND_WARNING:
         // when the match has 20 seconds left this code will change the color to magenta
-        setAllBlinking(Color.kMagenta, Color.kBlack);
+        setBlinking(Color.kMagenta, Color.kBlack);
         break;
       case AMP_LINING_UP:
-        setAllBlinking(Color.kYellow, Color.kBlack);
+        setBlinking(Color.kYellow, Color.kBlack);
       case GAMEPIECE_IN_ROBOT:
-        setAllSolidColor(Color.kOrange);
+        setSolidColor(Color.kOrange);
         break;
       case CLIMB_MODE:
-        setAllSolidColor(Color.kGreen);
+        setSolidColor(Color.kGreen);
         break;
       case HOME_SUBSYSTEMS:
-        setAllBlinking(Color.kGreen, Color.kBlack);
+        setBlinking(Color.kGreen, Color.kBlack);
         break;
       case BREAK_MODE_ON:
-        setAllBlinking(Color.kRed, Color.kBlack);
+        setBlinking(Color.kRed, Color.kBlack);
         break;
       case BREAK_MODE_OFF:
-        setAllBlinking(Color.kBlue, Color.kBlack, 0.3);
+        setBlinking(Color.kBlue, Color.kBlack, 0.3);
         break;
     }
+
+    Logger.recordOutput("LED/robotState", robotState);
+    Logger.recordOutput("LED/baseRobotState", baseRobotState);
+    Logger.recordOutput("LED/noteInRobot", noteInRobot);
 
     if (!sameAsPrevBuffer()) led.setData(ledBuffer);
 
@@ -94,17 +138,17 @@ public class LED extends SubsystemBase {
         });
   }
 
-  private void setAllSolidColor(Color color) {
+  private void setSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setLED(i, color);
     }
   }
 
-  private void setAllBlinking(Color color1, Color color2) {
-    setAllBlinking(color1, color2, 0.1);
+  private void setBlinking(Color color1, Color color2) {
+    setBlinking(color1, color2, 0.1);
   }
 
-  private void setAllBlinking(Color color1, Color color2, double period) {
+  private void setBlinking(Color color1, Color color2, double period) {
 
     if (Math.sin(Timer.getFPGATimestamp() * Math.PI / period) >= 0) {
       for (int i = 0; i < ledBuffer.getLength(); i++) {
@@ -174,7 +218,7 @@ public class LED extends SubsystemBase {
   }
 
   private void setNothing() {
-    setAllSolidColor(Color.kBlack);
+    setSolidColor(Color.kBlack);
   }
 
   private class individualLED {
