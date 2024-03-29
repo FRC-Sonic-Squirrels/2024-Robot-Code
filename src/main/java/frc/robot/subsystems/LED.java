@@ -98,9 +98,6 @@ public class LED extends SubsystemBase {
     Logger.recordOutput("LED/robotState", robotState);
     Logger.recordOutput("LED/baseRobotState", baseRobotState);
     Logger.recordOutput("LED/noteInRobot", noteInRobot);
-    Logger.recordOutput("LED/robotState", robotState);
-    Logger.recordOutput("LED/baseRobotState", baseRobotState);
-    Logger.recordOutput("LED/noteInRobot", noteInRobot);
 
     if (!sameAsPrevBuffer()) led.setData(ledBuffer);
 
