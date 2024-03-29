@@ -208,7 +208,7 @@ public class CommandComposer {
                 ? wrapper.getPoseEstimatorPoseStageRed(false)
                 : wrapper.getPoseEstimatorPoseStageBlue(false);
     Supplier<Pose2d> targetPose = () -> AutoClimb.getTargetPose(robotLocalization.get());
-    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, false);
+    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true);
     Command stageAlign =
         driveCommand
             .alongWith(

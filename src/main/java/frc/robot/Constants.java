@@ -181,6 +181,13 @@ public final class Constants {
           : STAGE_CENTER_BLUE_ALLIANCE;
     }
 
+    public static Pose2d getAmpPreScoringPose() {
+      return new Pose2d(
+          Constants.isRedAlliance() ? 14.76 : Constants.FieldConstants.FIELD_LENGTH - 14.76,
+          7.15,
+          Rotation2d.fromDegrees(90.0));
+    }
+
     public static Pose2d getAmpScoringPose() {
       return new Pose2d(
           Constants.isRedAlliance() ? 14.76 : Constants.FieldConstants.FIELD_LENGTH - 14.76,
