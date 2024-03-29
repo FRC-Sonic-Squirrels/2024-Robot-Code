@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -26,6 +28,11 @@ public class LED extends SubsystemBase {
   private BaseRobotState baseRobotState = BaseRobotState.NOTE_STATUS;
   private boolean noteInRobot;
   private Color squirrelOrange = new Color(255, 45, 0);
+  private TunableNumberGroup group = new TunableNumberGroup("LED");
+  private LoggedTunableNumber useTunableLEDs = group.build("useTunableLEDs", 0);
+  private LoggedTunableNumber tunableR = group.build("tunableColor/r", 0);
+  private LoggedTunableNumber tunableG = group.build("tunableColor/g", 0);
+  private LoggedTunableNumber tunableB = group.build("tunableColor/b", 0);
 
   public LED() {
     led.setLength(ledBuffer.getLength());
@@ -35,66 +42,71 @@ public class LED extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    switch (robotState) {
-      case BASE:
-        switch (baseRobotState) {
-          case NOTE_STATUS:
-            if (noteInRobot) {
-              setSolidColor(squirrelOrange);
+    if (useTunableLEDs.get() == 0) {
+      // This method will be called once per scheduler run
+      switch (robotState) {
+        case BASE:
+          switch (baseRobotState) {
+            case NOTE_STATUS:
+              if (noteInRobot) {
+                setSolidColor(squirrelOrange);
 
-            } else {
-              setSolidColor(Color.kBlack);
-            }
-            break;
+              } else {
+                setSolidColor(Color.kBlack);
+              }
+              break;
 
-          case AUTO_NOTE_PICKUP:
-            setBlinking(Color.kWhite, Color.kBlack);
-            break;
+            case AUTO_NOTE_PICKUP:
+              setBlinking(Color.kWhite, Color.kBlack);
+              break;
 
-          case AMP_LINE_UP:
-            setBlinking(Color.kWhite, Color.kGreen);
-            break;
+            case AMP_LINE_UP:
+              setBlinking(Color.kWhite, Color.kGreen);
+              break;
 
-          case CLIMB_LINE_UP:
-            setBlinking(Color.kWhite, Color.kBlue);
-            break;
+            case CLIMB_LINE_UP:
+              setBlinking(Color.kWhite, Color.kBlue);
+              break;
 
-          case SHOOTING_PREP:
-            setBlinking(Color.kWhite, Color.kRed);
-            break;
-          case SHOOTER_SUCCESS:
-            setSolidColor(Color.kGreen);
-            break;
+            case SHOOTING_PREP:
+              setBlinking(Color.kWhite, Color.kRed);
+              break;
+            case SHOOTER_SUCCESS:
+              setSolidColor(Color.kGreen);
+              break;
 
-          default:
-            setAudioLevelMeter(100);
-            break;
-        }
-        break;
+            default:
+              setAudioLevelMeter(100);
+              break;
+          }
+          break;
 
-      case AMP_READY_TO_SCORE:
-        setSolidColor(Color.kGreen);
-        break;
-      case TWENTY_SECOND_WARNING:
-        setBlinking(Color.kMagenta, Color.kBlack);
-        break;
-      case HOME_SUBSYSTEMS:
-        setBlinking(Color.kGreen, Color.kBlack);
-        break;
-      case BREAK_MODE_ON:
-        setBlinking(Color.kRed, Color.kBlack);
-        break;
-      case BREAK_MODE_OFF:
-        setBlinking(Color.kBlue, Color.kBlack, 0.3);
-        break;
-      case TEST:
-        setSolidColor(Color.kCyan);
-        break;
-      case INTAKE_SUCCESS:
-        setBlinking(squirrelOrange, Color.kBlack);
-        break;
+        case AMP_READY_TO_SCORE:
+          setSolidColor(Color.kGreen);
+          break;
+        case TWENTY_SECOND_WARNING:
+          setBlinking(Color.kMagenta, Color.kBlack);
+          break;
+        case HOME_SUBSYSTEMS:
+          setBlinking(Color.kGreen, Color.kBlack);
+          break;
+        case BREAK_MODE_ON:
+          setBlinking(Color.kRed, Color.kBlack);
+          break;
+        case BREAK_MODE_OFF:
+          setBlinking(Color.kBlue, Color.kBlack, 0.3);
+          break;
+        case TEST:
+          setSolidColor(Color.kCyan);
+          break;
+        case INTAKE_SUCCESS:
+          setBlinking(squirrelOrange, Color.kBlack);
+          break;
+      }
+    } else {
+      setSolidColor(new Color(tunableR.get(), tunableG.get(), tunableB.get()));
     }
+
     Logger.recordOutput("LED/robotState", robotState);
     Logger.recordOutput("LED/baseRobotState", baseRobotState);
     Logger.recordOutput("LED/noteInRobot", noteInRobot);
