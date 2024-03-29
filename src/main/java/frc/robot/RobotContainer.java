@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -62,7 +63,7 @@ import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.LED.robotStates;
+import frc.robot.subsystems.LED.RobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
@@ -139,6 +140,9 @@ public class RobotContainer {
       new LoggedDashboardChooser<>("Auto Routine");
   private final HashMap<String, Supplier<Auto>> stringToAutoSupplierMap = new HashMap<>();
   private final AutosManager autoManager;
+
+  private Trigger noteInRobot;
+  private final Trigger twenty_Second_Warning;
 
   public DigitalInput breakModeButton = new DigitalInput(0);
   public DigitalInput homeSensorsButton = new DigitalInput(1);
@@ -409,7 +413,7 @@ public class RobotContainer {
 
     var subsystems =
         new AutosSubsystems(
-            drivetrainWrapper, elevator, arm, intake, endEffector, shooter, visionGamepiece);
+            drivetrainWrapper, elevator, arm, intake, endEffector, shooter, visionGamepiece, led);
 
     autoManager = new AutosManager(subsystems, config, autoChooser, stringToAutoSupplierMap);
 
@@ -424,7 +428,10 @@ public class RobotContainer {
         new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
 
     scoreSpeaker = new ScoreSpeaker(drivetrainWrapper, shooter, endEffector, () -> true);
+    twenty_Second_Warning = new Trigger(() -> DriverStation.getMatchTime() > 115);
 
+    noteInRobot =
+        new Trigger(() -> endEffector.noteInEndEffector() || shooter.noteInShooter()).debounce(0.1);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -442,6 +449,7 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new DriveToGamepiece(
+                led,
                 visionGamepiece::getClosestGamepiece,
                 drivetrainWrapper,
                 endEffector::intakeSideTOFDetectGamepiece,
@@ -460,7 +468,14 @@ public class RobotContainer {
 
     driverController
         .rightBumper()
-        .whileTrue(new IntakeGamepiece(intake, endEffector, shooter, arm, elevator, (rumble) -> {}))
+        .whileTrue(
+            new IntakeGamepiece(intake, endEffector, shooter, arm, elevator, (rumble) -> {})
+                .finallyDo(
+                    (interrupted) -> {
+                      if (!interrupted)
+                        CommandScheduler.getInstance()
+                            .schedule(new LedSetStateForSeconds(led, RobotState.INTAKE_SUCCESS, 1));
+                    }))
         .whileTrue(
             Commands.run(
                     () -> {
@@ -477,9 +492,10 @@ public class RobotContainer {
         .whileTrue(
             CommandComposer.stageAlign(
                 drivetrainWrapper,
+                led,
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
 
-    driverController.povUp().whileTrue(CommandComposer.driveToChain(drivetrainWrapper));
+    driverController.povUp().whileTrue(CommandComposer.driveToChain(drivetrainWrapper, led));
 
     driverController
         .rightTrigger()
@@ -489,6 +505,7 @@ public class RobotContainer {
                 shooter,
                 endEffector,
                 intake,
+                led,
                 1000,
                 () -> true,
                 (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble)));
@@ -503,10 +520,12 @@ public class RobotContainer {
                 arm,
                 intake,
                 shooter,
+                led,
                 true,
                 driverController.a(),
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)))
-        .onFalse(CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
+        .onFalse(
+            CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm, led));
 
     driverController
         .x()
@@ -543,6 +562,7 @@ public class RobotContainer {
                 shooter,
                 endEffector,
                 intake,
+                led,
                 5.0,
                 () -> true,
                 (r) -> {},
@@ -626,7 +646,7 @@ public class RobotContainer {
             .andThen(arm::resetSensorToHomePosition, arm)
             .andThen(shooter::pivotResetHomePosition, shooter)
             .andThen(elevator::resetReactionArmPositions)
-            .andThen(new LedSetStateForSeconds(led, robotStates.HOME_SUBSYSTEMS, 1.5))
+            .andThen(new LedSetStateForSeconds(led, RobotState.HOME_SUBSYSTEMS, 1.5))
             .ignoringDisable(true));
 
     breakModeButtonTrigger.onTrue(
@@ -641,7 +661,7 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_OFF, 1.5))
+                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_OFF, 1.5))
                 .ignoringDisable(true),
             Commands.runOnce(
                     () -> {
@@ -653,9 +673,15 @@ public class RobotContainer {
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, robotStates.BREAK_MODE_ON, 1.5))
+                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_ON, 1.5))
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
+
+    noteInRobot.onTrue(Commands.runOnce(() -> led.setNoteStatus(true)));
+    noteInRobot.onFalse(Commands.runOnce(() -> led.setNoteStatus(false)));
+
+    twenty_Second_Warning.onTrue(
+        new LedSetStateForSeconds(led, RobotState.TWENTY_SECOND_WARNING, 0.5));
 
     // Add Reset and Reboot buttons to SmartDashboard
     SmartDashboard.putData(

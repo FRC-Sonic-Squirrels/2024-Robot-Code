@@ -19,6 +19,8 @@ import frc.lib.team2930.*;
 import frc.lib.team2930.ShootingSolver.Solution;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -102,6 +104,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final Shooter shooter;
   private final EndEffector endEffector;
   private final Intake intake;
+  private final LED led;
   // such as driver confirmation, in auto this is always true
   private final Consumer<Double> rumbleConsumer;
   private final BooleanSupplier externalConfirmation;
@@ -137,6 +140,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      LED led,
       double forceShotIn,
       BooleanSupplier externalConfirmation,
       Consumer<Double> rumbleConsumer) {
@@ -145,6 +149,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         shooter,
         endEffector,
         intake,
+        led,
         forceShotIn,
         externalConfirmation,
         rumbleConsumer,
@@ -157,6 +162,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      LED led,
       double forceShotIn,
       BooleanSupplier externalConfirmation,
       Consumer<Double> rumbleConsumer,
@@ -168,6 +174,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
+    this.led = led;
     this.rumbleConsumer = rumbleConsumer;
     this.externalConfirmation = externalConfirmation;
     this.forceShotIn = forceShotIn;
@@ -193,6 +200,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      LED led,
       double forceShotIn,
       BooleanSupplier externalSupplier,
       Consumer<Double> rumbleConsumer,
@@ -201,19 +209,21 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     Command command =
         new RunStateMachineCommand(
-            () ->
-                new ShooterScoreSpeakerStateMachine(
-                    drivetrainWrapper,
-                    shooter,
-                    endEffector,
-                    intake,
-                    forceShotIn,
-                    externalSupplier,
-                    rumbleConsumer,
-                    simpleShot,
-                    shooterPitch),
-            shooter,
-            endEffector);
+                () ->
+                    new ShooterScoreSpeakerStateMachine(
+                        drivetrainWrapper,
+                        shooter,
+                        endEffector,
+                        intake,
+                        led,
+                        forceShotIn,
+                        externalSupplier,
+                        rumbleConsumer,
+                        simpleShot,
+                        shooterPitch),
+                shooter,
+                endEffector)
+            .finallyDo(() -> led.setBaseRobotState(BaseRobotState.NOTE_STATUS));
 
     // FIXME: probably dont need this add requirments here once we add the
     // asCommand(Subsytem...
@@ -242,6 +252,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      LED led,
       double forceShotIn,
       BooleanSupplier externalSupplier,
       Consumer<Double> rumbleConsumer) {
@@ -250,6 +261,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         shooter,
         endEffector,
         intake,
+        led,
         forceShotIn,
         externalSupplier,
         rumbleConsumer,
@@ -262,12 +274,14 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       Shooter shooter,
       EndEffector endEffector,
       Intake intake,
+      LED led,
       double forceShotIn) {
     return getAsCommand(
         drivetrainWrapper,
         shooter,
         endEffector,
         intake,
+        led,
         forceShotIn,
         () -> true,
         (ignore) -> {},
@@ -276,6 +290,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   public StateHandler prepWhileLoadingGamepiece() {
+    led.setBaseRobotState(BaseRobotState.SHOOTING_PREP);
     // aim towards speaker
 
     updateSolver();
@@ -423,6 +438,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         startOfShooting = Timer.getFPGATimestamp();
         solver.startShooting(startOfShooting);
         shooter.markStartOfNoteShooting();
+        led.setBaseRobotState(BaseRobotState.SHOOTER_SUCCESS);
         return stateWithName("shoot", this::shoot);
       }
     }

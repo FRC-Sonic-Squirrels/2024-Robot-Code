@@ -10,6 +10,7 @@ import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
 import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -30,6 +31,7 @@ public class AutoStateMachine extends StateMachine {
   private final Arm arm;
   private final Intake intake;
   private final VisionGamepiece visionGamepiece;
+  private final LED led;
   private final RobotConfig config;
   private final ChoreoTrajectoryWithName[] intakingTrajs;
   private final ChoreoTrajectoryWithName[] shootingTrajs;
@@ -63,6 +65,7 @@ public class AutoStateMachine extends StateMachine {
     this.arm = subsystems.arm();
     this.intake = subsystems.intake();
     this.visionGamepiece = subsystems.visionGamepiece();
+    this.led = subsystems.led();
     this.config = config;
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
@@ -87,7 +90,7 @@ public class AutoStateMachine extends StateMachine {
 
   private StateHandler autoInitialState() {
     scoreSpeaker =
-        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, led, 5);
 
     return suspendForCommand(scoreSpeaker, this::shotDone);
   }

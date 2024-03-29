@@ -8,12 +8,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public class DriveToGamepiece extends Command {
   /** Creates a new DriveToGamepiece. */
+  private final LED led;
+
   private Supplier<ProcessedGamepieceData> targetGamepiece;
 
   private final DrivetrainWrapper wrapper;
@@ -26,11 +30,13 @@ public class DriveToGamepiece extends Command {
 
   /** Drives robot to gamepiece, intended for ground gamepieces only */
   public DriveToGamepiece(
+      LED led,
       Supplier<ProcessedGamepieceData> targetGamepiece,
       DrivetrainWrapper wrapper,
       Supplier<Boolean> gamepieceIntaked,
       Supplier<Pose2d> pose) {
     // Use addRequirements() here to declare subsystem dependencies.
+    this.led = led;
     this.targetGamepiece = targetGamepiece;
     this.wrapper = wrapper;
     this.gamepieceIntaked = gamepieceIntaked;
@@ -42,7 +48,7 @@ public class DriveToGamepiece extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    helper = new DriveToGamepieceHelper();
+    helper = new DriveToGamepieceHelper(led);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -63,6 +69,7 @@ public class DriveToGamepiece extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
     wrapper.resetVelocityOverride();
   }
 

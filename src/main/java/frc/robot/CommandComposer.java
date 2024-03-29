@@ -17,8 +17,13 @@ import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
+import frc.robot.commands.led.LedSetBaseState;
+import frc.robot.commands.led.LedSetStateForSeconds;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.elevator.ReactionArmsSetAngle;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
+import frc.robot.subsystems.LED.RobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -98,6 +103,7 @@ public class CommandComposer {
       Arm arm,
       Intake intake,
       Shooter shooter,
+      LED led,
       boolean doDrive,
       Trigger confirmation,
       Consumer<Double> rumbleCommand) {
@@ -132,6 +138,7 @@ public class CommandComposer {
         new ConditionalCommand(
                 driveToAmp
                     .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
+                    .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
                     .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
                     .finallyDo(() -> rumbleCommand.accept(0.0))
                     .andThen(Commands.waitUntil(() -> false))
@@ -154,6 +161,7 @@ public class CommandComposer {
                 MechanismActions.ampPosition(elevator, arm)
                     .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
                     .until(noGamepieceInEE))
+            .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
             .finallyDo(() -> rumbleCommand.accept(0.0));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
@@ -163,7 +171,11 @@ public class CommandComposer {
   }
 
   public static Command cancelScoreAmp(
-      DrivetrainWrapper drivetrainWrapper, EndEffector endEffector, Elevator elevator, Arm arm) {
+      DrivetrainWrapper drivetrainWrapper,
+      EndEffector endEffector,
+      Elevator elevator,
+      Arm arm,
+      LED led) {
     Command cancelScoreAmp =
         // MechanismActions.ampPositionToLoadPosition(elevator, arm)
         // .until(
@@ -181,20 +193,22 @@ public class CommandComposer {
                 new ReactionArmsSetAngle(
                     elevator,
                     Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
-            .alongWith(new EndEffectorPercentOut(endEffector, 0.0));
+            .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
+            .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
   }
 
-  public static Command stageAlign(DrivetrainWrapper wrapper, Consumer<Double> rumbleMagnitude) {
+  public static Command stageAlign(
+      DrivetrainWrapper wrapper, LED led, Consumer<Double> rumbleMagnitude) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
                 ? wrapper.getPoseEstimatorPoseStageRed(false)
                 : wrapper.getPoseEstimatorPoseStageBlue(false);
     Supplier<Pose2d> targetPose = () -> AutoClimb.getTargetPose(robotLocalization.get());
-    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, false);
+    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true);
     Command stageAlign =
         driveCommand
             .alongWith(
@@ -202,7 +216,12 @@ public class CommandComposer {
                     () ->
                         rumbleMagnitude.accept(
                             driveCommand.withinTolerance(0.05, new Rotation2d(0.05)) ? 0.5 : 0.0)))
-            .finallyDo(() -> rumbleMagnitude.accept(0.0));
+            .finallyDo(
+                () -> {
+                  rumbleMagnitude.accept(0.0);
+                  led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+                })
+            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
     stageAlign.setName("stageAlign");
     return stageAlign;
   }
@@ -210,7 +229,7 @@ public class CommandComposer {
   private static LoggedTunableNumber stageApproachSpeed =
       new LoggedTunableNumber("driveToChain/stageApproachSpeed", 0.5);
 
-  public static Command driveToChain(DrivetrainWrapper wrapper) {
+  public static Command driveToChain(DrivetrainWrapper wrapper, LED led) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
@@ -238,7 +257,9 @@ public class CommandComposer {
                 () -> {
                   wrapper.resetVelocityOverride();
                   wrapper.resetRotationOverride();
-                });
+                  led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+                })
+            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
 
     stageApproach.setName("stageApproach");
 

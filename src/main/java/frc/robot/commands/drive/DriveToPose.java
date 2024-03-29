@@ -71,7 +71,7 @@ public class DriveToPose extends Command {
   private static final LoggedTunableNumber ffMaxRadius = group.build("FFMaxRadius");
 
   static {
-    driveKp.initDefault(6.0);
+    driveKp.initDefault(3.0);
     driveKd.initDefault(0.0);
     thetaKp.initDefault(5.0);
     thetaKd.initDefault(0.0);
@@ -81,8 +81,8 @@ public class DriveToPose extends Command {
     thetaMaxVelocity.initDefault(Math.toRadians(360.0));
     thetaMaxVelocitySlow.initDefault(Math.toRadians(90.0));
     thetaMaxAcceleration.initDefault(Math.toRadians(720.0));
-    driveTolerance.initDefault(0.01);
-    driveToleranceSlow.initDefault(0.06);
+    driveTolerance.initDefault(0.05);
+    driveToleranceSlow.initDefault(0.05);
     thetaTolerance.initDefault(Math.toRadians(1.0));
     thetaToleranceSlow.initDefault(Math.toRadians(3.0));
     ffMinRadius.initDefault(0.2);

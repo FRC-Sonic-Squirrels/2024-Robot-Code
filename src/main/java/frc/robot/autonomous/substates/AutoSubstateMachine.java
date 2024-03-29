@@ -19,6 +19,7 @@ import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -35,6 +36,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final Intake intake;
   protected final Elevator elevator;
   protected final Arm arm;
+  protected final LED led;
   protected final RobotConfig config;
   protected final ChoreoTrajectoryWithName trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
@@ -79,6 +81,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.intake = subsystems.intake();
     this.elevator = subsystems.elevator();
     this.arm = subsystems.arm();
+    this.led = subsystems.led();
     this.useVision = useVision;
     this.config = config;
     this.trajToShoot = trajToShoot;
@@ -115,7 +118,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     intakeCommand.cancel();
 
     scoreSpeaker =
-        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, 5);
+        ShooterScoreSpeakerStateMachine.getAsCommand(drive, shooter, endEffector, intake, led, 5);
 
     spawnCommand(
         scoreSpeaker,
