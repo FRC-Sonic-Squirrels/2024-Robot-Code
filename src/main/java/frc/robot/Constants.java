@@ -321,7 +321,7 @@ public final class Constants {
       public static final Rotation2d HOME_POSITION = MIN_ANGLE_RAD;
       public static final Rotation2d TRUE_TOP_HARD_STOP = Rotation2d.fromDegrees(59.67);
 
-      public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(14.0);
+      public static final Rotation2d SHOOTER_STOW_PITCH = Rotation2d.fromDegrees(12.0);
 
       public static final Rotation2d LOADING_POSITION = MIN_ANGLE_RAD;
 

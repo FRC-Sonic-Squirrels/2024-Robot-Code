@@ -42,6 +42,7 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.autonomous.AutosManager;
@@ -133,6 +134,8 @@ public class RobotContainer {
   private static final LoggedTunableNumber tunableY = groupTunable.build("dY", 0);
   private static final LoggedTunableNumber passThroughVel =
       groupTunable.build("PlopThroughVel", 1000);
+
+private static final LoggedTunableNumber passThroughPivotPitch = groupTunable.build("plopThroughPivotPitch", 12.0);
 
   private final ShuffleBoardLayouts shuffleBoardLayouts;
 
@@ -536,6 +539,7 @@ public class RobotContainer {
                   shooter.setKickerVelocity(passThroughVel.get());
                   endEffector.setVelocity(passThroughVel.get());
                   intake.setVelocity(passThroughVel.get());
+                  shooter.setPivotPosition(Rotation2d.fromDegrees(passThroughPivotPitch.get()));
                 },
                 shooter,
                 endEffector,
@@ -543,10 +547,11 @@ public class RobotContainer {
         .onFalse(
             Commands.runOnce(
                 () -> {
-                  shooter.setPercentOut(0);
+                shooter.setPercentOut(0);
                   shooter.setKickerPercentOut(0.0);
                   endEffector.setPercentOut(0.0);
                   intake.setPercentOut(0.0);
+                  shooter.setPivotPosition(ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
                 },
                 shooter,
                 endEffector,

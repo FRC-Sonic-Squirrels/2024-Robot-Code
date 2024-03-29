@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class IntakeGamepiece extends Command {
   private static final TunableNumberGroup group = new TunableNumberGroup("IntakeGamepiece");
   private static final LoggedTunableNumber rumbleIntensityPercent =
-      group.build("rumbleIntensityPercent", 0.3);
+      group.build("rumbleIntensityPercent", 0.5);
   private static final LoggedTunableNumber intakingVelocity = group.build("intakingVelocity", 2500);
 
   private final Intake intake;
