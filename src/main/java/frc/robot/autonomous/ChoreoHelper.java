@@ -19,6 +19,8 @@ public class ChoreoHelper {
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal log_stateLinearVel =
       logGroup.buildDecimal("stateLinearVel");
+  private static final LoggerEntry.Decimal log_stateLinearVelError =
+      logGroup.buildDecimal("stateLinearVelError");
   private static final LoggerEntry.Decimal log_stateScaleVel =
       logGroup.buildDecimal("stateScaleVel");
   private static final LoggerEntry.Decimal log_stateTimeOffset =
@@ -190,6 +192,7 @@ public class ChoreoHelper {
     double yVel = state.velocityY * scaleVelocity + yFeedback.calculate(yRobot, yDesired);
 
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
+    log_stateLinearVelError.info(Math.hypot(state.velocityX - xVel, state.velocityY - yVel));
 
     Rotation2d rotation = robotPose.getRotation();
     double theta = rotation.getRadians();
