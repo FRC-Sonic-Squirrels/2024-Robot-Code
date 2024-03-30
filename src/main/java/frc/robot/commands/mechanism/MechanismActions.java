@@ -160,6 +160,10 @@ public class MechanismActions {
             goToPositionParallel(elevator, arm, MechanismPositions::deployReactionArmsStep4, true));
   }
 
+  public static Command noteGetOut(Elevator elevator, Arm arm) {
+    return goToPositionParallel(elevator, arm, MechanismPositions::noteGetOut);
+  }
+
   private static Command goToPositionParallel(
       Elevator elevator, Arm arm, Supplier<MechanismPosition> position) {
     return goToPositionParallel(elevator, arm, position, false);

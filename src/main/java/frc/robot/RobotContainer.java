@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -42,6 +43,7 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team2930.commands.RunsWhenDisabledInstantCommand;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.RobotMode.Mode;
 import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.Constants.ShooterConstants;
@@ -51,8 +53,8 @@ import frc.robot.autonomous.AutosSubsystems;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
-import frc.robot.commands.drive.DriveToGamepiece;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
+import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.intake.IntakeEject;
@@ -133,7 +135,7 @@ public class RobotContainer {
   private static final LoggedTunableNumber tunableX = groupTunable.build("dX", 50.0);
   private static final LoggedTunableNumber tunableY = groupTunable.build("dY", 0);
   private static final LoggedTunableNumber passThroughVel =
-      groupTunable.build("PlopThroughVel", 1000);
+      groupTunable.build("PlopThroughVel", 5000);
 
   private static final LoggedTunableNumber passThroughPivotPitch =
       groupTunable.build("plopThroughPivotPitch", 12.0);
@@ -449,15 +451,15 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // ----------- DRIVER CONTROLS ------------
 
-    driverController
-        .leftTrigger()
-        .whileTrue(
-            new DriveToGamepiece(
-                led,
-                visionGamepiece::getClosestGamepiece,
-                drivetrainWrapper,
-                endEffector::intakeSideTOFDetectGamepiece,
-                () -> drivetrainWrapper.getPoseEstimatorPose(true)));
+    // driverController
+    //     .leftTrigger()
+    //     .whileTrue(
+    //         new DriveToGamepiece(
+    //             led,
+    //             visionGamepiece::getClosestGamepiece,
+    //             drivetrainWrapper,
+    //             endEffector::intakeSideTOFDetectGamepiece,
+    //             () -> drivetrainWrapper.getPoseEstimatorPose(true)));
 
     driverController
         .back()
@@ -483,36 +485,64 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                     () -> {
-                      if (endEffector.noteInEndEffector()) {
+                      if (endEffector.intakeSideTOFDetectGamepiece()
+                          || endEffector.shooterSideTOFDetectGamepiece()
+                          || shooter.noteInShooter()) {
                         driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
                       } else {
                         driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
                       }
                     })
-                .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
+                .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)))
+        // .onFalse(
+        //     new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter)
+        //         .withTimeout(2.0));
+
+        .onFalse(
+            Commands.run(
+                    () -> {
+                      endEffector.setVelocity(500);
+                      intake.setVelocity(500);
+                      shooter.setKickerVelocity(500);
+                    },
+                    endEffector,
+                    intake,
+                    shooter)
+                .until(
+                    () ->
+                        !endEffector.intakeSideTOFDetectGamepiece()
+                            && endEffector.shooterSideTOFDetectGamepiece())
+                .withTimeout(4.0)
+                .andThen(
+                    new IntakeEject(shooter, endEffector, intake)
+                        .until(() -> !endEffector.shooterSideTOFDetectGamepiece()))
+                .withTimeout(1.5)
+                .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+                .withTimeout(2.0));
 
     driverController
-        .b()
+        .povUp()
         .whileTrue(
             CommandComposer.stageAlign(
                 drivetrainWrapper,
                 led,
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
 
-    driverController.povUp().whileTrue(CommandComposer.driveToChain(drivetrainWrapper, led));
+    driverController.povLeft().whileTrue(CommandComposer.driveToChain(drivetrainWrapper, led));
 
     driverController
         .rightTrigger()
         .whileTrue(
             ShooterScoreSpeakerStateMachine.getAsCommand(
-                drivetrainWrapper,
-                shooter,
-                endEffector,
-                intake,
-                led,
-                1000,
-                () -> true,
-                (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble)));
+                    drivetrainWrapper,
+                    shooter,
+                    endEffector,
+                    intake,
+                    led,
+                    1000,
+                    () -> true,
+                    (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     driverController
         .leftBumper()
@@ -532,14 +562,29 @@ public class RobotContainer {
             CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm, led));
 
     driverController
+        .leftTrigger()
+        .whileTrue(
+            new RotateToAngle(
+                drivetrainWrapper,
+                () ->
+                    drivetrainWrapper
+                        .getGlobalPoseEstimatorPose(true)
+                        .getTranslation()
+                        .minus(Constants.FieldConstants.getSweepTargetTranslation())
+                        .getAngle(),
+                () -> drivetrainWrapper.getGlobalPoseEstimatorPose(true)));
+
+    driverController
         .x()
         .onTrue(
-            Commands.runOnce(
+            Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(1000);
-                  shooter.setKickerVelocity(passThroughVel.get());
-                  endEffector.setVelocity(passThroughVel.get());
-                  intake.setVelocity(passThroughVel.get());
+                  shooter.setLauncherRPM(8500);
+                  if (shooter.getRPM() > 8000) {
+                    shooter.setKickerVelocity(passThroughVel.get());
+                    endEffector.setVelocity(passThroughVel.get());
+                    intake.setVelocity(passThroughVel.get());
+                  }
                   shooter.setPivotPosition(Rotation2d.fromDegrees(passThroughPivotPitch.get()));
                 },
                 shooter,
@@ -626,8 +671,41 @@ public class RobotContainer {
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
 
-    operatorController.y().onTrue(MechanismActions.deployReactionArms(elevator, arm));
     operatorController.x().onTrue(MechanismActions.climbFinalRestPosition(elevator, arm));
+
+    operatorController
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      shooter.setLauncherRPM(1000);
+                      shooter.setKickerVelocity(passThroughVel.get());
+                      intake.setVelocity(passThroughVel.get());
+                      shooter.setPivotPosition(Rotation2d.fromDegrees(passThroughPivotPitch.get()));
+                    },
+                    shooter,
+                    endEffector,
+                    intake)
+                .andThen(
+                    elevator
+                        .setReactionArmsRotationsCMD(
+                            ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+                        .andThen(MechanismActions.noteGetOut(elevator, arm))))
+        .onFalse(
+            Commands.runOnce(
+                    () -> {
+                      shooter.setPercentOut(0);
+                      shooter.setKickerPercentOut(0.0);
+                      intake.setPercentOut(0.0);
+                      shooter.setPivotPosition(ShooterConstants.Pivot.SHOOTER_STOW_PITCH);
+                    },
+                    shooter,
+                    endEffector,
+                    intake)
+                .andThen(MechanismActions.loadingPosition(elevator, arm))
+                .andThen(
+                    elevator.setReactionArmsRotationsCMD(
+                        ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS)));
 
     operatorController
         .b()

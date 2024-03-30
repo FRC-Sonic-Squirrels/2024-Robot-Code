@@ -123,6 +123,12 @@ public class MechanismPositions {
   private static final LoggedTunableNumber deployReactionArms4ArmAngleDegrees =
       group.build("deployReactionArms/stage4/ArmAngleDegrees", -46);
 
+  private static final LoggedTunableNumber noteGetOutElevatorHeight =
+      group.build("noteGetOut/ElevatorHeight", 13.3);
+
+  private static final LoggedTunableNumber noteGetOutArmAngle =
+      group.build("noteGetOut/ArmAngle", Constants.ArmConstants.MAX_ARM_ANGLE.getDegrees());
+
   public record MechanismPosition(Measure<Distance> elevatorHeight, Rotation2d armAngle) {}
 
   public static MechanismPosition loadingPosition() {
@@ -236,5 +242,11 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(deployReactionArms4ElevatorHeightInches.get()),
         Rotation2d.fromDegrees(deployReactionArms4ArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition noteGetOut() {
+    return new MechanismPosition(
+        Units.Inches.of(noteGetOutElevatorHeight.get()),
+        Rotation2d.fromDegrees(noteGetOutArmAngle.get()));
   }
 }

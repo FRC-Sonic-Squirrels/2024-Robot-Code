@@ -11,6 +11,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.ExecutionTiming;
 import frc.lib.team2930.LoggerEntry;
@@ -19,6 +20,7 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotMode.RobotType;
+import frc.robot.commands.mechanism.elevator.ReactionArmsSetAngle;
 
 public class Elevator extends SubsystemBase {
   public static final String ROOT_TABLE = "Elevator";
@@ -229,5 +231,9 @@ public class Elevator extends SubsystemBase {
 
   public void setReactionArmIdleMode(IdleMode idleMode) {
     io.setReactionArmIdleMode(idleMode);
+  }
+
+  public Command setReactionArmsRotationsCMD(double rotations) {
+    return new ReactionArmsSetAngle(this, rotations);
   }
 }

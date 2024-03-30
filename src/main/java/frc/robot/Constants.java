@@ -195,6 +195,15 @@ public final class Constants {
           Rotation2d.fromDegrees(90.0));
     }
 
+    public static Translation2d BLUE_SWEEP_TARGET_TRANSLATION =
+        new Translation2d(0.45505082607269287, 7.828024387359619);
+
+    public static Translation2d getSweepTargetTranslation() {
+      return Constants.isRedAlliance()
+          ? AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SWEEP_TARGET_TRANSLATION)
+          : BLUE_SWEEP_TARGET_TRANSLATION;
+    }
+
     public static class Gamepieces {
       public static final Measure<Distance> NOTE_INNER_RADIUS = Units.Meters.of(0.127);
       public static final Measure<Distance> NOTE_OUTER_RADIUS = Units.Meters.of(0.1778);

@@ -103,6 +103,15 @@ public class DrivetrainWrapper {
     return pose;
   }
 
+  public Pose2d getGlobalPoseEstimatorPose(boolean prioritizeGyro) {
+    var pose = drivetrain.getPoseEstimatorPoseAllTags();
+    if (prioritizeGyro) {
+      pose = new Pose2d(pose.getTranslation(), getRotationGyroOnly());
+    }
+
+    return pose;
+  }
+
   public double getVisionStaleness() {
     return drivetrain.getVisionStaleness();
   }
