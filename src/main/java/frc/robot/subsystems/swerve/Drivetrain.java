@@ -116,6 +116,12 @@ public class Drivetrain extends SubsystemBase {
 
   private static final LoggerEntry.Decimal logTimeSinceVision =
       logGroupLocalization.buildDecimal("timeSinceVision");
+  private static final LoggerEntry.Integer logRejectionCutoff =
+      logGroupLocalization.buildInteger("rejectionCutoff");
+  private static final LoggerEntry.Integer logRejectionInvalidTags =
+      logGroupLocalization.buildInteger("rejectionInvalidTags");
+  private static final LoggerEntry.Integer logRejectionNoDriveData =
+      logGroupLocalization.buildInteger("rejectionNoDriveData");
 
   private static final LoggerGroup logGroupRobot = LoggerGroup.build("Robot");
   private static final LoggerEntry.Struct<Pose2d> log_FieldRelativeVel =
@@ -233,6 +239,9 @@ public class Drivetrain extends SubsystemBase {
       SmartDashboard.putData("Localization/rawOdometryField2d", rawOdometryField2d);
 
       logTimeSinceVision.info(getVisionStaleness());
+      logRejectionCutoff.info(poseEstimator.rejectionCutoff);
+      logRejectionInvalidTags.info(poseEstimator.rejectionInvalidTags);
+      logRejectionNoDriveData.info(poseEstimator.rejectionNoDriveData);
     }
   }
 

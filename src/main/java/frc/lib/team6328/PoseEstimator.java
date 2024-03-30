@@ -30,6 +30,9 @@ public class PoseEstimator {
   private final double[] q;
   private final int tagsMask;
   private double visionCutoff;
+  public int rejectionCutoff;
+  public int rejectionInvalidTags;
+  public int rejectionNoDriveData;
 
   public PoseEstimator(double x, double y, double theta, int[] validTags) {
     q = new double[] {x * x, y * y, theta * theta};
@@ -155,6 +158,7 @@ public class PoseEstimator {
     for (var timestampedVisionUpdate : visionData) {
       var timestamp = timestampedVisionUpdate.timestamp;
       if (Double.isFinite(visionCutoff) && timestamp < visionCutoff) {
+        rejectionCutoff += 1;
         continue;
       }
 
@@ -164,6 +168,7 @@ public class PoseEstimator {
       }
 
       if ((this.tagsMask & tagsMask) != tagsMask) {
+        rejectionInvalidTags += 1;
         continue;
       }
 
@@ -174,6 +179,7 @@ public class PoseEstimator {
       if (existingPoseUpdateAfter.twist == null)
       // This means that we have no drive data, ignore vision.
       {
+        rejectionNoDriveData += 1;
         continue;
       }
 
