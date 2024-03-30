@@ -17,7 +17,7 @@ public class ReactionArmsSetAngle extends Command {
   Double nonDefaultTolerance = Double.NaN;
 
   TunableNumberGroup group = new TunableNumberGroup("ReactionArms");
-  LoggedTunableNumber tolerance = group.build("tolerance", 100);
+  LoggedTunableNumber tolerance = group.build("tolerance", 0.5);
 
   public ReactionArmsSetAngle(Elevator elevator, double rotations) {
     this.elevator = elevator;

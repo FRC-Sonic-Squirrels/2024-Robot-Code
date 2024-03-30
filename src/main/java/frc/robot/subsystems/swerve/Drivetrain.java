@@ -114,6 +114,9 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry.Struct<Pose2d> logLocalization_Global =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_global");
 
+  private static final LoggerEntry.Decimal logTimeSinceVision =
+      logGroupLocalization.buildDecimal("timeSinceVision");
+
   private static final LoggerGroup logGroupRobot = LoggerGroup.build("Robot");
   private static final LoggerEntry.Struct<Pose2d> log_FieldRelativeVel =
       logGroupRobot.buildStruct(Pose2d.class, "FieldRelativeVel");
@@ -228,6 +231,8 @@ public class Drivetrain extends SubsystemBase {
 
       rawOdometryField2d.setRobotPose(rawOdometryPose);
       SmartDashboard.putData("Localization/rawOdometryField2d", rawOdometryField2d);
+
+      logTimeSinceVision.info(getVisionStaleness());
     }
   }
 

@@ -9,6 +9,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.GeomUtil;
@@ -16,7 +17,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
-import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.led.LedSetBaseState;
 import frc.robot.commands.led.LedSetStateForSeconds;
@@ -155,24 +155,33 @@ public class CommandComposer {
                     Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS));
 
     Command scoreAmp =
+        // goToAmpPosition
+        //     .deadlineWith(driveToPrep)
+        //     .andThen(
+        //         (driveToAmp
+        //             .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
+        //             .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
+        //             .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
+        //             .finallyDo(() ->
+        // rumbleCommand.accept(0.0))).until(confirmation::getAsBoolean)
+        //             .asProxy()
+        //             .deadlineWith(
+        //                 new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+        //             .andThen(
+        //                 MechanismActions.ampPosition(elevator, arm)
+        //                     .andThen(Commands.run(() -> endEffector.setVelocity(2500),
+        // endEffector))
+        //                     .until(noGamepieceInEE))
+        //             .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
+        //             .finallyDo(() -> rumbleCommand.accept(0.0)));
         goToAmpPosition
-            .deadlineWith(driveToPrep)
+            .andThen(new WaitUntilCommand(confirmation))
             .andThen(
-                driveToAmp
-                    .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
-                    .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
-                    .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
-                    .finallyDo(() -> rumbleCommand.accept(0.0))
-                    .andThen(Commands.waitUntil(confirmation::getAsBoolean))
-                    .asProxy()
-                    .deadlineWith(
-                        new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-                    .andThen(
-                        MechanismActions.ampPosition(elevator, arm)
-                            .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
-                            .until(noGamepieceInEE))
-                    .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
-                    .finallyDo(() -> rumbleCommand.accept(0.0)));
+                MechanismActions.ampPosition(elevator, arm)
+                    .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
+                    .until(noGamepieceInEE)
+                    .andThen(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1)))
+            .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP));
     // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");

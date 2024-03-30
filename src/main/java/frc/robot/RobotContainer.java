@@ -556,9 +556,14 @@ public class RobotContainer {
                 intake,
                 shooter,
                 led,
-                true,
+                false,
                 driverController.a(),
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)))
+        .whileTrue(
+            new RotateToAngle(
+                drivetrainWrapper,
+                () -> Rotation2d.fromDegrees(90),
+                () -> drivetrainWrapper.getPoseEstimatorPose(true)))
         .onFalse(
             CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm, led));
 

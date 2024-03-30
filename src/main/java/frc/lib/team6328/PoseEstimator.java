@@ -18,7 +18,7 @@ import java.util.List;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class PoseEstimator {
-  private static final double historyLengthSecs = 0.3;
+  private static final double historyLengthSecs = 2.0;
 
   //
   // We create a single-linked list, with a tail and a head.

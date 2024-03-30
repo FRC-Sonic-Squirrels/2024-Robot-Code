@@ -65,7 +65,7 @@ public class LED extends SubsystemBase {
           switch (baseRobotState) {
             case NOTE_STATUS:
               if (DriverStation.isDisabled() && elevatorHeight.getAsDouble() < 1) {
-                setBlinking(Color.kBlack, Color.kMagenta);
+                setSnake2(Color.kPink, Color.kMagenta);
               } else {
                 if (noteInRobot) {
                   setSolidColor(squirrelOrange);
