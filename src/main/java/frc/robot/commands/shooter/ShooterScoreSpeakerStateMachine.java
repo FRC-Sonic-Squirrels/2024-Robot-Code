@@ -93,9 +93,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 6.0);
   private static final LoggedTunableNumber rotationKd = group.build("rotationKd", 0.0);
   private static final LoggedTunableNumber rumbleIntensity = group.build("rumbleIntensity", 0.5);
-  public static final LoggedTunableNumber loadingRPM = group.build("loading/LoadingRPM", 1200);
+  public static final LoggedTunableNumber loadingRPM = group.build("loading/LoadingRPM", 350);
   public static final LoggedTunableNumber slowLoadingRPM =
-      group.build("loading/slowLoadingRPM", 500);
+      group.build("loading/slowLoadingRPM", 350);
   private static final LoggedTunableNumber shootingLoadingVelocity =
       group.build("shootingLoadingVelocity", 3000);
   private static final LoggedTunableNumber maxRotVel = group.build("maxRotVelDegPerSec", 10);
@@ -116,6 +116,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final Rotation2d simpleShotShooterPitch;
 
   private final Trigger noNoteInRobot;
+
+  private final Trigger pivotAtPitchTrigger;
+
+  private static final LoggedTunableNumber pivotAtPitchDebounce =
+      group.build("pivotAtPitchDebounce", 0.1);
 
   private double startOfShooting;
 
@@ -185,6 +190,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
+
+    pivotAtPitchTrigger =
+        new Trigger(shooter::isPivotIsAtTarget).debounce(pivotAtPitchDebounce.get());
 
     noNoteInRobot =
         new Trigger(
@@ -376,17 +384,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     boolean belowMaxRotVel =
         drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVelRads;
 
-    boolean pivotAtAngle;
+    boolean pivotAtAngle = false;
     var launcherAtRpm = shooter.isAtTargetRPM();
     if (solverResult != null) {
       shooter.setPivotPosition(desiredShootingPitch);
-      pivotAtAngle =
-          shooter.isPivotIsAtTarget(
-              desiredShootingPitch
-              // , getPitchTolerance(Units.Meters.of(solverResult.xyDistance()))
-              );
-    } else {
-      pivotAtAngle = false;
+      pivotAtAngle = pivotAtPitchTrigger.getAsBoolean();
     }
 
     rotateToSpeaker();
@@ -469,7 +471,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   public StateHandler shootEnding() {
     updateSolver();
     rotateToSpeaker();
-    if (!stateRunningLongerThan(0.2)) return null;
+    if (!stateRunningLongerThan(0.5)) return null;
     // visualize gamepiece
 
     log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);

@@ -88,7 +88,7 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber launcherToleranceRPM =
       group.build("launcherToleranceRPM", 150); // TODO: tune for better tolerance
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
-      group.build("distanceToTriggerNote", 8.0);
+      group.build("distanceToTriggerNote", 10.0);
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
@@ -284,7 +284,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtTargetRPM(double rpm) {
-    return Math.abs(inputs.launcherRPM[0] - rpm) <= launcherToleranceRPM.get();
+    return inputs.launcherRPM[0] > rpm - launcherToleranceRPM.get();
   }
 
   public double getPivotPIDLatency() {

@@ -494,32 +494,32 @@ public class RobotContainer {
                         driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
                       }
                     })
-                .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)))
-        // .onFalse(
-        //     new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter)
-        //         .withTimeout(2.0));
+                .finallyDo(() -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
+    // .onFalse(
+    //     new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter)
+    //         .withTimeout(2.0));
 
-        .onFalse(
-            Commands.run(
-                    () -> {
-                      endEffector.setVelocity(500);
-                      intake.setVelocity(500);
-                      shooter.setKickerVelocity(500);
-                    },
-                    endEffector,
-                    intake,
-                    shooter)
-                .until(
-                    () ->
-                        !endEffector.intakeSideTOFDetectGamepiece()
-                            && endEffector.shooterSideTOFDetectGamepiece())
-                .withTimeout(4.0)
-                .andThen(
-                    new IntakeEject(shooter, endEffector, intake)
-                        .until(() -> !endEffector.shooterSideTOFDetectGamepiece()))
-                .withTimeout(1.5)
-                .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-                .withTimeout(2.0));
+    // .onFalse(
+    //     Commands.run(
+    //             () -> {
+    //               endEffector.setVelocity(500);
+    //               intake.setVelocity(500);
+    //               shooter.setKickerVelocity(500);
+    //             },
+    //             endEffector,
+    //             intake,
+    //             shooter)
+    //         .until(
+    //             () ->
+    //                 !endEffector.intakeSideTOFDetectGamepiece()
+    //                     && endEffector.shooterSideTOFDetectGamepiece())
+    //         .withTimeout(4.0)
+    //         .andThen(
+    //             new IntakeEject(shooter, endEffector, intake)
+    //                 .until(() -> !endEffector.shooterSideTOFDetectGamepiece()))
+    //         .withTimeout(1.5)
+    //         .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+    //         .withTimeout(2.0));
 
     driverController
         .povUp()
