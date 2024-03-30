@@ -36,6 +36,10 @@ public class ChoreoHelper {
   private static final LoggerEntry.Decimal log_distanceError =
       logGroup.buildDecimal("distanceError");
   private static final LoggerEntry.Decimal log_headingError = logGroup.buildDecimal("headingError");
+  private static final LoggerEntry.Decimal log_pidXVelEffort =
+      logGroup.buildDecimal("pidXVelEffort");
+  private static final LoggerEntry.Decimal log_pidYVelEffort =
+      logGroup.buildDecimal("pidYVelEffort");
 
   private static final LoggerEntry.Bool log_isPaused = logGroup.buildBoolean("isPaused");
 
@@ -105,16 +109,18 @@ public class ChoreoHelper {
     this.initialTime = initialTime;
   }
 
+  public boolean isPaused() {
+    return Double.isFinite(pausedTime);
+  }
+
   public void pause(double timestamp) {
-    if (Double.isNaN(pausedTime)) {
-      log_isPaused.info(true);
+    if (!isPaused()) {
       pausedTime = timestamp;
     }
   }
 
   public void resume(double timestamp) {
-    if (!Double.isNaN(pausedTime)) {
-      log_isPaused.info(false);
+    if ((isPaused())) {
       timeOffset += (pausedTime - timestamp);
       pausedTime = Double.NaN;
     }
@@ -128,6 +134,8 @@ public class ChoreoHelper {
    */
   public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     ChoreoTrajectoryState state;
+
+    log_isPaused.info(isPaused());
 
     if (stateTooBehind != null) {
       state = stateTooBehind;
@@ -188,9 +196,14 @@ public class ChoreoHelper {
 
     log_stateScaleVel.info(scaleVelocity);
 
-    double xVel = state.velocityX * scaleVelocity + xFeedback.calculate(xRobot, xDesired);
-    double yVel = state.velocityY * scaleVelocity + yFeedback.calculate(yRobot, yDesired);
+    double pidxVel = xFeedback.calculate(xRobot, xDesired);
+    double pidyVel = yFeedback.calculate(yRobot, yDesired);
 
+    double xVel = state.velocityX * scaleVelocity + pidxVel;
+    double yVel = state.velocityY * scaleVelocity + pidyVel;
+
+    log_pidXVelEffort.info(pidxVel);
+    log_pidYVelEffort.info(pidyVel);
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
     log_stateLinearVelError.info(Math.hypot(state.velocityX - xVel, state.velocityY - yVel));
 

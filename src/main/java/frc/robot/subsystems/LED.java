@@ -83,7 +83,7 @@ public class LED extends SubsystemBase {
                 break;
               }
             case AUTO_NOTE_PICKUP:
-              setBlinking(Color.kWhite, Color.kMagenta);
+              setSolidColor(Color.kMagenta);
               break;
 
             case AUTO_DRIVE_TO_POSE:
@@ -98,7 +98,7 @@ public class LED extends SubsystemBase {
               break;
 
             case SHOOTING_PREP:
-              setBlinking(Color.kWhite, Color.kRed);
+              setSolidColor(Color.kYellow);
               break;
             case SHOOTER_SUCCESS:
               setSolidColor(Color.kGreen);
@@ -129,7 +129,7 @@ public class LED extends SubsystemBase {
           setSolidColor(Color.kCyan);
           break;
         case INTAKE_SUCCESS:
-          setBlinking(squirrelOrange, Color.kBlack);
+          setBlinking(Color.kGreen, Color.kBlack);
           break;
       }
     } else {

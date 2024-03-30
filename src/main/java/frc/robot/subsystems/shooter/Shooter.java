@@ -98,10 +98,10 @@ public class Shooter extends SubsystemBase {
       pivotClosedLoopMaxVelocityConstraint.initDefault(10.0);
       pivotClosedLoopMaxAccelerationConstraint.initDefault(5.0);
 
-      launcherkS.initDefault(0.2949);
-      launcherkP.initDefault(0.2);
+      launcherkS.initDefault(0.24);
+      launcherkP.initDefault(0.4);
       launcherkV.initDefault(0.072);
-      launcherClosedLoopMaxAccelerationConstraint.initDefault(300.0);
+      launcherClosedLoopMaxAccelerationConstraint.initDefault(1000.0);
 
       kickerkP.initDefault(0.6);
       kickerkV.initDefault(0.18);

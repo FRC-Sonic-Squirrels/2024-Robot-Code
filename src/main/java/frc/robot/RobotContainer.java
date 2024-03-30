@@ -66,6 +66,7 @@ import frc.robot.commands.mechanism.elevator.ElevatorSetHeight;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.SimulatorRobotConfig;
 import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.LED.RobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -841,6 +842,8 @@ public class RobotContainer {
     resetDrivetrainResetOverrides();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
+
+    led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
 
     is_teleop = true;
     is_autonomous = false;

@@ -37,6 +37,8 @@ public class DriveToGamepieceHelper {
   private static final LoggedTunableNumber advancedMode =
       group.build("advancedMode/doAdvancedMotion", 1);
 
+  private static final LoggedTunableNumber maxSpeed = group.build("advancedMode/maxSpeed", 3);
+
   private final PIDController xController = new PIDController(0, 0, 0);
   private final PIDController yController = new PIDController(0, 0, 0);
   private final PIDController rotController = new PIDController(0, 0, 0);
@@ -100,6 +102,17 @@ public class DriveToGamepieceHelper {
         yVel *= errorScaling;
       }
     }
+
+    Translation2d vel = new Translation2d(xVel, yVel);
+
+    double mag = vel.getNorm();
+
+    if (mag > maxSpeed.get()) {
+      vel = vel.div(mag).times(maxSpeed.get());
+    }
+
+    xVel = vel.getX();
+    yVel = vel.getY();
 
     rotVel =
         rotController.calculate(pose.getRotation().getRadians(), gamepieceDirection.getRadians());
