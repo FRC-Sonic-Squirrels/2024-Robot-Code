@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,7 +28,7 @@ public class LED extends SubsystemBase {
   private RobotState robotState = RobotState.BASE;
   private BaseRobotState baseRobotState = BaseRobotState.NOTE_STATUS;
   private boolean noteInRobot;
-  private Color squirrelOrange = new Color(255, 45, 0);
+  private Color squirrelOrange = new Color(1, 0.1, 0);
   private TunableNumberGroup group = new TunableNumberGroup("LED");
   private LoggedTunableNumber useTunableLEDs = group.build("useTunableLEDs", 0);
   private LoggedTunableNumber tunableR = group.build("tunableColor/r", 0);
@@ -52,13 +53,20 @@ public class LED extends SubsystemBase {
                 setSolidColor(squirrelOrange);
 
               } else {
-                setSolidColor(Color.kBlack);
+                if (DriverStation.isTeleop() && !DriverStation.isDisabled()) {
+                  setSolidColor(Color.kBlack);
+                } else {
+                  setAudioLevelMeter(100);
+                }
               }
               break;
 
             case AUTO_NOTE_PICKUP:
-              setBlinking(Color.kWhite, Color.kBlack);
+              setBlinking(Color.kWhite, Color.kMagenta);
               break;
+
+            case AUTO_DRIVE_TO_POSE:
+              setSolidColor(Color.kYellow);
 
             case AMP_LINE_UP:
               setBlinking(Color.kWhite, Color.kGreen);
@@ -110,6 +118,7 @@ public class LED extends SubsystemBase {
     Logger.recordOutput("LED/robotState", robotState);
     Logger.recordOutput("LED/baseRobotState", baseRobotState);
     Logger.recordOutput("LED/noteInRobot", noteInRobot);
+    Logger.recordOutput("LED/isTeleop", DriverStation.isTeleop());
 
     if (!sameAsPrevBuffer()) led.setData(ledBuffer);
 
@@ -240,6 +249,7 @@ public class LED extends SubsystemBase {
   public enum BaseRobotState {
     NOTE_STATUS,
     AUTO_NOTE_PICKUP,
+    AUTO_DRIVE_TO_POSE,
     AMP_LINE_UP,
     CLIMB_LINE_UP,
     SHOOTING_PREP,

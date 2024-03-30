@@ -58,7 +58,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
               config.getAutoThetaPidController());
     }
 
-    driveToGamepieceHelper = new DriveToGamepieceHelper(led);
+    driveToGamepieceHelper = new DriveToGamepieceHelper();
 
     return stateWithName("followPathToGamePiece", this::pickupGamepiece);
   }

@@ -7,6 +7,7 @@ import frc.robot.autonomous.ChoreoTrajectoryWithName;
 import frc.robot.autonomous.DriveToGamepieceHelper;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
+import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
@@ -39,17 +40,19 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
     intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
     intakeCommand.schedule();
 
-    driveToGamepieceHelper = new DriveToGamepieceHelper(led);
+    driveToGamepieceHelper = new DriveToGamepieceHelper();
 
     return stateWithName("followPathToGamePiece", this::pickupGamepiece);
   }
 
   private StateHandler pickupGamepiece() {
+    led.setBaseRobotState(BaseRobotState.AUTO_DRIVE_TO_POSE);
     ChassisSpeeds speeds =
         driveToGamepieceHelper.calculateChassisSpeeds(
             gamepieceTranslation, drive.getPoseEstimatorPose(true));
 
     if (useVisionForGamepiece()) {
+      led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
       return stateWithName("visionPickupGamepiece", super::visionPickupGamepiece);
     }
 
@@ -57,11 +60,13 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       drive.setVelocityOverride(speeds);
       if (driveToGamepieceHelper.isAtTarget()) {
         drive.resetVelocityOverride();
+        led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
         return super::gamepieceConfirmation;
       }
       return null;
     }
     drive.resetVelocityOverride();
+    led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
     return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
   }
 }

@@ -48,7 +48,7 @@ public class DriveToGamepiece extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    helper = new DriveToGamepieceHelper(led);
+    helper = new DriveToGamepieceHelper();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

@@ -20,6 +20,7 @@ import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -90,6 +91,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   protected StateHandler visionPickupGamepiece() {
+    led.setBaseRobotState(BaseRobotState.AUTO_NOTE_PICKUP);
     ProcessedGamepieceData gamepieceData = closestGamepiece.get();
     if (gamepieceData != null
         && useVisionForGamepiece()
@@ -106,11 +108,13 @@ public abstract class AutoSubstateMachine extends StateMachine {
     if (!endEffector.noteInEndEffector()) {
       if (driveToGamepieceHelper.isAtTarget()) {
         drive.resetVelocityOverride();
+        led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
         return setStopped();
       }
       return null;
     }
     drive.resetVelocityOverride();
+    led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
     return stateWithName("prepFollowPathToShooting", this::prepFollowPathToShooting);
   }
 
