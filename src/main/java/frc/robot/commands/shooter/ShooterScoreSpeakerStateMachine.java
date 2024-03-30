@@ -80,6 +80,8 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       logGroupData.buildDecimal("xyDistanceFromSpeaker");
   private static final LoggerEntry.Decimal log_shooterPitchError =
       logGroupData.buildDecimal("log_shooterPitchError");
+  private static final LoggerEntry.Decimal log_timeSinceVision =
+      logGroupData.buildDecimal("log_timeSinceVision");
 
   // --
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
@@ -424,6 +426,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     log_atThetaTarget.info(atThetaTarget);
     log_belowMaxSpeed.info(belowMaxSpeed);
     log_belowMaxRotVel.info(belowMaxRotVel);
+    log_timeSinceVision.info(drivetrainWrapper.getVisionStaleness());
 
     if ((launcherAtRpm
             && pivotAtAngle
@@ -505,7 +508,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private boolean recentVisionUpdates() {
-    return false; // drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
+    return drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
   }
 
   private boolean validShootingPosition() {

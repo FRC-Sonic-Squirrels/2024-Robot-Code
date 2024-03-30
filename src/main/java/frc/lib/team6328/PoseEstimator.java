@@ -56,8 +56,8 @@ public class PoseEstimator {
     var lastUpdate = this.tailPoseUpdate.previousUpdate;
     var lastVisionUpdate = lastUpdate;
     while (lastVisionUpdate.visionUpdates.isEmpty()) {
-      PoseUpdate previousUpdate = lastUpdate.previousUpdate;
-      if (previousUpdate == null) return 100;
+      PoseUpdate previousUpdate = lastVisionUpdate.previousUpdate;
+      if (previousUpdate == null) return 5;
 
       lastVisionUpdate = previousUpdate;
     }
