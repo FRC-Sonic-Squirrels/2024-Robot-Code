@@ -10,13 +10,24 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class LED extends SubsystemBase {
+  private static final String ROOT_TABLE = "LED";
+
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.EnumValue<RobotState> log_robotState =
+      logGroup.buildEnum("robotState");
+  private static final LoggerEntry.EnumValue<BaseRobotState> log_baseRobotState =
+      logGroup.buildEnum("baseRobotState");
+  private static final LoggerEntry.Bool log_noteInRobot = logGroup.buildBoolean("noteInRobot");
+  private static final LoggerEntry.Bool log_isTeleop = logGroup.buildBoolean("isTeleop");
+
   /** Creates a new LED. */
   private AddressableLED led = new AddressableLED(Constants.LEDConstants.PWM_PORT);
 
@@ -125,10 +136,10 @@ public class LED extends SubsystemBase {
       setSnake2(new Color(tunableR.get(), tunableG.get(), tunableB.get()), Color.kRed);
     }
 
-    Logger.recordOutput("LED/robotState", robotState);
-    Logger.recordOutput("LED/baseRobotState", baseRobotState);
-    Logger.recordOutput("LED/noteInRobot", noteInRobot);
-    Logger.recordOutput("LED/isTeleop", DriverStation.isTeleop());
+    log_robotState.info(robotState);
+    log_baseRobotState.info(baseRobotState);
+    log_noteInRobot.info(noteInRobot);
+    log_isTeleop.info(DriverStation.isTeleop());
 
     if (!sameAsPrevBuffer()) led.setData(ledBuffer);
 

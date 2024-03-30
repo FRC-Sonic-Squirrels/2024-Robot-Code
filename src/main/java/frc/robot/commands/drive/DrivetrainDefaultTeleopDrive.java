@@ -19,7 +19,7 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.DoubleSupplier;
 
 public class DrivetrainDefaultTeleopDrive extends Command {
-  private static final String ROOT_TABLE = "Commands/TeleopDrive";
+  private static final String ROOT_TABLE = "TeleopDrive";
 
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal log_XSupplier = logGroup.buildDecimal("XSupplier");

@@ -9,14 +9,24 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class RotateToAngle extends Command {
   private static final String ROOT_TABLE = "RotateToAngle";
+
+  private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal log_rotVel = logGroup.buildDecimal("rotVel");
+  private static final LoggerEntry.Decimal log_targetRotation =
+      logGroup.buildDecimal("targetRotation");
+  private static final LoggerEntry.Decimal log_currentRotation =
+      logGroup.buildDecimal("currentRotation");
+  private static final LoggerEntry.Decimal log_positionErrorDeg =
+      logGroup.buildDecimal("positionErrorDeg");
 
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber tunableKP = groupTunable.build("kP", 4.9);
@@ -56,17 +66,15 @@ public class RotateToAngle extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Rotation2d target = angle.get();
-    double rotVel =
-        rotationalPID.calculate(currentPose.get().getRotation().getRadians(), target.getRadians());
+    var target = angle.get();
+    var currentPoseRotation = currentPose.get().getRotation();
+    var rotVel = rotationalPID.calculate(currentPoseRotation.getRadians(), target.getRadians());
     wrapper.setRotationOverride(rotVel);
 
-    Logger.recordOutput(ROOT_TABLE + "/rotVel", rotVel);
-    Logger.recordOutput(ROOT_TABLE + "/targetRotation", target.getDegrees());
-    Logger.recordOutput(
-        ROOT_TABLE + "/currentRotation", currentPose.get().getRotation().getDegrees());
-    Logger.recordOutput(
-        ROOT_TABLE + "/positionErrorDeg", Math.toDegrees(rotationalPID.getPositionError()));
+    log_rotVel.info(rotVel);
+    log_targetRotation.info(target);
+    log_currentRotation.info(currentPoseRotation);
+    log_positionErrorDeg.info(Math.toDegrees(rotationalPID.getPositionError()));
   }
 
   // Called once the command ends or is interrupted.
