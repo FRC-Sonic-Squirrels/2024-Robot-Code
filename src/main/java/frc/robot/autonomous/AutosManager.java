@@ -265,7 +265,9 @@ public class AutosManager {
     PathPlannerPath path = PathPlannerPath.fromPathFile("Characterization");
     return new Auto(
         "Characterization",
-        AutoBuilder.followPath(path).finallyDo(subsystems.drivetrain()::resetVelocityOverride),
+        Commands.runOnce(() -> subsystems.drivetrain().setPose(new Pose2d()))
+            .andThen(AutoBuilder.followPath(path))
+            .finallyDo(subsystems.drivetrain()::resetVelocityOverride),
         new Pose2d());
   }
 

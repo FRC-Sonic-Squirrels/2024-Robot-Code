@@ -90,21 +90,24 @@ public class ChoreoHelper {
     double closestDistance = Double.MAX_VALUE;
     double lastDistance = Double.MAX_VALUE;
 
-    for (ChoreoTrajectoryState state : getStates(traj)) {
-      ChoreoTrajectoryState stateComputed = traj.sample(state.timestamp, Constants.isRedAlliance());
-      double stateDistance = GeometryUtil.getDist(initialPose, stateComputed.getPose());
+    if (useCorrection.get() != 0) {
+      for (ChoreoTrajectoryState state : getStates(traj)) {
+        ChoreoTrajectoryState stateComputed =
+            traj.sample(state.timestamp, Constants.isRedAlliance());
+        double stateDistance = GeometryUtil.getDist(initialPose, stateComputed.getPose());
 
-      if (stateDistance > lastDistance) {
-        // Moving away, give up.
-        break;
+        if (stateDistance > lastDistance) {
+          // Moving away, give up.
+          break;
+        }
+
+        if (closestState == null || stateDistance < closestDistance) {
+          closestState = state;
+          closestDistance = stateDistance;
+        }
+
+        lastDistance = stateDistance;
       }
-
-      if (closestState == null || stateDistance < closestDistance) {
-        closestState = state;
-        closestDistance = stateDistance;
-      }
-
-      lastDistance = stateDistance;
     }
 
     if (closestState != null) {
