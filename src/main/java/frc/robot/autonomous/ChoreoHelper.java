@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +42,12 @@ public class ChoreoHelper {
       logGroup.buildDecimal("pidXVelEffort");
   private static final LoggerEntry.Decimal log_pidYVelEffort =
       logGroup.buildDecimal("pidYVelEffort");
+  private static final LoggerEntry.Decimal log_pidVelEffort = logGroup.buildDecimal("pidVelEffort");
 
   private static final LoggerEntry.Bool log_isPaused = logGroup.buildBoolean("isPaused");
+
+  private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
+  private static final LoggedTunableNumber useCorrection = group.build("useCorrection", 1);
 
   private final ChoreoTrajectory traj;
   private final PIDController xFeedback;
@@ -170,16 +176,20 @@ public class ChoreoHelper {
     var distanceError = Math.hypot(xDesired - xRobot, yDesired - yRobot);
 
     log_distanceError.info(distanceError);
-    if (distanceError < lagThreshold) {
-      if (stateTooBehind != null) {
-        stateTooBehind = null;
-        resume(timestamp);
-      }
-    } else {
-      var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
-      if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 0.25) {
-        stateTooBehind = state;
-        pause(timestamp);
+
+    boolean useCorrection = this.useCorrection.get() != 0;
+    if (useCorrection) {
+      if (distanceError < lagThreshold) {
+        if (stateTooBehind != null) {
+          stateTooBehind = null;
+          resume(timestamp);
+        }
+      } else {
+        var velMagnitude = Math.hypot(state.velocityX, state.velocityY);
+        if (stateTooBehind == null && velMagnitude >= minVelToPause && state.timestamp > 0.25) {
+          stateTooBehind = state;
+          pause(timestamp);
+        }
       }
     }
 
@@ -196,14 +206,20 @@ public class ChoreoHelper {
 
     log_stateScaleVel.info(scaleVelocity);
 
-    double pidxVel = xFeedback.calculate(xRobot, xDesired);
-    double pidyVel = yFeedback.calculate(yRobot, yDesired);
+    double pidXVel = xFeedback.calculate(xRobot, xDesired);
+    double pidYVel = yFeedback.calculate(yRobot, yDesired);
 
-    double xVel = state.velocityX * scaleVelocity + pidxVel;
-    double yVel = state.velocityY * scaleVelocity + pidyVel;
+    double xVel = state.velocityX * scaleVelocity;
+    double yVel = state.velocityY * scaleVelocity;
 
-    log_pidXVelEffort.info(pidxVel);
-    log_pidYVelEffort.info(pidyVel);
+    if (useCorrection) {
+      xVel += pidXVel;
+      yVel += pidYVel;
+    }
+
+    log_pidXVelEffort.info(pidXVel);
+    log_pidYVelEffort.info(pidYVel);
+    log_pidVelEffort.info(Math.hypot(pidXVel, pidYVel));
     log_stateLinearVel.info(Math.hypot(state.velocityX, state.velocityY));
     log_stateLinearVelError.info(Math.hypot(state.velocityX - xVel, state.velocityY - yVel));
 

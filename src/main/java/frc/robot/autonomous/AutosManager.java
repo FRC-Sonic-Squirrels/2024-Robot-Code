@@ -227,6 +227,7 @@ public class AutosManager {
 
           @Override
           public void initialize() {
+            drivetrain.setPose(new Pose2d());
             helper =
                 new ChoreoHelper(
                     Timer.getFPGATimestamp(),

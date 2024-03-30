@@ -160,4 +160,8 @@ public class DrivetrainWrapper {
         null, // No log consumer, since data is recorded by AdvantageKit
         drivetrain);
   }
+
+  public void setPose(Pose2d pose) {
+    drivetrain.setPose(pose);
+  }
 }

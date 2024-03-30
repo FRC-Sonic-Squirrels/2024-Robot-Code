@@ -62,6 +62,8 @@ public class Drivetrain extends SubsystemBase {
       logGyro.buildDecimal("YAcceleration");
   private static final LoggerEntry.Decimal logGyro_zAcceleration =
       logGyro.buildDecimal("ZAcceleration");
+  private static final LoggerEntry.Decimal logGyro_Acceleration =
+      logGyro.buildDecimal("linearAcceleration");
 
   private static final LoggerGroup logGroupSwerveStates = LoggerGroup.build("SwerveStates");
   private static final LoggerEntry.StructArray<SwerveModuleState> logSwerveStatesSetpoints =
@@ -190,6 +192,7 @@ public class Drivetrain extends SubsystemBase {
       logGyro_xAcceleration.info(gyroInputs.xAcceleration);
       logGyro_yAcceleration.info(gyroInputs.yAcceleration);
       logGyro_zAcceleration.info(gyroInputs.zAcceleration);
+      logGyro_Acceleration.info(Math.hypot(gyroInputs.xAcceleration, gyroInputs.yAcceleration));
 
       modules.updateInputs();
       modules.periodic();
