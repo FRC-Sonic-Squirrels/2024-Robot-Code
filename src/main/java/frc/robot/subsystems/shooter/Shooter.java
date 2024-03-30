@@ -56,6 +56,8 @@ public class Shooter extends SubsystemBase {
   private static final LoggerEntry.Bool logNoteInShooter = logGroup.buildBoolean("NoteInShooter");
   private static final LoggerEntry.Decimal logPivotPIDLatency =
       logGroup.buildDecimal("PivotPIDLatency");
+  private static final LoggerEntry.Decimal logLauncherRollersDifference =
+      logGroup.buildDecimal("LauncherRollersDifference");
 
   public static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -179,6 +181,7 @@ public class Shooter extends SubsystemBase {
       logPitchDegrees.info(inputs.pivotPosition.getDegrees());
       logTargetPitchDegrees.info(targetPivotPosition.getDegrees());
       logNoteInShooter.info(noteInShooter.getAsBoolean());
+      logLauncherRollersDifference.info(inputs.launcherRPM[1] - inputs.launcherRPM[0]);
 
       if (Constants.unusedCode) {
         var timestamp = Timer.getFPGATimestamp();
