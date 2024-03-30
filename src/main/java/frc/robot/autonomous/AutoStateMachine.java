@@ -4,6 +4,7 @@
 
 package frc.robot.autonomous;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
@@ -37,22 +38,43 @@ public class AutoStateMachine extends StateMachine {
   private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
+  private ChoreoHelper initialPathChoreoHelper;
   private int currentSubState;
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
-    this(subsystems, config, null, overrideStateMachines);
+    this(subsystems, config, false, null, null, overrideStateMachines);
+  }
+
+  public AutoStateMachine(
+      AutosSubsystems subsystems,
+      RobotConfig config,
+      boolean doInitialShot,
+      String initPath,
+      StateMachine[] overrideStateMachines) {
+    this(subsystems, config, doInitialShot, initPath, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, subStateTrajNames, null);
+    this(subsystems, config, false, null, subStateTrajNames, null);
+  }
+
+  public AutoStateMachine(
+      AutosSubsystems subsystems,
+      RobotConfig config,
+      boolean doInitialShot,
+      String initPath,
+      List<PathDescriptor> subStateTrajNames) {
+    this(subsystems, config, doInitialShot, initPath, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
   private AutoStateMachine(
       AutosSubsystems subsystems,
       RobotConfig config,
+      boolean doInitDrive,
+      String initPath,
       List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
@@ -85,7 +107,33 @@ public class AutoStateMachine extends StateMachine {
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
 
-    setInitialState(stateWithName("autoInitialState", this::autoInitialState));
+    if (doInitDrive) {
+      initialPathChoreoHelper =
+          new ChoreoHelper(
+              timeFromStart(),
+              drive.getPoseEstimatorPose(true),
+              ChoreoTrajectoryWithName.getTrajectory(initPath),
+              config.getDriveBaseRadius() / 2,
+              2.0,
+              config.getAutoTranslationPidController(),
+              config.getAutoTranslationPidController(),
+              config.getAutoThetaPidController());
+      setInitialState(stateWithName("driveOutState", this::driveOutState));
+    } else {
+      setInitialState(stateWithName("autoInitialState", this::autoInitialState));
+    }
+  }
+
+  private StateHandler driveOutState() {
+    ChassisSpeeds speeds =
+        initialPathChoreoHelper.calculateChassisSpeeds(
+            drive.getPoseEstimatorPose(true), timeFromStart());
+    if (speeds == null) {
+      drive.resetVelocityOverride();
+      return stateWithName("autoInitialState", this::autoInitialState);
+    }
+    drive.setVelocity(speeds);
+    return null;
   }
 
   private StateHandler autoInitialState() {

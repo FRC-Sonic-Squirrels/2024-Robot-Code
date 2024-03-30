@@ -174,13 +174,14 @@ public class AutosManager {
 
   private Auto ampAuto() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Samp-G1", "G1-S1", true));
+    paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true));
     paths.add(new PathDescriptor("S1-G2", "G2-S2", true));
     paths.add(new PathDescriptor("S2-G3", "G3-S2", true));
     paths.add(new PathDescriptor("S2-G4", "G4-S3", true));
     paths.add(new PathDescriptor("S3-G5", "G5-S3", true));
-    AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
-    return new Auto("ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-G1").getInitialPose());
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, false, "Samp-Samp2", paths);
+    return new Auto(
+        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-Samp2").getInitialPose());
   }
 
   private Auto middleAuto() {
