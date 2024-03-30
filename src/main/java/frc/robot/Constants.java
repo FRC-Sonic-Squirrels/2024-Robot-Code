@@ -342,14 +342,19 @@ public final class Constants {
 
       static {
         PITCH_ADJUSTMENT_MAP = new InterpolatingDoubleTreeMap();
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 1.25); // 3.5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 1.25);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 1.25);
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 1.25); // 3.5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 2.55); // 5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 4.25); // 6.7
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 5.05); // 7.5
-        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 5.85); // 8.3
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(51).in(Units.Meters), 4.0);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(106.3).in(Units.Meters), 4.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(114.2).in(Units.Meters), 4.5);
+        PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(145.7).in(Units.Meters), 4.25);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 1.75); // 3.5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 1.75);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 1.75);
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 1.75); // 3.5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 3.05); // 5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 4.25); // 6.7
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 5.55); // 7.5
+        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 6.35); // 8.3
+
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(110.0).in(Units.Meters), 3.5); // 4.0
         // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 4.0); // 4.5
