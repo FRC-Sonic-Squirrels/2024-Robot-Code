@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class LED extends SubsystemBase {
@@ -34,33 +35,42 @@ public class LED extends SubsystemBase {
   private LoggedTunableNumber tunableR = group.build("tunableColor/r", 0);
   private LoggedTunableNumber tunableG = group.build("tunableColor/g", 0);
   private LoggedTunableNumber tunableB = group.build("tunableColor/b", 0);
+  private final DoubleSupplier elevatorHeight;
 
-  public LED() {
+  public LED(DoubleSupplier elevatorHeight) {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
+    this.elevatorHeight = elevatorHeight;
   }
 
   @Override
   public void periodic() {
+
     if (useTunableLEDs.get() == 0) {
       // This method will be called once per scheduler run
       switch (robotState) {
         case BASE:
           switch (baseRobotState) {
             case NOTE_STATUS:
-              if (noteInRobot) {
-                setSolidColor(squirrelOrange);
-
+              if (DriverStation.isDisabled() && elevatorHeight.getAsDouble() < 1) {
+                setBlinking(Color.kBlack, Color.kMagenta);
               } else {
-                if (DriverStation.isTeleop() && !DriverStation.isDisabled()) {
-                  setSolidColor(Color.kBlack);
-                } else {
-                  setAudioLevelMeter(100);
-                }
-              }
-              break;
+                if (noteInRobot) {
+                  setSolidColor(squirrelOrange);
 
+                } else {
+
+                  if (DriverStation.isTeleop() && DriverStation.isEnabled()) {
+                    setSolidColor(Color.kBlack);
+                  } else if (DriverStation.isAutonomous()) {
+                    setAudioLevelMeter(100);
+                  } else {
+                    setSnake2(squirrelOrange, new Color(1, 0.3, 0));
+                  }
+                }
+                break;
+              }
             case AUTO_NOTE_PICKUP:
               setBlinking(Color.kWhite, Color.kMagenta);
               break;
@@ -112,7 +122,7 @@ public class LED extends SubsystemBase {
           break;
       }
     } else {
-      setSolidColor(new Color(tunableR.get(), tunableG.get(), tunableB.get()));
+      setSnake2(new Color(tunableR.get(), tunableG.get(), tunableB.get()), Color.kRed);
     }
 
     Logger.recordOutput("LED/robotState", robotState);
@@ -151,14 +161,28 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setSnake(Color color) {
+  private void setSnake(Color color1, Color color2) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
       ledBuffer.setRGB(
-          i, (int) (shade * color.red), (int) (shade * color.green), (int) (shade * color.blue));
+          i,
+          (int) (shade * color1.red + color2.red * (255 - shade)),
+          (int) (shade * color1.green + color2.green * (255 - shade)),
+          (int) (shade * color1.blue + color2.blue * (255 - shade)));
 
-      snakeShade += 3;
+      snakeShade += 0.5;
       snakeShade %= 255;
+    }
+  }
+
+  private void setSnake2(Color color1, Color color2) {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      final var shade = Math.sin(Timer.getFPGATimestamp() * 4 - i * 0.32);
+      ledBuffer.setRGB(
+          i,
+          (int) (shade * color1.red * 255 + color2.red * (1 - shade) * 255),
+          (int) (shade * color1.green * 255 + color2.green * (1 - shade) * 255),
+          (int) (shade * color1.blue * 255 + color2.blue * (1 - shade)) * 255);
     }
   }
 

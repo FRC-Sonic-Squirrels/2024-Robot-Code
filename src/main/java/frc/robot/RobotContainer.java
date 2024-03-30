@@ -212,7 +212,7 @@ public class RobotContainer {
       visionGamepiece =
           new VisionGamepiece(
               new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
-      led = new LED();
+      led = new LED(elevator::getHeightInches);
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_SIMBOT_REAL_CAMERAS:
@@ -279,7 +279,7 @@ public class RobotContainer {
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          led = new LED();
+          led = new LED(elevator::getHeightInches);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -306,7 +306,7 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED();
+          led = new LED(elevator::getHeightInches);
           break;
 
         case ROBOT_2024_MAESTRO:
@@ -362,7 +362,7 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
-          led = new LED();
+          led = new LED(elevator::getHeightInches);
           break;
 
         default:
@@ -388,7 +388,7 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED();
+          led = new LED(elevator::getHeightInches);
           break;
       }
     }
@@ -620,13 +620,15 @@ public class RobotContainer {
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
-    if (Constants.unusedCode) {
+    driverController
+        .povRight()
+        .whileTrue(
+            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
 
-      driverController
-          .povUp()
-          .whileTrue(
-              new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
-    }
+    driverController
+        .povDown()
+        .whileTrue(
+            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () -> 0.0));
 
     // ---------- OPERATOR CONTROLS -----------
     DoubleSupplier elevatorDelta =
