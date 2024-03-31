@@ -147,7 +147,7 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveModules modules;
 
   private final SwerveDriveKinematics kinematics;
-  private Pose2d rawOdometryPose = new Pose2d();
+  private Pose2d rawOdometryPose = Constants.zeroPose2d;
 
   private final PoseEstimator poseEstimator;
   private final PoseEstimator poseEstimatorStageBlue;
@@ -157,7 +157,7 @@ public class Drivetrain extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private final Field2d rawOdometryField2d = new Field2d();
 
-  private Pose2d prevVel = new Pose2d();
+  private Pose2d prevVel = Constants.zeroPose2d;
 
   public Drivetrain(
       RobotConfig config,
@@ -179,7 +179,7 @@ public class Drivetrain extends SubsystemBase {
     kinematics = config.getSwerveDriveKinematics();
 
     int[] tagsSpeakersAndAmps = new int[] {3, 4, /*5, 6,*/ 7, 8};
-    int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16};
+    int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
     poseEstimator = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
     poseEstimatorStageBlue = new PoseEstimator(0.1, 0.1, 0.1, new int[] {14, 15, 16});

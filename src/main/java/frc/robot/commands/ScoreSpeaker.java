@@ -343,8 +343,6 @@ public class ScoreSpeaker extends Command {
 
   Timer shootingTimer = new Timer();
 
-  Pose2d robotPoseOfShot = new Pose2d();
-
   public void updateVisualization() {
     log_timer.info(shootingTimer.get());
     log_ShootingRPM.info(shooter.getRPM());

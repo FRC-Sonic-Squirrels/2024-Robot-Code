@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
+import frc.robot.Constants;
 import frc.robot.autonomous.substates.DriveAfterSimpleShot;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.MechanismActionsSafe;
@@ -126,7 +127,7 @@ public class AutosManager {
   }
 
   public Auto doNothing() {
-    return new Auto("doNothing", new InstantCommand(), new Pose2d());
+    return new Auto("doNothing", new InstantCommand(), Constants.zeroPose2d);
   }
 
   public Auto swerveCharacterization() {
@@ -158,7 +159,7 @@ public class AutosManager {
             .andThen(command4)
             .andThen(Commands.runOnce(() -> logSwerveSysidState.info(SysIdRoutineLog.State.kNone)));
 
-    return new Auto("swerveCharacterization", finalCommand, new Pose2d());
+    return new Auto("swerveCharacterization", finalCommand, Constants.zeroPose2d);
   }
 
   private Auto sourceAuto() {
@@ -227,7 +228,7 @@ public class AutosManager {
 
           @Override
           public void initialize() {
-            drivetrain.setPose(new Pose2d());
+            drivetrain.setPose(Constants.zeroPose2d);
             helper =
                 new ChoreoHelper(
                     Timer.getFPGATimestamp(),
@@ -265,10 +266,10 @@ public class AutosManager {
     PathPlannerPath path = PathPlannerPath.fromPathFile("Characterization");
     return new Auto(
         "Characterization",
-        Commands.runOnce(() -> subsystems.drivetrain().setPose(new Pose2d()))
+        Commands.runOnce(() -> subsystems.drivetrain().setPose(Constants.zeroPose2d))
             .andThen(AutoBuilder.followPath(path))
             .finallyDo(subsystems.drivetrain()::resetVelocityOverride),
-        new Pose2d());
+        Constants.zeroPose2d);
   }
 
   /* Copy these to get waypoints for choreo. If pasted in choreo, they will automatically be turned into waypoints

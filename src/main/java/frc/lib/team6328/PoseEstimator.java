@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -42,7 +43,7 @@ public class PoseEstimator {
     }
     this.tagsMask = tagsMask;
 
-    resetPose(new Pose2d(), Double.NaN);
+    resetPose(Constants.zeroPose2d, Double.NaN);
   }
 
   /** Returns the latest robot pose based on drive and vision data. */
@@ -73,10 +74,9 @@ public class PoseEstimator {
     }
 
     var poseUpdateAfter = tailPoseUpdate.findExactTimestampOrMoreRecent(timestamp);
-    if (poseUpdateAfter.twist == null)
-    // This means that we have no drive data, ignore vision.
-    {
-      return new Pose2d();
+    if (poseUpdateAfter.twist == null) {
+      // This means that we have no drive data, ignore vision.
+      return Constants.zeroPose2d;
     }
 
     var poseUpdateBefore = poseUpdateAfter.previousUpdate;

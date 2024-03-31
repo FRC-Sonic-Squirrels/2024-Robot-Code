@@ -1,10 +1,11 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.Constants;
 
 public record VisionResultLoggedFields(
     VisionResultStatus status,
-    double numSeenTargets,
+    int numSeenTargets,
     double tagAmbiguity,
     double averageDistanceFromTags,
     double distanceFromExistingPoseEstimate,
@@ -17,6 +18,6 @@ public record VisionResultLoggedFields(
   }
 
   private VisionResultLoggedFields(VisionResultStatus status) {
-    this(status, -1, -1, -1, -1, -1, -1, new Pose3d());
+    this(status, -1, -1, -1, -1, -1, -1, Constants.zeroPose3d);
   }
 }

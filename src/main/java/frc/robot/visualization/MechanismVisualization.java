@@ -16,11 +16,11 @@ public class MechanismVisualization {
   private static final LoggerEntry.Struct<Pose2d> logTestPose =
       logGroup.buildStruct(Pose2d.class, "TestPose");
 
-  private static Pose3d elevatorStage = new Pose3d();
-  private static Pose3d elevatorCarriage = new Pose3d();
-  private static Pose3d arm = new Pose3d();
-  private static Pose3d shooter = new Pose3d();
-  private static Pose3d gamepiece = new Pose3d();
+  private static Pose3d elevatorStage = Constants.zeroPose3d;
+  private static Pose3d elevatorCarriage = Constants.zeroPose3d;
+  private static Pose3d arm = Constants.zeroPose3d;
+  private static Pose3d shooter = Constants.zeroPose3d;
+  private static Pose3d gamepiece = Constants.zeroPose3d;
 
   public static void updateVisualization(
       Rotation2d armAngle,
@@ -64,6 +64,6 @@ public class MechanismVisualization {
 
   public static void logMechanism() {
     logMechanism.info(new Pose3d[] {elevatorStage, elevatorCarriage, arm, shooter, gamepiece});
-    logTestPose.info(new Pose2d());
+    logTestPose.info(Constants.zeroPose2d);
   }
 }

@@ -47,6 +47,8 @@ public final class Constants {
   public static final double kDefaultPeriod = 0.02;
   public static final Translation2d zeroTranslation2d = new Translation2d();
   public static final Rotation2d zeroRotation2d = new Rotation2d();
+  public static final Pose2d zeroPose2d = new Pose2d();
+  public static final Pose3d zeroPose3d = new Pose3d();
 
   public static boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();

@@ -269,8 +269,8 @@ public class DriveToPose extends Command {
   @Override
   public void end(boolean interrupted) {
     drive.resetVelocityOverride();
-    log_Setpoint.info(new Pose2d());
-    log_Goal.info(new Pose2d());
+    log_Setpoint.info(Constants.zeroPose2d);
+    log_Goal.info(Constants.zeroPose2d);
   }
 
   /** Checks if the robot is stopped at the final pose. */

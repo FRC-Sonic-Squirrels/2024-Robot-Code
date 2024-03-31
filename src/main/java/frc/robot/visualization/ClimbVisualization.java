@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
+import frc.robot.Constants;
 
 public class ClimbVisualization {
   private static final LoggerGroup logGroup = LoggerGroup.build("AutoClimb");
@@ -14,7 +15,7 @@ public class ClimbVisualization {
 
   private static final ClimbVisualization instance = new ClimbVisualization();
   private double additionalRobotHeight = 0.0;
-  private Pose3d pose = new Pose3d();
+  private Pose3d pose = Constants.zeroPose3d;
 
   public static ClimbVisualization getInstance() {
     return instance;
