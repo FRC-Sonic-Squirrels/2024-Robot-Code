@@ -240,19 +240,22 @@ public class Vision extends SubsystemBase {
 
     // remove any tags that are not part of the field layout
     var timeStampCameraResult = cameraResult.getTimestampSeconds();
-    var cleanTargets = new ArrayList<PhotonTrackedTarget>();
+    List<Integer> cleanTargets = new ArrayList<>();
+
     for (PhotonTrackedTarget target : cameraResult.getTargets()) {
       int fiducialId = target.getFiducialId();
       Optional<Pose3d> optTagPose = aprilTagLayout.getTagPose(fiducialId);
       if (optTagPose.isEmpty()) continue;
 
-      cleanTargets.add(target);
+      cleanTargets.add(target.getFiducialId());
       lastTagDetectionTimes.put(fiducialId, timeStampCameraResult);
     }
-    cameraResult =
-        new PhotonPipelineResult(
-            cameraResult.getLatencyMillis(), cleanTargets, cameraResult.getMultiTagResult());
-    cameraResult.setTimestampSeconds(timeStampCameraResult);
+    // FIXME: don't replace cameraResult just to change cleanTargets, target rejection is handled
+    // elsewhere.
+    // cameraResult =
+    //     new PhotonPipelineResult(
+    //         cameraResult.getLatencyMillis(), cleanTargets, cameraResult.getMultiTagResult());
+    // cameraResult.setTimestampSeconds(timeStampCameraResult);
 
     var numTargetsSeen = cleanTargets.size();
     if (numTargetsSeen == 0) {
@@ -269,12 +272,6 @@ public class Vision extends SubsystemBase {
             : VisionResultLoggedFields.unsuccessfulResult(VisionResultStatus.INVALID_TAG);
       }
     }
-    // else if (
-    //     != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-    //       // do something when we get more than one tag, pick the best
-    //
-    //       // FIXME: shouldn't we be calling cameraResult.getMultiTagResult() somewhere
-    // }
 
     Optional<EstimatedRobotPose> photonPoseEstimatorOptionalResult =
         visionModule.photonPoseEstimator.update(cameraResult);
@@ -289,6 +286,11 @@ public class Vision extends SubsystemBase {
     var newCalculatedRobotPose = photonPoseEstimatorResult.estimatedPose;
     var multiTagFailed =
         (photonPoseEstimatorResult.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR);
+
+    if (!multiTagFailed) {
+      // only include tags used by PNP
+      cleanTargets = cameraResult.getMultiTagResult().fiducialIDsUsed;
+    }
 
     if (GeometryUtil.isPoseOutsideField(newCalculatedRobotPose.toPose2d())) {
       return VisionResultLoggedFields.unsuccessfulResult(
@@ -327,10 +329,10 @@ public class Vision extends SubsystemBase {
     if (photonPoseEstimatorResult.strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
 
       // use average distance for PNP with multiple tags
-      for (PhotonTrackedTarget tag : cleanTargets) {
+      for (int tag : cleanTargets) {
         totalDistance +=
             aprilTagLayout
-                .getTagPose(tag.getFiducialId())
+                .getTagPose(tag)
                 .get()
                 .getTranslation()
                 .getDistance(newCalculatedRobotPose.getTranslation());
@@ -381,8 +383,7 @@ public class Vision extends SubsystemBase {
 
     posesFedToPoseEstimator3D.add(newCalculatedRobotPose);
     posesFedToPoseEstimator2D.add(newCalculatedRobotPose.toPose2d());
-    cleanTargets.forEach(
-        (PhotonTrackedTarget tag) -> tagsUsedInPoseEstimation.add(tag.getFiducialId()));
+    cleanTargets.forEach((Integer tag) -> tagsUsedInPoseEstimation.add(tag));
 
     VisionResultStatus status;
     if ((numTargetsSeen == 1)

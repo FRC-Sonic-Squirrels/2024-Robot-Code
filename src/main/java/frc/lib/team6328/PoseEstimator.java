@@ -15,7 +15,6 @@ import edu.wpi.first.math.numbers.N3;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class PoseEstimator {
   private static final double historyLengthSecs = 2.0;
@@ -164,7 +163,7 @@ public class PoseEstimator {
 
       var tagsMask = 0;
       for (var tag : timestampedVisionUpdate.tags) {
-        tagsMask |= 1 << tag.getFiducialId();
+        tagsMask |= 1 << tag;
       }
 
       if ((this.tagsMask & tagsMask) != tagsMask) {
@@ -302,5 +301,5 @@ public class PoseEstimator {
 
   /** Represents a single vision pose with a timestamp and associated standard deviations. */
   public record TimestampedVisionUpdate(
-      List<PhotonTrackedTarget> tags, double timestamp, Pose2d pose, Matrix<N3, N1> stdDevs) {}
+      List<Integer> tags, double timestamp, Pose2d pose, Matrix<N3, N1> stdDevs) {}
 }
