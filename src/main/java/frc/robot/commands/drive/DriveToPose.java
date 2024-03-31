@@ -94,6 +94,7 @@ public class DriveToPose extends Command {
   private final Supplier<Pose2d> poseSupplier;
   private final Supplier<Pose2d> currentRobotPose;
   private final boolean finish;
+  private final Supplier<Boolean> move;
 
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
@@ -106,13 +107,21 @@ public class DriveToPose extends Command {
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, boolean slowMode, Pose2d pose, Supplier<Pose2d> currentPose) {
-    this(drive, slowMode, () -> pose, currentPose, true);
+    this(drive, slowMode, () -> pose, currentPose, true, () -> true);
+  }
+
+  public DriveToPose(
+      DrivetrainWrapper drive,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> currentRobotPose,
+      Supplier<Boolean> move) {
+    this(drive, false, poseSupplier, currentRobotPose, true, move);
   }
 
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, Supplier<Pose2d> poseSupplier, Supplier<Pose2d> currentRobotPose) {
-    this(drive, false, poseSupplier, currentRobotPose, true);
+    this(drive, false, poseSupplier, currentRobotPose, true, () -> true);
   }
 
   /** Drives to the specified pose under full software control. */
@@ -121,7 +130,7 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       boolean finish) {
-    this(drive, false, poseSupplier, currentRobotPose, finish);
+    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true);
   }
 
   /** Drives to the specified pose under full software control. */
@@ -130,12 +139,14 @@ public class DriveToPose extends Command {
       boolean slowMode,
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
-      boolean finish) {
+      boolean finish,
+      Supplier<Boolean> move) {
     this.drive = drive;
     this.slowMode = slowMode;
     this.poseSupplier = poseSupplier;
     this.currentRobotPose = currentRobotPose;
     this.finish = finish;
+    this.move = move;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
@@ -225,9 +236,16 @@ public class DriveToPose extends Command {
                 currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
             .transformBy(GeomUtil.translationToTransform(driveVelocityScalar, 0.0))
             .getTranslation();
-    drive.setVelocityOverride(
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            driveVelocity.getX(), driveVelocity.getY(), thetaVelocity, currentPose.getRotation()));
+    if (move.get()) {
+      drive.setVelocityOverride(
+          ChassisSpeeds.fromFieldRelativeSpeeds(
+              driveVelocity.getX(),
+              driveVelocity.getY(),
+              thetaVelocity,
+              currentPose.getRotation()));
+    } else {
+      drive.resetVelocityOverride();
+    }
 
     // Log data
     log_DistanceMeasured.info(currentDistance);
