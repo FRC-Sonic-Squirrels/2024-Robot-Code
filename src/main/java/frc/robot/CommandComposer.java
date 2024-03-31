@@ -234,16 +234,15 @@ public class CommandComposer {
                         >= 0.2)
             .andThen(
                 new ReactionArmsSetAngle(
-                        elevator,
-                        Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
-                    .andThen(MechanismActions.loadingPosition(elevator, arm))
-                    .andThen(
-                        new ReactionArmsSetAngle(
-                            elevator,
-                            Constants.ElevatorConstants.ReactionArmConstants
-                                .REACTION_ARM_HOME_ROTATIONS))
-                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
-                    .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS)));
+                    elevator,
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS))
+            .andThen(MechanismActions.loadingPosition(elevator, arm))
+            .andThen(
+                new ReactionArmsSetAngle(
+                    elevator,
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
+            .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
+            .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
