@@ -27,7 +27,7 @@ public class RobotConfig2024 extends RobotConfig {
   // TODO: ----- !IMPORTANT! FILL IN ALL VALUES !IMPORTANT! -----
 
   // ------------ SWERVE ---------------------
-  private static final Measure<Distance> WHEEL_RADIUS = Units.Inches.of(1.910);
+  private static final Measure<Distance> WHEEL_RADIUS = Units.Inches.of(1.940);
 
   // ------ SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
   // 0

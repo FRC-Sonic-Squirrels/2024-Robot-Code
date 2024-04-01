@@ -211,6 +211,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
     log_GPVisionWithinDistanceToRobot.info(withInBeginDriveDistance);
     log_GPVisionDetectedNoteWithinExpectedRange.info(withInExpectedTargetDistance);
 
-    return withInBeginDriveDistance && withInExpectedTargetDistance;
+    return
+    // withInBeginDriveDistance
+    withInExpectedTargetDistance && drive.getPoseEstimatorPose(true).getX() > 5.572144031524658;
   }
 }

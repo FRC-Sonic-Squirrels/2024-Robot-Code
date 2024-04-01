@@ -472,7 +472,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   public StateHandler shootEnding() {
     updateSolver();
     rotateToSpeaker();
-    if (!stateRunningLongerThan(0.5)) return null;
+    if (!stateRunningLongerThan(0.1)) return null;
     // visualize gamepiece
 
     log_TimeToShoot.info(Timer.getFPGATimestamp() - startOfShooting);
@@ -538,11 +538,11 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR
     // CLUTCH SHOTS IN
     // TELEOP
-    var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
-    if (solverResult == null
-        || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
-      return false;
-    }
+    // var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
+    // if (solverResult == null
+    //     || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
+    //   return false;
+    // }
 
     return true;
   }

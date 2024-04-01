@@ -47,6 +47,8 @@ public class LED extends SubsystemBase {
   private LoggedTunableNumber tunableG = group.build("tunableColor/g", 0);
   private LoggedTunableNumber tunableB = group.build("tunableColor/b", 0);
   private final DoubleSupplier elevatorHeight;
+  private int robotLoops = 0;
+  private final int robotLoopsTillReady = 20;
 
   public LED(DoubleSupplier elevatorHeight) {
     led.setLength(ledBuffer.getLength());
@@ -57,6 +59,7 @@ public class LED extends SubsystemBase {
 
   @Override
   public void periodic() {
+    robotLoops++;
 
     if (useTunableLEDs.get() == 0) {
       // This method will be called once per scheduler run
@@ -64,14 +67,14 @@ public class LED extends SubsystemBase {
         case BASE:
           switch (baseRobotState) {
             case NOTE_STATUS:
-              if (DriverStation.isDisabled() && elevatorHeight.getAsDouble() < 1) {
-                setSnake2(Color.kWhite, Color.kMagenta);
+              if (robotLoops < robotLoopsTillReady) {
+                setProgressBar(Color.kGreen, (double) robotLoops / (double) robotLoopsTillReady);
+              } else if (elevatorHeight.getAsDouble() < 1 && DriverStation.isDisabled()) {
+                setSnake2(Color.kRed, Color.kMagenta);
               } else {
                 if (noteInRobot) {
                   setSolidColor(squirrelOrange);
-
                 } else {
-
                   if (DriverStation.isTeleop() && DriverStation.isEnabled()) {
                     setSolidColor(Color.kBlack);
                   } else if (DriverStation.isAutonomous()) {
@@ -80,8 +83,8 @@ public class LED extends SubsystemBase {
                     setSnake2(squirrelOrange, new Color(1, 0.3, 0));
                   }
                 }
-                break;
               }
+              break;
             case AUTO_NOTE_PICKUP:
               setSolidColor(Color.kMagenta);
               break;
@@ -152,6 +155,16 @@ public class LED extends SubsystemBase {
   private void setSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setLED(i, color);
+    }
+  }
+
+  private void setProgressBar(Color color, double percent) {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      if ((double) i / (double) ledBuffer.getLength() < percent) {
+        ledBuffer.setLED(i, color);
+      } else {
+        ledBuffer.setLED(i, Color.kBlack);
+      }
     }
   }
 
