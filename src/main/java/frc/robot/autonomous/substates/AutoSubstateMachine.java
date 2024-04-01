@@ -213,6 +213,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
     return
     // withInBeginDriveDistance
-    withInExpectedTargetDistance && drive.getPoseEstimatorPose(true).getX() > 5.572144031524658;
+    // FIXME : THIS IS BROKEN
+    (withInExpectedTargetDistance && drive.getPoseEstimatorPose(true).getX() > 5.572144031524658)
+        || gamepieceTranslation.getX() < 5.572144031524658;
   }
 }

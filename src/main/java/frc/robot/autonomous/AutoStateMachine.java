@@ -40,10 +40,11 @@ public class AutoStateMachine extends StateMachine {
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
   private int currentSubState;
+  private final boolean plopFirstGP;
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
-    this(subsystems, config, false, null, null, overrideStateMachines);
+    this(subsystems, config, false, null, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
@@ -52,12 +53,20 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       StateMachine[] overrideStateMachines) {
-    this(subsystems, config, doInitialPath, initPath, null, overrideStateMachines);
+    this(subsystems, config, doInitialPath, initPath, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, false, null, subStateTrajNames, null);
+    this(subsystems, config, false, null, false, subStateTrajNames, null);
+  }
+
+  public AutoStateMachine(
+      AutosSubsystems subsystems,
+      RobotConfig config,
+      boolean plopFirstGamepiece,
+      List<PathDescriptor> subStateTrajNames) {
+    this(subsystems, config, false, null, plopFirstGamepiece, subStateTrajNames, null);
   }
 
   public AutoStateMachine(
@@ -66,7 +75,7 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, doInitialPath, initPath, subStateTrajNames, null);
+    this(subsystems, config, doInitialPath, initPath, false, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
@@ -75,6 +84,7 @@ public class AutoStateMachine extends StateMachine {
       RobotConfig config,
       boolean doInitDrive,
       String initPath,
+      boolean plopFirstGP,
       List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
@@ -91,6 +101,7 @@ public class AutoStateMachine extends StateMachine {
     this.config = config;
     this.currentSubState = -1;
     this.overrideStateMachines = overrideStateMachines;
+    this.plopFirstGP = plopFirstGP;
 
     if (subStateTrajNames == null) {
       subStateTrajNames = new ArrayList<>();
@@ -110,6 +121,9 @@ public class AutoStateMachine extends StateMachine {
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
       setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
+    } else if (plopFirstGP) {
+      this.initPath = null;
+      setInitialState(() -> nextSubState(true));
     } else {
       this.initPath = null;
       setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -172,7 +186,8 @@ public class AutoStateMachine extends StateMachine {
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
-                    targetGPPose),
+                    targetGPPose,
+                    currentSubState == 1 && plopFirstGP),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));
       } else {
         nextState =
