@@ -90,18 +90,18 @@ public class LED extends SubsystemBase {
               setSolidColor(Color.kYellow);
 
             case AMP_LINE_UP:
-              setBlinking(Color.kWhite, Color.kGreen);
+              setBlinking(Color.kWhite, Color.kBlack);
               break;
 
             case CLIMB_LINE_UP:
-              setBlinking(Color.kWhite, Color.kBlue);
+              setBlinking(Color.kWhite, Color.kBlack);
               break;
 
             case SHOOTING_PREP:
               setSolidColor(Color.kYellow);
               break;
             case SHOOTER_SUCCESS:
-              setSolidColor(Color.kGreen);
+              setSolidColor(Color.kBlueViolet);
               break;
 
             default:
