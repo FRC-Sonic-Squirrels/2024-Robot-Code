@@ -61,6 +61,8 @@ public class ChoreoHelper {
   private double pausedTime = Double.NaN;
   private ChoreoTrajectoryState stateTooBehind;
 
+  public record ChassisSpeedsWithPathEnd(ChassisSpeeds chassisSpeeds, boolean atEndOfPath) {}
+
   /**
    * Helper class to go from timestamps of path to desired chassis speeds
    *
@@ -141,10 +143,12 @@ public class ChoreoHelper {
    * @param robotPose pose of the robot
    * @param timestamp time of path
    */
-  public ChassisSpeeds calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
+  public ChassisSpeedsWithPathEnd calculateChassisSpeeds(Pose2d robotPose, double timestamp) {
     ChoreoTrajectoryState state;
 
     log_isPaused.info(isPaused());
+
+    boolean atTheEndOfPath = false;
 
     if (stateTooBehind != null) {
       state = stateTooBehind;
@@ -153,7 +157,7 @@ public class ChoreoHelper {
 
       state = traj.sample(timestampCorrected, Constants.isRedAlliance());
       if (timestampCorrected >= traj.getTotalTime()) {
-        return null;
+        atTheEndOfPath = true;
       }
     }
 
@@ -201,7 +205,7 @@ public class ChoreoHelper {
 
     if (Double.isFinite(pausedTime)) {
       if (stateTooBehind == null) {
-        return null;
+        atTheEndOfPath = true;
       }
 
       // If we are paused, scale down the velocity, to avoid fighting the Feedback PID.
@@ -235,7 +239,9 @@ public class ChoreoHelper {
     log_desiredVelocity.info(new Pose2d(xVel, yVel, Rotation2d.fromRadians(omegaVel)));
     log_headingError.info(Math.toDegrees(GeometryUtil.optimizeRotation(theta - state.heading)));
 
-    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation);
+    return new ChassisSpeedsWithPathEnd(
+        ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(xVel, yVel, omegaVel), rotation),
+        atTheEndOfPath);
   }
 
   private ChoreoTrajectoryState isFutureStateCloser(

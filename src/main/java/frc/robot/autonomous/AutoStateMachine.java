@@ -4,7 +4,6 @@
 
 package frc.robot.autonomous;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
@@ -125,14 +124,14 @@ public class AutoStateMachine extends StateMachine {
   }
 
   private StateHandler driveOutState() {
-    ChassisSpeeds speeds =
+    var result =
         initialPathChoreoHelper.calculateChassisSpeeds(
             drive.getPoseEstimatorPose(true), timeFromStart());
-    if (speeds == null) {
+    if (result.atEndOfPath()) {
       drive.resetVelocityOverride();
       return stateWithName("autoInitialState", this::autoInitialState);
     }
-    drive.setVelocity(speeds);
+    drive.setVelocity(result.chassisSpeeds());
     return null;
   }
 

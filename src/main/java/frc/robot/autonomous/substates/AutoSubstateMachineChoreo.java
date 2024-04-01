@@ -1,7 +1,6 @@
 package frc.robot.autonomous.substates;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.autonomous.AutosSubsystems;
 import frc.robot.autonomous.ChoreoHelper;
 import frc.robot.autonomous.ChoreoTrajectoryWithName;
@@ -73,15 +72,16 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
     }
 
-    ChassisSpeeds speeds =
-        choreoHelper != null
-            ? choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart())
-            : null;
-    if (speeds == null) {
-      drive.resetVelocityOverride();
-      return stateWithName("gamepieceConfirmation", super::gamepieceConfirmation);
+    if (choreoHelper != null) {
+      var result =
+          choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
+      if (!result.atEndOfPath()) {
+        drive.setVelocityOverride(result.chassisSpeeds());
+        return null;
+      }
     }
-    drive.setVelocityOverride(speeds);
-    return null;
+
+    drive.resetVelocityOverride();
+    return stateWithName("gamepieceConfirmation", super::gamepieceConfirmation);
   }
 }

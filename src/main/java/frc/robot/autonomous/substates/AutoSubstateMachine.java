@@ -158,13 +158,10 @@ public abstract class AutoSubstateMachine extends StateMachine {
   }
 
   private StateHandler followPathToShooting() {
-    ChassisSpeeds chassisSpeeds =
-        choreoHelper != null
-            ? choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart())
-            : null;
-
-    if (chassisSpeeds != null) {
-      drive.setVelocityOverride(chassisSpeeds);
+    if (choreoHelper != null) {
+      var result =
+          choreoHelper.calculateChassisSpeeds(drive.getPoseEstimatorPose(true), timeFromStart());
+      drive.setVelocityOverride(result.chassisSpeeds());
     } else {
       drive.resetVelocityOverride();
     }
