@@ -33,6 +33,11 @@ public abstract class LoggerEntry {
     }
   }
 
+  @Override
+  public String toString() {
+    return key;
+  }
+
   public abstract String getNT4Type();
 
   public abstract String getWpiLogType();

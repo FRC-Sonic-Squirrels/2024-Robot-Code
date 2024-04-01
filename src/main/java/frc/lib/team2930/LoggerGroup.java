@@ -421,6 +421,11 @@ public class LoggerGroup {
     this.path = path;
   }
 
+  @Override
+  public String toString() {
+    return path;
+  }
+
   // -- //
 
   public LoggerEntry.Text buildString(String name) {
@@ -691,70 +696,70 @@ public class LoggerGroup {
             case Boolean:
               {
                 var l = root.buildBoolean(key);
-                callback = (v) -> l.info(value.getBoolean());
+                callback = (v) -> l.info(v.getBoolean());
                 break;
               }
 
             case BooleanArray:
               {
                 var l = root.buildBooleanArray(key);
-                callback = (v) -> l.info(value.getBooleanArray());
+                callback = (v) -> l.info(v.getBooleanArray());
                 break;
               }
 
             case Integer:
               {
                 var l = root.buildInteger(key);
-                callback = (v) -> l.info(value.getInteger());
+                callback = (v) -> l.info(v.getInteger());
                 break;
               }
 
             case IntegerArray:
               {
                 var l = root.buildIntegerArray(key);
-                callback = (v) -> l.info(value.getIntegerArray());
+                callback = (v) -> l.info(v.getIntegerArray());
                 break;
               }
 
             case Float:
               {
                 var l = root.buildDecimalFloat(key);
-                callback = (v) -> l.info(value.getFloat());
+                callback = (v) -> l.info(v.getFloat());
                 break;
               }
 
             case FloatArray:
               {
                 var l = root.buildDecimalFloatArray(key);
-                callback = (v) -> l.info(value.getFloatArray());
+                callback = (v) -> l.info(v.getFloatArray());
                 break;
               }
 
             case Double:
               {
                 var l = root.buildDecimal(key);
-                callback = (v) -> l.info(value.getDouble());
+                callback = (v) -> l.info(v.getDouble());
                 break;
               }
 
             case DoubleArray:
               {
                 var l = root.buildDecimalArray(key);
-                callback = (v) -> l.info(value.getDoubleArray());
+                callback = (v) -> l.info(v.getDoubleArray());
                 break;
               }
 
             case String:
               {
                 var l = root.buildString(key);
-                callback = (v) -> l.info(value.getString());
+                callback = (v) -> l.info(v.getString());
                 break;
               }
 
             case StringArray:
               {
                 var l = root.buildStringArray(key);
-                callback = (v) -> l.info(value.getStringArray());
+                callback = (v) -> l.info(v.getStringArray());
                 break;
               }
 
