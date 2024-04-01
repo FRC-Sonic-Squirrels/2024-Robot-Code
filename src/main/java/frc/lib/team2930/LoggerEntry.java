@@ -164,8 +164,9 @@ public abstract class LoggerEntry {
 
     @Override
     public void publish() {
-      LoggerGroup.emit(publisher, value, getDataLogId());
-      valuePrevious = value;
+      var valueCloned = value != null ? Arrays.copyOf(value, value.length) : null;
+      LoggerGroup.emit(publisher, valueCloned, getDataLogId());
+      valuePrevious = valueCloned;
     }
 
     public void info(String... value) {
@@ -319,8 +320,9 @@ public abstract class LoggerEntry {
 
     @Override
     public void publish() {
-      LoggerGroup.emit(publisher, value, getDataLogId());
-      valuePrevious = value;
+      var valueCloned = value != null ? Arrays.copyOf(value, value.length) : null;
+      LoggerGroup.emit(publisher, valueCloned, getDataLogId());
+      valuePrevious = valueCloned;
     }
 
     public void info(long... value) {
@@ -383,8 +385,9 @@ public abstract class LoggerEntry {
 
     @Override
     public void publish() {
-      LoggerGroup.emit(publisher, value, getDataLogId());
-      valuePrevious = value;
+      var valueCloned = value != null ? Arrays.copyOf(value, value.length) : null;
+      LoggerGroup.emit(publisher, valueCloned, getDataLogId());
+      valuePrevious = valueCloned;
     }
 
     public void info(double... value) {
@@ -443,8 +446,9 @@ public abstract class LoggerEntry {
 
     @Override
     public void publish() {
-      LoggerGroup.emit(publisher, value, getDataLogId());
-      valuePrevious = value;
+      var valueCloned = value != null ? Arrays.copyOf(value, value.length) : null;
+      LoggerGroup.emit(publisher, valueCloned, getDataLogId());
+      valuePrevious = valueCloned;
     }
 
     public void info(float... value) {
@@ -473,8 +477,9 @@ public abstract class LoggerEntry {
 
     @Override
     public void publish() {
-      LoggerGroup.emit(publisher, value, getDataLogId());
-      valuePrevious = value;
+      var valueCloned = value != null ? Arrays.copyOf(value, value.length) : null;
+      LoggerGroup.emit(publisher, valueCloned, getDataLogId());
+      valuePrevious = valueCloned;
     }
 
     public void info(byte[] value) {
