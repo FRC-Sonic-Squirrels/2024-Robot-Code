@@ -16,6 +16,7 @@ public abstract class LoggerEntry {
   public final double updateFrequency;
   public double lastRefresh;
   protected GenericPublisher publisher;
+  boolean notFirstValue;
   boolean changed;
   int dataLogId = LoggerGroup.dataLogIdNotInitialized;
 
@@ -139,7 +140,7 @@ public abstract class LoggerEntry {
       if (shouldNotRefresh()) return;
 
       this.value = value;
-      this.changed = !Objects.equals(value, valuePrevious);
+      this.changed = !Objects.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -171,7 +172,7 @@ public abstract class LoggerEntry {
       if (shouldNotRefresh()) return;
 
       this.value = value;
-      this.changed = !Arrays.equals(value, valuePrevious);
+      this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -204,7 +205,7 @@ public abstract class LoggerEntry {
 
     public void info(E value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
   }
 
@@ -234,7 +235,7 @@ public abstract class LoggerEntry {
 
     public void info(boolean value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
   }
 
@@ -264,7 +265,7 @@ public abstract class LoggerEntry {
 
     public void info(boolean... value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
   }
 
@@ -294,7 +295,7 @@ public abstract class LoggerEntry {
 
     public void info(long value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
   }
 
@@ -324,7 +325,7 @@ public abstract class LoggerEntry {
 
     public void info(long... value) {
       this.value = value;
-      this.changed = !Arrays.equals(value, valuePrevious);
+      this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -354,7 +355,7 @@ public abstract class LoggerEntry {
 
     public void info(double value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
 
     public void info(Rotation2d value) {
@@ -388,7 +389,7 @@ public abstract class LoggerEntry {
 
     public void info(double... value) {
       this.value = value;
-      this.changed = !Arrays.equals(value, valuePrevious);
+      this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -418,7 +419,7 @@ public abstract class LoggerEntry {
 
     public void info(float value) {
       this.value = value;
-      this.changed = value != valuePrevious;
+      this.changed = value != valuePrevious || !notFirstValue;
     }
   }
 
@@ -448,7 +449,7 @@ public abstract class LoggerEntry {
 
     public void info(float... value) {
       this.value = value;
-      this.changed = !Arrays.equals(value, valuePrevious);
+      this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -478,7 +479,7 @@ public abstract class LoggerEntry {
 
     public void info(byte[] value) {
       this.value = value;
-      this.changed = !Arrays.equals(value, valuePrevious);
+      this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
   }
 
@@ -623,6 +624,7 @@ public abstract class LoggerEntry {
 
     if (changed) {
       changed = false;
+      notFirstValue = true;
       publish();
     }
   }
