@@ -4,6 +4,7 @@ import com.ctre.phoenix6.Utils;
 import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import org.littletonrobotics.junction.LogDataReceiver;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
@@ -29,8 +31,8 @@ public class LoggerGroup {
   private static final double logWriter_defaultWritePeriodSim = 0.01;
 
   private static final Object g_lock = new Object();
-  private static final Map<Class<?>, edu.wpi.first.util.struct.Struct<?>> structTypeCache;
-  private static final List<edu.wpi.first.util.struct.Struct<?>> structTypePendingSchema;
+  private static final Map<Class<?>, Struct<?>> structTypeCache;
+  private static final List<Struct<?>> structTypePendingSchema;
 
   static {
     structTypeCache = new HashMap<>();
@@ -221,7 +223,7 @@ public class LoggerGroup {
             : logWriter_defaultWritePeriodRio;
 
     // Create random identifier
-    Random random = new Random();
+    var random = new Random();
     StringBuilder randomIdentifierBuilder = new StringBuilder();
     for (int i = 0; i < 4; i++) {
       randomIdentifierBuilder.append(String.format("%04x", random.nextInt(0x10000)));
@@ -664,8 +666,10 @@ public class LoggerGroup {
   }
 
   public static class Redirector implements LogDataReceiver {
+    private final HashMap<String, Consumer<LogTable.LogValue>> lookup = new HashMap<>();
+
     @Override
-    public void putTable(LogTable table) throws InterruptedException {
+    public void putTable(LogTable table) {
       // Encode new/changed fields
       var newMap = table.getAll(false);
 
@@ -674,52 +678,95 @@ public class LoggerGroup {
         var key = field.getKey();
         var value = field.getValue();
 
-        // Write new data
-        switch (value.type) {
-          case Raw:
-            root.buildBytes(key).info(value.getRaw());
-            break;
+        var callback = lookup.get(key);
+        if (callback == null) {
+          switch (value.type) {
+            case Raw:
+              {
+                var l = root.buildBytes(key);
+                callback = (v) -> l.info(v.getRaw());
+                break;
+              }
 
-          case Boolean:
-            root.buildBoolean(key).info(value.getBoolean());
-            break;
+            case Boolean:
+              {
+                var l = root.buildBoolean(key);
+                callback = (v) -> l.info(value.getBoolean());
+                break;
+              }
 
-          case BooleanArray:
-            root.buildBooleanArray(key).info(value.getBooleanArray());
-            break;
+            case BooleanArray:
+              {
+                var l = root.buildBooleanArray(key);
+                callback = (v) -> l.info(value.getBooleanArray());
+                break;
+              }
 
-          case Integer:
-            root.buildInteger(key).info(value.getInteger());
-            break;
+            case Integer:
+              {
+                var l = root.buildInteger(key);
+                callback = (v) -> l.info(value.getInteger());
+                break;
+              }
 
-          case IntegerArray:
-            root.buildIntegerArray(key).info(value.getIntegerArray());
-            break;
+            case IntegerArray:
+              {
+                var l = root.buildIntegerArray(key);
+                callback = (v) -> l.info(value.getIntegerArray());
+                break;
+              }
 
-          case Float:
-            root.buildDecimalFloat(key).info(value.getFloat());
-            break;
+            case Float:
+              {
+                var l = root.buildDecimalFloat(key);
+                callback = (v) -> l.info(value.getFloat());
+                break;
+              }
 
-          case FloatArray:
-            root.buildDecimalFloatArray(key).info(value.getFloatArray());
-            break;
+            case FloatArray:
+              {
+                var l = root.buildDecimalFloatArray(key);
+                callback = (v) -> l.info(value.getFloatArray());
+                break;
+              }
 
-          case Double:
-            root.buildDecimal(key).info(value.getDouble());
-            break;
+            case Double:
+              {
+                var l = root.buildDecimal(key);
+                callback = (v) -> l.info(value.getDouble());
+                break;
+              }
 
-          case DoubleArray:
-            root.buildDecimalArray(key).info(value.getDoubleArray());
-            break;
+            case DoubleArray:
+              {
+                var l = root.buildDecimalArray(key);
+                callback = (v) -> l.info(value.getDoubleArray());
+                break;
+              }
 
-          case String:
-            root.buildString(key).info(value.getString());
-            break;
+            case String:
+              {
+                var l = root.buildString(key);
+                callback = (v) -> l.info(value.getString());
+                break;
+              }
 
-          case StringArray:
-            root.buildStringArray(key).info(value.getStringArray());
-            break;
+            case StringArray:
+              {
+                var l = root.buildStringArray(key);
+                callback = (v) -> l.info(value.getStringArray());
+                break;
+              }
+
+            default:
+              // Not supported.
+              continue;
+          }
+
+          lookup.put(key, callback);
         }
+
+        callback.accept(value);
       }
     }
   }
