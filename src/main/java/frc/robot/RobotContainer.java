@@ -241,16 +241,6 @@ public class RobotContainer {
           } else {
             VisionModuleConfiguration[] visionModules = {
               VisionModuleConfiguration.buildSim(
-                  SimulatorRobotConfig.INTAKE_SIDE_LEFT_CAMERA_NAME,
-                  SimulatorRobotConfig.INTAKE_SIDE_LEFT,
-                  config,
-                  drivetrain::getPoseEstimatorPose),
-              VisionModuleConfiguration.buildSim(
-                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT_CAMERA_NAME,
-                  SimulatorRobotConfig.INTAKE_SIDE_RIGHT,
-                  config,
-                  drivetrain::getPoseEstimatorPose),
-              VisionModuleConfiguration.buildSim(
                   SimulatorRobotConfig.SHOOTER_SIDE_LEFT_CAMERA_NAME,
                   SimulatorRobotConfig.SHOOTER_SIDE_LEFT,
                   config,
