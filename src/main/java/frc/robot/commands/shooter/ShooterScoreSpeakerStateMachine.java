@@ -443,6 +443,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         startOfShooting = Timer.getFPGATimestamp();
         solver.startShooting(startOfShooting);
         shooter.markStartOfNoteShooting();
+        endEffector.markStartOfNoteDropping();
         led.setBaseRobotState(BaseRobotState.SHOOTER_SUCCESS);
         return stateWithName("shoot", this::shoot);
       }

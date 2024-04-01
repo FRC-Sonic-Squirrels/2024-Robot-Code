@@ -728,6 +728,25 @@ public class RobotContainer {
 
     operatorController.start().onTrue(new EndEffectorPrepareNoteForTrap(endEffector));
 
+    // --- SIM ONLY --
+
+    if (!Robot.isReal()) {
+      operatorController
+          .back()
+          .onTrue(Commands.runOnce(() -> endEffector.markStartOfNoteIntaking()));
+
+      operatorController
+          .start()
+          .whileTrue(
+              Commands.run(
+                  () ->
+                      drivetrain.setPose(
+                          new Pose2d(
+                              drivetrain.getPoseEstimatorPose().getX() + 0.25,
+                              drivetrain.getPoseEstimatorPose().getY(),
+                              drivetrain.getPoseEstimatorPose().getRotation()))));
+    }
+
     // -- buttons on robot
     homeSensorsButtonTrigger.onTrue(
         Commands.runOnce(elevator::resetSensorToHomePosition, elevator)
@@ -772,6 +791,7 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV Restart SW 1_Shooter_Left",
         new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.13")));
+
     SmartDashboard.putData(
         "PV REBOOT 1_Shooter_Left",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.13")));
@@ -779,6 +799,7 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV Restart SW 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.restartPhotonVision("10.29.30.14")));
+
     SmartDashboard.putData(
         "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
