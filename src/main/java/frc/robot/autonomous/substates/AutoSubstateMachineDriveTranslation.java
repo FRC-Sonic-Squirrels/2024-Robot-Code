@@ -33,16 +33,16 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
 
     this.gamepieceTranslation = gamepieceTranslation;
 
-    setInitialState(stateWithName("initFollowPathToGamePiece", this::initFollowPathToGamePiece));
+    setInitialState(stateWithName("initDriveToGamepiece", this::initDriveToGamepiece));
   }
 
-  private StateHandler initFollowPathToGamePiece() {
+  private StateHandler initDriveToGamepiece() {
     intakeCommand = new IntakeGamepiece(intake, endEffector, shooter, arm, elevator);
     intakeCommand.schedule();
 
     driveToGamepieceHelper = new DriveToGamepieceHelper();
 
-    return stateWithName("followPathToGamePiece", this::pickupGamepiece);
+    return stateWithName("pickupGamepiece", this::pickupGamepiece);
   }
 
   private StateHandler pickupGamepiece() {
