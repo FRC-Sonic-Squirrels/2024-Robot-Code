@@ -54,6 +54,63 @@ public abstract class LoggerEntry {
 
   // ############
 
+  public static class Condition {
+    public State build() {
+      return new State();
+    }
+
+    public class State {
+      private double timeStart = Double.NaN;
+      private double timeTrigger = Double.NaN;
+      private boolean state;
+
+      public void start() {
+        if (Double.isNaN(timeStart)) {
+          timeStart = LoggerGroup.getCurrentTimestmap();
+        }
+      }
+
+      public void set(boolean state) {
+        if (state) {
+          if (Double.isNaN(timeTrigger)) {
+            timeTrigger = LoggerGroup.getCurrentTimestmap();
+          }
+        }
+
+        this.state = state;
+      }
+
+      public boolean get() {
+        return state;
+      }
+
+      public void log() {
+        double delay;
+
+        if (Double.isNaN(timeStart)) {
+          delay = 0;
+        } else if (Double.isNaN(timeTrigger)) {
+          delay = LoggerGroup.getCurrentTimestmap() - timeStart;
+        } else {
+          delay = timeTrigger - timeStart;
+        }
+
+        log_condition.info(state);
+        log_conditionDelay.info(delay);
+      }
+    }
+
+    public final LoggerEntry.Bool log_condition;
+    public final LoggerEntry.Decimal log_conditionDelay;
+
+    public Condition(LoggerGroup group, String prefix) {
+      log_condition = group.buildBoolean(prefix);
+      log_conditionDelay = group.buildDecimal(prefix + "_Latency");
+    }
+  }
+
+  // ############
+
   public static class Text extends LoggerEntry {
     private String valuePrevious;
     private String value;

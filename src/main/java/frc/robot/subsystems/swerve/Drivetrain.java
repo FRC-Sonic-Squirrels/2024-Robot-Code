@@ -100,10 +100,14 @@ public class Drivetrain extends SubsystemBase {
       logGroupDrivetrain.buildDecimal("speedsRot");
 
   private static final LoggerGroup logGroupLocalization = LoggerGroup.build("Localization");
-  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition =
-      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition");
+
   private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition_RAW_ODOMETRY =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_RAW_ODOMETRY");
+
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition");
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPositionWithVision =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_with_vision");
 
   private static final LoggerEntry.Struct<Pose2d> logLocalization_StageRedOnly =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_stage_Red");
@@ -224,21 +228,24 @@ public class Drivetrain extends SubsystemBase {
 
       prevVel = getFieldRelativeVelocities();
 
-      logLocalization_RobotPosition.info(getPoseEstimatorPose());
-      logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
+      var poseEstimatorPose = getPoseEstimatorPose();
+      var visionStaleness = getVisionStaleness();
+      logLocalization_RobotPosition.info(poseEstimatorPose);
+      if (visionStaleness < 0.5) logLocalization_RobotPositionWithVision.info(poseEstimatorPose);
 
       logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
       logLocalization_StageBlueOnly.info(getPoseEstimatorPoseStageBlue());
 
       logLocalization_Global.info(getPoseEstimatorPoseAllTags());
 
-      field2d.setRobotPose(getPoseEstimatorPose());
+      field2d.setRobotPose(poseEstimatorPose);
       SmartDashboard.putData("Localization/field2d", field2d);
 
       rawOdometryField2d.setRobotPose(rawOdometryPose);
+      logLocalization_RobotPosition_RAW_ODOMETRY.info(rawOdometryPose);
       SmartDashboard.putData("Localization/rawOdometryField2d", rawOdometryField2d);
 
-      logTimeSinceVision.info(getVisionStaleness());
+      logTimeSinceVision.info(visionStaleness);
       logRejectionCutoff.info(poseEstimator.rejectionCutoff);
       logRejectionInvalidTags.info(poseEstimator.rejectionInvalidTags);
       logRejectionNoDriveData.info(poseEstimator.rejectionNoDriveData);

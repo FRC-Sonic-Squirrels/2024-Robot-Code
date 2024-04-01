@@ -265,6 +265,10 @@ public class LoggerGroup {
     dataLog_logMatchText = null;
   }
 
+  public static double getCurrentTimestmap() {
+    return currentTimestmap;
+  }
+
   public static void periodic() {
     currentTimestmap = Utils.getCurrentTimeSeconds();
     currentTimestmapLog = HALUtil.getFPGATime();
@@ -457,6 +461,12 @@ public class LoggerGroup {
     //noinspection unchecked
     return buildInner(
         name, updateFrequencyInSeconds, LoggerEntry.EnumValue.class, LoggerEntry.EnumValue::new);
+  }
+
+  // -- //
+
+  public LoggerEntry.Condition buildCondition(String name) {
+    return new LoggerEntry.Condition(this, name);
   }
 
   // -- //

@@ -40,28 +40,33 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   // --
   private static final LoggerGroup logGroupConfirmation = logGroup.subgroup("shootingConfimation");
-  private static final LoggerEntry.Bool log_launcherAtRPM =
-      logGroupConfirmation.buildBoolean("launcherAtRPM");
-  private static final LoggerEntry.Bool log_pivotAtAngle =
-      logGroupConfirmation.buildBoolean("pivotAtAngle");
-  private static final LoggerEntry.Bool log_shootingPosition =
-      logGroupConfirmation.buildBoolean("shootingPosition");
-  private static final LoggerEntry.Bool log_recentVisionUpdates =
-      logGroupConfirmation.buildBoolean("recentVisionUpdates");
-  private static final LoggerEntry.Bool log_driverConfirmation =
-      logGroupConfirmation.buildBoolean("driverConfirmation");
-  private static final LoggerEntry.Bool log_atThetaTarget =
-      logGroupConfirmation.buildBoolean("atThetaTarget");
-  private static final LoggerEntry.Bool log_belowMaxSpeed =
-      logGroupConfirmation.buildBoolean("belowMaxSpeed");
-  private static final LoggerEntry.Bool log_belowMaxRotVel =
-      logGroupConfirmation.buildBoolean("belowMaxRotVel");
-  private static final LoggerEntry.Bool log_shooterSolver =
-      logGroupConfirmation.buildBoolean("shooterSolver");
-  private static final LoggerEntry.Bool log_forceShoot =
-      logGroupConfirmation.buildBoolean("forceShoot");
+  private static final LoggerEntry.Condition log_launcherAtRPM =
+      logGroupConfirmation.buildCondition("launcherAtRPM");
+  private static final LoggerEntry.Condition log_pivotAtAngle =
+      logGroupConfirmation.buildCondition("pivotAtAngle");
+  private static final LoggerEntry.Condition log_shootingPosition =
+      logGroupConfirmation.buildCondition("shootingPosition");
+  private static final LoggerEntry.Condition log_recentVisionUpdates =
+      logGroupConfirmation.buildCondition("recentVisionUpdates");
+  private static final LoggerEntry.Condition log_driverConfirmation =
+      logGroupConfirmation.buildCondition("driverConfirmation");
+  private static final LoggerEntry.Condition log_atThetaTarget =
+      logGroupConfirmation.buildCondition("atThetaTarget");
+  private static final LoggerEntry.Condition log_belowMaxSpeed =
+      logGroupConfirmation.buildCondition("belowMaxSpeed");
+  private static final LoggerEntry.Condition log_belowMaxRotVel =
+      logGroupConfirmation.buildCondition("belowMaxRotVel");
+  private static final LoggerEntry.Condition log_shooterSolver =
+      logGroupConfirmation.buildCondition("shooterSolver");
+  private static final LoggerEntry.Condition log_forceShoot =
+      logGroupConfirmation.buildCondition("forceShoot");
+  private static final LoggerEntry.Condition log_allOtherConditionsGood =
+      logGroupConfirmation.buildCondition("allOtherConditionsGood");
+  private static final LoggerEntry.Condition log_shootingDelayDueToVision =
+      logGroupConfirmation.buildCondition("shootingDelayDueToVision");
 
   // --
+
   private static final LoggerGroup logGroupData = logGroup.subgroup("data");
   private static final LoggerEntry.Decimal log_omega = logGroupData.buildDecimal("omega");
   private static final LoggerEntry.Decimal log_rotationalError =
@@ -84,6 +89,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       logGroupData.buildDecimal("log_timeSinceVision");
 
   // --
+
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber tunableVisionStaleness =
       group.build("tunableVisionStaleness", 0.5);
@@ -123,6 +129,19 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       group.build("pivotAtPitchDebounce", 0.1);
 
   private double startOfShooting;
+
+  private final LoggerEntry.Condition.State state_launcherAtRPM;
+  private final LoggerEntry.Condition.State state_pivotAtAngle;
+  private final LoggerEntry.Condition.State state_shootingPosition;
+  private final LoggerEntry.Condition.State state_recentVisionUpdates;
+  private final LoggerEntry.Condition.State state_driverConfirmation;
+  private final LoggerEntry.Condition.State state_atThetaTarget;
+  private final LoggerEntry.Condition.State state_belowMaxSpeed;
+  private final LoggerEntry.Condition.State state_belowMaxRotVel;
+  private final LoggerEntry.Condition.State state_shooterSolver;
+  private final LoggerEntry.Condition.State state_forceShoot;
+  private final LoggerEntry.Condition.State state_allOtherConditionsGood;
+  private final LoggerEntry.Condition.State state_shootingDelayDueToVision;
 
   // FIXME: are these constants correct?
   private final ShootingSolver solver =
@@ -188,6 +207,19 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     this.simpleShot = simpleShot;
     this.simpleShotShooterPitch = shooterPitch;
 
+    state_launcherAtRPM = log_launcherAtRPM.build();
+    state_pivotAtAngle = log_pivotAtAngle.build();
+    state_shootingPosition = log_shootingPosition.build();
+    state_recentVisionUpdates = log_recentVisionUpdates.build();
+    state_driverConfirmation = log_driverConfirmation.build();
+    state_atThetaTarget = log_atThetaTarget.build();
+    state_belowMaxSpeed = log_belowMaxSpeed.build();
+    state_belowMaxRotVel = log_belowMaxRotVel.build();
+    state_shooterSolver = log_shooterSolver.build();
+    state_forceShoot = log_forceShoot.build();
+    state_allOtherConditionsGood = log_allOtherConditionsGood.build();
+    state_shootingDelayDueToVision = log_shootingDelayDueToVision.build();
+
     rotationController = new PIDController(rotationKp.get(), 0, rotationKd.get());
     rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -202,7 +234,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                         || shooter.getToFActivated()))
             .debounce(0.2);
 
-    setInitialState(stateWithName("prepWhileLoadingGamepiece", this::prepWhileLoadingGamepiece));
+    setInitialState(stateWithName("initializeConditions", this::initializeConditions));
   }
 
   public static Command getAsCommand(
@@ -299,6 +331,22 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         Constants.zeroRotation2d);
   }
 
+  public StateHandler initializeConditions() {
+    state_launcherAtRPM.start();
+    state_pivotAtAngle.start();
+    state_shootingPosition.start();
+    state_recentVisionUpdates.start();
+    state_driverConfirmation.start();
+    state_atThetaTarget.start();
+    state_belowMaxSpeed.start();
+    state_belowMaxRotVel.start();
+    state_shooterSolver.start();
+    state_forceShoot.start();
+    state_allOtherConditionsGood.start();
+
+    return stateWithName("prepWhileLoadingGamepiece", this::prepWhileLoadingGamepiece);
+  }
+
   public StateHandler prepWhileLoadingGamepiece() {
     led.setBaseRobotState(BaseRobotState.SHOOTING_PREP);
     // aim towards speaker
@@ -373,31 +421,27 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     // check if we are below max vel
 
     double maxVelMetersPerSec = maxVel.get();
-    boolean belowMaxSpeed =
-        drivetrainWrapper
-                .getFieldRelativeVelocities()
-                .getTranslation()
-                .getDistance(new Translation2d())
-            <= maxVelMetersPerSec;
+    Pose2d fieldRelativeVelocities = drivetrainWrapper.getFieldRelativeVelocities();
 
-    double maxRotVelRads = Math.toRadians(maxRotVel.get());
-    boolean belowMaxRotVel =
-        drivetrainWrapper.getFieldRelativeVelocities().getRotation().getRadians() <= maxRotVelRads;
+    state_belowMaxSpeed.set(
+        fieldRelativeVelocities.getTranslation().getNorm() <= maxVelMetersPerSec);
 
-    boolean pivotAtAngle = false;
-    var launcherAtRpm = shooter.isAtTargetRPM();
+    state_belowMaxRotVel.set(fieldRelativeVelocities.getRotation().getDegrees() <= maxRotVel.get());
+
+    state_launcherAtRPM.set(shooter.isAtTargetRPM());
     if (solverResult != null) {
       shooter.setPivotPosition(desiredShootingPitch);
-      pivotAtAngle = pivotAtPitchTrigger.getAsBoolean();
+      state_pivotAtAngle.set(pivotAtPitchTrigger.getAsBoolean());
+    } else {
+      state_pivotAtAngle.set(false);
     }
 
     rotateToSpeaker();
 
-    var externalConfirmation = this.externalConfirmation.getAsBoolean();
-    boolean atThetaTarget;
+    state_driverConfirmation.set(this.externalConfirmation.getAsBoolean());
 
     if (simpleShot) {
-      atThetaTarget = true;
+      state_atThetaTarget.set(true);
     } else {
       if (solverResult != null) {
         var thetaError =
@@ -407,39 +451,53 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
         thetaError = GeometryUtil.optimizeRotation(thetaError);
         double tolerance = getYawTolerance(solverResult.xyOffset().toTranslation2d()).getRadians();
         log_headingTolerance.info(Math.toDegrees(tolerance));
-        atThetaTarget = Math.abs(thetaError) <= Math.toRadians(2.0);
+        state_atThetaTarget.set(Math.abs(thetaError) <= Math.toRadians(2.0));
       } else {
-        atThetaTarget = false;
+        state_atThetaTarget.set(false);
       }
     }
 
-    var forceShoot = stateRunningLongerThan(forceShotIn);
-    var recentVisionUpdates = recentVisionUpdates();
-    var validShootingPosition = validShootingPosition();
+    state_forceShoot.set(stateRunningLongerThan(forceShotIn));
+    state_recentVisionUpdates.set(recentVisionUpdates());
+    state_shootingPosition.set(validShootingPosition());
+
+    state_allOtherConditionsGood.set(
+        state_launcherAtRPM.get()
+            && state_pivotAtAngle.get()
+            && state_shootingPosition.get()
+            && state_atThetaTarget.get()
+            && state_belowMaxSpeed.get()
+            && state_belowMaxRotVel.get());
+
+    if (state_allOtherConditionsGood.get()) {
+      // Start the timer when all other conditions are valid.
+      state_shootingDelayDueToVision.start();
+
+      // When there's a recent vision, we should set the state and thus stop the timer.
+      state_shootingDelayDueToVision.set(state_recentVisionUpdates.get());
+    }
 
     log_simpleShot.info(simpleShot);
 
-    log_launcherAtRPM.info(launcherAtRpm);
-    log_pivotAtAngle.info(pivotAtAngle);
-    log_shootingPosition.info(validShootingPosition);
-    log_recentVisionUpdates.info(recentVisionUpdates);
-    log_forceShoot.info(forceShoot);
-    log_driverConfirmation.info(externalConfirmation);
-    log_atThetaTarget.info(atThetaTarget);
-    log_belowMaxSpeed.info(belowMaxSpeed);
-    log_belowMaxRotVel.info(belowMaxRotVel);
+    state_launcherAtRPM.log();
+    state_pivotAtAngle.log();
+    state_shootingPosition.log();
+    state_recentVisionUpdates.log();
+    state_driverConfirmation.log();
+    state_atThetaTarget.log();
+    state_belowMaxSpeed.log();
+    state_belowMaxRotVel.log();
+    state_shooterSolver.log();
+    state_forceShoot.log();
+    state_allOtherConditionsGood.log();
+    state_shootingDelayDueToVision.log();
+
     log_timeSinceVision.info(drivetrainWrapper.getVisionStaleness());
 
-    if ((launcherAtRpm
-            && pivotAtAngle
-            // && recentVisionUpdates
-            && validShootingPosition
-            && atThetaTarget
-            && belowMaxSpeed
-            && belowMaxRotVel)
-        || forceShoot) {
+    if ((state_allOtherConditionsGood.get() && state_recentVisionUpdates.get())
+        || state_forceShoot.get()) {
       rumbleConsumer.accept(rumbleIntensity.get());
-      if (externalConfirmation) {
+      if (state_driverConfirmation.get()) {
         startOfShooting = Timer.getFPGATimestamp();
         solver.startShooting(startOfShooting);
         shooter.markStartOfNoteShooting();
@@ -492,7 +550,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
   private void rotateToSpeaker() {
     if (solverResult != null) {
-      log_shooterSolver.info(true);
+      state_shooterSolver.set(true);
 
       double currentRotation = drivetrainWrapper.getRotationGyroOnly().getRadians();
       double omega =
@@ -504,7 +562,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       log_omega.info(omega);
       log_rotationalError.info(Math.toDegrees(rotationController.getPositionError()));
     } else {
-      log_shooterSolver.info(false);
+      state_shooterSolver.set(false);
     }
 
     log_CurrentHeadingDegrees.info(drivetrainWrapper.getRotationGyroOnly().getDegrees());
