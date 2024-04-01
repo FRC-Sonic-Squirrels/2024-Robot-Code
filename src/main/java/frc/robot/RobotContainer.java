@@ -120,6 +120,7 @@ public class RobotContainer {
 
   private final Drivetrain drivetrain;
   private final DrivetrainWrapper drivetrainWrapper;
+  public final AprilTagFieldLayout aprilTagLayout;
   public final Vision vision;
   private final Arm arm;
   private final Elevator elevator;
@@ -187,7 +188,7 @@ public class RobotContainer {
     logRobotMode.info(mode);
 
     var config = robotType.config.get();
-    AprilTagFieldLayout aprilTagLayout = config.getAprilTagFieldLayout();
+    aprilTagLayout = config.getAprilTagFieldLayout();
 
     if (mode == Mode.REPLAY) {
       drivetrain =
@@ -521,11 +522,14 @@ public class RobotContainer {
         .povUp()
         .whileTrue(
             CommandComposer.stageAlign(
+                aprilTagLayout,
                 drivetrainWrapper,
                 led,
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
 
-    driverController.povLeft().whileTrue(CommandComposer.driveToChain(drivetrainWrapper, led));
+    driverController
+        .povLeft()
+        .whileTrue(CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led));
 
     driverController
         .rightTrigger()

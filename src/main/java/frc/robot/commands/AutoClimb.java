@@ -4,8 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
@@ -167,26 +169,34 @@ public class AutoClimb extends Command {
     return stage == 7;
   }
 
-  public static Pose2d getTargetPose(Pose2d robotPose) {
-    // MORE CLIMB POSITIONS
-    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
-    Pose2d[] poses = Constants.FieldConstants.getClimbPositionsBlueAlliance(distFromStage.get());
-    Pose2d closestPose = null;
-    for (int i = 0; i < poses.length; i++) {
-      if (closestPose == null) {
-        closestPose = poses[i];
-      } else {
+  public static Pose2d getTargetPose(AprilTagFieldLayout aprilTagFieldLayout, Pose2d robotPose) {
+    int[] tags;
 
-        if (GeometryUtil.getDist(poses[i], flippedPose)
-            < GeometryUtil.getDist(closestPose, flippedPose)) {
-          closestPose = poses[i];
+    if (Constants.isRedAlliance()) {
+      tags = new int[] {11, 12, 13};
+    } else {
+      tags = new int[] {14, 15, 16};
+    }
+
+    var offset = new Translation2d(distFromStage.get(), Constants.zeroRotation2d);
+    var offset_transform = new Transform2d(offset, Constants.zeroRotation2d);
+
+    Pose2d closestPose = null;
+    for (int tag : tags) {
+      var tagPose = aprilTagFieldLayout.getTagPose(tag);
+      if (tagPose.isEmpty()) continue;
+
+      var tagPose2d = tagPose.get().toPose2d();
+      var tagPose2d_offset = tagPose2d.transformBy(offset_transform);
+      if (closestPose == null) {
+        closestPose = tagPose2d_offset;
+      } else {
+        if (GeometryUtil.getDist(tagPose2d_offset, robotPose)
+            < GeometryUtil.getDist(closestPose, robotPose)) {
+          closestPose = tagPose2d_offset;
         }
       }
     }
-
-    // Pose2d closestPose = new Pose2d(6.6, 4.1, new Rotation2d(3.141));
-
-    closestPose = AllianceFlipUtil.flipPoseForAlliance(closestPose);
 
     log_closestPose.info(closestPose);
     return closestPose;

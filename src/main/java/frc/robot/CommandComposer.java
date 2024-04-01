@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -37,6 +38,7 @@ import java.util.function.Supplier;
 
 public class CommandComposer {
   public static Command autoClimb(
+      AprilTagFieldLayout aprilTagFieldLayout,
       DrivetrainWrapper drivetrainWrapper,
       Elevator elevator,
       Arm arm,
@@ -58,7 +60,9 @@ public class CommandComposer {
     DriveToPose driveToClimbPos =
         new DriveToPose(
             drivetrainWrapper,
-            () -> AutoClimb.getTargetPose(drivetrainWrapper.getPoseEstimatorPose(true)),
+            () ->
+                AutoClimb.getTargetPose(
+                    aprilTagFieldLayout, drivetrainWrapper.getPoseEstimatorPose(true)),
             () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
     BooleanSupplier withinRangeOfStage =
@@ -249,13 +253,17 @@ public class CommandComposer {
   }
 
   public static Command stageAlign(
-      DrivetrainWrapper wrapper, LED led, Consumer<Double> rumbleMagnitude) {
+      AprilTagFieldLayout aprilTagLayout,
+      DrivetrainWrapper wrapper,
+      LED led,
+      Consumer<Double> rumbleMagnitude) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
                 ? wrapper.getPoseEstimatorPoseStageRed(false)
                 : wrapper.getPoseEstimatorPoseStageBlue(false);
-    Supplier<Pose2d> targetPose = () -> AutoClimb.getTargetPose(robotLocalization.get());
+    Supplier<Pose2d> targetPose =
+        () -> AutoClimb.getTargetPose(aprilTagLayout, robotLocalization.get());
     DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true);
     Command stageAlign =
         driveCommand
@@ -274,10 +282,11 @@ public class CommandComposer {
     return stageAlign;
   }
 
-  private static LoggedTunableNumber stageApproachSpeed =
+  private static final LoggedTunableNumber stageApproachSpeed =
       new LoggedTunableNumber("driveToChain/stageApproachSpeed", 0.5);
 
-  public static Command driveToChain(DrivetrainWrapper wrapper, LED led) {
+  public static Command driveToChain(
+      AprilTagFieldLayout aprilTagFieldLayout, DrivetrainWrapper wrapper, LED led) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
@@ -287,7 +296,7 @@ public class CommandComposer {
         new RotateToAngle(
             wrapper,
             () ->
-                AutoClimb.getTargetPose(robotLocalization.get())
+                AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
                     .getRotation()
                     .plus(Rotation2d.fromDegrees(180)),
             robotLocalization);
