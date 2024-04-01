@@ -38,6 +38,7 @@ public class AutoStateMachine extends StateMachine {
   private final Boolean[] useVision;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
+  private final ChoreoTrajectoryWithName initPath;
   private int currentSubState;
 
   public AutoStateMachine(
@@ -48,10 +49,10 @@ public class AutoStateMachine extends StateMachine {
   public AutoStateMachine(
       AutosSubsystems subsystems,
       RobotConfig config,
-      boolean doInitialShot,
+      boolean doInitialPath,
       String initPath,
       StateMachine[] overrideStateMachines) {
-    this(subsystems, config, doInitialShot, initPath, null, overrideStateMachines);
+    this(subsystems, config, doInitialPath, initPath, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
@@ -62,10 +63,10 @@ public class AutoStateMachine extends StateMachine {
   public AutoStateMachine(
       AutosSubsystems subsystems,
       RobotConfig config,
-      boolean doInitialShot,
+      boolean doInitialPath,
       String initPath,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, doInitialShot, initPath, subStateTrajNames, null);
+    this(subsystems, config, doInitialPath, initPath, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
@@ -107,20 +108,26 @@ public class AutoStateMachine extends StateMachine {
     }
 
     if (doInitDrive) {
-      initialPathChoreoHelper =
-          new ChoreoHelper(
-              timeFromStart(),
-              drive.getPoseEstimatorPose(true),
-              ChoreoTrajectoryWithName.getTrajectory(initPath),
-              config.getDriveBaseRadius() / 2,
-              2.0,
-              config.getAutoTranslationPidController(),
-              config.getAutoTranslationPidController(),
-              config.getAutoThetaPidController());
-      setInitialState(stateWithName("driveOutState", this::driveOutState));
+      this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
+      setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
     } else {
+      this.initPath = null;
       setInitialState(stateWithName("autoInitialState", this::autoInitialState));
     }
+  }
+
+  private StateHandler driveOutStateInit() {
+    initialPathChoreoHelper =
+        new ChoreoHelper(
+            timeFromStart(),
+            drive.getPoseEstimatorPose(true),
+            initPath,
+            config.getDriveBaseRadius() / 2,
+            2.0,
+            config.getAutoTranslationPidController(),
+            config.getAutoTranslationPidController(),
+            config.getAutoThetaPidController());
+    return stateWithName("driveOutState", this::driveOutState);
   }
 
   private StateHandler driveOutState() {
@@ -131,7 +138,7 @@ public class AutoStateMachine extends StateMachine {
       drive.resetVelocityOverride();
       return stateWithName("autoInitialState", this::autoInitialState);
     }
-    drive.setVelocity(result.chassisSpeeds());
+    drive.setVelocityOverride(result.chassisSpeeds());
     return null;
   }
 

@@ -16,6 +16,7 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -614,5 +615,9 @@ public class Drivetrain extends SubsystemBase {
 
   public double[] getCurrentDrawAmps() {
     return modules.getCurrentDrawAmps();
+  }
+
+  public void setNeturalMode(NeutralModeValue mode) {
+    modules.setNeutralMode(mode);
   }
 }

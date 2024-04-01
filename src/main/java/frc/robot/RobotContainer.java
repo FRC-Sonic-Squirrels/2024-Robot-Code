@@ -168,7 +168,7 @@ public class RobotContainer {
   // LoggedTunableNumber("Localization/tunableYPose",
   // 0.0);
 
-  boolean brakeModeTriggered = false;
+  boolean brakeModeTriggered = true;
 
   ScoreSpeaker scoreSpeaker;
   AutoClimb autoClimb;
@@ -768,6 +768,7 @@ public class RobotContainer {
                       elevator.setNeutralMode(NeutralModeValue.Coast);
                       shooter.setNeutralMode(NeutralModeValue.Coast);
                       elevator.setReactionArmIdleMode(IdleMode.kCoast);
+                      drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
                     },
                     elevator,
@@ -780,6 +781,7 @@ public class RobotContainer {
                       elevator.setNeutralMode(NeutralModeValue.Brake);
                       shooter.setNeutralMode(NeutralModeValue.Brake);
                       elevator.setReactionArmIdleMode(IdleMode.kBrake);
+                      drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
                     elevator,
@@ -865,6 +867,7 @@ public class RobotContainer {
   }
 
   public void enterTeleop() {
+    setBrakeMode();
     resetDrivetrainResetOverrides();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
@@ -922,6 +925,7 @@ public class RobotContainer {
     elevator.setNeutralMode(NeutralModeValue.Brake);
     arm.setNeutralMode(NeutralModeValue.Brake);
     shooter.setNeutralMode(NeutralModeValue.Brake);
+    drivetrain.setNeturalMode(NeutralModeValue.Brake);
   }
 
   public void updateLedGamepieceState() {

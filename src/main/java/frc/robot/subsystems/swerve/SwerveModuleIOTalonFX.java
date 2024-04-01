@@ -349,4 +349,10 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
     configurator.apply(pidConfig);
     configurator.apply(mmConfig);
   }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue mode) {
+    driveTalon.setNeutralMode(mode);
+    turnTalon.setNeutralMode(mode);
+  }
 }

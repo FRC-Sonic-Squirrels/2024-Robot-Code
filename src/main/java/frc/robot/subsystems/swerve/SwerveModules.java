@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import java.util.List;
@@ -112,5 +113,12 @@ public class SwerveModules {
     front_right.stop();
     back_left.stop();
     back_right.stop();
+  }
+
+  public void setNeutralMode(NeutralModeValue mode) {
+    front_left.setNeutralMode(mode);
+    front_right.setNeutralMode(mode);
+    back_left.setNeutralMode(mode);
+    back_right.setNeutralMode(mode);
   }
 }
