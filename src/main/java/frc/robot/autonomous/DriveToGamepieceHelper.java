@@ -50,18 +50,18 @@ public class DriveToGamepieceHelper {
     xController.setP(kP.get());
     xController.setI(kI.get());
     xController.setD(kD.get());
-    xController.setTolerance(0.01);
+    xController.setTolerance(0.05);
 
     yController.reset();
     yController.setP(kP.get());
     yController.setI(kI.get());
     yController.setD(kD.get());
-    yController.setTolerance(0.01);
+    yController.setTolerance(0.05);
 
     rotController.reset();
     rotController.enableContinuousInput(-Math.PI, Math.PI);
     rotController.setP(rotationKp.get());
-    rotController.setTolerance(2);
+    rotController.setTolerance(Math.toRadians(2));
   }
 
   public ChassisSpeeds calculateChassisSpeeds(Translation2d targetGamepiece, Pose2d pose) {
