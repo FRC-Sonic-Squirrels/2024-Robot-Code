@@ -165,6 +165,7 @@ public class ChoreoHelper {
 
       timeOffset += lookaheadTime;
       state = stateAhead;
+      if (stateTooBehind != null) stateTooBehind = state;
     }
 
     log_stateTimestamp.info(state.timestamp);
@@ -180,7 +181,7 @@ public class ChoreoHelper {
 
     log_distanceError.info(distanceError);
 
-    boolean useCorrection = this.useCorrection.get() != 0;
+    boolean useCorrection = ChoreoHelper.useCorrection.get() != 0;
     if (useCorrection) {
       if (distanceError < lagThreshold) {
         if (stateTooBehind != null) {
