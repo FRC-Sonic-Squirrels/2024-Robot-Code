@@ -255,6 +255,7 @@ public class StateMachine {
               }
             });
 
+    sequence.setName("substate_" + command.getName());
     sequence.schedule();
   }
 }
