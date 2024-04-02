@@ -221,9 +221,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
     boolean poseIsPastWingLine = flippedPose.getX() > 5.572144031524658;
     boolean gamepieceIsPastWingLine = flippedGamepieceTranslation.getX() > 5.572144031524658;
-    boolean sameSideAsGamepiece =
-        (poseIsPastWingLine && gamepieceIsPastWingLine)
-            || (!poseIsPastWingLine && !gamepieceIsPastWingLine);
+    boolean sameSideAsGamepiece = poseIsPastWingLine == gamepieceIsPastWingLine;
 
     return
     // withInBeginDriveDistance
