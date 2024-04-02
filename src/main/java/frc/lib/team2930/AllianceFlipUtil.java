@@ -24,7 +24,19 @@ public class AllianceFlipUtil {
         new Rotation2d(-originalPose.getRotation().getCos(), originalPose.getRotation().getSin()));
   }
 
+  /**
+   * @return blue alliance reference pose
+   */
   public static Pose2d flipPoseForAlliance(Pose2d originalPose) {
     return Constants.isRedAlliance() ? mirrorPose2DOverCenterLine(originalPose) : originalPose;
+  }
+
+  /**
+   * @return blue alliance reference translation
+   */
+  public static Translation2d flipTranslationForAlliance(Translation2d originalTranslation) {
+    return Constants.isRedAlliance()
+        ? mirrorTranslation2DOverCenterLine(originalTranslation)
+        : originalTranslation;
   }
 }
