@@ -35,7 +35,7 @@ public class AutosManager {
   private final AutosSubsystems subsystems;
   private final RobotConfig config;
 
-  public final boolean includeDebugPaths = true;
+  public final boolean includeDebugPaths = false;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
@@ -54,11 +54,11 @@ public class AutosManager {
     var list = new ArrayList<Supplier<Auto>>();
 
     list.add(this::doNothing);
+    list.add(this::subWooferCloseFirst);
+    list.add(this::rushCenterGP1First);
     list.add(this::sourceAuto);
     list.add(this::sourceAuto4GP);
     list.add(this::sourceAuto5GP);
-    list.add(this::middleAuto);
-    list.add(this::ampAuto);
     list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
@@ -131,38 +131,6 @@ public class AutosManager {
     return new Auto("doNothing", new InstantCommand(), Constants.zeroPose2d);
   }
 
-  public Auto swerveCharacterization() {
-    var sysidConfig =
-        new SysIdRoutine.Config(
-            null,
-            null,
-            null,
-            (state) -> {
-              if (state != SysIdRoutineLog.State.kNone) {
-                logSwerveSysidState.info(state);
-              }
-            });
-
-    var mechanism = new SysIdRoutine(sysidConfig, subsystems.drivetrain().getSysIdMechanism());
-
-    var command1 = mechanism.quasistatic(Direction.kForward);
-    var command2 = mechanism.quasistatic(Direction.kReverse);
-    var command3 = mechanism.dynamic(Direction.kForward);
-    var command4 = mechanism.dynamic(Direction.kReverse);
-
-    var finalCommand =
-        command1
-            // .andThen(Commands.waitSeconds(1.0))
-            .andThen(command2)
-            // .andThen(Commands.waitSeconds(1.0))
-            .andThen(command3)
-            // .andThen(Commands.waitSeconds(1.0))
-            .andThen(command4)
-            .andThen(Commands.runOnce(() -> logSwerveSysidState.info(SysIdRoutineLog.State.kNone)));
-
-    return new Auto("swerveCharacterization", finalCommand, Constants.zeroPose2d);
-  }
-
   private Auto sourceAuto() {
     List<PathDescriptor> paths = new ArrayList<>();
     paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true));
@@ -170,7 +138,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("S2-G3", "G3-S2", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
-        "sourceAuto", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "SOURCE_3GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
 
   private Auto sourceAuto4GP() {
@@ -181,7 +149,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
-        "sourceAuto4GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "SOURCE_4GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
 
   private Auto sourceAuto5GP() {
@@ -193,10 +161,10 @@ public class AutosManager {
     paths.add(new PathDescriptor("S1-G1", "G1-S1", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
-        "sourceAuto5GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "SOURCE_5GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
   }
 
-  private Auto ampAuto() {
+  private Auto rushCenterGP1First() {
     List<PathDescriptor> paths = new ArrayList<>();
     paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true));
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
@@ -205,10 +173,12 @@ public class AutosManager {
     // paths.add(new PathDescriptor("S3-G5", "G5-S3", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
     return new Auto(
-        "ampAuto", state.asCommand(), Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+        "RUSH_CENTER_GP_1_FIRST",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
   }
 
-  private Auto middleAuto() {
+  private Auto subWooferCloseFirst() {
     List<PathDescriptor> paths = new ArrayList<>();
     paths.add(new PathDescriptor("Smiddle-CG3", "CG3-CS2", false));
     paths.add(new PathDescriptor("CG3-CG2", null, false));
@@ -217,7 +187,9 @@ public class AutosManager {
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
-        "middleAuto", state.asCommand(), Choreo.getTrajectory("Smiddle-CG3").getInitialPose());
+        "SUBWOOFER_CLOSE_FIRST",
+        state.asCommand(),
+        Choreo.getTrajectory("Smiddle-CG3").getInitialPose());
   }
 
   private Auto portableAuto() {
@@ -381,5 +353,37 @@ public class AutosManager {
       }
     }
     return null;
+  }
+
+  public Auto swerveCharacterization() {
+    var sysidConfig =
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> {
+              if (state != SysIdRoutineLog.State.kNone) {
+                logSwerveSysidState.info(state);
+              }
+            });
+
+    var mechanism = new SysIdRoutine(sysidConfig, subsystems.drivetrain().getSysIdMechanism());
+
+    var command1 = mechanism.quasistatic(Direction.kForward);
+    var command2 = mechanism.quasistatic(Direction.kReverse);
+    var command3 = mechanism.dynamic(Direction.kForward);
+    var command4 = mechanism.dynamic(Direction.kReverse);
+
+    var finalCommand =
+        command1
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command2)
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command3)
+            // .andThen(Commands.waitSeconds(1.0))
+            .andThen(command4)
+            .andThen(Commands.runOnce(() -> logSwerveSysidState.info(SysIdRoutineLog.State.kNone)));
+
+    return new Auto("swerveCharacterization", finalCommand, Constants.zeroPose2d);
   }
 }
