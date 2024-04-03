@@ -27,7 +27,6 @@ public class Intake extends SubsystemBase {
       logInputs.buildDecimal("TempCelsius");
   private static final LoggerEntry.Decimal logInputs_appliedVolts =
       logInputs.buildDecimal("AppliedVolts");
-  private static final LoggerEntry.Bool logInputs_beamBreak = logInputs.buildBoolean("BeamBreak");
 
   private static final TunableNumberGroup group = new TunableNumberGroup(ROOT_TABLE);
 
@@ -69,7 +68,6 @@ public class Intake extends SubsystemBase {
       logInputs_currentAmps.info(inputs.currentAmps);
       logInputs_tempCelsius.info(inputs.tempCelsius);
       logInputs_appliedVolts.info(inputs.appliedVolts);
-      logInputs_beamBreak.info(inputs.beamBreak);
 
       var hc = hashCode();
       if (kS.hasChanged(hc)
@@ -91,10 +89,6 @@ public class Intake extends SubsystemBase {
 
   public double getRPM() {
     return inputs.velocityRPM;
-  }
-
-  public boolean getBeamBreak() {
-    return inputs.beamBreak;
   }
 
   public void setVelocity(double revPerMin) {
