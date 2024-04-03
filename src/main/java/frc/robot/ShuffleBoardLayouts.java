@@ -49,11 +49,11 @@ public class ShuffleBoardLayouts {
   private void loadAllCompetitionLayouts() {}
 
   private void loadAllNonFMSLayouts() {
-    armDebugLayout();
-    intakeDebugLayout();
-    endEffectorDebugLayout();
-    elevatorDebugLayout();
-    systemsCheck();
+    // armDebugLayout();
+    // intakeDebugLayout();
+    // endEffectorDebugLayout();
+    // elevatorDebugLayout();
+    // systemsCheck();
   }
 
   private void armDebugLayout() {
