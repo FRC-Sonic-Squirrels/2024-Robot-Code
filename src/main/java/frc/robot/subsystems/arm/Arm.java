@@ -21,8 +21,6 @@ public class Arm extends SubsystemBase {
   private static final LoggerGroup logInputs = LoggerGroup.build(ROOT_TABLE);
   private static final LoggerEntry.Decimal logInputs_armPosition =
       logInputs.buildDecimal("ArmPosition");
-  private static final LoggerEntry.Decimal logInputs_armAngleDegrees =
-      logInputs.buildDecimal("ArmAngleDegrees");
   private static final LoggerEntry.Decimal logInputs_armAppliedVolts =
       logInputs.buildDecimal("ArmAppliedVolts");
   private static final LoggerEntry.Decimal logInputs_armCurrentAmps =
@@ -33,8 +31,6 @@ public class Arm extends SubsystemBase {
       logInputs.buildDecimal("ArmVelocity");
 
   private static final LoggerGroup logGroup = LoggerGroup.build(ROOT_TABLE);
-  private static final LoggerEntry.Decimal logPositionDegrees =
-      logGroup.buildDecimal("PositionDegrees");
   private static final LoggerEntry.EnumValue<ControlMode> logControlMode =
       logGroup.buildEnum("ControlMode");
   private static final LoggerEntry.Decimal logTargetClosedLoopSetpointDegrees =
@@ -105,13 +101,11 @@ public class Arm extends SubsystemBase {
     try (var ignored = timing.start()) {
       io.updateInputs(inputs);
       logInputs_armPosition.info(inputs.armPosition);
-      logInputs_armAngleDegrees.info(inputs.armAngleDegrees);
       logInputs_armAppliedVolts.info(inputs.armAppliedVolts);
       logInputs_armCurrentAmps.info(inputs.armCurrentAmps);
       logInputs_armTempCelsius.info(inputs.armTempCelsius);
       logInputs_armVelocity.info(inputs.armVelocity);
 
-      logPositionDegrees.info(inputs.armPosition.getDegrees() % 360);
       logControlMode.info(currentControlMode);
       logTargetClosedLoopSetpointDegrees.info(closedLoopTargetAngle);
 
