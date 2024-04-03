@@ -36,6 +36,7 @@ public class AutoStateMachine extends StateMachine {
   private final ChoreoTrajectoryWithName[] intakingTrajs;
   private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
+  private final Boolean[] ploppedGamepeice;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
@@ -57,6 +58,14 @@ public class AutoStateMachine extends StateMachine {
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
+    this(subsystems, config, false, null, subStateTrajNames, null);
+  }
+
+  public AutoStateMachine(
+      AutosSubsystems subsystems,
+      RobotConfig config,
+      boolean plopFirstGamepiece,
+      List<PathDescriptor> subStateTrajNames) {
     this(subsystems, config, false, null, subStateTrajNames, null);
   }
 
@@ -99,10 +108,14 @@ public class AutoStateMachine extends StateMachine {
     intakingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
+    ploppedGamepeice = new Boolean[subStateTrajNames.size()];
+    boolean plopping = false;
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
       useVision[i] = path.useVision();
+      ploppedGamepeice[i] = path.ploppedGamepiece();
+      if (path.ploppedGamepiece()) plopping = true;
       intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
@@ -110,6 +123,9 @@ public class AutoStateMachine extends StateMachine {
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
       setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
+    } else if (plopping) {
+      this.initPath = null;
+      setInitialState(() -> this.nextSubState(true));
     } else {
       this.initPath = null;
       setInitialState(stateWithName("autoInitialState", this::autoInitialState));
@@ -169,6 +185,7 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
+                    ploppedGamepeice[currentSubState],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -181,6 +198,7 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
+                    ploppedGamepeice[currentSubState],
                     targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),

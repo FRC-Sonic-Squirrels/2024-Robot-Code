@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
@@ -44,6 +45,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final ChoreoTrajectoryWithName trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
   private final boolean useVision;
+  private final boolean ploppedGamepiece;
   protected ChoreoHelper choreoHelper;
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
@@ -81,6 +83,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
       AutosSubsystems subsystems,
       RobotConfig config,
       boolean useVision,
+      boolean ploppedGamepiece,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
@@ -94,6 +97,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.arm = subsystems.arm();
     this.led = subsystems.led();
     this.useVision = useVision;
+    this.ploppedGamepiece = ploppedGamepiece;
     this.config = config;
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
@@ -211,8 +215,16 @@ public abstract class AutoSubstateMachine extends StateMachine {
     log_GPVisionWithinDistanceToRobot.info(withInBeginDriveDistance);
     log_GPVisionDetectedNoteWithinExpectedRange.info(withInExpectedTargetDistance);
 
+    Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
+    Translation2d flippedGamepieceTranslation =
+        AllianceFlipUtil.flipTranslationForAlliance(gamepieceTranslation);
+
+    boolean poseIsPastWingLine = flippedPose.getX() > 5.572144031524658;
+    boolean gamepieceIsPastWingLine = flippedGamepieceTranslation.getX() > 5.572144031524658;
+    boolean sameSideAsGamepiece = poseIsPastWingLine == gamepieceIsPastWingLine;
+
     return
     // withInBeginDriveDistance
-    withInExpectedTargetDistance && drive.getPoseEstimatorPose(true).getX() > 5.572144031524658;
+    (withInExpectedTargetDistance || ploppedGamepiece) && sameSideAsGamepiece;
   }
 }
