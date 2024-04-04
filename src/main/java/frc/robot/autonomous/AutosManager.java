@@ -180,11 +180,21 @@ public class AutosManager {
     paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true, false));
     paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
     paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false));
-    // paths.add(new PathDescriptor("S2-G4", "G4-S3", true));
-    // paths.add(new PathDescriptor("S3-G5", "G5-S3", true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
     return new Auto(
         "RUSH_CENTER_GP_1_FIRST",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+  }
+
+  private Auto rushCenterGP2First() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp2-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
+    return new Auto(
+        "RUSH_CENTER_GP_2_FIRST",
         state.asCommand(),
         Choreo.getTrajectory("Samp-Samp2").getInitialPose());
   }
