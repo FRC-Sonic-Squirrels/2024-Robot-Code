@@ -330,16 +330,20 @@ public class CommandComposer {
         .andThen(Commands.waitSeconds(1))
         .andThen(
             new ConditionalCommand(
-                MechanismActions.climbTrapPosition(elevator, arm)
-                    .andThen(
-                        Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector)
-                            .until(() -> !endEffector.noteInEndEffector())
-                            .andThen(Commands.waitSeconds(0.5))
-                            .andThen(
-                                Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector))
-                            .andThen(MechanismActions.climbFinalRestPosition(elevator, arm))),
-                Commands.none(),
-                endEffector::noteInEndEffector))
+                    MechanismActions.climbTrapPosition(elevator, arm)
+                        .andThen(
+                            Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector)
+                                .until(() -> !endEffector.noteInEndEffector())
+                                .andThen(Commands.waitSeconds(0.5))
+                                .andThen(
+                                    Commands.runOnce(
+                                        () -> endEffector.setPercentOut(0.0), endEffector))
+                                .andThen(MechanismActions.climbFinalRestPosition(elevator, arm))),
+                    Commands.none(),
+                    () ->
+                        endEffector.intakeSideTOFDetectGamepiece()
+                            || endEffector.shooterSideTOFDetectGamepiece())
+                .asProxy())
         .finallyDo(() -> endEffector.setPercentOut(0.0));
   }
 }

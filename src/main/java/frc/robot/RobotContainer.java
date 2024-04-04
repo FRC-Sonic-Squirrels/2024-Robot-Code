@@ -655,31 +655,33 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
-    Command toggleReactionArms =
-        new ConditionalCommand(
-            Commands.runOnce(
-                () -> {
-                  elevator.retractReactionArms();
-                  reactionArmsDown = false;
-                },
-                elevator),
-            Commands.runOnce(
-                () -> {
-                  elevator.deployReactionArms();
-                  reactionArmsDown = true;
-                },
-                elevator),
-            () -> reactionArmsDown);
+    Supplier<Command> toggleReactionArms =
+        () ->
+            new ConditionalCommand(
+                Commands.runOnce(
+                    () -> {
+                      elevator.retractReactionArms();
+                      reactionArmsDown = false;
+                    },
+                    elevator),
+                Commands.runOnce(
+                    () -> {
+                      elevator.deployReactionArms();
+                      reactionArmsDown = true;
+                    },
+                    elevator),
+                () -> reactionArmsDown);
 
-    operatorController.leftBumper().onTrue(toggleReactionArms);
+    operatorController.leftBumper().onTrue(toggleReactionArms.get());
 
     operatorController
         .povUp()
         .onTrue(
-            MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake)
-                .alongWith(
-                    new ConditionalCommand(
-                        Commands.none(), toggleReactionArms, () -> reactionArmsDown)));
+            new ConditionalCommand(
+                    Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
+                .andThen(
+                    MechanismActions.climbPrepPosition(
+                        elevator, arm, endEffector, shooter, intake)));
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
