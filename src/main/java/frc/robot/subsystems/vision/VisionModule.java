@@ -44,6 +44,7 @@ public class VisionModule {
   public final LoggerEntry.Decimal log_xyStandardDeviation;
   public final LoggerEntry.Decimal log_thetaStandardDeviation;
   public final LoggerEntry.Bool log_successfulResult;
+  public final LoggerEntry.BoolArray log_seenTargetsIDs;
 
   public VisionModule(
       LoggerGroup logGroup,
@@ -91,6 +92,7 @@ public class VisionModule {
     log_xyStandardDeviation = logGroup.buildDecimal("xyStandardDeviation");
     log_thetaStandardDeviation = logGroup.buildDecimal("thetaStandardDeviation");
     log_successfulResult = logGroup.buildBoolean("SUCCESSFUL_RESULT?");
+    log_seenTargetsIDs = logGroup.buildBooleanArray("seenTargetsIDs");
   }
 
   public void log(Pose3d robotPose) {
