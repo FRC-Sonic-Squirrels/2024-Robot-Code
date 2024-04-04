@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -654,28 +655,34 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
-    operatorController
-        .leftBumper()
-        .onTrue(
-            new ConditionalCommand(
-                Commands.runOnce(
-                    () -> {
-                      elevator.retractReactionArms();
-                      reactionArmsDown = false;
-                    },
-                    elevator),
-                Commands.runOnce(
-                    () -> {
-                      elevator.deployReactionArms();
-                      reactionArmsDown = true;
-                    },
-                    elevator),
-                () -> reactionArmsDown));
+    Command toggleReactionArms =
+        new ConditionalCommand(
+            Commands.runOnce(
+                () -> {
+                  elevator.retractReactionArms();
+                  reactionArmsDown = false;
+                },
+                elevator),
+            Commands.runOnce(
+                () -> {
+                  elevator.deployReactionArms();
+                  reactionArmsDown = true;
+                },
+                elevator),
+            () -> reactionArmsDown);
+
+    operatorController.leftBumper().onTrue(toggleReactionArms);
 
     operatorController
         .povUp()
-        .onTrue(MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake));
-    operatorController.povLeft().onTrue(MechanismActions.climbChainCheck(elevator, arm));
+        .onTrue(
+            MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake)
+                .alongWith(
+                    new ConditionalCommand(
+                        Commands.none(), toggleReactionArms, () -> reactionArmsDown)));
+    operatorController
+        .povLeft()
+        .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
 
