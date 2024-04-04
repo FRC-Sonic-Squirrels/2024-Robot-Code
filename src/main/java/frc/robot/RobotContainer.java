@@ -586,8 +586,8 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(8500);
-                  if (shooter.getRPM() > 8000) {
+                  shooter.setLauncherRPM(8700, 8000);
+                  if (shooter.getRPM() > 8500) {
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
                     intake.setVelocity(passThroughVel.get());

@@ -24,9 +24,6 @@ public class ShooterIOReal implements ShooterIO {
   private static final LoggedTunableNumber tunableMultiplier =
       Shooter.group.build("tunableMultiplier", 1.0);
 
-  private static final LoggedTunableNumber topRollerRPMOffset =
-      Shooter.group.build("topRollerRPMOffset", 150);
-
   TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
   TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
   TalonFX pivot = new TalonFX(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID);
@@ -255,11 +252,9 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setLauncherRPM(double rpm) {
-    launcher_lead.setControl(
-        launcherClosedLoop.withVelocity((rpm + topRollerRPMOffset.get()) / 60));
-    launcher_follower.setControl(
-        launcherClosedLoop.withVelocity(rpm / 60 * tunableMultiplier.get()));
+  public void setLauncherRPM(double topRollerRPM, double bottomRollerRPM) {
+    launcher_lead.setControl(launcherClosedLoop.withVelocity(topRollerRPM / 60));
+    launcher_follower.setControl(launcherClosedLoop.withVelocity(bottomRollerRPM / 60));
   }
 
   @Override

@@ -176,8 +176,8 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   @Override
-  public void setLauncherRPM(double rpm) {
-    targetRPM = rpm;
+  public void setLauncherRPM(double topRollerRPM, double bottomRollerRPM) {
+    targetRPM = topRollerRPM;
   }
 
   @Override

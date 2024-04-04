@@ -360,9 +360,10 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
     }
 
     // ramp up rpm
+    double targetRPM = tunableRPM.get();
     shooter.setLauncherRPM(
         // ShooterConstants.SHOOTING_RPM
-        tunableRPM.get());
+        targetRPM + 150, targetRPM);
     // shooter.setLauncherVoltage(10.0);
 
     if (shooter.noteInShooter()) {
