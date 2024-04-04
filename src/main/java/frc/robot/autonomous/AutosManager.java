@@ -35,7 +35,7 @@ public class AutosManager {
   private final AutosSubsystems subsystems;
   private final RobotConfig config;
 
-  public final boolean includeDebugPaths = false;
+  public final boolean includeDebugPaths = true;
 
   public record Auto(String name, Command command, Pose2d initPose) {}
 
