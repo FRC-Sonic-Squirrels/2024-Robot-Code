@@ -19,7 +19,6 @@ import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
-import frc.robot.commands.endEffector.EndEffectorPrepareNoteForTrap;
 import frc.robot.commands.led.LedSetBaseState;
 import frc.robot.commands.led.LedSetStateForSeconds;
 import frc.robot.commands.mechanism.MechanismActions;
@@ -285,7 +284,7 @@ public class CommandComposer {
   }
 
   private static final LoggedTunableNumber stageApproachSpeed =
-      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 0.5);
+      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 1.5);
 
   public static Command driveToChain(
       AprilTagFieldLayout aprilTagFieldLayout, DrivetrainWrapper wrapper, LED led) {
@@ -329,7 +328,7 @@ public class CommandComposer {
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
     return MechanismActions.climbDownPosition(elevator, arm)
         .andThen(Commands.waitSeconds(0.2))
-        .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
+        // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
         .andThen(
             new ConditionalCommand(
                     MechanismActions.climbTrapPosition(elevator, arm)
@@ -337,7 +336,7 @@ public class CommandComposer {
                             Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector)
                                 .until(() -> !endEffector.noteInEndEffector())
                                 .andThen(Commands.waitSeconds(0.5))
-                                .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
+                                // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
                                 .andThen(
                                     Commands.runOnce(
                                         () -> endEffector.setPercentOut(0.0), endEffector))

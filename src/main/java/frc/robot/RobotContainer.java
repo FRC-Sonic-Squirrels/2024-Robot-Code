@@ -681,7 +681,8 @@ public class RobotContainer {
                     Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
                 .andThen(
                     MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake))
-                .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy()));
+            // .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy())
+            );
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
