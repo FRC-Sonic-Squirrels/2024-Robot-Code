@@ -328,7 +328,7 @@ public class CommandComposer {
   public static final Command autoClimb(
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
     return MechanismActions.climbDownPosition(elevator, arm)
-        .andThen(Commands.waitSeconds(1))
+        .andThen(Commands.waitSeconds(0.2))
         .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
         .andThen(
             new ConditionalCommand(

@@ -298,6 +298,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void setDriveBrakeMode(boolean enable) {
+    if (driveTalon.getStickyFaultField().getValue() > 0) return;
     var config = new MotorOutputConfigs();
     driveTalon.getConfigurator().refresh(config);
 
@@ -307,6 +308,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void setTurnBrakeMode(boolean enable) {
+    if (turnTalon.getStickyFaultField().getValue() > 0) return;
     var config = new MotorOutputConfigs();
     turnTalon.getConfigurator().refresh(config);
 
