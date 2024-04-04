@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
@@ -96,6 +97,7 @@ public class DriveToPose extends Command {
   private final boolean finish;
   private final Supplier<Boolean> move;
   private final double driveToleranceValue;
+  private final Trigger withinTolerance;
 
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
@@ -178,6 +180,8 @@ public class DriveToPose extends Command {
     this.move = move;
     this.driveToleranceValue = driveTolerance;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    withinTolerance =
+        new Trigger(() -> driveController.atGoal() && thetaController.atGoal()).debounce(0.3);
   }
 
   @Override
@@ -309,7 +313,7 @@ public class DriveToPose extends Command {
   public boolean atGoal() {
     return
     // isScheduled() &&
-    driveController.atGoal() && thetaController.atGoal();
+    withinTolerance.getAsBoolean();
   }
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
