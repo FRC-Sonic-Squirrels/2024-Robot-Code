@@ -680,8 +680,8 @@ public class RobotContainer {
             new ConditionalCommand(
                     Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
                 .andThen(
-                    MechanismActions.climbPrepPosition(
-                        elevator, arm, endEffector, shooter, intake)));
+                    MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake))
+                .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy()));
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
@@ -777,7 +777,7 @@ public class RobotContainer {
                       elevator.setNeutralMode(NeutralModeValue.Coast);
                       shooter.setNeutralMode(NeutralModeValue.Coast);
                       elevator.setReactionArmIdleMode(IdleMode.kCoast);
-                    //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
+                      //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
                     },
                     elevator,
@@ -790,7 +790,7 @@ public class RobotContainer {
                       elevator.setNeutralMode(NeutralModeValue.Brake);
                       shooter.setNeutralMode(NeutralModeValue.Brake);
                       elevator.setReactionArmIdleMode(IdleMode.kBrake);
-                    //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
+                      //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
                     elevator,
