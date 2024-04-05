@@ -16,6 +16,7 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class LED extends SubsystemBase {
   private static final String ROOT_TABLE = "LED";
@@ -49,12 +50,14 @@ public class LED extends SubsystemBase {
   private final DoubleSupplier elevatorHeight;
   private int robotLoops = 0;
   private final int robotLoopsTillReady = 20;
+  private final Supplier<Boolean> brakeMode;
 
-  public LED(DoubleSupplier elevatorHeight) {
+  public LED(DoubleSupplier elevatorHeight, Supplier<Boolean> brakeMode) {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
     this.elevatorHeight = elevatorHeight;
+    this.brakeMode = brakeMode;
   }
 
   @Override
@@ -71,6 +74,8 @@ public class LED extends SubsystemBase {
                 setProgressBar(Color.kGreen, (double) robotLoops / (double) robotLoopsTillReady);
               } else if (elevatorHeight.getAsDouble() < 1 && DriverStation.isDisabled()) {
                 setSnake2(Color.kRed, Color.kMagenta);
+              } else if (!brakeMode.get()) {
+                setSnake2(Color.kGreen, Color.kCrimson);
               } else {
                 if (noteInRobot) {
                   setSolidColor(squirrelOrange);

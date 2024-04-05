@@ -215,7 +215,7 @@ public class RobotContainer {
       visionGamepiece =
           new VisionGamepiece(
               new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
-      led = new LED(elevator::getHeightInches);
+      led = new LED(elevator::getHeightInches, () -> brakeModeTriggered);
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_SIMBOT_REAL_CAMERAS:
@@ -272,7 +272,7 @@ public class RobotContainer {
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          led = new LED(elevator::getHeightInches);
+          led = new LED(elevator::getHeightInches, () -> brakeModeTriggered);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -299,7 +299,7 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED(elevator::getHeightInches);
+          led = new LED(elevator::getHeightInches, () -> brakeModeTriggered);
           break;
 
         case ROBOT_2024_MAESTRO:
@@ -355,7 +355,7 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
-          led = new LED(elevator::getHeightInches);
+          led = new LED(elevator::getHeightInches, () -> brakeModeTriggered);
           break;
 
         default:
@@ -381,7 +381,7 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED(elevator::getHeightInches);
+          led = new LED(elevator::getHeightInches, () -> brakeModeTriggered);
           break;
       }
     }
