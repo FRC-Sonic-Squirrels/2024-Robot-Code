@@ -230,24 +230,36 @@ public class CommandComposer {
       Elevator elevator,
       Arm arm,
       LED led) {
-    Command cancelScoreAmp =
-        Commands.waitUntil(
+
+    Trigger noGamepieceInEE =
+        new Trigger(
                 () ->
-                    GeometryUtil.getDist(
-                            drivetrainWrapper.getPoseEstimatorPose(true),
-                            Constants.FieldConstants.getAmpScoringPose())
-                        >= 0.2)
+                    !endEffector.intakeSideTOFDetectGamepiece()
+                        && !endEffector.shooterSideTOFDetectGamepiece())
+            .debounce(0.4);
+
+    Command cancelScoreAmp =
+        Commands.waitUntil(noGamepieceInEE::getAsBoolean)
             .andThen(
-                new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS))
-            .andThen(MechanismActions.loadingPosition(elevator, arm))
-            .andThen(
-                new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
-            .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
-            .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS));
+                Commands.waitUntil(
+                        () ->
+                            GeometryUtil.getDist(
+                                    drivetrainWrapper.getPoseEstimatorPose(true),
+                                    Constants.FieldConstants.getAmpScoringPose())
+                                >= 0.2)
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_AMP_ROTATIONS))
+                    .andThen(MechanismActions.loadingPosition(elevator, arm))
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_HOME_ROTATIONS))
+                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
+                    .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS)));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
