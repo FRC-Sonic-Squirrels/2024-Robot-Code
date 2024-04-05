@@ -1,8 +1,10 @@
 package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -167,7 +169,15 @@ public class ElevatorIOReal implements ElevatorIO {
 
   @Override
   public void setNeutralMode(NeutralModeValue value) {
-    motor.setNeutralMode(value);
+    var config = new MotorOutputConfigs();
+
+    var status = motor.getConfigurator().refresh(config);
+
+    if (status != StatusCode.OK) return;
+
+    config.NeutralMode = value;
+
+    motor.getConfigurator().apply(config);
   }
 
   @Override

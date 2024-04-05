@@ -1,8 +1,10 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -318,7 +320,15 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setNeutralMode(NeutralModeValue value) {
-    pivot.setNeutralMode(value);
+    var config = new MotorOutputConfigs();
+
+    var status = pivot.getConfigurator().refresh(config);
+
+    if (status != StatusCode.OK) return;
+
+    config.NeutralMode = value;
+
+    pivot.getConfigurator().apply(config);
   }
 
   @Override
