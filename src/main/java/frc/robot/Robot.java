@@ -164,7 +164,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    isAutonomousPrev = isAutonomous();
+
     // Update the timestamp for logging.
     LoggerGroup.periodic();
 
@@ -183,11 +183,6 @@ public class Robot extends LoggedRobot {
     robotContainer.updateLedGamepieceState();
 
     LoggerGroup.publish();
-
-    if (isAutonomousPrev && !isAutonomous()) {
-      prepForTeleop();
-      teleopPrepped = true;
-    }
   }
 
   /** This function is called once when the robot is disabled. */
@@ -271,6 +266,12 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {}
+
+  @Override
+  public void autonomousExit() {
+    prepForTeleop();
+    teleopPrepped = true;
+  }
 
   /** This function is called once when teleop is enabled. */
   @Override
