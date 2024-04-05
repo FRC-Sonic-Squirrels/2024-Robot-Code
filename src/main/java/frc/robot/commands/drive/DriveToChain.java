@@ -54,7 +54,7 @@ public class DriveToChain extends Command {
             rotationWithinTolerance.get() && Math.abs(tagOffset) < offsetTolerance.get()
                 ? driveInSpeed.get()
                 : 0.0,
-            xOffsetController.calculate(tagOffset, 0),
+            rotationWithinTolerance.get() ? xOffsetController.calculate(tagOffset, 0) : 0.0,
             0.0));
   }
 
