@@ -198,8 +198,8 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator = new PoseEstimator(1.2, 1.2, 0.3, tagsSpeakersAndAmps);
     // poseEstimatorHigh = new PoseEstimator(2.4, 2.4, 0.3, tagsSpeakersAndAmps);
     // poseEstimatorSuper = new PoseEstimator(10.0, 10.0, 0.3, tagsSpeakersAndAmps);
-    poseEstimatorStageBlue = new PoseEstimator(0.1, 0.1, 0.1, new int[] {14, 15, 16});
-    poseEstimatorStageRed = new PoseEstimator(0.1, 0.1, 0.1, new int[] {11, 12, 13});
+    poseEstimatorStageBlue = new PoseEstimator(0.6, 0.6, 0.1, new int[] {14, 15, 16});
+    poseEstimatorStageRed = new PoseEstimator(0.6, 0.6, 0.1, new int[] {11, 12, 13});
     poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
 
     var thread = new Thread(this::runOdometry);
