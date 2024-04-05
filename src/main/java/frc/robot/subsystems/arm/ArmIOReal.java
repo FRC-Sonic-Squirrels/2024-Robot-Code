@@ -126,15 +126,16 @@ public class ArmIOReal implements ArmIO {
   }
 
   @Override
-  public void setNeutralMode(NeutralModeValue value) {
+  public boolean setNeutralMode(NeutralModeValue value) {
     var config = new MotorOutputConfigs();
 
     var status = motor.getConfigurator().refresh(config);
 
-    if (status != StatusCode.OK) return;
+    if (status != StatusCode.OK) return false;
 
     config.NeutralMode = value;
 
     motor.getConfigurator().apply(config);
+    return true;
   }
 }

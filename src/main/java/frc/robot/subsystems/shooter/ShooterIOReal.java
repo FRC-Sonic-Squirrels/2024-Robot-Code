@@ -319,16 +319,17 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setNeutralMode(NeutralModeValue value) {
+  public boolean setNeutralMode(NeutralModeValue value) {
     var config = new MotorOutputConfigs();
 
     var status = pivot.getConfigurator().refresh(config);
 
-    if (status != StatusCode.OK) return;
+    if (status != StatusCode.OK) return false;
 
     config.NeutralMode = value;
 
     pivot.getConfigurator().apply(config);
+    return true;
   }
 
   @Override

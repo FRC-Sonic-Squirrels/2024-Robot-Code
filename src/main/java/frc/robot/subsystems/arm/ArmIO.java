@@ -31,5 +31,7 @@ public interface ArmIO {
       double maxProfiledVelocity,
       double maxProfiledAcceleration) {}
 
-  public default void setNeutralMode(NeutralModeValue value) {}
+  public default boolean setNeutralMode(NeutralModeValue value) {
+    return false;
+  }
 }

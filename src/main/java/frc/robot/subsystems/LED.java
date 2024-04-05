@@ -139,6 +139,9 @@ public class LED extends SubsystemBase {
         case INTAKE_SUCCESS:
           setBlinking(Color.kGreen, Color.kBlack);
           break;
+        case BRAKE_MODE_FAILED:
+          setSolidColor(Color.kPurple);
+          break;
       }
     } else {
       setSnake2(new Color(tunableR.get(), tunableG.get(), tunableB.get()), Color.kRed);
@@ -296,7 +299,8 @@ public class LED extends SubsystemBase {
     BREAK_MODE_OFF,
     BREAK_MODE_ON,
     BASE,
-    INTAKE_SUCCESS
+    INTAKE_SUCCESS,
+    BRAKE_MODE_FAILED
   }
 
   public enum BaseRobotState {

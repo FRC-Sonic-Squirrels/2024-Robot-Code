@@ -352,8 +352,8 @@ public class Shooter extends SubsystemBase {
     return inputs.pivotVelocityRadsPerSec;
   }
 
-  public void setNeutralMode(NeutralModeValue value) {
-    io.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    return io.setNeutralMode(value);
   }
 
   public void setKickerVelocity(double revPerMin) {

@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
   private final Translation2d gamepieceTranslation;
 
+  // private final RotateToAngle rotateToAngle;
+
   /** Creates a new AutoSubstateMachineDriveTranslation. */
   public AutoSubstateMachineDriveTranslation(
       AutosSubsystems subsystems,
@@ -34,6 +36,8 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         gamepieceTranslation);
 
     this.gamepieceTranslation = gamepieceTranslation;
+    // this.rotateToAngle = new RotateToAngle(drive,
+    // DriverStation.getAlliance().get().equals(Alliance.Blue), drive.getPoseEstimatorPose(true))
 
     setInitialState(stateWithName("initDriveToGamepiece", this::initDriveToGamepiece));
   }
@@ -71,4 +75,8 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
     led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
     return stateWithName("prepFollowPathToShooting", super::prepFollowPathToShooting);
   }
+
+  // private StateHandler rotateTowardOpponentWall(){
+
+  // }
 }

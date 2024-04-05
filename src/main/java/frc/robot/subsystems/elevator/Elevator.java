@@ -178,8 +178,8 @@ public class Elevator extends SubsystemBase {
     return inputs.velocityInchesPerSecond;
   }
 
-  public void setNeutralMode(NeutralModeValue value) {
-    io.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    return io.setNeutralMode(value);
   }
 
   private void setClosedLoopConstraints(double kp, double kd, double kg, Constraints constraints) {

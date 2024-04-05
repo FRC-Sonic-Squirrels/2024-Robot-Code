@@ -179,6 +179,8 @@ public class RobotContainer {
 
   private boolean reactionArmsDown = false;
 
+  private boolean brakeModeFailure = false;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -774,29 +776,42 @@ public class RobotContainer {
         new ConditionalCommand(
             Commands.runOnce(
                     () -> {
-                      arm.setNeutralMode(NeutralModeValue.Coast);
-                      elevator.setNeutralMode(NeutralModeValue.Coast);
-                      shooter.setNeutralMode(NeutralModeValue.Coast);
+                      boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Coast);
+                      boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Coast);
+                      boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Coast);
                       elevator.setReactionArmIdleMode(IdleMode.kCoast);
+
+                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+
                       //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_OFF, 1.5))
+                .andThen(
+                    new LedSetStateForSeconds(
+                        led,
+                        brakeModeFailure ? RobotState.BRAKE_MODE_FAILED : RobotState.BREAK_MODE_OFF,
+                        1.5))
                 .ignoringDisable(true),
             Commands.runOnce(
                     () -> {
-                      arm.setNeutralMode(NeutralModeValue.Brake);
-                      elevator.setNeutralMode(NeutralModeValue.Brake);
-                      shooter.setNeutralMode(NeutralModeValue.Brake);
+                      boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Brake);
+                      boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Brake);
+                      boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Brake);
                       elevator.setReactionArmIdleMode(IdleMode.kBrake);
+
+                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
                       //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_ON, 1.5))
+                .andThen(
+                    new LedSetStateForSeconds(
+                        led,
+                        brakeModeFailure ? RobotState.BRAKE_MODE_FAILED : RobotState.BREAK_MODE_ON,
+                        1.5))
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 
