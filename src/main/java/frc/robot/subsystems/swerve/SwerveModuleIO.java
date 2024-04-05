@@ -14,7 +14,6 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.Constants;
@@ -59,9 +58,6 @@ public interface SwerveModuleIO {
     @Override
     public void setTurnClosedLoopConstraints(
         double kP, double kD, double cruiseVelocity, double acceleration) {}
-
-    @Override
-    public void setNeutralMode(NeutralModeValue mode) {}
   }
 
   public static class Inputs {
@@ -107,6 +103,4 @@ public interface SwerveModuleIO {
 
   /** Enable or disable brake mode on the turn motor. */
   void setTurnBrakeMode(boolean enable);
-
-  void setNeutralMode(NeutralModeValue mode);
 }

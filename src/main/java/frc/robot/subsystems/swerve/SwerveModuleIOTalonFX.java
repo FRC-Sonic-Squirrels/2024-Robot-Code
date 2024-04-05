@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -298,9 +299,10 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void setDriveBrakeMode(boolean enable) {
-    if (driveTalon.getStickyFaultField().getValue() > 0) return;
     var config = new MotorOutputConfigs();
-    driveTalon.getConfigurator().refresh(config);
+    StatusCode code = driveTalon.getConfigurator().refresh(config);
+
+    if (code != StatusCode.OK) return;
 
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     driveTalon.getConfigurator().apply(config);
@@ -308,9 +310,10 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void setTurnBrakeMode(boolean enable) {
-    if (turnTalon.getStickyFaultField().getValue() > 0) return;
     var config = new MotorOutputConfigs();
-    turnTalon.getConfigurator().refresh(config);
+    StatusCode code = turnTalon.getConfigurator().refresh(config);
+
+    if (code != StatusCode.OK) return;
 
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     turnTalon.getConfigurator().apply(config);
@@ -350,11 +353,5 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     configurator.apply(pidConfig);
     configurator.apply(mmConfig);
-  }
-
-  @Override
-  public void setNeutralMode(NeutralModeValue mode) {
-    driveTalon.setNeutralMode(mode);
-    turnTalon.setNeutralMode(mode);
   }
 }

@@ -58,13 +58,13 @@ public class AutosManager {
     list.add(this::rushCenterGP1First);
     list.add(this::rushCenterGP2First);
     list.add(this::sourceAuto);
-    list.add(this::sourceAutoPlop);
     list.add(this::sourceAuto4GP);
     list.add(this::sourceAuto5GP);
+    list.add(this::sourceAutoPlop);
     list.add(this::sourceG4FirstAuto3GP);
     list.add(this::sourceG4FirstAuto4GP);
     list.add(this::sourceG4FirstAuto5GP);
-    list.add(this::simpleShootAuto);
+    // list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
       list.add(this::portableAuto);

@@ -312,9 +312,6 @@ public class Robot extends LoggedRobot {
   }
 
   private void prepForTeleop() {
-    robotContainer.setBrakeMode();
-    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
-    robotContainer.vision.useGyroBasedFilteringForVision(true);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

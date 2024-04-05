@@ -14,7 +14,6 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -150,7 +149,4 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   @Override
   public void setTurnClosedLoopConstraints(
       double kP, double kD, double cruiseVelocity, double acceleration) {}
-
-  @Override
-  public void setNeutralMode(NeutralModeValue mode) {}
 }

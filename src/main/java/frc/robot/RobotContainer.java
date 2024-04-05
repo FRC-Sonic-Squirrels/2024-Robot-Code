@@ -868,7 +868,7 @@ public class RobotContainer {
   }
 
   public void enterAutonomous() {
-    setBrakeMode();
+    // setBrakeMode();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
 
@@ -877,7 +877,7 @@ public class RobotContainer {
   }
 
   public void enterTeleop() {
-    setBrakeMode();
+    // setBrakeMode();
     resetDrivetrainResetOverrides();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
@@ -933,9 +933,9 @@ public class RobotContainer {
   public void setBrakeMode() {
     brakeModeTriggered = true;
     elevator.setNeutralMode(NeutralModeValue.Brake);
+    elevator.setReactionArmIdleMode(IdleMode.kBrake);
     arm.setNeutralMode(NeutralModeValue.Brake);
     shooter.setNeutralMode(NeutralModeValue.Brake);
-    drivetrain.setNeturalMode(NeutralModeValue.Brake);
   }
 
   public void updateLedGamepieceState() {
