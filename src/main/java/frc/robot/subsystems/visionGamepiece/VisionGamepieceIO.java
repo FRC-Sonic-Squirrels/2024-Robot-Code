@@ -12,6 +12,7 @@ public interface VisionGamepieceIO {
     public double[] area = new double[] {};
     public int targetCount = 0;
     public double xOffset = 0;
+    public int pipelineIndex;
   }
 
   /** Updates the set of loggable inputs. */

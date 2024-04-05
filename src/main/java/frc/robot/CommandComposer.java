@@ -15,7 +15,7 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.GeomUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.commands.AutoClimb;
-import frc.robot.commands.drive.DriveToChain;
+import frc.robot.commands.drive.AlignWithChain;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
@@ -297,6 +297,41 @@ public class CommandComposer {
     return stageAlign;
   }
 
+  public static Command stageAlignFast(
+      AprilTagFieldLayout aprilTagLayout,
+      DrivetrainWrapper wrapper,
+      LED led,
+      Consumer<Double> rumbleMagnitude,
+      VisionGamepiece visionGamepiece) {
+
+    Supplier<Pose2d> robotLocalization =
+        () ->
+            Constants.isRedAlliance()
+                ? wrapper.getPoseEstimatorPoseStageRed(false)
+                : wrapper.getPoseEstimatorPoseStageBlue(false);
+
+    RotateToAngle rotateToAngle =
+        new RotateToAngle(
+            wrapper,
+            () ->
+                AutoClimb.getTargetPose(aprilTagLayout, robotLocalization.get())
+                    .getRotation()
+                    .plus(Rotation2d.fromDegrees(180)),
+            robotLocalization);
+
+    Command stageAlign =
+        rotateToAngle
+            .alongWith(new AlignWithChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance))
+            .finallyDo(
+                () -> {
+                  rumbleMagnitude.accept(0.0);
+                  led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+                })
+            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
+    stageAlign.setName("stageAlign");
+    return stageAlign;
+  }
+
   private static final LoggedTunableNumber stageApproachSpeed =
       new LoggedTunableNumber("DriveToChain/stageApproachSpeed", 1.5);
 
@@ -338,40 +373,40 @@ public class CommandComposer {
     return stageApproach;
   }
 
-  public static Command driveToChainFast(
-      AprilTagFieldLayout aprilTagFieldLayout,
-      DrivetrainWrapper wrapper,
-      LED led,
-      VisionGamepiece visionGamepiece) {
-    Supplier<Pose2d> robotLocalization =
-        () ->
-            Constants.isRedAlliance()
-                ? wrapper.getPoseEstimatorPoseStageRed(false)
-                : wrapper.getPoseEstimatorPoseStageBlue(false);
-    RotateToAngle rotateToAngle =
-        new RotateToAngle(
-            wrapper,
-            () ->
-                AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
-                    .getRotation()
-                    .plus(Rotation2d.fromDegrees(180)),
-            robotLocalization);
+  //   public static Command driveToChainFast(
+  //       AprilTagFieldLayout aprilTagFieldLayout,
+  //       DrivetrainWrapper wrapper,
+  //       LED led,
+  //       VisionGamepiece visionGamepiece) {
+  //     Supplier<Pose2d> robotLocalization =
+  //         () ->
+  //             Constants.isRedAlliance()
+  //                 ? wrapper.getPoseEstimatorPoseStageRed(false)
+  //                 : wrapper.getPoseEstimatorPoseStageBlue(false);
+  //     RotateToAngle rotateToAngle =
+  //         new RotateToAngle(
+  //             wrapper,
+  //             () ->
+  //                 AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
+  //                     .getRotation()
+  //                     .plus(Rotation2d.fromDegrees(180)),
+  //             robotLocalization);
 
-    Command stageApproach =
-        new DriveToChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance)
-            .alongWith(rotateToAngle)
-            .finallyDo(
-                () -> {
-                  wrapper.resetVelocityOverride();
-                  wrapper.resetRotationOverride();
-                  led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
-                })
-            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
+  //     Command stageApproach =
+  //         new DriveToChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance)
+  //             .alongWith(rotateToAngle)
+  //             .finallyDo(
+  //                 () -> {
+  //                   wrapper.resetVelocityOverride();
+  //                   wrapper.resetRotationOverride();
+  //                   led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+  //                 })
+  //             .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
 
-    stageApproach.setName("stageApproach");
+  //     stageApproach.setName("stageApproach");
 
-    return stageApproach;
-  }
+  //     return stageApproach;
+  //   }
 
   public static final Command autoClimb(
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {

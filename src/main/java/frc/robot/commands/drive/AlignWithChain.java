@@ -13,7 +13,7 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.function.Supplier;
 
-public class DriveToChain extends Command {
+public class AlignWithChain extends Command {
   private final VisionGamepiece visionGamepiece;
   private final DrivetrainWrapper drive;
   private final Supplier<Boolean> rotationWithinTolerance;
@@ -26,7 +26,7 @@ public class DriveToChain extends Command {
   private PIDController xOffsetController;
 
   /** Creates a new DriveToChain. */
-  public DriveToChain(
+  public AlignWithChain(
       VisionGamepiece visionGamepiece,
       DrivetrainWrapper drive,
       Supplier<Boolean> rotationWithinTolerance) {
@@ -51,9 +51,7 @@ public class DriveToChain extends Command {
 
     drive.setVelocityOverride(
         new ChassisSpeeds(
-            rotationWithinTolerance.get() && Math.abs(tagOffset) < offsetTolerance.get()
-                ? driveInSpeed.get()
-                : 0.0,
+            0.0,
             rotationWithinTolerance.get() ? xOffsetController.calculate(tagOffset, 0) : 0.0,
             0.0));
   }

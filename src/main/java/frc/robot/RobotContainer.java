@@ -533,11 +533,12 @@ public class RobotContainer {
     driverController
         .povUp()
         .whileTrue(
-            CommandComposer.stageAlign(
+            CommandComposer.stageAlignFast(
                 aprilTagLayout,
                 drivetrainWrapper,
                 led,
-                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r),
+                visionGamepiece));
 
     driverController
         .povLeft()
