@@ -15,4 +15,6 @@ public interface VisionGamepieceIO {
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(Inputs inputs) {}
+
+  public default void setPipelineIndex(int index) {}
 }

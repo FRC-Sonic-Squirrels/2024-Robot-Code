@@ -17,6 +17,7 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     camera = new PhotonCamera(Constants.VisionGamepieceConstants.CAMERA_NAME);
     camera.setDriverMode(false);
     camera.setLED(VisionLEDMode.kOff);
+    camera.setPipelineIndex(0);
   }
 
   @Override
@@ -45,5 +46,10 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     timestamp += ctre;
 
     inputs.timestamp = timestamp;
+  }
+
+  @Override
+  public void setPipelineIndex(int index) {
+    camera.setPipelineIndex(index);
   }
 }
