@@ -8,6 +8,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
 
 public class VisionGamepieceIOReal implements VisionGamepieceIO {
 
@@ -46,6 +47,13 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     timestamp += ctre;
 
     inputs.timestamp = timestamp;
+    for (int i = 0; i < results.getTargets().size(); i++) {
+      PhotonTrackedTarget target = results.targets.get(i);
+      if (target.getFiducialId() >= 11) {
+        List<TargetCorner> corners = target.getDetectedCorners();
+        inputs.xOffset = (corners.get(0).x + corners.get(1).x) / 2.0;
+      }
+    }
   }
 
   @Override

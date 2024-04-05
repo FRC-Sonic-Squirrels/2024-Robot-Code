@@ -227,10 +227,6 @@ public class VisionGamepiece extends SubsystemBase {
         logGamepieceCount.info(seenGamePieces.size());
         logGamepiecePoseArray.info(gamepiecePoses);
       }
-      // APRIL TAG DETECTION -----------------------------------------:
-      else {
-
-      }
     }
   }
 
@@ -337,7 +333,11 @@ public class VisionGamepiece extends SubsystemBase {
   }
 
   public void setPipelineIndex(int index) {
-    usingGamepieceDetection = false;
+    usingGamepieceDetection = index == 0;
     io.setPipelineIndex(index);
+  }
+
+  public double getTagOffset() {
+    return inputs.xOffset;
   }
 }

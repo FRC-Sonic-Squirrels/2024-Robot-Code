@@ -15,6 +15,7 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team6328.GeomUtil;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.commands.AutoClimb;
+import frc.robot.commands.drive.DriveToChain;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
@@ -32,6 +33,7 @@ import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
+import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -296,7 +298,7 @@ public class CommandComposer {
   }
 
   private static final LoggedTunableNumber stageApproachSpeed =
-      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 1.5);
+      new LoggedTunableNumber("DriveToChain/stageApproachSpeed", 1.5);
 
   public static Command driveToChain(
       AprilTagFieldLayout aprilTagFieldLayout, DrivetrainWrapper wrapper, LED led) {
@@ -322,6 +324,41 @@ public class CommandComposer {
                             rotateToAngle.withinTolerance() ? stageApproachSpeed.get() : 0.0,
                             0.0,
                             0.0)))
+            .alongWith(rotateToAngle)
+            .finallyDo(
+                () -> {
+                  wrapper.resetVelocityOverride();
+                  wrapper.resetRotationOverride();
+                  led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+                })
+            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
+
+    stageApproach.setName("stageApproach");
+
+    return stageApproach;
+  }
+
+  public static Command driveToChainFast(
+      AprilTagFieldLayout aprilTagFieldLayout,
+      DrivetrainWrapper wrapper,
+      LED led,
+      VisionGamepiece visionGamepiece) {
+    Supplier<Pose2d> robotLocalization =
+        () ->
+            Constants.isRedAlliance()
+                ? wrapper.getPoseEstimatorPoseStageRed(false)
+                : wrapper.getPoseEstimatorPoseStageBlue(false);
+    RotateToAngle rotateToAngle =
+        new RotateToAngle(
+            wrapper,
+            () ->
+                AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
+                    .getRotation()
+                    .plus(Rotation2d.fromDegrees(180)),
+            robotLocalization);
+
+    Command stageApproach =
+        new DriveToChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance)
             .alongWith(rotateToAngle)
             .finallyDo(
                 () -> {

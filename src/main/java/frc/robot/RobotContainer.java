@@ -896,6 +896,8 @@ public class RobotContainer {
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
 
+    visionGamepiece.setPipelineIndex(0);
+
     is_teleop = false;
     is_autonomous = true;
   }
@@ -907,6 +909,8 @@ public class RobotContainer {
     vision.useGyroBasedFilteringForVision(true);
 
     led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+
+    visionGamepiece.setPipelineIndex(1);
 
     is_teleop = true;
     is_autonomous = false;

@@ -11,6 +11,7 @@ public interface VisionGamepieceIO {
     public double[] yaw = new double[] {};
     public double[] area = new double[] {};
     public int targetCount = 0;
+    public double xOffset = 0;
   }
 
   /** Updates the set of loggable inputs. */
