@@ -82,6 +82,7 @@ public class GyroIOPigeon2 implements GyroIO {
   public void updateInputs(Inputs inputs) {
     var statusCode = BaseStatusSignal.refreshAll(refreshSet);
 
+    inputs.statusCode = statusCode;
     inputs.connected = statusCode == StatusCode.OK;
     inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
     inputs.xAcceleration = xAcceleration.getValueAsDouble();

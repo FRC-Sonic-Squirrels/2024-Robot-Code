@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 public interface GyroIO {
   class Inputs {
     public boolean connected = false;
+    public StatusCode statusCode;
     public Rotation2d yawPosition = Constants.zeroRotation2d;
     public double yawVelocityRadPerSec;
     public double xAcceleration;
