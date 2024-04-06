@@ -51,13 +51,16 @@ public class LED extends SubsystemBase {
   private int robotLoops = 0;
   private final int robotLoopsTillReady = 20;
   private final Supplier<Boolean> brakeMode;
+  private final Supplier<Boolean> gyroConnected;
 
-  public LED(DoubleSupplier elevatorHeight, Supplier<Boolean> brakeMode) {
+  public LED(
+      DoubleSupplier elevatorHeight, Supplier<Boolean> brakeMode, Supplier<Boolean> gyroConnected) {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
     this.elevatorHeight = elevatorHeight;
     this.brakeMode = brakeMode;
+    this.gyroConnected = gyroConnected;
   }
 
   @Override
@@ -76,6 +79,8 @@ public class LED extends SubsystemBase {
                 setSnake2(Color.kRed, Color.kMagenta);
               } else if (!brakeMode.get()) {
                 setSnake2(Color.kGreen, Color.kCrimson);
+              } else if (!gyroConnected.get()) {
+                setBlinking(Color.kAquamarine, Color.kRed);
               } else {
                 if (noteInRobot) {
                   setSolidColor(squirrelOrange);

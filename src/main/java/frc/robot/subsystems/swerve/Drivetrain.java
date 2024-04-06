@@ -639,4 +639,8 @@ public class Drivetrain extends SubsystemBase {
   public double[] getCurrentDrawAmps() {
     return modules.getCurrentDrawAmps();
   }
+
+  public boolean isGyroConnected() {
+    return gyroInputs.connected;
+  }
 }
