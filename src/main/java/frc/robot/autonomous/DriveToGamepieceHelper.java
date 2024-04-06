@@ -1,10 +1,12 @@
 package frc.robot.autonomous;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
@@ -31,6 +33,12 @@ public class DriveToGamepieceHelper {
 
   private static final LoggedTunableNumber rotationKp = group.build("rotationKp", 4.8);
 
+  private static final LoggedTunableNumber rotationMaxAcceleration =
+      group.build("rotationMaxAcceleration", 720.0);
+
+  private static final LoggedTunableNumber rotationMaxVelocity =
+      group.build("rotationMaxVelocity", 360.0);
+
   private static final LoggedTunableNumber allowedRotationalErrorDegrees =
       group.build("allowedRotationalErrorDegrees", 10);
 
@@ -41,11 +49,12 @@ public class DriveToGamepieceHelper {
 
   private final PIDController xController = new PIDController(0, 0, 0);
   private final PIDController yController = new PIDController(0, 0, 0);
-  private final PIDController rotController = new PIDController(0, 0, 0);
+  private final ProfiledPIDController rotController =
+      new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
 
   private Rotation2d gamepieceDirection = Constants.zeroRotation2d;
 
-  public DriveToGamepieceHelper() {
+  public DriveToGamepieceHelper(Pose2d currentPose, Pose2d currentVel) {
     xController.reset();
     xController.setP(kP.get());
     xController.setI(kI.get());
@@ -58,9 +67,14 @@ public class DriveToGamepieceHelper {
     yController.setD(kD.get());
     yController.setTolerance(0.05);
 
-    rotController.reset();
+    rotController.reset(
+        currentPose.getRotation().getRadians(), currentVel.getRotation().getRadians());
     rotController.enableContinuousInput(-Math.PI, Math.PI);
     rotController.setP(rotationKp.get());
+    rotController.setConstraints(
+        new Constraints(
+            Math.toRadians(rotationMaxVelocity.get()),
+            Math.toRadians(rotationMaxAcceleration.get())));
     rotController.setTolerance(Math.toRadians(2));
   }
 
