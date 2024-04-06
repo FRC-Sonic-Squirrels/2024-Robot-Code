@@ -192,7 +192,9 @@ public class AutosManager {
     paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
-        "sourceAutoPlop", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "sourceAutoPlop",
+        state.asCommand(),
+        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
   }
 
   private Auto sourceAuto4GP() {
