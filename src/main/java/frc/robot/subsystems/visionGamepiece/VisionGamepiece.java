@@ -337,7 +337,11 @@ public class VisionGamepiece extends SubsystemBase {
     io.setPipelineIndex(index);
   }
 
-  public double getTagOffset() {
-    return inputs.xOffset;
+  public double getTagYaw() {
+    return inputs.aprilTagYaw;
+  }
+
+  public boolean seesStageTags() {
+    return inputs.seesStageTags;
   }
 }
