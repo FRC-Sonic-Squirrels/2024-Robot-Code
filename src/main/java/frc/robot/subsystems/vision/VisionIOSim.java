@@ -55,6 +55,7 @@ public class VisionIOSim implements VisionIO {
     visionSim.addCamera(cameraSim, robotToCamera);
 
     cameraSim.enableDrawWireframe(true);
+    cameraSim.enableProcessedStream(true);
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     /*

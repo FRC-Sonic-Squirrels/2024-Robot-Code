@@ -98,6 +98,7 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOSim;
 import frc.robot.visualization.ClimbVisualization;
 import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
@@ -267,7 +268,8 @@ public class RobotContainer {
 
             visionGamepiece =
                 new VisionGamepiece(
-                    new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
+                    new VisionGamepieceIOSim(config, drivetrain::getPoseEstimatorPose),
+                    drivetrain::getPoseEstimatorPoseAtTimestamp);
           }
 
           arm = new Arm(new ArmIOSim());
