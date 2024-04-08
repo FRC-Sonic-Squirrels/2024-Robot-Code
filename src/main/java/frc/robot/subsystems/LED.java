@@ -79,7 +79,7 @@ public class LED extends SubsystemBase {
                 setSnake2(Color.kRed, Color.kMagenta);
               } else if (!brakeMode.get()) {
                 setSnake2(Color.kGreen, Color.kCrimson);
-              } else if (!gyroConnected.get()) {
+              } else if (!gyroConnected.get() && !Constants.RobotMode.isSimBot()) {
                 setBlinking(Color.kAquamarine, Color.kRed);
               } else {
                 if (noteInRobot) {
@@ -116,7 +116,15 @@ public class LED extends SubsystemBase {
             case SHOOTER_SUCCESS:
               setSolidColor(Color.kBlueViolet);
               break;
-
+            case CLIMB_ALIGN_STAGE1:
+              setSolidColor(Color.kRed);
+              break;
+            case CLIMB_ALIGN_STAGE2:
+              setSolidColor(Color.kYellow);
+              break;
+            case CLIMB_ALIGN_STAGE3:
+              setSolidColor(Color.kBlueViolet);
+              break;
             default:
               setAudioLevelMeter(100);
               break;
@@ -315,7 +323,10 @@ public class LED extends SubsystemBase {
     AMP_LINE_UP,
     CLIMB_LINE_UP,
     SHOOTING_PREP,
-    SHOOTER_SUCCESS
+    SHOOTER_SUCCESS,
+    CLIMB_ALIGN_STAGE1,
+    CLIMB_ALIGN_STAGE2,
+    CLIMB_ALIGN_STAGE3
   }
 
   public boolean sameAsPrevBuffer() {

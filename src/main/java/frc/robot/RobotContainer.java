@@ -532,6 +532,23 @@ public class RobotContainer {
                 .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
                 .withTimeout(2.0));
 
+    Supplier<Command> toggleReactionArms =
+        () ->
+            new ConditionalCommand(
+                Commands.runOnce(
+                    () -> {
+                      elevator.retractReactionArms();
+                      reactionArmsDown = false;
+                    },
+                    elevator),
+                Commands.runOnce(
+                    () -> {
+                      elevator.deployReactionArms();
+                      reactionArmsDown = true;
+                    },
+                    elevator),
+                () -> reactionArmsDown);
+
     driverController
         .povUp()
         .whileTrue(
@@ -540,7 +557,14 @@ public class RobotContainer {
                 drivetrainWrapper,
                 led,
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r),
-                visionGamepiece));
+                visionGamepiece,
+                elevator,
+                arm,
+                endEffector,
+                shooter,
+                intake,
+                () -> reactionArmsDown,
+                toggleReactionArms));
 
     driverController
         .povLeft()
@@ -641,15 +665,17 @@ public class RobotContainer {
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
-    driverController
-        .povRight()
-        .whileTrue(
-            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
+    // driverController
+    //     .povRight()
+    //     .whileTrue(
+    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () ->
+    // 0.0));
 
-    driverController
-        .povDown()
-        .whileTrue(
-            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () -> 0.0));
+    // driverController
+    //     .povDown()
+    //     .whileTrue(
+    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () ->
+    // 0.0));
 
     // ---------- OPERATOR CONTROLS -----------
     DoubleSupplier elevatorDelta =
@@ -669,34 +695,19 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
-    Supplier<Command> toggleReactionArms =
-        () ->
-            new ConditionalCommand(
-                Commands.runOnce(
-                    () -> {
-                      elevator.retractReactionArms();
-                      reactionArmsDown = false;
-                    },
-                    elevator),
-                Commands.runOnce(
-                    () -> {
-                      elevator.deployReactionArms();
-                      reactionArmsDown = true;
-                    },
-                    elevator),
-                () -> reactionArmsDown);
-
     operatorController.leftBumper().onTrue(toggleReactionArms.get());
 
     operatorController
         .povUp()
         .onTrue(
-            new ConditionalCommand(
-                    Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
-                .andThen(
-                    MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake))
-            // .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy())
-            );
+            CommandComposer.prepMechForClimb(
+                elevator,
+                arm,
+                endEffector,
+                shooter,
+                intake,
+                () -> reactionArmsDown,
+                toggleReactionArms));
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));

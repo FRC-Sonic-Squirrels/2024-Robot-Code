@@ -62,6 +62,11 @@ public class VisionGamepiece extends SubsystemBase {
   private static final LoggerEntry.Decimal log_timestamp =
       logGroupClosestGamepiece.buildDecimal("timestamp");
 
+  private static final LoggerEntry.Decimal log_aprilTagTargetYawDegrees =
+      logGroup.buildDecimal("aprilTagTargetYawDegrees");
+  private static final LoggerEntry.Bool log_usingAprilTagDetection =
+      logGroup.buildBoolean("usingAprilTagDetection");
+
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber pitchFudgeFactor =
       groupTunable.build("pitchFudgeFactor", 21.85);
@@ -85,6 +90,7 @@ public class VisionGamepiece extends SubsystemBase {
   @Override
   public void periodic() {
     try (var ignored = new ExecutionTiming(ROOT_TABLE)) {
+      io.updateInputs(inputs);
       logTotalLatencyMs.info(inputs.totalLatencyMs);
       logInputs_isConnected.info(inputs.isConnected);
       logInputs_validTarget.info(inputs.validTarget);
@@ -93,7 +99,7 @@ public class VisionGamepiece extends SubsystemBase {
 
       // GAMEPIECE DETECTION --------------------------------------------:
       if (usingGamepieceDetection) {
-        io.updateInputs(inputs);
+        log_usingAprilTagDetection.info(false);
         logInputs_pitch.info(inputs.pitch);
         logInputs_yaw.info(inputs.yaw);
         logInputs_area.info(inputs.area);
@@ -226,6 +232,9 @@ public class VisionGamepiece extends SubsystemBase {
         }
         logGamepieceCount.info(seenGamePieces.size());
         logGamepiecePoseArray.info(gamepiecePoses);
+      } else {
+        log_usingAprilTagDetection.info(true);
+        log_aprilTagTargetYawDegrees.info(inputs.aprilTagYaw);
       }
     }
   }

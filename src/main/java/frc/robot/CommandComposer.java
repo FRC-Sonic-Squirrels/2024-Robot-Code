@@ -1,12 +1,15 @@
 package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -37,6 +40,7 @@ import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class CommandComposer {
   //   public static Command autoClimb(
@@ -297,39 +301,111 @@ public class CommandComposer {
     return stageAlign;
   }
 
+  public static Command prepMechForClimb(
+      Elevator elevator,
+      Arm arm,
+      EndEffector endEffector,
+      Shooter shooter,
+      Intake intake,
+      BooleanSupplier reactionArmsDown,
+      Supplier<Command> toggleReactionArms) {
+    return new ConditionalCommand(Commands.none(), toggleReactionArms.get(), reactionArmsDown)
+        .andThen(MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake));
+  }
+
   public static Command stageAlignFast(
       AprilTagFieldLayout aprilTagLayout,
       DrivetrainWrapper wrapper,
       LED led,
       Consumer<Double> rumbleMagnitude,
-      VisionGamepiece visionGamepiece) {
+      VisionGamepiece visionGamepiece,
+      Elevator elevator,
+      Arm arm,
+      EndEffector endEffector,
+      Shooter shooter,
+      Intake intake,
+      BooleanSupplier reactionArmsDown,
+      Supplier<Command> toggleReactionArms) {
 
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
-                ? wrapper.getPoseEstimatorPoseStageRed(false)
-                : wrapper.getPoseEstimatorPoseStageBlue(false);
+                ? wrapper.getPoseEstimatorPoseStageRed(true)
+                : wrapper.getPoseEstimatorPoseStageBlue(true);
 
     RotateToAngle rotateToAngle =
         new RotateToAngle(
             wrapper,
-            () ->
-                AutoClimb.getTargetPose(aprilTagLayout, robotLocalization.get())
-                    .getRotation()
-                    .plus(Rotation2d.fromDegrees(180)),
+            () -> getStageTargetRotation(robotLocalization.get().getRotation()),
             robotLocalization);
+
+    AlignWithChain alignWithChain =
+        new AlignWithChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance);
 
     Command stageAlign =
         rotateToAngle
-            .alongWith(new AlignWithChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance))
+            .alongWith(alignWithChain)
+            .alongWith(
+                Commands.run(
+                    () -> {
+                      if (!alignWithChain.driving()) {
+                        led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE1);
+                      } else if (Math.abs(visionGamepiece.getTagYaw()) > 1) {
+                        led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE2);
+                      } else {
+                        led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE3);
+                      }
+                    }))
+            .alongWith(
+                prepMechForClimb(
+                    elevator,
+                    arm,
+                    endEffector,
+                    shooter,
+                    intake,
+                    reactionArmsDown,
+                    toggleReactionArms))
             .finallyDo(
                 () -> {
                   rumbleMagnitude.accept(0.0);
                   led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
-                })
-            .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
+                });
     stageAlign.setName("stageAlign");
     return stageAlign;
+  }
+
+  public static Rotation2d getStageTargetRotation(Rotation2d currentRotation) {
+    double currentRot = GeometryUtil.optimizeRotationInDegrees(currentRotation.getDegrees());
+    Double closestRot = null;
+
+    for (int i = -1; i < 2; i++) {
+      double subjectRot = 120.0 * i;
+
+      if (DriverStation.getAlliance().isPresent()) {
+        if (DriverStation.getAlliance().get().equals(Alliance.Blue)) {
+          subjectRot -= 60.0;
+        }
+      }
+
+      subjectRot = GeometryUtil.optimizeRotationInDegrees(subjectRot);
+
+      if (closestRot == null) {
+        closestRot = subjectRot;
+      } else {
+        if (getDistWithWrapping(currentRot, closestRot)
+            > getDistWithWrapping(currentRot, subjectRot)) {
+          closestRot = subjectRot;
+        }
+      }
+    }
+
+    Logger.recordOutput("StageAlignFast/closestRot", closestRot);
+    return Rotation2d.fromDegrees(closestRot);
+  }
+
+  public static double getDistWithWrapping(double rotation1, double rotation2) {
+    double errorBound = (180 - (-180)) / 2.0;
+    return Math.abs(MathUtil.inputModulus(rotation1 - rotation2, -errorBound, errorBound));
   }
 
   private static final LoggedTunableNumber stageApproachSpeed =
@@ -340,15 +416,12 @@ public class CommandComposer {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
-                ? wrapper.getPoseEstimatorPoseStageRed(false)
-                : wrapper.getPoseEstimatorPoseStageBlue(false);
+                ? wrapper.getPoseEstimatorPoseStageRed(true)
+                : wrapper.getPoseEstimatorPoseStageBlue(true);
     RotateToAngle rotateToAngle =
         new RotateToAngle(
             wrapper,
-            () ->
-                AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
-                    .getRotation()
-                    .plus(Rotation2d.fromDegrees(180)),
+            () -> getStageTargetRotation(robotLocalization.get().getRotation()),
             robotLocalization);
 
     Command stageApproach =

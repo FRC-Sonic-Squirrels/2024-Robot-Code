@@ -23,7 +23,10 @@ public class AlignWithChain extends Command {
   private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerancePixels", 3);
   private static LoggedTunableNumber driveInSpeed = group.build("driveInSpeed", 1.5);
 
-  private PIDController xOffsetController;
+  private PIDController xOffsetController = new PIDController(0, 0, 0);
+  private boolean hasSeenStageTag;
+
+  private boolean driving = false;
 
   /** Creates a new DriveToChain. */
   public AlignWithChain(
@@ -47,13 +50,15 @@ public class AlignWithChain extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (visionGamepiece.seesStageTags()) {
+      hasSeenStageTag = true;
+    }
     double tagOffset = visionGamepiece.getTagYaw();
 
+    driving = rotationWithinTolerance.get() && hasSeenStageTag;
+
     drive.setVelocityOverride(
-        new ChassisSpeeds(
-            0.0,
-            rotationWithinTolerance.get() ? xOffsetController.calculate(tagOffset, 0) : 0.0,
-            0.0));
+        new ChassisSpeeds(0.0, driving ? xOffsetController.calculate(tagOffset, 0) : 0.0, 0.0));
   }
 
   // Called once the command ends or is interrupted.
@@ -66,5 +71,9 @@ public class AlignWithChain extends Command {
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  public boolean driving() {
+    return driving;
   }
 }

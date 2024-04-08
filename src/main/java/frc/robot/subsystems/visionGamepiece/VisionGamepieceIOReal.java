@@ -1,6 +1,8 @@
 package frc.robot.subsystems.visionGamepiece;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import java.util.List;
@@ -52,7 +54,10 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     var seesStageTags = false;
     for (int i = 0; i < results.getTargets().size(); i++) {
       PhotonTrackedTarget target = results.targets.get(i);
-      if (target.getFiducialId() >= 11) {
+      if ((DriverStation.getAlliance().get().equals(Alliance.Red)
+              && (target.getFiducialId() >= 11 && target.getFiducialId() <= 13))
+          || (DriverStation.getAlliance().get().equals(Alliance.Blue)
+              && (target.getFiducialId() >= 14 && target.getFiducialId() <= 16))) {
         aprilTagYaw = target.getYaw();
         seesStageTags = true;
       }
