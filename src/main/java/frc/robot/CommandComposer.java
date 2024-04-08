@@ -37,69 +37,70 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CommandComposer {
-  public static Command autoClimb(
-      AprilTagFieldLayout aprilTagFieldLayout,
-      DrivetrainWrapper drivetrainWrapper,
-      Elevator elevator,
-      Arm arm,
-      EndEffector endEffector,
-      Shooter shooter,
-      Intake intake) {
-    /*
-     * Step 1: drive to in front of the chain,
-     * at the same time, if the robot is within 2 meters of the stage:
-     * if the robot is under the stage
-     * bring mech into under stage prep,
-     * else
-     * bring the mech into climb prep positon,
-     * if we are farther than 2 meters,
-     * stay in stow/loading position
-     * Step 2: run climb command
-     */
+  //   public static Command autoClimb(
+  //       AprilTagFieldLayout aprilTagFieldLayout,
+  //       DrivetrainWrapper drivetrainWrapper,
+  //       Elevator elevator,
+  //       Arm arm,
+  //       EndEffector endEffector,
+  //       Shooter shooter,
+  //       Intake intake) {
+  //     /*
+  //      * Step 1: drive to in front of the chain,
+  //      * at the same time, if the robot is within 2 meters of the stage:
+  //      * if the robot is under the stage
+  //      * bring mech into under stage prep,
+  //      * else
+  //      * bring the mech into climb prep positon,
+  //      * if we are farther than 2 meters,
+  //      * stay in stow/loading position
+  //      * Step 2: run climb command
+  //      */
 
-    DriveToPose driveToClimbPos =
-        new DriveToPose(
-            drivetrainWrapper,
-            () ->
-                AutoClimb.getTargetPose(
-                    aprilTagFieldLayout, drivetrainWrapper.getPoseEstimatorPose(true)),
-            () -> drivetrainWrapper.getPoseEstimatorPose(true));
+  //     DriveToPose driveToClimbPos =
+  //         new DriveToPose(
+  //             drivetrainWrapper,
+  //             () ->
+  //                 AutoClimb.getTargetPose(
+  //                     aprilTagFieldLayout, drivetrainWrapper.getPoseEstimatorPose(true)),
+  //             () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
-    BooleanSupplier withinRangeOfStage =
-        () ->
-            GeometryUtil.getDist(
-                    Constants.FieldConstants.getStageCenter(),
-                    drivetrainWrapper.getPoseEstimatorPose(false).getTranslation())
-                <= 2.0;
+  //     BooleanSupplier withinRangeOfStage =
+  //         () ->
+  //             GeometryUtil.getDist(
+  //                     Constants.FieldConstants.getStageCenter(),
+  //                     drivetrainWrapper.getPoseEstimatorPose(false).getTranslation())
+  //                 <= 2.0;
 
-    BooleanSupplier underStage =
-        () -> AutoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose(false));
+  //     BooleanSupplier underStage =
+  //         () -> AutoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose(false));
 
-    Supplier<Command> prepForClimb =
-        () ->
-            new ConditionalCommand(
-                MechanismActions.climbPrepUnderStagePosition(elevator, arm)
-                    .until(() -> !underStage.getAsBoolean())
-                    .andThen(
-                        MechanismActions.climbPrepPosition(
-                            elevator, arm, endEffector, shooter, intake)),
-                MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake),
-                underStage);
+  //     Supplier<Command> prepForClimb =
+  //         () ->
+  //             new ConditionalCommand(
+  //                 MechanismActions.climbPrepUnderStagePosition(elevator, arm)
+  //                     .until(() -> !underStage.getAsBoolean())
+  //                     .andThen(
+  //                         MechanismActions.climbPrepPosition(
+  //                             elevator, arm, endEffector, shooter, intake)),
+  //                 MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter,
+  // intake),
+  //                 underStage);
 
-    Command climbCommand =
-        (driveToClimbPos.alongWith(
-                new ConditionalCommand(
-                    prepForClimb.get(),
-                    MechanismActions.loadingPosition(elevator, arm)
-                        .until(withinRangeOfStage)
-                        .andThen(prepForClimb.get()),
-                    withinRangeOfStage)))
-            .until(driveToClimbPos::atGoal)
-            .andThen(new AutoClimb(drivetrainWrapper, elevator, arm, endEffector));
+  //     Command climbCommand =
+  //         (driveToClimbPos.alongWith(
+  //                 new ConditionalCommand(
+  //                     prepForClimb.get(),
+  //                     MechanismActions.loadingPosition(elevator, arm)
+  //                         .until(withinRangeOfStage)
+  //                         .andThen(prepForClimb.get()),
+  //                     withinRangeOfStage)))
+  //             .until(driveToClimbPos::atGoal)
+  //             .andThen(new AutoClimb(drivetrainWrapper, elevator, arm, endEffector));
 
-    climbCommand.setName("AutoClimb");
-    return climbCommand;
-  }
+  //     climbCommand.setName("AutoClimb");
+  //     return climbCommand;
+  //   }
 
   public static Command scoreAmp(
       EndEffector endEffector,
@@ -229,24 +230,36 @@ public class CommandComposer {
       Elevator elevator,
       Arm arm,
       LED led) {
-    Command cancelScoreAmp =
-        Commands.waitUntil(
+
+    Trigger noGamepieceInEE =
+        new Trigger(
                 () ->
-                    GeometryUtil.getDist(
-                            drivetrainWrapper.getPoseEstimatorPose(true),
-                            Constants.FieldConstants.getAmpScoringPose())
-                        >= 0.2)
+                    !endEffector.intakeSideTOFDetectGamepiece()
+                        && !endEffector.shooterSideTOFDetectGamepiece())
+            .debounce(0.4);
+
+    Command cancelScoreAmp =
+        Commands.waitUntil(noGamepieceInEE::getAsBoolean)
             .andThen(
-                new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS))
-            .andThen(MechanismActions.loadingPosition(elevator, arm))
-            .andThen(
-                new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS))
-            .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
-            .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS));
+                Commands.waitUntil(
+                        () ->
+                            GeometryUtil.getDist(
+                                    drivetrainWrapper.getPoseEstimatorPose(true),
+                                    Constants.FieldConstants.getAmpScoringPose())
+                                >= 0.2)
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_AMP_ROTATIONS))
+                    .andThen(MechanismActions.loadingPosition(elevator, arm))
+                    .andThen(
+                        new ReactionArmsSetAngle(
+                            elevator,
+                            Constants.ElevatorConstants.ReactionArmConstants
+                                .REACTION_ARM_HOME_ROTATIONS))
+                    .alongWith(new EndEffectorPercentOut(endEffector, 0.0))
+                    .alongWith(new LedSetBaseState(led, BaseRobotState.NOTE_STATUS)));
 
     cancelScoreAmp.setName("CancelScoreAmp");
     return cancelScoreAmp;
@@ -264,7 +277,7 @@ public class CommandComposer {
                 : wrapper.getPoseEstimatorPoseStageBlue(false);
     Supplier<Pose2d> targetPose =
         () -> AutoClimb.getTargetPose(aprilTagLayout, robotLocalization.get());
-    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true);
+    DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true, 0.02);
     Command stageAlign =
         driveCommand
             .alongWith(
@@ -283,7 +296,7 @@ public class CommandComposer {
   }
 
   private static final LoggedTunableNumber stageApproachSpeed =
-      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 0.5);
+      new LoggedTunableNumber("driveToChain/stageApproachSpeed", 1.5);
 
   public static Command driveToChain(
       AprilTagFieldLayout aprilTagFieldLayout, DrivetrainWrapper wrapper, LED led) {
@@ -321,5 +334,32 @@ public class CommandComposer {
     stageApproach.setName("stageApproach");
 
     return stageApproach;
+  }
+
+  public static final Command autoClimb(
+      Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
+    return MechanismActions.climbDownPosition(elevator, arm)
+        .andThen(Commands.waitSeconds(0.2))
+        // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
+        .andThen(
+            new ConditionalCommand(
+                    MechanismActions.climbTrapPosition(elevator, arm)
+                    // .andThen(
+                    //     // Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector)
+                    //     //     .until(() -> !endEffector.noteInEndEffector())
+                    //     //     .andThen(Commands.waitSeconds(0.5))
+                    //         // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
+                    //         // .andThen(
+                    //         //     Commands.runOnce(
+                    //         //         () -> endEffector.setPercentOut(0.0), endEffector))
+                    //         // .andThen(MechanismActions.climbFinalRestPosition(elevator, arm))
+                    //         )
+                    ,
+                    Commands.none(),
+                    () ->
+                        endEffector.intakeSideTOFDetectGamepiece()
+                            || endEffector.shooterSideTOFDetectGamepiece())
+                .asProxy())
+        .finallyDo(() -> endEffector.setPercentOut(0.0));
   }
 }

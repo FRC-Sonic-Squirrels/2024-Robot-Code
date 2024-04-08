@@ -179,7 +179,7 @@ public class Arm extends SubsystemBase {
     return inputs.armVelocity;
   }
 
-  public void setNeutralMode(NeutralModeValue value) {
-    io.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    return io.setNeutralMode(value);
   }
 }

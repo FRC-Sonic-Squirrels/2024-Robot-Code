@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -178,6 +179,8 @@ public class RobotContainer {
 
   private boolean reactionArmsDown = false;
 
+  private boolean brakeModeFailure = false;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -214,7 +217,8 @@ public class RobotContainer {
       visionGamepiece =
           new VisionGamepiece(
               new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
-      led = new LED(elevator::getHeightInches);
+      led =
+          new LED(elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
     } else { // REAL and SIM robots HERE
       switch (robotType) {
         case ROBOT_SIMBOT_REAL_CAMERAS:
@@ -271,7 +275,9 @@ public class RobotContainer {
           intake = new Intake(new IntakeIOSim());
           shooter = new Shooter(new ShooterIOSim());
           endEffector = new EndEffector(new EndEffectorIOSim());
-          led = new LED(elevator::getHeightInches);
+          led =
+              new LED(
+                  elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
           break;
 
         case ROBOT_2023_RETIRED_ROBER:
@@ -298,7 +304,9 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED(elevator::getHeightInches);
+          led =
+              new LED(
+                  elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
           break;
 
         case ROBOT_2024_MAESTRO:
@@ -354,7 +362,9 @@ public class RobotContainer {
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
-          led = new LED(elevator::getHeightInches);
+          led =
+              new LED(
+                  elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
           break;
 
         default:
@@ -380,7 +390,9 @@ public class RobotContainer {
               new VisionGamepiece(
                   new VisionGamepieceIO() {}, drivetrain::getPoseEstimatorPoseAtTimestamp);
 
-          led = new LED(elevator::getHeightInches);
+          led =
+              new LED(
+                  elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
           break;
       }
     }
@@ -585,8 +597,8 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(8500);
-                  if (shooter.getRPM() > 8000) {
+                  shooter.setLauncherRPM(8700, 8000);
+                  if (shooter.getRPM() > 8500) {
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
                     intake.setVelocity(passThroughVel.get());
@@ -654,9 +666,8 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
-    operatorController
-        .leftBumper()
-        .onTrue(
+    Supplier<Command> toggleReactionArms =
+        () ->
             new ConditionalCommand(
                 Commands.runOnce(
                     () -> {
@@ -670,12 +681,22 @@ public class RobotContainer {
                       reactionArmsDown = true;
                     },
                     elevator),
-                () -> reactionArmsDown));
+                () -> reactionArmsDown);
+
+    operatorController.leftBumper().onTrue(toggleReactionArms.get());
 
     operatorController
         .povUp()
-        .onTrue(MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake));
-    operatorController.povLeft().onTrue(MechanismActions.climbChainCheck(elevator, arm));
+        .onTrue(
+            new ConditionalCommand(
+                    Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
+                .andThen(
+                    MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake))
+            // .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy())
+            );
+    operatorController
+        .povLeft()
+        .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
 
@@ -764,29 +785,42 @@ public class RobotContainer {
         new ConditionalCommand(
             Commands.runOnce(
                     () -> {
-                      arm.setNeutralMode(NeutralModeValue.Coast);
-                      elevator.setNeutralMode(NeutralModeValue.Coast);
-                      shooter.setNeutralMode(NeutralModeValue.Coast);
+                      boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Coast);
+                      boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Coast);
+                      boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Coast);
                       elevator.setReactionArmIdleMode(IdleMode.kCoast);
-                      drivetrain.setNeturalMode(NeutralModeValue.Coast);
+
+                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+
+                      //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_OFF, 1.5))
+                .andThen(
+                    new LedSetStateForSeconds(
+                        led,
+                        brakeModeFailure ? RobotState.BRAKE_MODE_FAILED : RobotState.BREAK_MODE_OFF,
+                        1.5))
                 .ignoringDisable(true),
             Commands.runOnce(
                     () -> {
-                      arm.setNeutralMode(NeutralModeValue.Brake);
-                      elevator.setNeutralMode(NeutralModeValue.Brake);
-                      shooter.setNeutralMode(NeutralModeValue.Brake);
+                      boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Brake);
+                      boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Brake);
+                      boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Brake);
                       elevator.setReactionArmIdleMode(IdleMode.kBrake);
-                      drivetrain.setNeturalMode(NeutralModeValue.Brake);
+
+                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+                      //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
                     elevator,
                     arm)
-                .andThen(new LedSetStateForSeconds(led, RobotState.BREAK_MODE_ON, 1.5))
+                .andThen(
+                    new LedSetStateForSeconds(
+                        led,
+                        brakeModeFailure ? RobotState.BRAKE_MODE_FAILED : RobotState.BREAK_MODE_ON,
+                        1.5))
                 .ignoringDisable(true),
             () -> brakeModeTriggered));
 
@@ -858,7 +892,7 @@ public class RobotContainer {
   }
 
   public void enterAutonomous() {
-    setBrakeMode();
+    // setBrakeMode();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
 
@@ -867,7 +901,7 @@ public class RobotContainer {
   }
 
   public void enterTeleop() {
-    setBrakeMode();
+    // setBrakeMode();
     resetDrivetrainResetOverrides();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
@@ -923,9 +957,9 @@ public class RobotContainer {
   public void setBrakeMode() {
     brakeModeTriggered = true;
     elevator.setNeutralMode(NeutralModeValue.Brake);
+    elevator.setReactionArmIdleMode(IdleMode.kBrake);
     arm.setNeutralMode(NeutralModeValue.Brake);
     shooter.setNeutralMode(NeutralModeValue.Brake);
-    drivetrain.setNeturalMode(NeutralModeValue.Brake);
   }
 
   public void updateLedGamepieceState() {

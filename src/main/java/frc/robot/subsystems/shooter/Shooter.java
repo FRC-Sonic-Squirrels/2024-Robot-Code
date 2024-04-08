@@ -138,7 +138,8 @@ public class Shooter extends SubsystemBase {
   private double pivotPidLatency = 0.0;
 
   private Rotation2d targetPivotPosition = Constants.zeroRotation2d;
-  private double targetLauncherRPM = 0.0;
+  private double topRollerTargetLauncherRPM = 0.0;
+  private double bottomRollerTargetLauncherRPM = 0.0;
 
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
@@ -270,9 +271,16 @@ public class Shooter extends SubsystemBase {
     io.setLauncherVoltage(volts);
   }
 
+  public void setLauncherRPM(double topRollerRPM, double bottomRollerRPM) {
+    io.setLauncherRPM(topRollerRPM, bottomRollerRPM);
+    topRollerTargetLauncherRPM = topRollerRPM;
+    bottomRollerTargetLauncherRPM = bottomRollerRPM;
+  }
+
   public void setLauncherRPM(double rpm) {
-    io.setLauncherRPM(rpm);
-    targetLauncherRPM = rpm;
+    io.setLauncherRPM(rpm, rpm);
+    topRollerTargetLauncherRPM = rpm;
+    bottomRollerTargetLauncherRPM = rpm;
   }
 
   public double getRPM() {
@@ -280,7 +288,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtTargetRPM() {
-    return isAtTargetRPM(targetLauncherRPM);
+    return isAtTargetRPM(topRollerTargetLauncherRPM);
   }
 
   public boolean isAtTargetRPM(double rpm) {
@@ -344,8 +352,8 @@ public class Shooter extends SubsystemBase {
     return inputs.pivotVelocityRadsPerSec;
   }
 
-  public void setNeutralMode(NeutralModeValue value) {
-    io.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    return io.setNeutralMode(value);
   }
 
   public void setKickerVelocity(double revPerMin) {

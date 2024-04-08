@@ -16,6 +16,7 @@ import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class LED extends SubsystemBase {
   private static final String ROOT_TABLE = "LED";
@@ -49,12 +50,17 @@ public class LED extends SubsystemBase {
   private final DoubleSupplier elevatorHeight;
   private int robotLoops = 0;
   private final int robotLoopsTillReady = 20;
+  private final Supplier<Boolean> brakeMode;
+  private final Supplier<Boolean> gyroConnected;
 
-  public LED(DoubleSupplier elevatorHeight) {
+  public LED(
+      DoubleSupplier elevatorHeight, Supplier<Boolean> brakeMode, Supplier<Boolean> gyroConnected) {
     led.setLength(ledBuffer.getLength());
     led.setData(ledBuffer);
     led.start();
     this.elevatorHeight = elevatorHeight;
+    this.brakeMode = brakeMode;
+    this.gyroConnected = gyroConnected;
   }
 
   @Override
@@ -71,6 +77,10 @@ public class LED extends SubsystemBase {
                 setProgressBar(Color.kGreen, (double) robotLoops / (double) robotLoopsTillReady);
               } else if (elevatorHeight.getAsDouble() < 1 && DriverStation.isDisabled()) {
                 setSnake2(Color.kRed, Color.kMagenta);
+              } else if (!brakeMode.get()) {
+                setSnake2(Color.kGreen, Color.kCrimson);
+              } else if (!gyroConnected.get()) {
+                setBlinking(Color.kAquamarine, Color.kRed);
               } else {
                 if (noteInRobot) {
                   setSolidColor(squirrelOrange);
@@ -133,6 +143,9 @@ public class LED extends SubsystemBase {
           break;
         case INTAKE_SUCCESS:
           setBlinking(Color.kGreen, Color.kBlack);
+          break;
+        case BRAKE_MODE_FAILED:
+          setSolidColor(Color.kPurple);
           break;
       }
     } else {
@@ -291,7 +304,8 @@ public class LED extends SubsystemBase {
     BREAK_MODE_OFF,
     BREAK_MODE_ON,
     BASE,
-    INTAKE_SUCCESS
+    INTAKE_SUCCESS,
+    BRAKE_MODE_FAILED
   }
 
   public enum BaseRobotState {

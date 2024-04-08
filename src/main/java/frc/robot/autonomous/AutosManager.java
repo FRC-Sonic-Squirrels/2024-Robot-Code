@@ -58,13 +58,13 @@ public class AutosManager {
     list.add(this::rushCenterGP1First);
     list.add(this::rushCenterGP2First);
     list.add(this::sourceAuto);
-    list.add(this::sourceAutoPlop);
     list.add(this::sourceAuto4GP);
     list.add(this::sourceAuto5GP);
+    list.add(this::sourceAutoPlop);
     list.add(this::sourceG4FirstAuto3GP);
     list.add(this::sourceG4FirstAuto4GP);
     list.add(this::sourceG4FirstAuto5GP);
-    list.add(this::simpleShootAuto);
+    // list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
       list.add(this::portableAuto);
@@ -192,7 +192,9 @@ public class AutosManager {
     paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
-        "sourceAutoPlop", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
+        "sourceAutoPlop",
+        state.asCommand(),
+        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
   }
 
   private Auto sourceAuto4GP() {

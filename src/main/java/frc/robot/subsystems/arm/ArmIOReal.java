@@ -1,8 +1,10 @@
 package frc.robot.subsystems.arm;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -124,7 +126,16 @@ public class ArmIOReal implements ArmIO {
   }
 
   @Override
-  public void setNeutralMode(NeutralModeValue value) {
-    motor.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    var config = new MotorOutputConfigs();
+
+    var status = motor.getConfigurator().refresh(config);
+
+    if (status != StatusCode.OK) return false;
+
+    config.NeutralMode = value;
+
+    motor.getConfigurator().apply(config);
+    return true;
   }
 }

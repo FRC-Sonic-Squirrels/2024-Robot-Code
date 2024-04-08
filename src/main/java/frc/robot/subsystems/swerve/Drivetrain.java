@@ -16,7 +16,6 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -53,6 +52,7 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerGroup logGyro = logGroupDrive.subgroup("Gyro");
 
   private static final LoggerEntry.Bool logGyro_connected = logGyro.buildBoolean("Connected");
+  private static final LoggerEntry.Text logGyro_status = logGyro.buildString("StatusCode");
   private static final LoggerEntry.Decimal logGyro_yawPosition =
       logGyro.buildDecimal("YawPosition");
   private static final LoggerEntry.Decimal logGyro_yawVelocityRadPerSec =
@@ -105,8 +105,14 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition_RAW_ODOMETRY =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_RAW_ODOMETRY");
 
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition_low =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_0.6");
   private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition");
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition_high =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_2.4");
+  private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPosition_super =
+      logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_10.0");
   private static final LoggerEntry.Struct<Pose2d> logLocalization_RobotPositionWithVision =
       logGroupLocalization.buildStruct(Pose2d.class, "RobotPosition_with_vision");
 
@@ -154,7 +160,10 @@ public class Drivetrain extends SubsystemBase {
   private final SwerveDriveKinematics kinematics;
   private Pose2d rawOdometryPose = Constants.zeroPose2d;
 
+  // private final PoseEstimator poseEstimatorLow;
   private final PoseEstimator poseEstimator;
+  // private final PoseEstimator poseEstimatorHigh;
+  // private final PoseEstimator poseEstimatorSuper;
   private final PoseEstimator poseEstimatorStageBlue;
   private final PoseEstimator poseEstimatorStageRed;
   private final PoseEstimator poseEstimatorGlobal;
@@ -186,9 +195,12 @@ public class Drivetrain extends SubsystemBase {
     int[] tagsSpeakersAndAmps = new int[] {3, 4, /*5, 6,*/ 7, 8};
     int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
+    // poseEstimatorLow = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
     poseEstimator = new PoseEstimator(1.2, 1.2, 0.3, tagsSpeakersAndAmps);
-    poseEstimatorStageBlue = new PoseEstimator(0.1, 0.1, 0.1, new int[] {14, 15, 16});
-    poseEstimatorStageRed = new PoseEstimator(0.1, 0.1, 0.1, new int[] {11, 12, 13});
+    // poseEstimatorHigh = new PoseEstimator(2.4, 2.4, 0.3, tagsSpeakersAndAmps);
+    // poseEstimatorSuper = new PoseEstimator(10.0, 10.0, 0.3, tagsSpeakersAndAmps);
+    poseEstimatorStageBlue = new PoseEstimator(0.6, 0.6, 0.1, new int[] {14, 15, 16});
+    poseEstimatorStageRed = new PoseEstimator(0.6, 0.6, 0.1, new int[] {11, 12, 13});
     poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
 
     var thread = new Thread(this::runOdometry);
@@ -201,6 +213,7 @@ public class Drivetrain extends SubsystemBase {
     try (var ignored = timing.start()) {
       gyroIO.updateInputs(gyroInputs);
       logGyro_connected.info(gyroInputs.connected);
+      logGyro_status.info(gyroInputs.statusCode);
       logGyro_yawPosition.info(gyroInputs.yawPosition);
       logGyro_yawVelocityRadPerSec.info(gyroInputs.yawVelocityRadPerSec);
       logGyro_xAcceleration.info(gyroInputs.xAcceleration);
@@ -232,6 +245,9 @@ public class Drivetrain extends SubsystemBase {
       var poseEstimatorPose = getPoseEstimatorPose();
       var visionStaleness = getVisionStaleness();
       logLocalization_RobotPosition.info(poseEstimatorPose);
+      // logLocalization_RobotPosition_low.info(poseEstimatorLow.getLatestPose());
+      // logLocalization_RobotPosition_high.info(poseEstimatorHigh.getLatestPose());
+      // logLocalization_RobotPosition_super.info(poseEstimatorSuper.getLatestPose());
       if (visionStaleness < 0.5) logLocalization_RobotPositionWithVision.info(poseEstimatorPose);
 
       logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
@@ -335,6 +351,9 @@ public class Drivetrain extends SubsystemBase {
             rawOdometryPose = rawOdometryPose.exp(twist);
 
             poseEstimator.addDriveData(timestamp, twist);
+            // poseEstimatorLow.addDriveData(timestamp, twist);
+            // poseEstimatorHigh.addDriveData(timestamp, twist);
+            // poseEstimatorSuper.addDriveData(timestamp, twist);
             poseEstimatorStageRed.addDriveData(timestamp, twist);
             poseEstimatorStageBlue.addDriveData(timestamp, twist);
             if (!Constants.unusedCode) {
@@ -513,6 +532,9 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_vision.start()) {
         poseEstimator.addVisionData(visionData);
+        // poseEstimatorLow.addVisionData(visionData);
+        // poseEstimatorHigh.addVisionData(visionData);
+        // poseEstimatorSuper.addVisionData(visionData);
         if (Constants.isRedAlliance()) {
           poseEstimatorStageRed.addVisionData(visionData);
         } else {
@@ -592,6 +614,9 @@ public class Drivetrain extends SubsystemBase {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
       this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      // this.poseEstimatorLow.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      // this.poseEstimatorHigh.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      // this.poseEstimatorSuper.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorStageBlue.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorStageRed.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorGlobal.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
@@ -617,7 +642,7 @@ public class Drivetrain extends SubsystemBase {
     return modules.getCurrentDrawAmps();
   }
 
-  public void setNeturalMode(NeutralModeValue mode) {
-    modules.setNeutralMode(mode);
+  public boolean isGyroConnected() {
+    return gyroInputs.connected;
   }
 }

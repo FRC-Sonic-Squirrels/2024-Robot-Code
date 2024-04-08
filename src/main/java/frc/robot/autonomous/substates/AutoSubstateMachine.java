@@ -69,7 +69,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   private static final LoggedTunableNumber distToBeginDriveToGamepiece =
       groupTunable.build("distToBeginDriveToGamepiece", 2.0);
   private static final LoggedTunableNumber confirmationTime =
-      groupTunable.build("confirmationTime", 0.8);
+      groupTunable.build("confirmationTime", 0.4);
   protected static final LoggedTunableNumber slowDownFactor =
       groupTunable.build("slowDownFactor", 1.0);
   private static final LoggedTunableNumber distFromExpectedToAcceptVisionGamepiece =

@@ -74,6 +74,9 @@ public class Robot extends LoggedRobot {
   private boolean hasEnteredTeleAtSomePoint = false;
   private boolean hasEnteredAutoAtSomePoint = false;
 
+  private boolean isAutonomousPrev = false;
+  private boolean teleopPrepped = false;
+
   // Enables power distribution logging
   private PowerDistribution powerDistribution = new PowerDistribution(1, ModuleType.kRev);
 
@@ -161,6 +164,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+
     // Update the timestamp for logging.
     LoggerGroup.periodic();
 
@@ -177,9 +181,6 @@ public class Robot extends LoggedRobot {
     robotContainer.applyToDrivetrain();
     robotContainer.updateVisualization();
     robotContainer.updateLedGamepieceState();
-
-    logBreakModeButton.info(robotContainer.breakModeButton.get());
-    logHomeSensorsButton.info(robotContainer.homeSensorsButton.get());
 
     LoggerGroup.publish();
   }
@@ -245,6 +246,9 @@ public class Robot extends LoggedRobot {
     } else {
       robotContainer.matchRawOdometryToPoseEstimatorValue();
     }
+
+    logBreakModeButton.info(robotContainer.breakModeButton.get());
+    logHomeSensorsButton.info(robotContainer.homeSensorsButton.get());
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -263,23 +267,16 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousPeriodic() {}
 
+  @Override
+  public void autonomousExit() {
+    prepForTeleop();
+    teleopPrepped = true;
+  }
+
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    robotContainer.setBrakeMode();
-    robotContainer.vision.useMaxDistanceAwayFromExistingEstimate(true);
-    robotContainer.vision.useGyroBasedFilteringForVision(true);
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (autoCommand != null) {
-      autoCommand.cancel();
-      autoCommand = null;
-    }
-
-    robotContainer.enterTeleop();
-
+    if (!teleopPrepped) prepForTeleop();
     hasEnteredTeleAtSomePoint = true;
   }
 
@@ -312,5 +309,18 @@ public class Robot extends LoggedRobot {
 
     logCurrentDraws.info(robotContainer.getCurrentDraws());
     logBatteryVoltage.info(RobotController.getBatteryVoltage());
+  }
+
+  private void prepForTeleop() {
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
+    if (autoCommand != null) {
+      autoCommand.cancel();
+      autoCommand = null;
+    }
+
+    robotContainer.enterTeleop();
   }
 }

@@ -35,7 +35,7 @@ public class RotateToAngle extends Command {
   private static final LoggedTunableNumber maxAcceleration =
       groupTunable.build("maxAcceleration", 4 * Math.PI);
   private static final LoggedTunableNumber toleranceDegrees =
-      groupTunable.build("toleranceDegrees", 1.5);
+      groupTunable.build("toleranceDegrees", 1);
 
   private final DrivetrainWrapper wrapper;
   private final Supplier<Rotation2d> angle;

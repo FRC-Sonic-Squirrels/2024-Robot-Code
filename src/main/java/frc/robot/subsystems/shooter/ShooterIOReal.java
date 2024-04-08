@@ -1,8 +1,10 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -23,9 +25,6 @@ import frc.robot.Constants.ShooterConstants;
 public class ShooterIOReal implements ShooterIO {
   private static final LoggedTunableNumber tunableMultiplier =
       Shooter.group.build("tunableMultiplier", 1.0);
-
-  private static final LoggedTunableNumber topRollerRPMOffset =
-      Shooter.group.build("topRollerRPMOffset", 150);
 
   TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
   TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
@@ -255,11 +254,9 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setLauncherRPM(double rpm) {
-    launcher_lead.setControl(
-        launcherClosedLoop.withVelocity((rpm + topRollerRPMOffset.get()) / 60));
-    launcher_follower.setControl(
-        launcherClosedLoop.withVelocity(rpm / 60 * tunableMultiplier.get()));
+  public void setLauncherRPM(double topRollerRPM, double bottomRollerRPM) {
+    launcher_lead.setControl(launcherClosedLoop.withVelocity(topRollerRPM / 60));
+    launcher_follower.setControl(launcherClosedLoop.withVelocity(bottomRollerRPM / 60));
   }
 
   @Override
@@ -322,8 +319,17 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setNeutralMode(NeutralModeValue value) {
-    pivot.setNeutralMode(value);
+  public boolean setNeutralMode(NeutralModeValue value) {
+    var config = new MotorOutputConfigs();
+
+    var status = pivot.getConfigurator().refresh(config);
+
+    if (status != StatusCode.OK) return false;
+
+    config.NeutralMode = value;
+
+    pivot.getConfigurator().apply(config);
+    return true;
   }
 
   @Override

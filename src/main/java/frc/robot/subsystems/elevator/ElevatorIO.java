@@ -30,7 +30,9 @@ public interface ElevatorIO {
 
   public default void setSensorPosition(Measure<Distance> position) {}
 
-  public default void setNeutralMode(NeutralModeValue value) {}
+  public default boolean setNeutralMode(NeutralModeValue value) {
+    return false;
+  }
 
   public default void setRightServoAngle(Rotation2d angle) {}
 

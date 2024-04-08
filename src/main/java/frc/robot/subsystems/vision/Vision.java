@@ -369,7 +369,8 @@ public class Vision extends SubsystemBase {
         distanceFromExistingPoseEstimate,
         xyStandardDeviation,
         thetaStandardDeviation,
-        newCalculatedRobotPose);
+        newCalculatedRobotPose,
+        timestampedVisionUpdate.tags().toArray(new Integer[timestampedVisionUpdate.tags().size()]));
   }
 
   public boolean isValidTarget(PhotonTrackedTarget target) {

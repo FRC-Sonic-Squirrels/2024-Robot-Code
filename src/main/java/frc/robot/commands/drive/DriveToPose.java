@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
@@ -95,6 +96,8 @@ public class DriveToPose extends Command {
   private final Supplier<Pose2d> currentRobotPose;
   private final boolean finish;
   private final Supplier<Boolean> move;
+  private final double driveToleranceValue;
+  private final Trigger withinTolerance;
 
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
@@ -107,7 +110,16 @@ public class DriveToPose extends Command {
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, boolean slowMode, Pose2d pose, Supplier<Pose2d> currentPose) {
-    this(drive, slowMode, () -> pose, currentPose, true, () -> true);
+    this(drive, slowMode, () -> pose, currentPose, true, () -> true, driveTolerance.get());
+  }
+
+  public DriveToPose(
+      DrivetrainWrapper drive,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> currentRobotPose,
+      Supplier<Boolean> move,
+      double driveTolerance) {
+    this(drive, false, poseSupplier, currentRobotPose, true, move, driveTolerance);
   }
 
   public DriveToPose(
@@ -115,13 +127,31 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       Supplier<Boolean> move) {
-    this(drive, false, poseSupplier, currentRobotPose, true, move);
+    this(drive, false, poseSupplier, currentRobotPose, true, move, driveTolerance.get());
+  }
+
+  /** Drives to the specified pose under full software control. */
+  public DriveToPose(
+      DrivetrainWrapper drive,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> currentRobotPose,
+      double driveTolerance) {
+    this(drive, false, poseSupplier, currentRobotPose, true, () -> true, driveTolerance);
   }
 
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, Supplier<Pose2d> poseSupplier, Supplier<Pose2d> currentRobotPose) {
-    this(drive, false, poseSupplier, currentRobotPose, true, () -> true);
+    this(drive, false, poseSupplier, currentRobotPose, true, () -> true, driveTolerance.get());
+  }
+
+  public DriveToPose(
+      DrivetrainWrapper drive,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> currentRobotPose,
+      boolean finish,
+      double driveTolerance) {
+    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true, driveTolerance);
   }
 
   /** Drives to the specified pose under full software control. */
@@ -130,7 +160,7 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       boolean finish) {
-    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true);
+    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true, driveTolerance.get());
   }
 
   /** Drives to the specified pose under full software control. */
@@ -140,14 +170,18 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       boolean finish,
-      Supplier<Boolean> move) {
+      Supplier<Boolean> move,
+      double driveTolerance) {
     this.drive = drive;
     this.slowMode = slowMode;
     this.poseSupplier = poseSupplier;
     this.currentRobotPose = currentRobotPose;
     this.finish = finish;
     this.move = move;
+    this.driveToleranceValue = driveTolerance;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    withinTolerance =
+        new Trigger(() -> driveController.atGoal() && thetaController.atGoal()).debounce(0.3);
   }
 
   @Override
@@ -181,7 +215,9 @@ public class DriveToPose extends Command {
         new TrapezoidProfile.Constraints(
             slowMode ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
             driveMaxAcceleration.get()));
-    driveController.setTolerance(slowMode ? driveToleranceSlow.get() : driveTolerance.get());
+    driveController.setTolerance(
+        // slowMode ? driveToleranceSlow.get() : driveTolerance.get()
+        driveToleranceValue);
     thetaController.setP(thetaKp.get());
     thetaController.setD(thetaKd.get());
     thetaController.setConstraints(
@@ -277,7 +313,7 @@ public class DriveToPose extends Command {
   public boolean atGoal() {
     return
     // isScheduled() &&
-    driveController.atGoal() && thetaController.atGoal();
+    withinTolerance.getAsBoolean();
   }
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */
