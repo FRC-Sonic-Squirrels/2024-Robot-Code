@@ -27,6 +27,7 @@ public interface GyroIO {
     public double xAcceleration;
     public double yAcceleration;
     public double zAcceleration;
+    public String description;
   }
 
   public class Fake implements GyroIO {

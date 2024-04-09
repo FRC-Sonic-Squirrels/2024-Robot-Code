@@ -42,7 +42,7 @@ public class VisionIOSim implements VisionIO {
     var cameraProp = new SimCameraProperties();
     // FIXME: get these values for the cameras we use
     cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(128.2));
-    cameraProp.setCalibError(0.35, 0.10);
+    cameraProp.setCalibError(0.01, 0.10);
     cameraProp.setFPS(15);
     cameraProp.setAvgLatencyMs(25);
     cameraProp.setLatencyStdDevMs(10);
@@ -55,6 +55,7 @@ public class VisionIOSim implements VisionIO {
     visionSim.addCamera(cameraSim, robotToCamera);
 
     cameraSim.enableDrawWireframe(true);
+    cameraSim.enableProcessedStream(true);
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     /*

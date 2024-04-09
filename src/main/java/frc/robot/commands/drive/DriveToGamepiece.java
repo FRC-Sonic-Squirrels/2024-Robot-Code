@@ -48,7 +48,9 @@ public class DriveToGamepiece extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    helper = new DriveToGamepieceHelper();
+    helper =
+        new DriveToGamepieceHelper(
+            wrapper.getPoseEstimatorPose(true), wrapper.getFieldRelativeVelocities());
   }
 
   // Called every time the scheduler runs while the command is scheduled.

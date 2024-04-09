@@ -62,6 +62,11 @@ public class VisionGamepiece extends SubsystemBase {
   private static final LoggerEntry.Decimal log_timestamp =
       logGroupClosestGamepiece.buildDecimal("timestamp");
 
+  private static final LoggerEntry.Decimal log_aprilTagTargetYawDegrees =
+      logGroup.buildDecimal("aprilTagTargetYawDegrees");
+  private static final LoggerEntry.Bool log_usingAprilTagDetection =
+      logGroup.buildBoolean("usingAprilTagDetection");
+
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup(ROOT_TABLE);
   private static final LoggedTunableNumber pitchFudgeFactor =
       groupTunable.build("pitchFudgeFactor", 21.85);
@@ -74,6 +79,8 @@ public class VisionGamepiece extends SubsystemBase {
   private final Function<Double, Pose2d> robotPoseSupplier;
   private final ArrayList<ProcessedGamepieceData> seenGamePieces = new ArrayList<>();
 
+  private boolean usingGamepieceDetection = true;
+
   /** Creates a new VisionGamepiece. */
   public VisionGamepiece(VisionGamepieceIO io, Function<Double, Pose2d> robotPose) {
     this.io = io;
@@ -84,145 +91,151 @@ public class VisionGamepiece extends SubsystemBase {
   public void periodic() {
     try (var ignored = new ExecutionTiming(ROOT_TABLE)) {
       io.updateInputs(inputs);
+      logTotalLatencyMs.info(inputs.totalLatencyMs);
       logInputs_isConnected.info(inputs.isConnected);
       logInputs_validTarget.info(inputs.validTarget);
-      logInputs_totalLatencyMs.info(inputs.totalLatencyMs);
       logInputs_timestamp.info(inputs.timestamp);
-      logInputs_pitch.info(inputs.pitch);
-      logInputs_yaw.info(inputs.yaw);
-      logInputs_area.info(inputs.area);
       logInputs_targetCount.info(inputs.targetCount);
 
-      // uncomment if simming for target gamepieces ---------------------------------------
+      // GAMEPIECE DETECTION --------------------------------------------:
+      if (usingGamepieceDetection) {
+        log_usingAprilTagDetection.info(false);
+        logInputs_pitch.info(inputs.pitch);
+        logInputs_yaw.info(inputs.yaw);
+        logInputs_area.info(inputs.area);
 
-      //     Gamepieces (8.273, yMeters, 0.0):
-      //  G1: yMeters = 7.474
-      //  G2: yMeters = 5.792
-      //  G3: yMeters = 4.11
-      //  G4: yMeters = 2.428
-      //  G5: yMeters = 0.742
+        // uncomment if simming for target gamepieces ---------------------------------------
 
-      // Pose2d g1 = new Pose2d(8.273, 7.474, Constants.zeroRotation2d);
-      // Pose2d g2 = new Pose2d(8.273, 5.792, Constants.zeroRotation2d);
-      // Pose2d g3 = new Pose2d(8.273, 4.11, Constants.zeroRotation2d);
-      // Pose2d g4 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
-      // Pose2d g5 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
+        //     Gamepieces (8.273, yMeters, 0.0):
+        //  G1: yMeters = 7.474
+        //  G2: yMeters = 5.792
+        //  G3: yMeters = 4.11
+        //  G4: yMeters = 2.428
+        //  G5: yMeters = 0.742
 
-      // processedGamepieceData =
-      //     new ProcessedGamepieceData[] {
-      //       new ProcessedGamepieceData(
-      //           Constants.zeroRotation2d,
-      //           Constants.zeroRotation2d,
-      //           GeometryUtil.getDist(robotPoseSupplier.get(), g1),
-      //           robotPoseSupplier.get().relativeTo(g1),
-      //           g1,
-      //           Timer.getFPGATimestamp()),
-      //       new ProcessedGamepieceData(
-      //           Constants.zeroRotation2d,
-      //           Constants.zeroRotation2d,
-      //           GeometryUtil.getDist(robotPoseSupplier.get(), g2),
-      //           robotPoseSupplier.get().relativeTo(g2),
-      //           g2,
-      //           Timer.getFPGATimestamp()),
-      //       new ProcessedGamepieceData(
-      //           Constants.zeroRotation2d,
-      //           Constants.zeroRotation2d,
-      //           GeometryUtil.getDist(robotPoseSupplier.get(), g3),
-      //           robotPoseSupplier.get().relativeTo(g3),
-      //           g3,
-      //           Timer.getFPGATimestamp()),
-      //       new ProcessedGamepieceData(
-      //           Constants.zeroRotation2d,
-      //           Constants.zeroRotation2d,
-      //           GeometryUtil.getDist(robotPoseSupplier.get(), g4),
-      //           robotPoseSupplier.get().relativeTo(g4),
-      //           g4,
-      //           Timer.getFPGATimestamp()),
-      //       new ProcessedGamepieceData(
-      //           Constants.zeroRotation2d,
-      //           Constants.zeroRotation2d,
-      //           GeometryUtil.getDist(robotPoseSupplier.get(), g5),
-      //           robotPoseSupplier.get().relativeTo(g5),
-      //           g5,
-      //           Timer.getFPGATimestamp())
-      //     };
+        // Pose2d g1 = new Pose2d(8.273, 7.474, Constants.zeroRotation2d);
+        // Pose2d g2 = new Pose2d(8.273, 5.792, Constants.zeroRotation2d);
+        // Pose2d g3 = new Pose2d(8.273, 4.11, Constants.zeroRotation2d);
+        // Pose2d g4 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
+        // Pose2d g5 = new Pose2d(8.273, 2.428, Constants.zeroRotation2d);
 
-      // for (int i = 0; i < processedGamepieceData.length; i++) {
-      //   if (i == 0) {
-      //     closestGamepiece = processedGamepieceData[0];
-      //   } else {
-      //     if (processedGamepieceData[i].distance < closestGamepiece.distance) {
-      //       closestGamepiece = processedGamepieceData[i];
-      //     }
-      //   }
-      //   logGamepieceData(new RawGamepieceData(0, 0, 0), processedGamepieceData[i], i);
-      // }
+        // processedGamepieceData =
+        //     new ProcessedGamepieceData[] {
+        //       new ProcessedGamepieceData(
+        //           Constants.zeroRotation2d,
+        //           Constants.zeroRotation2d,
+        //           GeometryUtil.getDist(robotPoseSupplier.get(), g1),
+        //           robotPoseSupplier.get().relativeTo(g1),
+        //           g1,
+        //           Timer.getFPGATimestamp()),
+        //       new ProcessedGamepieceData(
+        //           Constants.zeroRotation2d,
+        //           Constants.zeroRotation2d,
+        //           GeometryUtil.getDist(robotPoseSupplier.get(), g2),
+        //           robotPoseSupplier.get().relativeTo(g2),
+        //           g2,
+        //           Timer.getFPGATimestamp()),
+        //       new ProcessedGamepieceData(
+        //           Constants.zeroRotation2d,
+        //           Constants.zeroRotation2d,
+        //           GeometryUtil.getDist(robotPoseSupplier.get(), g3),
+        //           robotPoseSupplier.get().relativeTo(g3),
+        //           g3,
+        //           Timer.getFPGATimestamp()),
+        //       new ProcessedGamepieceData(
+        //           Constants.zeroRotation2d,
+        //           Constants.zeroRotation2d,
+        //           GeometryUtil.getDist(robotPoseSupplier.get(), g4),
+        //           robotPoseSupplier.get().relativeTo(g4),
+        //           g4,
+        //           Timer.getFPGATimestamp()),
+        //       new ProcessedGamepieceData(
+        //           Constants.zeroRotation2d,
+        //           Constants.zeroRotation2d,
+        //           GeometryUtil.getDist(robotPoseSupplier.get(), g5),
+        //           robotPoseSupplier.get().relativeTo(g5),
+        //           g5,
+        //           Timer.getFPGATimestamp())
+        //     };
 
-      // --------------------------------------------------------------------------------------
+        // for (int i = 0; i < processedGamepieceData.length; i++) {
+        //   if (i == 0) {
+        //     closestGamepiece = processedGamepieceData[0];
+        //   } else {
+        //     if (processedGamepieceData[i].distance < closestGamepiece.distance) {
+        //       closestGamepiece = processedGamepieceData[i];
+        //     }
+        //   }
+        //   logGamepieceData(new RawGamepieceData(0, 0, 0), processedGamepieceData[i], i);
+        // }
 
-      // closestGamepiece.globalPose = new Pose2d(simPose.getX(), simPose.getY(), new
-      // Rotation2d(0));
+        // --------------------------------------------------------------------------------------
 
-      if (inputs.validTarget) {
-        for (int index = 0; index < inputs.targetCount; index++) {
-          double pitch = inputs.pitch[index];
-          double yaw = inputs.yaw[index];
+        // closestGamepiece.globalPose = new Pose2d(simPose.getX(), simPose.getY(), new
+        // Rotation2d(0));
 
-          var processedGamepieceData = processGamepieceData(yaw, pitch, inputs.timestamp);
+        if (inputs.validTarget) {
+          for (int index = 0; index < inputs.targetCount; index++) {
+            double pitch = inputs.pitch[index];
+            double yaw = inputs.yaw[index];
 
-          boolean alreadySeen = false;
+            var processedGamepieceData = processGamepieceData(yaw, pitch, inputs.timestamp);
 
-          for (int i = 0; i < seenGamePieces.size(); i++) {
-            if (seenGamePieces.get(i).sameGamepiece(processedGamepieceData)) {
-              seenGamePieces.set(i, processedGamepieceData);
-              alreadySeen = true;
+            boolean alreadySeen = false;
+
+            for (int i = 0; i < seenGamePieces.size(); i++) {
+              if (seenGamePieces.get(i).sameGamepiece(processedGamepieceData)) {
+                seenGamePieces.set(i, processedGamepieceData);
+                alreadySeen = true;
+              }
             }
+
+            if (!alreadySeen) seenGamePieces.add(processedGamepieceData);
+
+            logGamepieceData(yaw, pitch, processedGamepieceData, index);
           }
-
-          if (!alreadySeen) seenGamePieces.add(processedGamepieceData);
-
-          logGamepieceData(yaw, pitch, processedGamepieceData, index);
         }
+
+        var timestamp = Utils.getCurrentTimeSeconds();
+
+        seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
+
+        var closestGamepiece = getClosestGamepiece();
+        if (closestGamepiece != null) {
+          Pose2d robotPose = robotPoseSupplier.apply(closestGamepiece.timestamp_RIOFPGA_capture);
+          Pose3d pose =
+              new Pose3d(
+                  closestGamepiece.getRobotCentricPose(robotPose).getX(),
+                  closestGamepiece.getRobotCentricPose(robotPose).getY(),
+                  0.0254,
+                  new Rotation3d());
+
+          Pose3d globalPose =
+              new Pose3d(
+                  closestGamepiece.globalPose.getX(),
+                  closestGamepiece.globalPose.getY(),
+                  0.0254,
+                  new Rotation3d());
+
+          log_distance.info(closestGamepiece.getDistance(robotPose).in(Units.Meters));
+          log_targetYawDegrees.info(closestGamepiece.getYaw(robotPose));
+          log_targetPitchDegrees.info(closestGamepiece.getPitch(robotPose));
+          log_poseRobotCentric.info(pose);
+          log_pose.info(globalPose);
+          log_timestamp.info(closestGamepiece.timestamp_RIOFPGA_capture);
+        }
+
+        var gamepiecePoses = new Pose3d[seenGamePieces.size()];
+        for (int i = 0; i < seenGamePieces.size(); i++) {
+          Pose2d pose = seenGamePieces.get(i).globalPose;
+          gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
+        }
+        logGamepieceCount.info(seenGamePieces.size());
+        logGamepiecePoseArray.info(gamepiecePoses);
+      } else {
+        log_usingAprilTagDetection.info(true);
+        log_aprilTagTargetYawDegrees.info(inputs.aprilTagYaw);
       }
-
-      var timestamp = Utils.getCurrentTimeSeconds();
-
-      logTotalLatencyMs.info(inputs.totalLatencyMs);
-
-      seenGamePieces.removeIf(previousSeenGamePiece -> previousSeenGamePiece.isStale(timestamp));
-
-      var closestGamepiece = getClosestGamepiece();
-      if (closestGamepiece != null) {
-        Pose2d robotPose = robotPoseSupplier.apply(closestGamepiece.timestamp_RIOFPGA_capture);
-        Pose3d pose =
-            new Pose3d(
-                closestGamepiece.getRobotCentricPose(robotPose).getX(),
-                closestGamepiece.getRobotCentricPose(robotPose).getY(),
-                0.0254,
-                new Rotation3d());
-
-        Pose3d globalPose =
-            new Pose3d(
-                closestGamepiece.globalPose.getX(),
-                closestGamepiece.globalPose.getY(),
-                0.0254,
-                new Rotation3d());
-
-        log_distance.info(closestGamepiece.getDistance(robotPose).in(Units.Meters));
-        log_targetYawDegrees.info(closestGamepiece.getYaw(robotPose));
-        log_targetPitchDegrees.info(closestGamepiece.getPitch(robotPose));
-        log_poseRobotCentric.info(pose);
-        log_pose.info(globalPose);
-        log_timestamp.info(closestGamepiece.timestamp_RIOFPGA_capture);
-      }
-
-      var gamepiecePoses = new Pose3d[seenGamePieces.size()];
-      for (int i = 0; i < seenGamePieces.size(); i++) {
-        Pose2d pose = seenGamePieces.get(i).globalPose;
-        gamepiecePoses[i] = new Pose3d(pose.getX(), pose.getY(), 0.0254, new Rotation3d());
-      }
-      logGamepieceCount.info(seenGamePieces.size());
-      logGamepiecePoseArray.info(gamepiecePoses);
     }
   }
 
@@ -326,5 +339,18 @@ public class VisionGamepiece extends SubsystemBase {
         .info(processedGamepieceData.getRobotCentricPose(robotPose));
     processedGroup.buildStruct(Pose2d.class, "globalPose").info(processedGamepieceData.globalPose);
     processedGroup.buildDecimal("timestamp").info(processedGamepieceData.timestamp_RIOFPGA_capture);
+  }
+
+  public void setPipelineIndex(int index) {
+    usingGamepieceDetection = index == 0;
+    io.setPipelineIndex(index);
+  }
+
+  public double getTagYaw() {
+    return inputs.aprilTagYaw;
+  }
+
+  public boolean seesStageTags() {
+    return inputs.seesStageTags;
   }
 }

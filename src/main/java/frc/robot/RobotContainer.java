@@ -98,6 +98,7 @@ import frc.robot.subsystems.vision.VisionModuleConfiguration;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIO;
 import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOReal;
+import frc.robot.subsystems.visionGamepiece.VisionGamepieceIOSim;
 import frc.robot.visualization.ClimbVisualization;
 import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
@@ -267,7 +268,8 @@ public class RobotContainer {
 
             visionGamepiece =
                 new VisionGamepiece(
-                    new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
+                    new VisionGamepieceIOSim(config, drivetrain::getPoseEstimatorPose),
+                    drivetrain::getPoseEstimatorPoseAtTimestamp);
           }
 
           arm = new Arm(new ArmIOSim());
@@ -530,18 +532,44 @@ public class RobotContainer {
                 .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
                 .withTimeout(2.0));
 
+    Supplier<Command> toggleReactionArms =
+        () ->
+            new ConditionalCommand(
+                Commands.runOnce(
+                    () -> {
+                      elevator.retractReactionArms();
+                      reactionArmsDown = false;
+                    },
+                    elevator),
+                Commands.runOnce(
+                    () -> {
+                      elevator.deployReactionArms();
+                      reactionArmsDown = true;
+                    },
+                    elevator),
+                () -> reactionArmsDown);
+
     driverController
         .povUp()
         .whileTrue(
-            CommandComposer.stageAlign(
+            CommandComposer.stageAlignFast(
                 aprilTagLayout,
                 drivetrainWrapper,
                 led,
-                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)));
+                (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r),
+                visionGamepiece,
+                elevator,
+                arm,
+                endEffector,
+                shooter,
+                intake,
+                () -> reactionArmsDown,
+                toggleReactionArms));
 
     driverController
         .povLeft()
-        .whileTrue(CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led));
+        .whileTrue(
+            CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led, visionGamepiece));
 
     driverController
         .rightTrigger()
@@ -638,15 +666,17 @@ public class RobotContainer {
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
-    driverController
-        .povRight()
-        .whileTrue(
-            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () -> 0.0));
+    // driverController
+    //     .povRight()
+    //     .whileTrue(
+    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () ->
+    // 0.0));
 
-    driverController
-        .povDown()
-        .whileTrue(
-            new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () -> 0.0));
+    // driverController
+    //     .povDown()
+    //     .whileTrue(
+    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () ->
+    // 0.0));
 
     // ---------- OPERATOR CONTROLS -----------
     DoubleSupplier elevatorDelta =
@@ -666,34 +696,19 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
-    Supplier<Command> toggleReactionArms =
-        () ->
-            new ConditionalCommand(
-                Commands.runOnce(
-                    () -> {
-                      elevator.retractReactionArms();
-                      reactionArmsDown = false;
-                    },
-                    elevator),
-                Commands.runOnce(
-                    () -> {
-                      elevator.deployReactionArms();
-                      reactionArmsDown = true;
-                    },
-                    elevator),
-                () -> reactionArmsDown);
-
     operatorController.leftBumper().onTrue(toggleReactionArms.get());
 
     operatorController
         .povUp()
         .onTrue(
-            new ConditionalCommand(
-                    Commands.none(), toggleReactionArms.get(), () -> reactionArmsDown)
-                .andThen(
-                    MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter, intake))
-            // .andThen(new EndEffectorPrepareNoteForTrap(endEffector).asProxy())
-            );
+            CommandComposer.prepMechForClimb(
+                elevator,
+                arm,
+                endEffector,
+                shooter,
+                intake,
+                () -> reactionArmsDown,
+                toggleReactionArms));
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
@@ -896,6 +911,8 @@ public class RobotContainer {
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
 
+    visionGamepiece.setPipelineIndex(0);
+
     is_teleop = false;
     is_autonomous = true;
   }
@@ -907,6 +924,8 @@ public class RobotContainer {
     vision.useGyroBasedFilteringForVision(true);
 
     led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+
+    visionGamepiece.setPipelineIndex(1);
 
     is_teleop = true;
     is_autonomous = false;

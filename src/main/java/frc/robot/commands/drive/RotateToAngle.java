@@ -92,4 +92,8 @@ public class RotateToAngle extends Command {
   public boolean withinTolerance() {
     return Math.abs(Math.toDegrees(rotationalPID.getPositionError())) <= toleranceDegrees.get();
   }
+
+  public double getError() {
+    return rotationalPID.getPositionError();
+  }
 }

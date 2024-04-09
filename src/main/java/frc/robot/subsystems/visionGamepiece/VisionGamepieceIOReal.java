@@ -1,6 +1,8 @@
 package frc.robot.subsystems.visionGamepiece;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import java.util.List;
@@ -17,12 +19,14 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     camera = new PhotonCamera(Constants.VisionGamepieceConstants.CAMERA_NAME);
     camera.setDriverMode(false);
     camera.setLED(VisionLEDMode.kOff);
+    camera.setPipelineIndex(0);
   }
 
   @Override
   public void updateInputs(Inputs inputs) {
     PhotonPipelineResult results = camera.getLatestResult();
     inputs.isConnected = camera.isConnected();
+    inputs.pipelineIndex = camera.getPipelineIndex();
     inputs.validTarget = results.hasTargets();
     List<PhotonTrackedTarget> targets = results.targets;
     inputs.pitch = new double[targets.size()];
@@ -45,5 +49,26 @@ public class VisionGamepieceIOReal implements VisionGamepieceIO {
     timestamp += ctre;
 
     inputs.timestamp = timestamp;
+
+    var aprilTagYaw = 0.0;
+    var seesStageTags = false;
+    for (int i = 0; i < results.getTargets().size(); i++) {
+      PhotonTrackedTarget target = results.targets.get(i);
+      if ((DriverStation.getAlliance().get().equals(Alliance.Red)
+              && (target.getFiducialId() >= 11 && target.getFiducialId() <= 13))
+          || (DriverStation.getAlliance().get().equals(Alliance.Blue)
+              && (target.getFiducialId() >= 14 && target.getFiducialId() <= 16))) {
+        aprilTagYaw = target.getYaw();
+        seesStageTags = true;
+      }
+    }
+
+    inputs.aprilTagYaw = aprilTagYaw;
+    inputs.seesStageTags = seesStageTags;
+  }
+
+  @Override
+  public void setPipelineIndex(int index) {
+    camera.setPipelineIndex(index);
   }
 }
