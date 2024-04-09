@@ -44,7 +44,7 @@ public class VisionModule {
   public final LoggerEntry.Decimal log_xyStandardDeviation;
   public final LoggerEntry.Decimal log_thetaStandardDeviation;
   public final LoggerEntry.Bool log_successfulResult;
-  public final LoggerEntry.BoolArray log_seenTargetsIDs;
+  public final LoggerEntry.DecimalArray log_seenTargetsIDs;
 
   public VisionModule(
       LoggerGroup logGroup,
@@ -92,7 +92,7 @@ public class VisionModule {
     log_xyStandardDeviation = logGroup.buildDecimal("xyStandardDeviation");
     log_thetaStandardDeviation = logGroup.buildDecimal("thetaStandardDeviation");
     log_successfulResult = logGroup.buildBoolean("SUCCESSFUL_RESULT?");
-    log_seenTargetsIDs = logGroup.buildBooleanArray("seenTargetsIDs");
+    log_seenTargetsIDs = logGroup.buildDecimalArray("seenTargetsIDs");
   }
 
   public void log(Pose3d robotPose) {
@@ -114,6 +114,12 @@ public class VisionModule {
     }
     lastStatus = status;
 
+    double[] seenTagsArray = new double[fieldsToLog.seenTags().length];
+
+    for (int i = 0; i < fieldsToLog.seenTags().length; i++) {
+      seenTagsArray[i] = fieldsToLog.seenTags()[i];
+    }
+
     log_status.info(status.name());
     log_cameraPose.info(robotPose.transformBy(RobotToCamera));
     log_calculatedRobotPose3d.info(fieldsToLog.robotPose3d());
@@ -125,5 +131,6 @@ public class VisionModule {
     log_xyStandardDeviation.info(fieldsToLog.xyStandardDeviation());
     log_thetaStandardDeviation.info(fieldsToLog.thetaStandardDeviation());
     log_successfulResult.info(status.success);
+    log_seenTargetsIDs.info(seenTagsArray);
   }
 }

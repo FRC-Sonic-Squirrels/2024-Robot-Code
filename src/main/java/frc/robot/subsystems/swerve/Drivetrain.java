@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,7 +37,9 @@ import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Drivetrain extends SubsystemBase {
   public static final String ROOT_TABLE = "Drivetrain";
@@ -148,13 +151,17 @@ public class Drivetrain extends SubsystemBase {
   public static final LoggedTunableNumber driveMotorAccelerationTele =
       group.build("SwerveDRIVEAccelerationTele", 1000);
 
+  private AtomicBoolean useSecondGyro = new AtomicBoolean(false);
+
   private final RobotConfig config;
   private final Supplier<Boolean> isAutonomous;
   private final boolean isCANFD;
 
   private final GyroIO gyroIO;
+  private final GyroIO gyroIO2;
   // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final GyroIO.Inputs gyroInputs = new GyroIO.Inputs();
+  private final GyroIO.Inputs gyroInputs2 = new GyroIO.Inputs();
   private final SwerveModules modules;
 
   private final SwerveDriveKinematics kinematics;
@@ -176,11 +183,13 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain(
       RobotConfig config,
       GyroIO gyroIO,
+      GyroIO gyroIO2,
       SwerveModules swerveModules,
       Supplier<Boolean> isAutonomous) {
     this.config = config;
     this.modules = swerveModules;
     this.gyroIO = gyroIO;
+    this.gyroIO2 = gyroIO2;
     this.isAutonomous = isAutonomous;
 
     String canBusName = config.getCANBusName();
@@ -211,15 +220,27 @@ public class Drivetrain extends SubsystemBase {
 
   public void periodic() {
     try (var ignored = timing.start()) {
-      gyroIO.updateInputs(gyroInputs);
-      logGyro_connected.info(gyroInputs.connected);
-      logGyro_status.info(gyroInputs.statusCode);
-      logGyro_yawPosition.info(gyroInputs.yawPosition);
-      logGyro_yawVelocityRadPerSec.info(gyroInputs.yawVelocityRadPerSec);
-      logGyro_xAcceleration.info(gyroInputs.xAcceleration);
-      logGyro_yAcceleration.info(gyroInputs.yAcceleration);
-      logGyro_zAcceleration.info(gyroInputs.zAcceleration);
-      logGyro_Acceleration.info(Math.hypot(gyroInputs.xAcceleration, gyroInputs.yAcceleration));
+      if (useSecondGyro.get()) {
+        gyroIO2.updateInputs(gyroInputs2);
+        logGyro_connected.info(gyroInputs2.connected);
+        Logger.recordOutput(ROOT_TABLE + "/Gyro/status", gyroInputs2.statusCode);
+        logGyro_yawPosition.info(gyroInputs2.yawPosition);
+        logGyro_yawVelocityRadPerSec.info(gyroInputs2.yawVelocityRadPerSec);
+        logGyro_xAcceleration.info(gyroInputs2.xAcceleration);
+        logGyro_yAcceleration.info(gyroInputs2.yAcceleration);
+        logGyro_zAcceleration.info(gyroInputs2.zAcceleration);
+        logGyro_Acceleration.info(Math.hypot(gyroInputs2.xAcceleration, gyroInputs2.yAcceleration));
+      } else {
+        gyroIO.updateInputs(gyroInputs);
+        logGyro_connected.info(gyroInputs.connected);
+        Logger.recordOutput(ROOT_TABLE + "/Gyro/status", gyroInputs.statusCode);
+        logGyro_yawPosition.info(gyroInputs.yawPosition);
+        logGyro_yawVelocityRadPerSec.info(gyroInputs.yawVelocityRadPerSec);
+        logGyro_xAcceleration.info(gyroInputs.xAcceleration);
+        logGyro_yAcceleration.info(gyroInputs.yAcceleration);
+        logGyro_zAcceleration.info(gyroInputs.zAcceleration);
+        logGyro_Acceleration.info(Math.hypot(gyroInputs.xAcceleration, gyroInputs.yAcceleration));
+      }
 
       modules.updateInputs();
       modules.periodic();
@@ -266,16 +287,24 @@ public class Drivetrain extends SubsystemBase {
       logRejectionCutoff.info(poseEstimator.rejectionCutoff);
       logRejectionInvalidTags.info(poseEstimator.rejectionInvalidTags);
       logRejectionNoDriveData.info(poseEstimator.rejectionNoDriveData);
+
+      Logger.recordOutput(ROOT_TABLE + "/Gyro/usingSecondGyro", useSecondGyro.get());
+      Logger.recordOutput(
+          ROOT_TABLE + "canivoreBusUtilization",
+          CANBus.getStatus(config.getCANBusName()).BusUtilization);
     }
   }
 
   private void runOdometry() {
     List<BaseStatusSignal> signals = new ArrayList<>();
+    gyroIO2.registerSignalForOdometry(signals);
     gyroIO.registerSignalForOdometry(signals);
+
     modules.registerSignalForOdometry(signals);
 
     var signalsArray = signals.toArray(new BaseStatusSignal[0]);
     Rotation2d lastGyroRotation = null;
+    Rotation2d lastGyroRotation2 = null;
     StatusCode lastStatusCode = null;
 
     while (true) {
@@ -327,6 +356,9 @@ public class Drivetrain extends SubsystemBase {
         }
 
         var gyroRotation = gyroIO.updateOdometry(gyroInputs);
+
+        var gyroRotation2 = gyroIO2.updateOdometry(gyroInputs2);
+
         var wheelDeltas = modules.updateOdometry();
 
         // The twist represents the motion of the robot since the last
@@ -335,13 +367,17 @@ public class Drivetrain extends SubsystemBase {
         var twist = kinematics.toTwist2d(wheelDeltas);
 
         logOdometryTwist.info(twist);
-        if (gyroRotation != null) {
-          if (lastGyroRotation != null) {
-            var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
+        if (useSecondGyro.get() ? gyroRotation2 != null : gyroRotation != null) {
+          if (useSecondGyro.get() ? lastGyroRotation2 != null : lastGyroRotation != null) {
+            var dtheta =
+                useSecondGyro.get()
+                    ? gyroRotation2.minus(lastGyroRotation2).getRadians()
+                    : gyroRotation.minus(lastGyroRotation).getRadians();
             twist = new Twist2d(twist.dx, twist.dy, dtheta);
           }
 
           lastGyroRotation = gyroRotation;
+          lastGyroRotation2 = gyroRotation2;
         }
 
         try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
@@ -644,5 +680,9 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean isGyroConnected() {
     return gyroInputs.connected;
+  }
+
+  public void chooseWhichGyro(boolean useSecondGyro) {
+    this.useSecondGyro.set(useSecondGyro);
   }
 }
