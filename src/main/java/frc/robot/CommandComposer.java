@@ -455,41 +455,6 @@ public class CommandComposer {
     return stageApproach;
   }
 
-  //   public static Command driveToChainFast(
-  //       AprilTagFieldLayout aprilTagFieldLayout,
-  //       DrivetrainWrapper wrapper,
-  //       LED led,
-  //       VisionGamepiece visionGamepiece) {
-  //     Supplier<Pose2d> robotLocalization =
-  //         () ->
-  //             Constants.isRedAlliance()
-  //                 ? wrapper.getPoseEstimatorPoseStageRed(false)
-  //                 : wrapper.getPoseEstimatorPoseStageBlue(false);
-  //     RotateToAngle rotateToAngle =
-  //         new RotateToAngle(
-  //             wrapper,
-  //             () ->
-  //                 AutoClimb.getTargetPose(aprilTagFieldLayout, robotLocalization.get())
-  //                     .getRotation()
-  //                     .plus(Rotation2d.fromDegrees(180)),
-  //             robotLocalization);
-
-  //     Command stageApproach =
-  //         new DriveToChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance)
-  //             .alongWith(rotateToAngle)
-  //             .finallyDo(
-  //                 () -> {
-  //                   wrapper.resetVelocityOverride();
-  //                   wrapper.resetRotationOverride();
-  //                   led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
-  //                 })
-  //             .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
-
-  //     stageApproach.setName("stageApproach");
-
-  //     return stageApproach;
-  //   }
-
   public static final Command autoClimb(
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
     return MechanismActions.climbDownPosition(elevator, arm)

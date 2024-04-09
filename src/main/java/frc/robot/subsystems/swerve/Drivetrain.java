@@ -53,6 +53,7 @@ public class Drivetrain extends SubsystemBase {
   private static final LoggerGroup logGyro = logGroupDrive.subgroup("Gyro");
 
   private static final LoggerEntry.Bool logGyro_connected = logGyro.buildBoolean("Connected");
+  private static final LoggerEntry.Text logGyro_status = logGyro.buildString("StatusCode");
   private static final LoggerEntry.Decimal logGyro_yawPosition =
       logGyro.buildDecimal("YawPosition");
   private static final LoggerEntry.Decimal logGyro_yawVelocityRadPerSec =
@@ -215,6 +216,7 @@ public class Drivetrain extends SubsystemBase {
       Logger.recordOutput(ROOT_TABLE + "/Gyro/statusCode", gyroInputs.statusCode);
       Logger.recordOutput(ROOT_TABLE + "/Gyro/description", gyroInputs.description);
       logGyro_connected.info(gyroInputs.connected);
+      logGyro_status.info(gyroInputs.statusCode);
       logGyro_yawPosition.info(gyroInputs.yawPosition);
       logGyro_yawVelocityRadPerSec.info(gyroInputs.yawVelocityRadPerSec);
       logGyro_xAcceleration.info(gyroInputs.xAcceleration);

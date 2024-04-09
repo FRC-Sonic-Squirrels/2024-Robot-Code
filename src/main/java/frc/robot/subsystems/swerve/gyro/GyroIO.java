@@ -21,6 +21,7 @@ import java.util.List;
 public interface GyroIO {
   class Inputs {
     public boolean connected = false;
+    public String statusCode;
     public Rotation2d yawPosition = Constants.zeroRotation2d;
     public double yawVelocityRadPerSec;
     public double xAcceleration;
