@@ -199,6 +199,7 @@ public class RobotContainer {
           new Drivetrain(
               config,
               new GyroIO.Fake(),
+              new GyroIO.Fake(),
               config.getReplaySwerveModuleObjects(),
               () -> is_autonomous);
 
@@ -228,7 +229,11 @@ public class RobotContainer {
 
           drivetrain =
               new Drivetrain(
-                  config, new GyroIO.Fake(), config.getSwerveModuleObjects(), () -> is_autonomous);
+                  config,
+                  new GyroIO.Fake(),
+                  new GyroIO.Fake(),
+                  config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
 
           if (robotType == RobotType.ROBOT_SIMBOT_REAL_CAMERAS) {
             // Sim Robot, Real Cameras
@@ -286,7 +291,8 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
-                  new GyroIOPigeon2(config),
+                  new GyroIOPigeon2(config, config.getGyroCANID()),
+                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID),
                   config.getSwerveModuleObjects(),
                   () -> is_autonomous);
 
@@ -321,7 +327,8 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
-                  new GyroIOPigeon2(config),
+                  new GyroIOPigeon2(config, config.getGyroCANID()),
+                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID),
                   config.getSwerveModuleObjects(),
                   () -> is_autonomous);
 
@@ -373,6 +380,7 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
+                  new GyroIO.Fake(),
                   new GyroIO.Fake(),
                   config.getReplaySwerveModuleObjects(),
                   () -> is_autonomous);
@@ -858,6 +866,11 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
+
+    SmartDashboard.putData(
+        "USE GYRO 1", new RunsWhenDisabledInstantCommand(() -> drivetrain.chooseWhichGyro(false)));
+    SmartDashboard.putData(
+        "USE GYRO 2", new RunsWhenDisabledInstantCommand(() -> drivetrain.chooseWhichGyro(true)));
   }
 
   /**
