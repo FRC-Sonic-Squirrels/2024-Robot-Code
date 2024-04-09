@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,6 +37,7 @@ import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -149,7 +151,7 @@ public class Drivetrain extends SubsystemBase {
   public static final LoggedTunableNumber driveMotorAccelerationTele =
       group.build("SwerveDRIVEAccelerationTele", 1000);
 
-  private boolean useSecondGyro;
+  private AtomicBoolean useSecondGyro = new AtomicBoolean(false);
 
   private final RobotConfig config;
   private final Supplier<Boolean> isAutonomous;
@@ -218,9 +220,9 @@ public class Drivetrain extends SubsystemBase {
 
   public void periodic() {
     try (var ignored = timing.start()) {
-      if (useSecondGyro) {
+      if (useSecondGyro.get()) {
         gyroIO2.updateInputs(gyroInputs2);
-        logGyro_connected.info(gyroInputs.connected);
+        logGyro_connected.info(gyroInputs2.connected);
         Logger.recordOutput(ROOT_TABLE + "/Gyro/status", gyroInputs2.statusCode);
         logGyro_yawPosition.info(gyroInputs2.yawPosition);
         logGyro_yawVelocityRadPerSec.info(gyroInputs2.yawVelocityRadPerSec);
@@ -286,18 +288,23 @@ public class Drivetrain extends SubsystemBase {
       logRejectionInvalidTags.info(poseEstimator.rejectionInvalidTags);
       logRejectionNoDriveData.info(poseEstimator.rejectionNoDriveData);
 
-      Logger.recordOutput(ROOT_TABLE + "/Gyro/usingSecondGyro", useSecondGyro);
+      Logger.recordOutput(ROOT_TABLE + "/Gyro/usingSecondGyro", useSecondGyro.get());
+      Logger.recordOutput(
+          ROOT_TABLE + "canivoreBusUtilization",
+          CANBus.getStatus(config.getCANBusName()).BusUtilization);
     }
   }
 
   private void runOdometry() {
     List<BaseStatusSignal> signals = new ArrayList<>();
-    gyroIO.registerSignalForOdometry(signals);
     gyroIO2.registerSignalForOdometry(signals);
+    gyroIO.registerSignalForOdometry(signals);
+
     modules.registerSignalForOdometry(signals);
 
     var signalsArray = signals.toArray(new BaseStatusSignal[0]);
     Rotation2d lastGyroRotation = null;
+    Rotation2d lastGyroRotation2 = null;
     StatusCode lastStatusCode = null;
 
     while (true) {
@@ -348,8 +355,10 @@ public class Drivetrain extends SubsystemBase {
           timestamp = Utils.getCurrentTimeSeconds();
         }
 
-        var gyroRotation =
-            useSecondGyro ? gyroIO2.updateOdometry(gyroInputs2) : gyroIO.updateOdometry(gyroInputs);
+        var gyroRotation = gyroIO.updateOdometry(gyroInputs);
+
+        var gyroRotation2 = gyroIO2.updateOdometry(gyroInputs2);
+
         var wheelDeltas = modules.updateOdometry();
 
         // The twist represents the motion of the robot since the last
@@ -358,13 +367,17 @@ public class Drivetrain extends SubsystemBase {
         var twist = kinematics.toTwist2d(wheelDeltas);
 
         logOdometryTwist.info(twist);
-        if (gyroRotation != null) {
-          if (lastGyroRotation != null) {
-            var dtheta = gyroRotation.minus(lastGyroRotation).getRadians();
+        if (useSecondGyro.get() ? gyroRotation2 != null : gyroRotation != null) {
+          if (useSecondGyro.get() ? lastGyroRotation2 != null : lastGyroRotation != null) {
+            var dtheta =
+                useSecondGyro.get()
+                    ? gyroRotation2.minus(lastGyroRotation2).getRadians()
+                    : gyroRotation.minus(lastGyroRotation).getRadians();
             twist = new Twist2d(twist.dx, twist.dy, dtheta);
           }
 
           lastGyroRotation = gyroRotation;
+          lastGyroRotation2 = gyroRotation2;
         }
 
         try (var ignored2 = odometryLock.lock()) // Prevents odometry updates while reading data
@@ -670,6 +683,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void chooseWhichGyro(boolean useSecondGyro) {
-    this.useSecondGyro = useSecondGyro;
+    this.useSecondGyro.set(useSecondGyro);
   }
 }

@@ -289,8 +289,8 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
-                  new GyroIOPigeon2(config, config.getGyroCANID(), config.getCANBusName()),
-                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID, ""),
+                  new GyroIOPigeon2(config, config.getGyroCANID()),
+                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID),
                   config.getSwerveModuleObjects(),
                   () -> is_autonomous);
 
@@ -325,8 +325,8 @@ public class RobotContainer {
           drivetrain =
               new Drivetrain(
                   config,
-                  new GyroIOPigeon2(config, config.getGyroCANID(), config.getCANBusName()),
-                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID, ""),
+                  new GyroIOPigeon2(config, config.getGyroCANID()),
+                  new GyroIOPigeon2(config, Constants.CanIDs.GYRO_2_CAN_ID),
                   config.getSwerveModuleObjects(),
                   () -> is_autonomous);
 

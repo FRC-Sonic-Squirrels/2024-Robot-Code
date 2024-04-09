@@ -35,13 +35,13 @@ public class GyroIOPigeon2 implements GyroIO {
 
   private final BaseStatusSignal[] refreshSet;
 
-  public GyroIOPigeon2(RobotConfig config, int canID, String canBus) {
+  public GyroIOPigeon2(RobotConfig config, int canID) {
     Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
     pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
     pigeonConfig.MountPose.MountPoseRoll = config.getGyroMountingRoll();
     pigeonConfig.MountPose.MountPoseYaw = config.getGyroMountingYaw();
 
-    pigeon = new Pigeon2(canID, canBus);
+    pigeon = new Pigeon2(canID, config.getCANBusName());
 
     pigeon.getConfigurator().apply(pigeonConfig);
 
