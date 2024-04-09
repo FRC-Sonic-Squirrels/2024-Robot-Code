@@ -568,7 +568,8 @@ public class RobotContainer {
 
     driverController
         .povLeft()
-        .whileTrue(CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led));
+        .whileTrue(
+            CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led, visionGamepiece));
 
     driverController
         .rightTrigger()

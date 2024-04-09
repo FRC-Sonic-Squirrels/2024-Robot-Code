@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class AlignWithChain extends Command {
   private final VisionGamepiece visionGamepiece;
   private final DrivetrainWrapper drive;
-  private final Supplier<Boolean> rotationWithinTolerance;
+  private final Supplier<Double> rotationOffset;
 
   private static TunableNumberGroup group = new TunableNumberGroup("DriveToChainFast");
   private static LoggedTunableNumber kp = group.build("kp", 0.02);
@@ -28,14 +28,14 @@ public class AlignWithChain extends Command {
 
   private boolean driving = false;
 
+  private double tagOffset = 0;
+
   /** Creates a new DriveToChain. */
   public AlignWithChain(
-      VisionGamepiece visionGamepiece,
-      DrivetrainWrapper drive,
-      Supplier<Boolean> rotationWithinTolerance) {
+      VisionGamepiece visionGamepiece, DrivetrainWrapper drive, Supplier<Double> rotationOffset) {
     this.visionGamepiece = visionGamepiece;
     this.drive = drive;
-    this.rotationWithinTolerance = rotationWithinTolerance;
+    this.rotationOffset = rotationOffset;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -45,20 +45,27 @@ public class AlignWithChain extends Command {
     xOffsetController.setP(kp.get());
     xOffsetController.setI(0.0);
     xOffsetController.setD(0.0);
+    hasSeenStageTag = false;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
     if (visionGamepiece.seesStageTags()) {
+      tagOffset = visionGamepiece.getTagYaw();
       hasSeenStageTag = true;
     }
-    double tagOffset = visionGamepiece.getTagYaw();
 
-    driving = rotationWithinTolerance.get() && hasSeenStageTag;
+    driving = hasSeenStageTag;
 
-    drive.setVelocityOverride(
-        new ChassisSpeeds(0.0, driving ? xOffsetController.calculate(tagOffset, 0) : 0.0, 0.0));
+    double effort = xOffsetController.calculate(tagOffset, 0) / Math.max(rotationOffset.get(), 1.0);
+
+    if (Math.abs(tagOffset) < 1) {
+      effort *= 2;
+    }
+
+    drive.setVelocityOverride(new ChassisSpeeds(0.0, driving ? effort : 0.0, 0.0));
   }
 
   // Called once the command ends or is interrupted.

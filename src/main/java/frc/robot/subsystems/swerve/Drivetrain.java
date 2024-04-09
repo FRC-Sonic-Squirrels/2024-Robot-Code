@@ -37,6 +37,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Drivetrain extends SubsystemBase {
   public static final String ROOT_TABLE = "Drivetrain";
@@ -211,6 +212,8 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     try (var ignored = timing.start()) {
       gyroIO.updateInputs(gyroInputs);
+      Logger.recordOutput(ROOT_TABLE + "/Gyro/statusCode", gyroInputs.statusCode);
+      Logger.recordOutput(ROOT_TABLE + "/Gyro/description", gyroInputs.description);
       logGyro_connected.info(gyroInputs.connected);
       logGyro_yawPosition.info(gyroInputs.yawPosition);
       logGyro_yawVelocityRadPerSec.info(gyroInputs.yawVelocityRadPerSec);

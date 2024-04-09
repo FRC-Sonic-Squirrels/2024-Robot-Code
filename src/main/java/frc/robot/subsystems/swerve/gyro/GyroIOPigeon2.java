@@ -87,5 +87,7 @@ public class GyroIOPigeon2 implements GyroIO {
     inputs.xAcceleration = xAcceleration.getValueAsDouble();
     inputs.yAcceleration = yAcceleration.getValueAsDouble();
     inputs.zAcceleration = zAcceleration.getValueAsDouble();
+    inputs.statusCode = statusCode.getName();
+    inputs.description = statusCode.getDescription();
   }
 }

@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -340,7 +341,7 @@ public class CommandComposer {
             robotLocalization);
 
     AlignWithChain alignWithChain =
-        new AlignWithChain(visionGamepiece, wrapper, rotateToAngle::withinTolerance);
+        new AlignWithChain(visionGamepiece, wrapper, rotateToAngle::getError);
 
     Command stageAlign =
         rotateToAngle
@@ -412,12 +413,18 @@ public class CommandComposer {
       new LoggedTunableNumber("DriveToChain/stageApproachSpeed", 1.5);
 
   public static Command driveToChain(
-      AprilTagFieldLayout aprilTagFieldLayout, DrivetrainWrapper wrapper, LED led) {
+      AprilTagFieldLayout aprilTagFieldLayout,
+      DrivetrainWrapper wrapper,
+      LED led,
+      VisionGamepiece visionGamepiece) {
     Supplier<Pose2d> robotLocalization =
         () ->
             Constants.isRedAlliance()
                 ? wrapper.getPoseEstimatorPoseStageRed(true)
                 : wrapper.getPoseEstimatorPoseStageBlue(true);
+
+    PIDController yOffsetController = new PIDController(0.05, 0, 0);
+
     RotateToAngle rotateToAngle =
         new RotateToAngle(
             wrapper,
@@ -430,7 +437,9 @@ public class CommandComposer {
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
                             rotateToAngle.withinTolerance() ? stageApproachSpeed.get() : 0.0,
-                            0.0,
+                            visionGamepiece.seesStageTags()
+                                ? yOffsetController.calculate(visionGamepiece.getTagYaw(), 0)
+                                : 0.0,
                             0.0)))
             .alongWith(rotateToAngle)
             .finallyDo(
