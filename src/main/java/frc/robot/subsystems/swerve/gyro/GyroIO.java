@@ -20,14 +20,13 @@ import java.util.List;
 
 public interface GyroIO {
   class Inputs {
-    public boolean connected = false;
+    public boolean connected;
     public String statusCode;
     public Rotation2d yawPosition = Constants.zeroRotation2d;
     public double yawVelocityRadPerSec;
     public double xAcceleration;
     public double yAcceleration;
     public double zAcceleration;
-    public String description;
   }
 
   public class Fake implements GyroIO {

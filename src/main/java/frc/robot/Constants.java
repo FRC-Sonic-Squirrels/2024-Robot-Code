@@ -421,6 +421,8 @@ public final class Constants {
     public static final int END_EFFECTOR_CAN_ID = 30;
     public static final int END_EFFECTOR_INTAKE_SIDE_TOF_CAN_ID = 39;
     public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 40;
+
+    public static final int GYRO_2_CAN_ID = 41;
   }
 
   public static class DIOPorts {

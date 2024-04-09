@@ -35,13 +35,13 @@ public class GyroIOPigeon2 implements GyroIO {
 
   private final BaseStatusSignal[] refreshSet;
 
-  public GyroIOPigeon2(RobotConfig config) {
+  public GyroIOPigeon2(RobotConfig config, int canID) {
     Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
     pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
     pigeonConfig.MountPose.MountPoseRoll = config.getGyroMountingRoll();
     pigeonConfig.MountPose.MountPoseYaw = config.getGyroMountingYaw();
 
-    pigeon = new Pigeon2(config.getGyroCANID(), config.getCANBusName());
+    pigeon = new Pigeon2(canID, config.getCANBusName());
 
     pigeon.getConfigurator().apply(pigeonConfig);
 
@@ -56,10 +56,10 @@ public class GyroIOPigeon2 implements GyroIO {
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
     yaw.setUpdateFrequency(SwerveModule.ODOMETRY_FREQUENCY);
-    yawVelocity.setUpdateFrequency(100.0);
-    xAcceleration.setUpdateFrequency(100.0);
-    yAcceleration.setUpdateFrequency(100.0);
-    zAcceleration.setUpdateFrequency(100.0);
+    yawVelocity.setUpdateFrequency(50.0);
+    xAcceleration.setUpdateFrequency(50.0);
+    yAcceleration.setUpdateFrequency(50.0);
+    zAcceleration.setUpdateFrequency(50.0);
 
     pigeon.optimizeBusUtilization();
 
@@ -88,7 +88,5 @@ public class GyroIOPigeon2 implements GyroIO {
     inputs.xAcceleration = xAcceleration.getValueAsDouble();
     inputs.yAcceleration = yAcceleration.getValueAsDouble();
     inputs.zAcceleration = zAcceleration.getValueAsDouble();
-    inputs.statusCode = statusCode.getName();
-    inputs.description = statusCode.getDescription();
   }
 }
