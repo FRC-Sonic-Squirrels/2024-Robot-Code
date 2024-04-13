@@ -120,7 +120,7 @@ public class ElevatorIOReal implements ElevatorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     inputs.heightInches = rotorPosition.getValueAsDouble() / inchesToMotorRot;
     inputs.velocityInchesPerSecond = rotorVelocity.getValueAsDouble() / inchesToMotorRot;

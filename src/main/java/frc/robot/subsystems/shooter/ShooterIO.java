@@ -2,11 +2,13 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
+import frc.robot.subsystems.BaseInputs;
 
 public interface ShooterIO {
   /** Contains all of the input data received from hardware. */
-  public static class Inputs {
+  class Inputs extends BaseInputs {
     public Rotation2d pivotPosition = Constants.zeroRotation2d;
     public double pivotVelocityRadsPerSec = 0.0;
     public double pivotAppliedVolts = 0.0;
@@ -24,6 +26,10 @@ public interface ShooterIO {
     public double[] tempsCelcius = new double[4];
 
     public double timeOfFlightDistance = 18.0;
+
+    public Inputs(LoggerGroup logInputs) {
+      super(logInputs);
+    }
   }
 
   /** Updates the set of loggable inputs. */

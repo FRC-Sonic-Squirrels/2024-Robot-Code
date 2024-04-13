@@ -50,7 +50,7 @@ public class Intake extends SubsystemBase {
   }
 
   private final IntakeIO io;
-  private final IntakeIO.Inputs inputs = new IntakeIO.Inputs();
+  private final IntakeIO.Inputs inputs = new IntakeIO.Inputs(logInputs);
 
   /** Creates a new Intake. */
   public Intake(IntakeIO io) {

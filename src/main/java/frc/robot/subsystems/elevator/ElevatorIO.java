@@ -6,10 +6,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import frc.lib.team2930.LoggerGroup;
+import frc.robot.subsystems.BaseInputs;
 
 public interface ElevatorIO {
   /** Contains all of the input data received from hardware. */
-  public static class Inputs {
+  class Inputs extends BaseInputs {
     public double heightInches = 0.0;
     public double velocityInchesPerSecond = 0.0;
     public double appliedVolts = 0.0;
@@ -17,6 +19,10 @@ public interface ElevatorIO {
     public double tempCelsius = 0.0;
     public double reactionArmRotations = 0.0;
     public double reactionArmVoltage = 0.0;
+
+    public Inputs(LoggerGroup logInputs) {
+      super(logInputs);
+    }
   }
 
   /** Updates the set of loggable inputs. */

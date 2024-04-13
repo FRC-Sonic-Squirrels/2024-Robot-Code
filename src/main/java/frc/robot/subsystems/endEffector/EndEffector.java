@@ -59,7 +59,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   private final EndEffectorIO io;
-  private final EndEffectorIO.Inputs inputs = new EndEffectorIO.Inputs();
+  private final EndEffectorIO.Inputs inputs = new EndEffectorIO.Inputs(logInputs);
 
   /** Creates a new EndEffectorSubsystem. */
   public EndEffector(EndEffectorIO io) {

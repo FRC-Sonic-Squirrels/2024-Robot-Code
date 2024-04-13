@@ -7,9 +7,9 @@ public interface VisionIO {
   class Inputs {
     PhotonPipelineResult lastResult = new PhotonPipelineResult();
     double lastTimestampCTRETime = -1.0;
-    boolean connected = false;
-    double medianLatency = 0.0;
-    double medianUpdateTime = 0.0;
+    boolean connected;
+    double medianLatency;
+    double medianUpdateTime;
   }
 
   /** Updates the set of loggable inputs. */

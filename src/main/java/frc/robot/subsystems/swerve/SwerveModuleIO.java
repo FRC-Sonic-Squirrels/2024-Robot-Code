@@ -16,7 +16,9 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
+import frc.robot.subsystems.BaseInputs;
 import java.util.List;
 
 public interface SwerveModuleIO {
@@ -60,7 +62,7 @@ public interface SwerveModuleIO {
         double kP, double kD, double cruiseVelocity, double acceleration) {}
   }
 
-  public static class Inputs {
+  class Inputs extends BaseInputs {
     public double drivePositionRad;
     public double driveVelocityRadPerSec;
     public double driveAppliedVolts;
@@ -73,6 +75,10 @@ public interface SwerveModuleIO {
     public double turnCurrentAmps;
 
     public Rotation2d angle = Constants.zeroRotation2d;
+
+    public Inputs(LoggerGroup logInputs) {
+      super(logInputs);
+    }
   }
 
   void registerSignalForOdometry(List<BaseStatusSignal> signals);

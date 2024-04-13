@@ -95,7 +95,7 @@ public class Elevator extends SubsystemBase {
   private Rotation2d targetServoAngle = Constants.zeroRotation2d;
 
   private final ElevatorIO io;
-  private final ElevatorIO.Inputs inputs = new ElevatorIO.Inputs();
+  private final ElevatorIO.Inputs inputs = new ElevatorIO.Inputs(logInputs);
   private Measure<Distance> targetHeight = Units.Meters.zero();
 
   /** Creates a new ElevatorSubsystem. */

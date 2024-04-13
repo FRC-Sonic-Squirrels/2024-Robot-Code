@@ -209,7 +209,7 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();

@@ -58,8 +58,6 @@ public class Drivetrain extends SubsystemBase {
 
   private static final LoggerEntry.Bool logGyro_usingSecondGyro =
       logGyro.buildBoolean("usingSecondGyro");
-  private static final LoggerEntry.Bool logGyro_connected = logGyro.buildBoolean("Connected");
-  private static final LoggerEntry.Text logGyro_status = logGyro.buildString("StatusCode");
   private static final LoggerEntry.Decimal logGyro_yawPosition =
       logGyro.buildDecimal("YawPosition");
   private static final LoggerEntry.Decimal logGyro_yawVelocityRadPerSec =
@@ -163,8 +161,8 @@ public class Drivetrain extends SubsystemBase {
 
   private final GyroIO gyroIO;
   private final GyroIO gyroIO2;
-  private final GyroIO.Inputs gyroInputs = new GyroIO.Inputs();
-  private final GyroIO.Inputs gyroInputs2 = new GyroIO.Inputs();
+  private final GyroIO.Inputs gyroInputs = new GyroIO.Inputs(logGyro);
+  private final GyroIO.Inputs gyroInputs2 = new GyroIO.Inputs(logGyro);
   private final SwerveModules modules;
 
   private final SwerveDriveKinematics kinematics;
@@ -232,8 +230,6 @@ public class Drivetrain extends SubsystemBase {
         inputs = gyroInputs;
       }
 
-      logGyro_connected.info(inputs.connected);
-      logGyro_status.info(inputs.statusCode);
       logGyro_yawPosition.info(inputs.yawPosition);
       logGyro_yawVelocityRadPerSec.info(inputs.yawVelocityRadPerSec);
       logGyro_xAcceleration.info(inputs.xAcceleration);

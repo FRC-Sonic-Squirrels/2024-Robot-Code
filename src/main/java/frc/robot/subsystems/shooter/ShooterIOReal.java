@@ -203,7 +203,7 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     inputs.pivotPosition = Rotation2d.fromRotations(pivotPosition.getValueAsDouble());
     // rotations to rads = mult by 2pi. 1 full rot = 2pi rads

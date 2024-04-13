@@ -15,18 +15,22 @@ package frc.robot.subsystems.swerve.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.team2930.LoggerGroup;
 import frc.robot.Constants;
+import frc.robot.subsystems.BaseInputs;
 import java.util.List;
 
 public interface GyroIO {
-  class Inputs {
-    public boolean connected;
-    public String statusCode;
+  class Inputs extends BaseInputs {
     public Rotation2d yawPosition = Constants.zeroRotation2d;
     public double yawVelocityRadPerSec;
     public double xAcceleration;
     public double yAcceleration;
     public double zAcceleration;
+
+    public Inputs(LoggerGroup logInputs) {
+      super(logInputs);
+    }
   }
 
   public class Fake implements GyroIO {

@@ -73,7 +73,7 @@ public class Arm extends SubsystemBase {
   }
 
   private final ArmIO io;
-  private final ArmIO.Inputs inputs = new ArmIO.Inputs();
+  private final ArmIO.Inputs inputs = new ArmIO.Inputs(logInputs);
 
   private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
   private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;

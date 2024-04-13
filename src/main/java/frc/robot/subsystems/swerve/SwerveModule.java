@@ -48,7 +48,7 @@ public class SwerveModule {
   private final ExecutionTiming timing;
 
   private final SwerveModuleIO io;
-  private final SwerveModuleIO.Inputs inputs = new SwerveModuleIO.Inputs();
+  private final SwerveModuleIO.Inputs inputs;
   private final double wheelRadius;
 
   private final LoggedTunableNumber driveKS;
@@ -81,6 +81,7 @@ public class SwerveModule {
     log_turnCurrentAmps = group.buildDecimal("TurnCurrentAmps");
     log_angle = group.buildDecimal("Angle");
     timing = new ExecutionTiming(key);
+    inputs = new SwerveModuleIO.Inputs(group);
 
     wheelRadius = config.getWheelRadius().in(Units.Meters);
 

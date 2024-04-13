@@ -61,7 +61,7 @@ public class IntakeIOReal implements IntakeIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     inputs.currentAmps = currentAmps.getValueAsDouble();
     inputs.tempCelsius = deviceTemp.getValueAsDouble();

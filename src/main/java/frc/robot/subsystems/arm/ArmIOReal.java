@@ -78,7 +78,7 @@ public class ArmIOReal implements ArmIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     // could look into latency compensating this value
     inputs.armPosition = Rotation2d.fromRotations(positionRotations.getValueAsDouble());

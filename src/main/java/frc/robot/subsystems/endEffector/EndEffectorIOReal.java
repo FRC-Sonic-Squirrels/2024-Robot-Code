@@ -74,7 +74,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
     inputs.velocityRPM = velocityRPS.getValueAsDouble() * 60.0;
     inputs.currentAmps = currentAmps.getValueAsDouble();

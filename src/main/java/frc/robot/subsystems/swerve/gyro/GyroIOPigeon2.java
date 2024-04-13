@@ -14,7 +14,6 @@
 package frc.robot.subsystems.swerve.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -80,10 +79,8 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    var statusCode = BaseStatusSignal.refreshAll(refreshSet);
+    inputs.refreshAll(refreshSet);
 
-    inputs.statusCode = statusCode.getDescription();
-    inputs.connected = statusCode == StatusCode.OK;
     inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
     inputs.xAcceleration = xAcceleration.getValueAsDouble();
     inputs.yAcceleration = yAcceleration.getValueAsDouble();
