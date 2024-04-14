@@ -32,4 +32,8 @@ public abstract class BaseInputs {
     log_connected.info(connected);
     log_statusCode.info(statusCode);
   }
+
+  public boolean wasUpdatedRecently(double maxStale) {
+    return lastGoodStatus + maxStale >= LoggerGroup.getCurrentTimestmap();
+  }
 }
