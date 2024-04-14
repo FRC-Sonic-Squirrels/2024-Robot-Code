@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,6 +33,7 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.lib.team6328.PoseEstimator;
 import frc.lib.team6328.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import java.util.ArrayList;
@@ -48,7 +50,10 @@ public class Drivetrain extends SubsystemBase {
   private static final ExecutionTiming timing_vision = new ExecutionTiming(ROOT_TABLE + "/vision");
   private static final ExecutionTiming timing_pose = new ExecutionTiming(ROOT_TABLE + "/pose");
 
-  private static final LoggerGroup logGroupDrive = LoggerGroup.build("Drive");
+  private static final LoggerGroup logGroupDrive = LoggerGroup.build(ROOT_TABLE);
+  private static final LoggerEntry.Decimal logGyro_canivoreBusUtilization =
+      logGroupDrive.buildDecimal("canivoreBusUtilization");
+
   private static final LoggerGroup logGyro = logGroupDrive.subgroup("Gyro");
 
   private static final LoggerEntry.Bool logGyro_connected = logGyro.buildBoolean("Connected");
@@ -153,17 +158,16 @@ public class Drivetrain extends SubsystemBase {
   private final boolean isCANFD;
 
   private final GyroIO gyroIO;
-  // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final GyroIO.Inputs gyroInputs = new GyroIO.Inputs();
   private final SwerveModules modules;
 
   private final SwerveDriveKinematics kinematics;
   private Pose2d rawOdometryPose = Constants.zeroPose2d;
 
-  // private final PoseEstimator poseEstimatorLow;
   private final PoseEstimator poseEstimator;
-  // private final PoseEstimator poseEstimatorHigh;
-  // private final PoseEstimator poseEstimatorSuper;
+  private final PoseEstimator poseEstimatorLow;
+  private final PoseEstimator poseEstimatorHigh;
+  private final PoseEstimator poseEstimatorSuper;
   private final PoseEstimator poseEstimatorStageBlue;
   private final PoseEstimator poseEstimatorStageRed;
   private final PoseEstimator poseEstimatorGlobal;
@@ -195,10 +199,10 @@ public class Drivetrain extends SubsystemBase {
     int[] tagsSpeakersAndAmps = new int[] {3, 4, /*5, 6,*/ 7, 8};
     int[] tagsGlobal = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-    // poseEstimatorLow = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
     poseEstimator = new PoseEstimator(1.2, 1.2, 0.3, tagsSpeakersAndAmps);
-    // poseEstimatorHigh = new PoseEstimator(2.4, 2.4, 0.3, tagsSpeakersAndAmps);
-    // poseEstimatorSuper = new PoseEstimator(10.0, 10.0, 0.3, tagsSpeakersAndAmps);
+    poseEstimatorLow = new PoseEstimator(0.6, 0.6, 0.3, tagsSpeakersAndAmps);
+    poseEstimatorHigh = new PoseEstimator(2.4, 2.4, 0.3, tagsSpeakersAndAmps);
+    poseEstimatorSuper = new PoseEstimator(10.0, 10.0, 0.3, tagsSpeakersAndAmps);
     poseEstimatorStageBlue = new PoseEstimator(0.6, 0.6, 0.1, new int[] {14, 15, 16});
     poseEstimatorStageRed = new PoseEstimator(0.6, 0.6, 0.1, new int[] {11, 12, 13});
     poseEstimatorGlobal = new PoseEstimator(0.4, 0.4, 0.3, tagsGlobal);
@@ -245,9 +249,12 @@ public class Drivetrain extends SubsystemBase {
       var poseEstimatorPose = getPoseEstimatorPose();
       var visionStaleness = getVisionStaleness();
       logLocalization_RobotPosition.info(poseEstimatorPose);
-      // logLocalization_RobotPosition_low.info(poseEstimatorLow.getLatestPose());
-      // logLocalization_RobotPosition_high.info(poseEstimatorHigh.getLatestPose());
-      // logLocalization_RobotPosition_super.info(poseEstimatorSuper.getLatestPose());
+
+      if (Constants.unusedCode) {
+        logLocalization_RobotPosition_low.info(poseEstimatorLow.getLatestPose());
+        logLocalization_RobotPosition_high.info(poseEstimatorHigh.getLatestPose());
+        logLocalization_RobotPosition_super.info(poseEstimatorSuper.getLatestPose());
+      }
       if (visionStaleness < 0.5) logLocalization_RobotPositionWithVision.info(poseEstimatorPose);
 
       logLocalization_StageRedOnly.info(getPoseEstimatorPoseStageRed());
@@ -266,6 +273,10 @@ public class Drivetrain extends SubsystemBase {
       logRejectionCutoff.info(poseEstimator.rejectionCutoff);
       logRejectionInvalidTags.info(poseEstimator.rejectionInvalidTags);
       logRejectionNoDriveData.info(poseEstimator.rejectionNoDriveData);
+      if (Robot.isReal()) {
+        logGyro_canivoreBusUtilization.info(
+            CANBus.getStatus(config.getCANBusName()).BusUtilization);
+      }
     }
   }
 
@@ -333,7 +344,6 @@ public class Drivetrain extends SubsystemBase {
         // sample in x, y, and theta based only on the modules, without
         // the gyro. The gyro is always disconnected in simulation.
         var twist = kinematics.toTwist2d(wheelDeltas);
-
         logOdometryTwist.info(twist);
         if (gyroRotation != null) {
           if (lastGyroRotation != null) {
@@ -351,11 +361,15 @@ public class Drivetrain extends SubsystemBase {
             rawOdometryPose = rawOdometryPose.exp(twist);
 
             poseEstimator.addDriveData(timestamp, twist);
-            // poseEstimatorLow.addDriveData(timestamp, twist);
-            // poseEstimatorHigh.addDriveData(timestamp, twist);
-            // poseEstimatorSuper.addDriveData(timestamp, twist);
             poseEstimatorStageRed.addDriveData(timestamp, twist);
             poseEstimatorStageBlue.addDriveData(timestamp, twist);
+
+            if (Constants.unusedCode) {
+              poseEstimatorLow.addDriveData(timestamp, twist);
+              poseEstimatorHigh.addDriveData(timestamp, twist);
+              poseEstimatorSuper.addDriveData(timestamp, twist);
+            }
+
             if (!Constants.unusedCode) {
               poseEstimatorGlobal.addDriveData(timestamp, twist);
             }
@@ -418,17 +432,6 @@ public class Drivetrain extends SubsystemBase {
                         config.getRobotMaxLinearVelocity()
                             - Math.abs(rotationSpeedMetersPerSecond)));
 
-        // double vxMetersPerSecond =
-        //     Math.copySign(
-        //         Math.abs(
-        //                 Math.max(
-        //                     0.0,
-        //                     config.getRobotMaxLinearVelocity()
-        //                         - Math.abs(justRotationSetpointStates[0].speedMetersPerSecond)))
-        //             / Math.sqrt(
-        //                 (1.0 + Math.pow(speeds.vyMetersPerSecond / speeds.vxMetersPerSecond,
-        // 2.0))),
-        //         speeds.vxMetersPerSecond);
         double vyMetersPerSecond =
             speeds.vyMetersPerSecond * vxMetersPerSecond / speeds.vxMetersPerSecond;
 
@@ -532,14 +535,18 @@ public class Drivetrain extends SubsystemBase {
     {
       try (var ignored2 = timing_vision.start()) {
         poseEstimator.addVisionData(visionData);
-        // poseEstimatorLow.addVisionData(visionData);
-        // poseEstimatorHigh.addVisionData(visionData);
-        // poseEstimatorSuper.addVisionData(visionData);
         if (Constants.isRedAlliance()) {
           poseEstimatorStageRed.addVisionData(visionData);
         } else {
           poseEstimatorStageBlue.addVisionData(visionData);
         }
+
+        if (Constants.unusedCode) {
+          poseEstimatorLow.addVisionData(visionData);
+          poseEstimatorHigh.addVisionData(visionData);
+          poseEstimatorSuper.addVisionData(visionData);
+        }
+
         if (!Constants.unusedCode) {
           poseEstimatorGlobal.addVisionData(visionData);
         }
@@ -614,12 +621,16 @@ public class Drivetrain extends SubsystemBase {
     try (var ignored = odometryLock.lock()) // Prevents odometry updates while reading data
     {
       this.poseEstimator.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
-      // this.poseEstimatorLow.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
-      // this.poseEstimatorHigh.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
-      // this.poseEstimatorSuper.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorStageBlue.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorStageRed.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
       this.poseEstimatorGlobal.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+
+      if (Constants.unusedCode) {
+        this.poseEstimatorLow.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+        this.poseEstimatorHigh.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+        this.poseEstimatorSuper.resetPose(pose, Utils.getCurrentTimeSeconds() + 0.2);
+      }
+
       this.rawOdometryPose = pose;
     }
   }

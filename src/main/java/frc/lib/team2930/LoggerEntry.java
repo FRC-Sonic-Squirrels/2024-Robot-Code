@@ -137,8 +137,6 @@ public abstract class LoggerEntry {
     }
 
     public void info(String value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
       this.changed = !Objects.equals(value, valuePrevious) || !notFirstValue;
     }
@@ -170,8 +168,6 @@ public abstract class LoggerEntry {
     }
 
     public void info(String... value) {
-      if (shouldNotRefresh()) return;
-
       this.value = value;
       this.changed = !Arrays.equals(value, valuePrevious) || !notFirstValue;
     }
