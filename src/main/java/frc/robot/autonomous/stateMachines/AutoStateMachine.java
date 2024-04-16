@@ -42,7 +42,8 @@ public class AutoStateMachine extends StateMachine {
   private final ChoreoTrajectoryWithName[] intakingTrajs;
   private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
-  private final Boolean[] ploppedGamepeice;
+  private final Boolean[] doGamepieceDistanceCheck;
+  private final Boolean[] waitForVisionGamepiece;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
@@ -54,7 +55,7 @@ public class AutoStateMachine extends StateMachine {
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
-    this(subsystems, config, false, null, null, overrideStateMachines);
+    this(subsystems, config, false, null, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
@@ -63,12 +64,12 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       StateMachine[] overrideStateMachines) {
-    this(subsystems, config, doInitialPath, initPath, null, overrideStateMachines);
+    this(subsystems, config, doInitialPath, initPath, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, false, null, subStateTrajNames, null);
+    this(subsystems, config, false, null, false, subStateTrajNames, null);
   }
 
   public AutoStateMachine(
@@ -76,7 +77,7 @@ public class AutoStateMachine extends StateMachine {
       RobotConfig config,
       boolean plopFirstGamepiece,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, false, null, subStateTrajNames, null);
+    this(subsystems, config, false, null, plopFirstGamepiece, subStateTrajNames, null);
   }
 
   public AutoStateMachine(
@@ -85,7 +86,7 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, doInitialPath, initPath, subStateTrajNames, null);
+    this(subsystems, config, doInitialPath, initPath, false, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
@@ -94,6 +95,7 @@ public class AutoStateMachine extends StateMachine {
       RobotConfig config,
       boolean doInitDrive,
       String initPath,
+      boolean plopping,
       List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
@@ -118,14 +120,14 @@ public class AutoStateMachine extends StateMachine {
     intakingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
-    ploppedGamepeice = new Boolean[subStateTrajNames.size()];
-    boolean plopping = false;
+    doGamepieceDistanceCheck = new Boolean[subStateTrajNames.size()];
+    waitForVisionGamepiece = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
       useVision[i] = path.useVision();
-      ploppedGamepeice[i] = path.ploppedGamepiece();
-      if (path.ploppedGamepiece()) plopping = true;
+      doGamepieceDistanceCheck[i] = path.dontDoDistanceCheck();
+      waitForVisionGamepiece[i] = path.waitForVisionGamepiece();
       intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
@@ -205,7 +207,8 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
-                    ploppedGamepeice[currentSubState],
+                    doGamepieceDistanceCheck[currentSubState],
+                    waitForVisionGamepiece[currentSubState],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -218,7 +221,8 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
-                    ploppedGamepeice[currentSubState],
+                    doGamepieceDistanceCheck[currentSubState],
+                    waitForVisionGamepiece[currentSubState],
                     targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),

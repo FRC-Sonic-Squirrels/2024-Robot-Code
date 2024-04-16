@@ -21,7 +21,8 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       AutosSubsystems subsystems,
       RobotConfig config,
       boolean useVision,
-      boolean ploppedGamepeice,
+      boolean doDistanceCheck,
+      boolean waitForGamepieceVision,
       Translation2d gamepieceTranslation,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
@@ -30,7 +31,8 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         subsystems,
         config,
         useVision,
-        ploppedGamepeice,
+        doDistanceCheck,
+        waitForGamepieceVision,
         trajToShoot,
         closestGamepiece,
         gamepieceTranslation);

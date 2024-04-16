@@ -45,7 +45,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final ChoreoTrajectoryWithName trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
   private final boolean useVision;
-  private final boolean ploppedGamepiece;
+  private final boolean dontDoDistanceCheck;
+  private final boolean waitForGamepieceVision;
   protected ChoreoHelper choreoHelper;
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
@@ -85,7 +86,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
       AutosSubsystems subsystems,
       RobotConfig config,
       boolean useVision,
-      boolean ploppedGamepiece,
+      boolean dontDoDistanceCheck,
+      boolean waitForGamepieceVision,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
@@ -99,7 +101,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.arm = subsystems.arm();
     this.led = subsystems.led();
     this.useVision = useVision;
-    this.ploppedGamepiece = ploppedGamepiece;
+    this.dontDoDistanceCheck = dontDoDistanceCheck;
+    this.waitForGamepieceVision = waitForGamepieceVision;
     this.config = config;
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
@@ -122,7 +125,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     if (speeds != null) drive.setVelocityOverride(speeds);
 
     if (!endEffector.noteInEndEffector()) {
-      if (driveToGamepieceHelper.isAtTarget()) {
+      if (driveToGamepieceHelper.isAtTarget() && !waitForGamepieceVision) {
         drive.resetVelocityOverride();
         led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
         return setStopped();
@@ -232,6 +235,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
     return
     // withInBeginDriveDistance
-    (withInExpectedTargetDistance || ploppedGamepiece) && sameSideAsGamepiece;
+    (withInExpectedTargetDistance || dontDoDistanceCheck) && sameSideAsGamepiece;
   }
 }
