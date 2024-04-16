@@ -13,12 +13,19 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,7 +57,7 @@ import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
-import frc.robot.autonomous.AutosSubsystems;
+import frc.robot.autonomous.records.AutosSubsystems;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
@@ -103,10 +110,6 @@ import frc.robot.visualization.ClimbVisualization;
 import frc.robot.visualization.GamepieceVisualization;
 import frc.robot.visualization.MechanismVisualization;
 import frc.robot.visualization.SimpleMechanismVisualization;
-import java.util.HashMap;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
