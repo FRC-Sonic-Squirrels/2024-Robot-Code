@@ -7,7 +7,7 @@ package frc.robot.commands.drive;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.autonomous.helpers.DriveToGamepieceHelper;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;

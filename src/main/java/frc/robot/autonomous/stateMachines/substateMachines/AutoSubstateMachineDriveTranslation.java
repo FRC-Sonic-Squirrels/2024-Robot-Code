@@ -1,10 +1,12 @@
-package frc.robot.autonomous.substates;
+package frc.robot.autonomous.stateMachines.substateMachines;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.autonomous.AutosSubsystems;
-import frc.robot.autonomous.ChoreoTrajectoryWithName;
-import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.lib.team2930.AllianceFlipUtil;
+import frc.robot.autonomous.helpers.DriveToGamepieceHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.TargetGP;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED.BaseRobotState;
@@ -12,7 +14,7 @@ import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
 import java.util.function.Supplier;
 
 public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
-  private final Translation2d gamepieceTranslation;
+  private final TargetGP targetGPInfo;
 
   // private final RotateToAngle rotateToAngle;
 
@@ -22,7 +24,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       RobotConfig config,
       boolean useVision,
       boolean ploppedGamepeice,
-      Translation2d gamepieceTranslation,
+      TargetGP targetGPInfo,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
     super(
@@ -33,11 +35,9 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         ploppedGamepeice,
         trajToShoot,
         closestGamepiece,
-        gamepieceTranslation);
+        AllianceFlipUtil.flipTranslationForAlliance(targetGPInfo.targetGP()));
 
-    this.gamepieceTranslation = gamepieceTranslation;
-    // this.rotateToAngle = new RotateToAngle(drive,
-    // DriverStation.getAlliance().get().equals(Alliance.Blue), drive.getPoseEstimatorPose(true))
+    this.targetGPInfo = targetGPInfo;
 
     setInitialState(stateWithName("initDriveToGamepiece", this::initDriveToGamepiece));
   }
@@ -50,7 +50,37 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         new DriveToGamepieceHelper(
             drive.getPoseEstimatorPose(true), drive.getFieldRelativeVelocities());
 
-    return stateWithName("pickupGamepiece", this::pickupGamepiece);
+    return targetGPInfo.prepForTargetGP() == null
+        ? stateWithName("pickupGamepiece", this::pickupGamepiece)
+        : stateWithName("goToPrepPose", this::goToPrepPose);
+  }
+
+  private StateHandler goToPrepPose() {
+    led.setBaseRobotState(BaseRobotState.AUTO_DRIVE_TO_PREP_POSE);
+
+    AllianceFlipUtil.flipPoseForAlliance(targetGPInfo.prepForTargetGP());
+
+    spawnCommand(
+        new DriveToPose(
+                drive,
+                () -> AllianceFlipUtil.flipPoseForAlliance(targetGPInfo.prepForTargetGP()),
+                () -> drive.getPoseEstimatorPose(true),
+                0.1)
+            .until(() -> useVisionForGamepiece() || endEffector.noteInEndEffector()),
+        (c) -> {
+          drive.resetVelocityOverride();
+          driveToGamepieceHelper =
+              new DriveToGamepieceHelper(
+                  drive.getPoseEstimatorPose(true), drive.getFieldRelativeVelocities());
+
+          return stateWithName("pickupGamepiece", this::pickupGamepiece);
+        });
+
+    return stateWithName("waitWhileDrivingToPrepPose", this::waitWhileDrivingToPrepPose);
+  }
+
+  private StateHandler waitWhileDrivingToPrepPose() {
+    return null;
   }
 
   private StateHandler pickupGamepiece() {

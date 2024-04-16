@@ -1,10 +1,10 @@
-package frc.robot.autonomous.substates;
+package frc.robot.autonomous.stateMachines.substateMachines;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.autonomous.AutosSubsystems;
-import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.autonomous.ChoreoTrajectoryWithName;
-import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.helpers.DriveToGamepieceHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
@@ -68,6 +68,9 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
 
   private StateHandler pickupGamepiece() {
     if (useVisionForGamepiece()) {
+      driveToGamepieceHelper =
+          new DriveToGamepieceHelper(
+              drive.getPoseEstimatorPose(true), drive.getFieldRelativeVelocities());
       return stateWithName("visionPickupGamepiece", super::visionPickupGamepiece);
     }
 

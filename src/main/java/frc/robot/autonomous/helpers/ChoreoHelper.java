@@ -1,4 +1,4 @@
-package frc.robot.autonomous;
+package frc.robot.autonomous.helpers;
 
 import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;
@@ -12,6 +12,7 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
 import java.util.ArrayList;
 import java.util.List;
 

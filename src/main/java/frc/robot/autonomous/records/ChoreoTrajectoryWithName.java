@@ -1,9 +1,10 @@
-package frc.robot.autonomous;
+package frc.robot.autonomous.records;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.lib.team2930.AllianceFlipUtil;
+import frc.robot.autonomous.helpers.ChoreoHelper;
 
 public record ChoreoTrajectoryWithName(String name, ChoreoTrajectory states) {
   public static ChoreoTrajectoryWithName getTrajectory(String name) {

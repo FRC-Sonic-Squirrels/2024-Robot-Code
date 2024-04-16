@@ -2,12 +2,21 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.autonomous;
+package frc.robot.autonomous.stateMachines;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.team2930.AllianceFlipUtil;
 import frc.lib.team2930.StateMachine;
-import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
-import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.PathDescriptor;
+import frc.robot.autonomous.records.TargetGP;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineChoreo;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineDriveTranslation;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED;
@@ -37,10 +46,14 @@ public class AutoStateMachine extends StateMachine {
   private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
   private final Boolean[] ploppedGamepeice;
+  private final TargetGP[] targetGPInfo;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
   private int currentSubState;
+  public static final TunableNumberGroup group = new TunableNumberGroup("Autonomous");
+
+  public final LoggedTunableNumber tunableWait = group.build("tunableWait", 0.0);
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
@@ -109,6 +122,7 @@ public class AutoStateMachine extends StateMachine {
     shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
     ploppedGamepeice = new Boolean[subStateTrajNames.size()];
+    targetGPInfo = new TargetGP[subStateTrajNames.size()];
     boolean plopping = false;
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
@@ -118,18 +132,30 @@ public class AutoStateMachine extends StateMachine {
       if (path.ploppedGamepiece()) plopping = true;
       intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
+
+      targetGPInfo[i] = path.targetGP();
     }
 
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
-      setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
+      setInitialState(
+          stateWithName(
+              "initialWait", initialWait(stateWithName("driveOutState", this::driveOutStateInit))));
     } else if (plopping) {
       this.initPath = null;
-      setInitialState(() -> this.nextSubState(true));
+      setInitialState(stateWithName("initialWait", initialWait(() -> this.nextSubState(true))));
     } else {
       this.initPath = null;
-      setInitialState(stateWithName("autoInitialState", this::autoInitialState));
+      setInitialState(
+          stateWithName(
+              "initialWait",
+              initialWait(stateWithName("autoInitialState", this::autoInitialState))));
     }
+  }
+
+  private StateHandler initialWait(StateHandler nextState) {
+    if (timeFromStartOfState() > tunableWait.get()) return nextState;
+    return null;
   }
 
   private StateHandler driveOutStateInit() {
@@ -176,7 +202,8 @@ public class AutoStateMachine extends StateMachine {
         return setDone();
       }
 
-      var targetGPPose = intakingTrajs[currentSubState].getFinalPose(true).getTranslation();
+      Translation2d targetGPPose =
+          AllianceFlipUtil.flipTranslationForAlliance(targetGPInfo[currentSubState].targetGP());
 
       if (followPath) {
         nextState =
@@ -199,7 +226,7 @@ public class AutoStateMachine extends StateMachine {
                     config,
                     useVision[currentSubState],
                     ploppedGamepeice[currentSubState],
-                    targetGPPose,
+                    targetGPInfo[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),
                 subStateMachine -> () -> this.nextSubState(!subStateMachine.wasStopped()));

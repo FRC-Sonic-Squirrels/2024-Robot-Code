@@ -1,4 +1,4 @@
-package frc.robot.autonomous;
+package frc.robot.autonomous.records;
 
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.arm.Arm;

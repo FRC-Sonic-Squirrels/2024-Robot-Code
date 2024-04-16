@@ -101,7 +101,10 @@ public class LED extends SubsystemBase {
 
             case AUTO_DRIVE_TO_POSE:
               setSolidColor(Color.kYellow);
-
+              break;
+            case AUTO_DRIVE_TO_PREP_POSE:
+              setSolidColor(Color.kBlue);
+              break;
             case AMP_LINE_UP:
               setBlinking(Color.kWhite, Color.kBlack);
               break;
@@ -326,7 +329,8 @@ public class LED extends SubsystemBase {
     SHOOTER_SUCCESS,
     CLIMB_ALIGN_STAGE1,
     CLIMB_ALIGN_STAGE2,
-    CLIMB_ALIGN_STAGE3
+    CLIMB_ALIGN_STAGE3,
+    AUTO_DRIVE_TO_PREP_POSE
   }
 
   public boolean sameAsPrevBuffer() {

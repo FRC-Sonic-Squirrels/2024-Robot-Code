@@ -19,6 +19,7 @@ import frc.lib.team2930.*;
 import frc.lib.team2930.ShootingSolver.Solution;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -570,6 +571,9 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   }
 
   private boolean recentVisionUpdates() {
+
+    if (Robot.isSimulation()) return true;
+
     return drivetrainWrapper.getVisionStaleness() < tunableVisionStaleness.get();
   }
 
