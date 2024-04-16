@@ -2,12 +2,18 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.autonomous;
+package frc.robot.autonomous.stateMachines;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
-import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
-import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.PathDescriptor;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineChoreo;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineDriveTranslation;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED;
@@ -41,6 +47,9 @@ public class AutoStateMachine extends StateMachine {
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
   private int currentSubState;
+  public static final TunableNumberGroup group = new TunableNumberGroup("Autonomous");
+
+  public final LoggedTunableNumber tunableWait = group.build("tunableWait", 0.0);
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
@@ -122,14 +131,24 @@ public class AutoStateMachine extends StateMachine {
 
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
-      setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
+      setInitialState(
+          stateWithName(
+              "initialWait", initialWait(stateWithName("driveOutState", this::driveOutStateInit))));
     } else if (plopping) {
       this.initPath = null;
-      setInitialState(() -> this.nextSubState(true));
+      setInitialState(stateWithName("initialWait", initialWait(() -> this.nextSubState(true))));
     } else {
       this.initPath = null;
-      setInitialState(stateWithName("autoInitialState", this::autoInitialState));
+      setInitialState(
+          stateWithName(
+              "initialWait",
+              initialWait(stateWithName("autoInitialState", this::autoInitialState))));
     }
+  }
+
+  private StateHandler initialWait(StateHandler nextState) {
+    if (timeFromStartOfState() > tunableWait.get()) return nextState;
+    return null;
   }
 
   private StateHandler driveOutStateInit() {

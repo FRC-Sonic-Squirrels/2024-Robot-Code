@@ -16,7 +16,12 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
 import frc.robot.Constants;
-import frc.robot.autonomous.substates.DriveAfterSimpleShot;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.PathDescriptor;
+import frc.robot.autonomous.stateMachines.AutoStateMachine;
+import frc.robot.autonomous.stateMachines.substateMachines.DriveAfterSimpleShot;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.MechanismActionsSafe;
 import frc.robot.configs.RobotConfig;
@@ -64,6 +69,8 @@ public class AutosManager {
     list.add(this::sourceG4FirstAuto3GP);
     list.add(this::sourceG4FirstAuto4GP);
     list.add(this::sourceG4FirstAuto5GP);
+    list.add(this::rushCenterGP1FirstThenClose);
+    list.add(this::rushCenterGP2FirstThenClose);
     // list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
@@ -240,6 +247,34 @@ public class AutosManager {
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
     return new Auto(
         "RUSH_CENTER_GP_2_FIRST",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+  }
+
+  private Auto rushCenterGP1FirstThenClose() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("S1-CG1", null, true, false));
+    paths.add(new PathDescriptor("CG1-CG2", null, true, false));
+    paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
+    return new Auto(
+        "RUSH_CENTER_GP_1_THEN_CLOSE",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+  }
+
+  private Auto rushCenterGP2FirstThenClose() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp2-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false));
+    paths.add(new PathDescriptor("S1-CG1", null, true, false));
+    paths.add(new PathDescriptor("CG1-CG2", null, true, false));
+    paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
+    return new Auto(
+        "RUSH_CENTER_GP_2_THEN_CLOSE",
         state.asCommand(),
         Choreo.getTrajectory("Samp-Samp2").getInitialPose());
   }
