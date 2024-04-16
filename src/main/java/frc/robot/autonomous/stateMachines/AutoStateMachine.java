@@ -7,7 +7,6 @@ package frc.robot.autonomous.stateMachines;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team2930.TunableNumberGroup;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.autonomous.helpers.ChoreoHelper;
 import frc.robot.autonomous.records.AutosSubsystems;
 import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
@@ -26,6 +25,7 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
@@ -49,7 +49,8 @@ public class AutoStateMachine extends StateMachine {
   private int currentSubState;
   public static final TunableNumberGroup group = new TunableNumberGroup("Autonomous");
 
-  public final LoggedTunableNumber tunableWait = group.build("tunableWait", 0.0);
+  public final LoggedDashboardNumber tunableWait =
+      new LoggedDashboardNumber("Autonomous/tunableWait", 0.0);
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
@@ -131,19 +132,19 @@ public class AutoStateMachine extends StateMachine {
 
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
-      setInitialState(
-          stateWithName(
-              "initialWait", initialWait(stateWithName("driveOutState", this::driveOutStateInit))));
+      setInitialState(initInitialWait(stateWithName("driveOutState", this::driveOutStateInit)));
     } else if (plopping) {
       this.initPath = null;
-      setInitialState(stateWithName("initialWait", initialWait(() -> this.nextSubState(true))));
+      setInitialState(() -> initInitialWait(() -> this.nextSubState(true)));
     } else {
       this.initPath = null;
       setInitialState(
-          stateWithName(
-              "initialWait",
-              initialWait(stateWithName("autoInitialState", this::autoInitialState))));
+          () -> initInitialWait(stateWithName("autoInitialState", this::autoInitialState)));
     }
+  }
+
+  private StateHandler initInitialWait(StateHandler firstState) {
+    return stateWithName("initialWait", () -> initialWait(firstState));
   }
 
   private StateHandler initialWait(StateHandler nextState) {
