@@ -41,7 +41,8 @@
       "/SmartDashboard/VisionSystemSim-1_Shooter_Left_See3Cam/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-2_Shooter_Right_See3Cam/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-3_Intake_Left_See3Cam/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-4_Intake_Right_See3Cam/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-4_Intake_Right_See3Cam/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-gamepieceCameraSim/Sim Field": "Field2d"
     }
   },
   "NetworkTables Info": {

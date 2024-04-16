@@ -46,7 +46,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
   private final boolean useVision;
   private final boolean dontDoDistanceCheck;
-  private final boolean waitForGamepieceVision;
+  protected final boolean waitForGamepieceVision;
   protected ChoreoHelper choreoHelper;
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;

@@ -68,7 +68,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
 
     if (!endEffector.noteInEndEffector()) {
       drive.setVelocityOverride(speeds);
-      if (driveToGamepieceHelper.isAtTarget()) {
+      if (driveToGamepieceHelper.isAtTarget() && !super.waitForGamepieceVision) {
         drive.resetVelocityOverride();
         led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
         return super::gamepieceConfirmation;

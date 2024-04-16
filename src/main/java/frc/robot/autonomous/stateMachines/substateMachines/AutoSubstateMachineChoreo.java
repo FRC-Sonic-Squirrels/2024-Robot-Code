@@ -87,6 +87,10 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       }
     }
 
+    if (waitForGamepieceVision) {
+      return null;
+    }
+
     drive.resetVelocityOverride();
     return stateWithName("gamepieceConfirmation", super::gamepieceConfirmation);
   }

@@ -323,7 +323,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("Scorner2-CG1", null, true, false, false));
     paths.add(new PathDescriptor("CG1-CG2", null, true, false, false));
     paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false, false));
-    paths.add(new PathDescriptor("CS2-Srebound", "Grebound-CS2", true, true, true));
+    paths.add(new PathDescriptor("CS2-Srebound", "Grebound-Srebound2", true, true, true));
     AutoStateMachine state =
         new AutoStateMachine(subsystems, config, true, "Scorner-Scorner2", paths);
     return new Auto(
