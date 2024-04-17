@@ -19,9 +19,9 @@ public class AlignWithChain extends Command {
   private final Supplier<Double> rotationOffset;
 
   private static TunableNumberGroup group = new TunableNumberGroup("DriveToChainFast");
-  private static LoggedTunableNumber kp = group.build("kp", 0.02);
-  private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerancePixels", 3);
-  private static LoggedTunableNumber driveInSpeed = group.build("driveInSpeed", 1.5);
+  private static LoggedTunableNumber kp = group.build("kp", 0.06);
+  private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerancePixels", 1.5);
+  private static LoggedTunableNumber driveInSpeed = group.build("driveInSpeed", 1);
 
   private PIDController xOffsetController = new PIDController(0, 0, 0);
   private boolean hasSeenStageTag;
