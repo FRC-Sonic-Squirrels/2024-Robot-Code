@@ -44,6 +44,7 @@ public class AutoStateMachine extends StateMachine {
   private final Boolean[] useVision;
   private final Boolean[] doGamepieceDistanceCheck;
   private final Boolean[] waitForVisionGamepiece;
+  private final Boolean[] substatePlopping;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
@@ -122,12 +123,14 @@ public class AutoStateMachine extends StateMachine {
     useVision = new Boolean[subStateTrajNames.size()];
     doGamepieceDistanceCheck = new Boolean[subStateTrajNames.size()];
     waitForVisionGamepiece = new Boolean[subStateTrajNames.size()];
+    substatePlopping = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
       useVision[i] = path.useVision();
       doGamepieceDistanceCheck[i] = path.dontDoDistanceCheck();
       waitForVisionGamepiece[i] = path.waitForVisionGamepiece();
+      substatePlopping[i] = path.ploppedGamepiece();
       intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
@@ -209,6 +212,9 @@ public class AutoStateMachine extends StateMachine {
                     useVision[currentSubState],
                     doGamepieceDistanceCheck[currentSubState],
                     waitForVisionGamepiece[currentSubState],
+                    currentSubState == intakingTrajs.length
+                        ? false
+                        : substatePlopping[currentSubState + 1],
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -223,6 +229,9 @@ public class AutoStateMachine extends StateMachine {
                     useVision[currentSubState],
                     doGamepieceDistanceCheck[currentSubState],
                     waitForVisionGamepiece[currentSubState],
+                    currentSubState == intakingTrajs.length
+                        ? false
+                        : substatePlopping[currentSubState + 1],
                     targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),

@@ -20,6 +20,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       boolean useVision,
       boolean doDistanceCheck,
       boolean waitForGamepieceVision,
+      boolean nextSubstatePlop,
       ChoreoTrajectoryWithName trajToGamepiece,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
@@ -34,6 +35,7 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
         useVision,
         doDistanceCheck,
         waitForGamepieceVision,
+        nextSubstatePlop,
         trajToShoot,
         closestGamepiece,
         gamepieceTranslation);

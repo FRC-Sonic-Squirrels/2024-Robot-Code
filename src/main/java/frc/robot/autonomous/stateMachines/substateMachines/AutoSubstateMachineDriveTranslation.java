@@ -23,6 +23,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
       boolean useVision,
       boolean doDistanceCheck,
       boolean waitForGamepieceVision,
+      boolean nextSubstatePlop,
       Translation2d gamepieceTranslation,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece) {
@@ -32,6 +33,7 @@ public class AutoSubstateMachineDriveTranslation extends AutoSubstateMachine {
         config,
         useVision,
         doDistanceCheck,
+        nextSubstatePlop,
         waitForGamepieceVision,
         trajToShoot,
         closestGamepiece,

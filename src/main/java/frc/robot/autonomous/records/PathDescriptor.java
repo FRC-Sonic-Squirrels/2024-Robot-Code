@@ -5,4 +5,5 @@ public record PathDescriptor(
     String shootingTraj,
     boolean useVision,
     boolean dontDoDistanceCheck,
-    boolean waitForVisionGamepiece) {}
+    boolean waitForVisionGamepiece,
+    boolean ploppedGamepiece) {}

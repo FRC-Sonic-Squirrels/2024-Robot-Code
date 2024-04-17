@@ -88,6 +88,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
       boolean useVision,
       boolean dontDoDistanceCheck,
       boolean waitForGamepieceVision,
+      boolean nextSubstatePlop,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
