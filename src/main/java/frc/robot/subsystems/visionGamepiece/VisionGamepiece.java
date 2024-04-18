@@ -353,4 +353,8 @@ public class VisionGamepiece extends SubsystemBase {
   public boolean seesStageTags() {
     return inputs.seesStageTags;
   }
+
+  public double timestamp() {
+    return inputs.timestamp;
+  }
 }

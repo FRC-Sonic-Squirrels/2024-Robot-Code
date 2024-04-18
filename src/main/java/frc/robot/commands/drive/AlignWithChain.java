@@ -5,6 +5,7 @@
 package frc.robot.commands.drive;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.TunableNumberGroup;
@@ -22,6 +23,8 @@ public class AlignWithChain extends Command {
   private static LoggedTunableNumber kp = group.build("kp", 0.06);
   private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerancePixels", 1.5);
   private static LoggedTunableNumber driveInSpeed = group.build("driveInSpeed", 1);
+  private static LoggedTunableNumber distancefromSeenTargetToStop =
+      group.build("distancefromSeenTargetToStop", 0.3);
 
   private PIDController xOffsetController = new PIDController(0, 0, 0);
   private boolean hasSeenStageTag;
@@ -29,6 +32,8 @@ public class AlignWithChain extends Command {
   private boolean driving = false;
 
   private double tagOffset = 0;
+
+  private Pose2d seenTagsRawOdometryPose = new Pose2d();
 
   /** Creates a new DriveToChain. */
   public AlignWithChain(
@@ -54,6 +59,7 @@ public class AlignWithChain extends Command {
 
     if (visionGamepiece.seesStageTags()) {
       tagOffset = visionGamepiece.getTagYaw();
+      seenTagsRawOdometryPose = drive.getRawOdometryPose();
       hasSeenStageTag = true;
     }
 
@@ -64,6 +70,13 @@ public class AlignWithChain extends Command {
     if (Math.abs(tagOffset) < 1) {
       effort *= 2;
     }
+
+    // if (Utils.getCurrentTimeSeconds() - visionGamepiece.timestamp() > 0.1
+    //     && GeometryUtil.getDist(seenTagsRawOdometryPose, drive.getRawOdometryPose())
+    //         > distancefromSeenTargetToStop.get()) {
+
+    //   effort = 0;
+    // }
 
     drive.setVelocityOverride(new ChassisSpeeds(0.0, driving ? effort : 0.0, 0.0));
   }
