@@ -100,6 +100,9 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
   private final BaseStatusSignal[] refreshSet;
 
+  private final TalonFXConfiguration driveConfig;
+  private final TalonFXConfiguration turnConfig;
+
   public SwerveModuleIOTalonFX(
       RobotConfig globalConfig, IndividualSwerveModuleConfig moduleSpecificConfig) {
 
@@ -144,6 +147,8 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     driveTalonConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
+    driveConfig = driveTalonConfig;
+
     driveTalon.getConfigurator().apply(driveTalonConfig);
 
     setDriveBrakeMode(true);
@@ -156,6 +161,8 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     turnTalonConfig.ClosedLoopGeneral.ContinuousWrap = true;
     turnTalonConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
+
+    turnConfig = turnTalonConfig;
 
     turnTalon.getConfigurator().apply(turnTalonConfig);
 
@@ -353,5 +360,11 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
 
     configurator.apply(pidConfig);
     configurator.apply(mmConfig);
+  }
+
+  @Override
+  public void reconfigureMotors() {
+    driveTalon.getConfigurator().apply(driveConfig);
+    turnTalon.getConfigurator().apply(turnConfig);
   }
 }

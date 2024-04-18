@@ -656,4 +656,9 @@ public class Drivetrain extends SubsystemBase {
   public boolean isGyroConnected() {
     return gyroInputs.connected;
   }
+
+  public void reconfigureDevices() {
+    modules.reconfigureMotors();
+    gyroIO.reconfigurePigeon();
+  }
 }

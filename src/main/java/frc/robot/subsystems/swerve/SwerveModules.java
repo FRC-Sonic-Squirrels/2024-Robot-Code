@@ -113,4 +113,11 @@ public class SwerveModules {
     back_left.stop();
     back_right.stop();
   }
+
+  public void reconfigureMotors() {
+    front_left.reconfigureMotors();
+    front_right.reconfigureMotors();
+    back_left.reconfigureMotors();
+    back_right.reconfigureMotors();
+  }
 }

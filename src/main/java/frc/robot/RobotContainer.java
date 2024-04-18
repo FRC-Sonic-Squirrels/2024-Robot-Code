@@ -318,12 +318,6 @@ public class RobotContainer {
           // uncomment the empty IO's as a replacement
 
           // -- All real IO's
-          drivetrain =
-              new Drivetrain(
-                  config,
-                  new GyroIOPigeon2(config),
-                  config.getSwerveModuleObjects(),
-                  () -> is_autonomous);
 
           // vision =
           // new Vision(
@@ -345,7 +339,14 @@ public class RobotContainer {
           // drivetrain =
           // new Drivetrain(config, new GyroIO() {},
           // config.getReplaySwerveModuleObjects());
-
+          elevator = new Elevator(new ElevatorIOReal());
+          arm = new Arm(new ArmIOReal());
+          drivetrain =
+              new Drivetrain(
+                  config,
+                  new GyroIOPigeon2(config),
+                  config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
           vision =
               new Vision(
                   aprilTagLayout,
@@ -359,8 +360,7 @@ public class RobotContainer {
                   new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
 
           // intake = new Intake(new IntakeIO() {});
-          elevator = new Elevator(new ElevatorIOReal());
-          arm = new Arm(new ArmIOReal());
+
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
@@ -858,6 +858,10 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
+
+    // SmartDashboard.putData(
+    //     "ReconfigureSwerveAndGyro",
+    //     new RunsWhenDisabledInstantCommand(drivetrain::reconfigureDevices));
   }
 
   /**

@@ -351,7 +351,8 @@ public class CommandComposer {
                     () -> {
                       if (!alignWithChain.driving()) {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE1);
-                      } else if (Math.abs(visionGamepiece.getTagYaw()) > 1) {
+                      } else if (Math.abs(visionGamepiece.getTagYaw()) > 1
+                          || !visionGamepiece.isValidTarget()) {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE2);
                       } else {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE3);
