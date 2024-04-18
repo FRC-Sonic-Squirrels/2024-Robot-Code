@@ -7,6 +7,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
@@ -94,10 +95,14 @@ public class MechanismActions {
 
   public static Command climbPrepPosition(
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
-    return goToPositionParallel(
-            elevator,
-            arm,
-            () -> new MechanismPosition(Units.Inch.of(14), Constants.ArmConstants.MAX_ARM_ANGLE))
+    return new ConditionalCommand(
+            goToPositionParallel(
+                elevator,
+                arm,
+                () ->
+                    new MechanismPosition(Units.Inch.of(14), Constants.ArmConstants.MAX_ARM_ANGLE)),
+            Commands.none(),
+            () -> elevator.getHeightInches() < 14)
         .andThen(goToPositionParallel(elevator, arm, MechanismPositions::climbPrepPosition))
         .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
         .andThen(new EndEffectorPrepareNoteForTrap(endEffector));
@@ -131,7 +136,9 @@ public class MechanismActions {
   public static Command climbFinalRestPosition(Elevator elevator, Arm arm) {
     return goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPosition)
         .andThen(
-            goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2));
+            goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage2))
+        .andThen(
+            goToPositionParallel(elevator, arm, MechanismPositions::climbFinalRestPositionStage3));
   }
 
   public static Command climbFinalRestPositionStage2(Elevator elevator, Arm arm) {

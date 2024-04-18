@@ -21,7 +21,7 @@ public class AlignWithChain extends Command {
 
   private static TunableNumberGroup group = new TunableNumberGroup("DriveToChainFast");
   private static LoggedTunableNumber kp = group.build("kp", 0.06);
-  private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerancePixels", 1.5);
+  private static LoggedTunableNumber offsetTolerance = group.build("xOffsetTolerance", 1.5);
   private static LoggedTunableNumber driveInSpeed = group.build("driveInSpeed", 1);
   private static LoggedTunableNumber distancefromSeenTargetToStop =
       group.build("distancefromSeenTargetToStop", 0.3);
@@ -67,8 +67,8 @@ public class AlignWithChain extends Command {
 
     double effort = xOffsetController.calculate(tagOffset, 0) / Math.max(rotationOffset.get(), 1.0);
 
-    if (Math.abs(tagOffset) < 1) {
-      effort *= 2;
+    if (Math.abs(tagOffset) < offsetTolerance.get()) {
+      effort = 0;
     }
 
     // if (Utils.getCurrentTimeSeconds() - visionGamepiece.timestamp() > 0.1

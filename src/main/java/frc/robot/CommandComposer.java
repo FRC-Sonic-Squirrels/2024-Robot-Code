@@ -437,7 +437,11 @@ public class CommandComposer {
                 () ->
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
-                            rotateToAngle.withinTolerance() ? stageApproachSpeed.get() : 0.0,
+
+                            // rotateToAngle.withinTolerance() ?
+                            stageApproachSpeed.get()
+                            // : 0.0
+                            ,
                             visionGamepiece.seesStageTags()
                                 ? yOffsetController.calculate(visionGamepiece.getTagYaw(), 0)
                                 : 0.0,

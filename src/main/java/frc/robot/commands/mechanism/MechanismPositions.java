@@ -99,6 +99,12 @@ public class MechanismPositions {
   private static final LoggedTunableNumber climbFinalRestPositionStage2ArmAngleDegrees =
       group.build("climb/FinalRestPosition/Stage2/ArmAngleDegrees", 50.0);
 
+  private static final LoggedTunableNumber climbFinalRestPositionStage3ElevatorHeightInches =
+      group.build("climb/FinalRestPosition/Stage3/ElevatorHeightInches", 10);
+
+  private static final LoggedTunableNumber climbFinalRestPositionStage3ArmAngleDegrees =
+      group.build("climb/FinalRestPosition/Stage3/ArmAngleDegrees", 30.0);
+
   private static final LoggedTunableNumber deployReactionArms1ElevatorHeightInches =
       group.build("deployReactionArms/stage1/ElevatorHeightInches", 14.13);
 
@@ -218,6 +224,12 @@ public class MechanismPositions {
     return new MechanismPosition(
         Units.Inches.of(climbFinalRestPositionStage2ElevatorHeightInches.get()),
         Rotation2d.fromDegrees(climbFinalRestPositionStage2ArmAngleDegrees.get()));
+  }
+
+  public static MechanismPosition climbFinalRestPositionStage3() {
+    return new MechanismPosition(
+        Units.Inches.of(climbFinalRestPositionStage3ElevatorHeightInches.get()),
+        Rotation2d.fromDegrees(climbFinalRestPositionStage3ArmAngleDegrees.get()));
   }
 
   public static MechanismPosition deployReactionArmsStep1() {

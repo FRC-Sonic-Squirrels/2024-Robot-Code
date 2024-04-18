@@ -929,7 +929,7 @@ public class RobotContainer {
 
     led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
 
-    visionGamepiece.setPipelineIndex(1);
+    visionGamepiece.setPipelineIndex(2);
 
     is_teleop = true;
     is_autonomous = false;
