@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.autonomous.substates;
+package frc.robot.autonomous.stateMachines.substateMachines;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,10 +15,10 @@ import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.autonomous.AutosSubsystems;
-import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.autonomous.ChoreoTrajectoryWithName;
-import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.helpers.DriveToGamepieceHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
@@ -45,7 +45,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected final ChoreoTrajectoryWithName trajToShoot;
   protected final Supplier<ProcessedGamepieceData> closestGamepiece;
   private final boolean useVision;
-  private final boolean ploppedGamepiece;
+  private final boolean dontDoDistanceCheck;
+  protected final boolean waitForGamepieceVision;
   protected ChoreoHelper choreoHelper;
   protected DriveToGamepieceHelper driveToGamepieceHelper;
   public Command scoreSpeaker;
@@ -59,10 +60,12 @@ public abstract class AutoSubstateMachine extends StateMachine {
       logGroupGPVision.buildDecimal("detectedNoteDistanceFromExpectedTarget");
   private static final LoggerEntry.Decimal log_GPVisionDistanceFromRobot =
       logGroupGPVision.buildDecimal("distanceFromRobot");
-  private static final LoggerEntry.Bool log_GPVisionWithinDistanceToRobot =
-      logGroupGPVision.buildBoolean("withinDistanceToRobot");
+  // private static final LoggerEntry.Bool log_GPVisionWithinDistanceToRobot =
+  //     logGroupGPVision.buildBoolean("withinDistanceToRobot");
   private static final LoggerEntry.Bool log_GPVisionDetectedNoteWithinExpectedRange =
       logGroupGPVision.buildBoolean("detectedNoteWithinExpectedRange");
+  private static final LoggerEntry.Bool log_GPVisionSameSideAsGamepiece =
+      logGroupGPVision.buildBoolean("sameSideAsGamepiece");
 
   private static final TunableNumberGroup groupTunable =
       new TunableNumberGroup("AutoSubstateMachine");
@@ -83,7 +86,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
       AutosSubsystems subsystems,
       RobotConfig config,
       boolean useVision,
-      boolean ploppedGamepiece,
+      boolean dontDoDistanceCheck,
+      boolean waitForGamepieceVision,
+      boolean nextSubstatePlop,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
       Translation2d gamepieceTranslation) {
@@ -97,7 +102,8 @@ public abstract class AutoSubstateMachine extends StateMachine {
     this.arm = subsystems.arm();
     this.led = subsystems.led();
     this.useVision = useVision;
-    this.ploppedGamepiece = ploppedGamepiece;
+    this.dontDoDistanceCheck = dontDoDistanceCheck;
+    this.waitForGamepieceVision = waitForGamepieceVision;
     this.config = config;
     this.trajToShoot = trajToShoot;
     this.closestGamepiece = closestGamepiece;
@@ -120,7 +126,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
     if (speeds != null) drive.setVelocityOverride(speeds);
 
     if (!endEffector.noteInEndEffector()) {
-      if (driveToGamepieceHelper.isAtTarget()) {
+      if (driveToGamepieceHelper.isAtTarget() && !waitForGamepieceVision) {
         drive.resetVelocityOverride();
         led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
         return setStopped();
@@ -193,7 +199,7 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
     ProcessedGamepieceData gamepieceData = closestGamepiece.get();
     if (gamepieceData == null) {
-      log_GPVisionStatus.info("data null");
+      log_GPVisionStatus.info("data_null");
       log_GPVisionDetectedNoteDistanceFromExpectedTarget.info(-1);
       log_GPVisionDistanceFromRobot.info(-1);
       return false;
@@ -203,17 +209,9 @@ public abstract class AutoSubstateMachine extends StateMachine {
     double distanceToRobot = gamepieceData.getDistance(robotPose).in(Units.Meters);
     double distanceToTarget = gamepieceData.getDistance(gamepieceTranslation).in(Units.Meters);
 
-    var withInBeginDriveDistance = distanceToRobot <= distToBeginDriveToGamepiece.get();
+    // var withInBeginDriveDistance = distanceToRobot <= distToBeginDriveToGamepiece.get();
     var withInExpectedTargetDistance =
         distanceToTarget <= distFromExpectedToAcceptVisionGamepiece.get();
-
-    log_GPVisionStatus.info(
-        withInBeginDriveDistance && withInExpectedTargetDistance ? "SUCCESSFUL" : "FAILED_CHECKS");
-
-    log_GPVisionDetectedNoteDistanceFromExpectedTarget.info(distanceToTarget);
-    log_GPVisionDistanceFromRobot.info(distanceToRobot);
-    log_GPVisionWithinDistanceToRobot.info(withInBeginDriveDistance);
-    log_GPVisionDetectedNoteWithinExpectedRange.info(withInExpectedTargetDistance);
 
     Pose2d flippedPose = AllianceFlipUtil.flipPoseForAlliance(robotPose);
     Translation2d flippedGamepieceTranslation =
@@ -223,8 +221,21 @@ public abstract class AutoSubstateMachine extends StateMachine {
     boolean gamepieceIsPastWingLine = flippedGamepieceTranslation.getX() > 5.572144031524658;
     boolean sameSideAsGamepiece = poseIsPastWingLine == gamepieceIsPastWingLine;
 
+    // log_GPVisionStatus.info(
+    //     withInBeginDriveDistance && withInExpectedTargetDistance ? "SUCCESSFUL" :
+    // "FAILED_CHECKS");
+
+    log_GPVisionStatus.info(
+        sameSideAsGamepiece && withInExpectedTargetDistance ? "SUCCESSFUL" : "FAILED_CHECKS");
+
+    log_GPVisionDetectedNoteDistanceFromExpectedTarget.info(distanceToTarget);
+    log_GPVisionDistanceFromRobot.info(distanceToRobot);
+    // log_GPVisionWithinDistanceToRobot.info(withInBeginDriveDistance);
+    log_GPVisionDetectedNoteWithinExpectedRange.info(withInExpectedTargetDistance);
+    log_GPVisionSameSideAsGamepiece.info(sameSideAsGamepiece);
+
     return
     // withInBeginDriveDistance
-    (withInExpectedTargetDistance || ploppedGamepiece) && sameSideAsGamepiece;
+    (withInExpectedTargetDistance || dontDoDistanceCheck) && sameSideAsGamepiece;
   }
 }

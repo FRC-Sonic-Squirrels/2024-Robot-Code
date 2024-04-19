@@ -1,4 +1,4 @@
-package frc.robot.autonomous.substates;
+package frc.robot.autonomous.stateMachines.substateMachines;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.lib.team2930.LoggerEntry;

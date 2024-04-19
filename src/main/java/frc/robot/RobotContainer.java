@@ -50,7 +50,7 @@ import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
-import frc.robot.autonomous.AutosSubsystems;
+import frc.robot.autonomous.records.AutosSubsystems;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;

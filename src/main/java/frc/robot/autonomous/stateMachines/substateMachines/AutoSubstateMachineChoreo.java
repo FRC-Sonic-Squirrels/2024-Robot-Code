@@ -1,10 +1,10 @@
-package frc.robot.autonomous.substates;
+package frc.robot.autonomous.stateMachines.substateMachines;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.autonomous.AutosSubsystems;
-import frc.robot.autonomous.ChoreoHelper;
-import frc.robot.autonomous.ChoreoTrajectoryWithName;
-import frc.robot.autonomous.DriveToGamepieceHelper;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.helpers.DriveToGamepieceHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
 import frc.robot.commands.intake.IntakeGamepiece;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.visionGamepiece.ProcessedGamepieceData;
@@ -18,7 +18,9 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
       AutosSubsystems subsystems,
       RobotConfig config,
       boolean useVision,
-      boolean ploppedGamepeice,
+      boolean doDistanceCheck,
+      boolean waitForGamepieceVision,
+      boolean nextSubstatePlop,
       ChoreoTrajectoryWithName trajToGamepiece,
       ChoreoTrajectoryWithName trajToShoot,
       Supplier<ProcessedGamepieceData> closestGamepiece,
@@ -31,7 +33,9 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
         subsystems,
         config,
         useVision,
-        ploppedGamepeice,
+        doDistanceCheck,
+        waitForGamepieceVision,
+        nextSubstatePlop,
         trajToShoot,
         closestGamepiece,
         gamepieceTranslation);
@@ -83,6 +87,10 @@ public class AutoSubstateMachineChoreo extends AutoSubstateMachine {
         drive.setVelocityOverride(result.chassisSpeeds());
         return null;
       }
+    }
+
+    if (waitForGamepieceVision) {
+      return null;
     }
 
     drive.resetVelocityOverride();
