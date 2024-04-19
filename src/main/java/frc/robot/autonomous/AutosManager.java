@@ -227,6 +227,7 @@ public class AutosManager {
     paths.add(new PathDescriptor("SsourcePlop-G5", "G5-CS4", true, false, false, false));
     paths.add(new PathDescriptor("CS4-CG3", "CG3-CS2", true, true, true, true));
     paths.add(new PathDescriptor("CS2-PG1", "PG1-CS5", true, false, false, false));
+    paths.add(new PathDescriptor("CS5-R1", "R1-CS5", true, true, true, true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
         "SOURCE_AUTO_FAR_CLOSE_PLOP",
