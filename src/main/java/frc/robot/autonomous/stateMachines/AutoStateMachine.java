@@ -212,9 +212,10 @@ public class AutoStateMachine extends StateMachine {
                     useVision[currentSubState],
                     doGamepieceDistanceCheck[currentSubState],
                     waitForVisionGamepiece[currentSubState],
-                    currentSubState == intakingTrajs.length
-                        ? false
-                        : substatePlopping[currentSubState + 1],
+                    // currentSubState == intakingTrajs.length
+                    //     ? false
+                    //     : substatePlopping[currentSubState + 1]
+                    false,
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -229,9 +230,10 @@ public class AutoStateMachine extends StateMachine {
                     useVision[currentSubState],
                     doGamepieceDistanceCheck[currentSubState],
                     waitForVisionGamepiece[currentSubState],
-                    currentSubState == intakingTrajs.length
-                        ? false
-                        : substatePlopping[currentSubState + 1],
+                    // currentSubState == intakingTrajs.length
+                    //     ? false
+                    //     : substatePlopping[currentSubState + 1]
+                    false,
                     targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),

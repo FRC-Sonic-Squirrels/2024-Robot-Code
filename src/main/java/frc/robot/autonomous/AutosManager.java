@@ -72,7 +72,8 @@ public class AutosManager {
     list.add(this::rushCenterGP1FirstThenClose);
     list.add(this::rushCenterGP2FirstThenClose);
     list.add(this::cornerAuto);
-    list.add(this::sourceAutoPlopThenClose);
+    // list.add(this::sourceAutoPlopThenClose);
+    list.add(this::sourceAutoFarClosePlop);
     // list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
@@ -208,15 +209,27 @@ public class AutosManager {
 
   private Auto sourceAutoPlopThenClose() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
-    paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
-    paths.add(new PathDescriptor("S3-CG3", "CG3-CS2", true, false, false, false));
-    paths.add(new PathDescriptor("CS2-CG2", null, true, false, false, false));
-    paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
-    paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
+    // paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
+    // paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
+    // paths.add(new PathDescriptor("S3-CG3", "CG3-CS2", true, false, false, false));
+    // paths.add(new PathDescriptor("CS2-CG2", null, true, false, false, false));
+    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
+    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
         "sourceAutoPlopThenClose",
+        state.asCommand(),
+        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
+  }
+
+  private Auto sourceAutoFarClosePlop() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("SsourcePlop-G5", "G5-CS4", true, false, false, false));
+    paths.add(new PathDescriptor("CS4-CG3", "CG3-CS2", true, true, true, true));
+    paths.add(new PathDescriptor("CS2-PG1", "PG1-CS5", true, false, false, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
+    return new Auto(
+        "SOURCE_AUTO_FAR_CLOSE_PLOP",
         state.asCommand(),
         Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
   }
