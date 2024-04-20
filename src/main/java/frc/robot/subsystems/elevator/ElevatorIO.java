@@ -42,5 +42,7 @@ public interface ElevatorIO {
 
   public default void resetReactionArmPosition() {}
 
-  public default void setReactionArmIdleMode(IdleMode idleMode) {}
+  public default boolean setReactionArmIdleMode(IdleMode idleMode) {
+    return false;
+  }
 }

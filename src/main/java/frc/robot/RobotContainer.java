@@ -625,8 +625,8 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(8700, 8000);
-                  if (shooter.getRPM() > 8500) {
+                  shooter.setLauncherRPM(6000, 5000);
+                  if (shooter.getRPM() > 5500) {
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
                     intake.setVelocity(passThroughVel.get());
@@ -649,7 +649,17 @@ public class RobotContainer {
                 endEffector,
                 intake));
 
-    driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
+    driverController
+        .povDown()
+        .onTrue(
+            elevator
+                .setReactionArmsRotationsCMD(
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+                .andThen(MechanismActions.loadingPosition(elevator, arm))
+                .andThen(
+                    elevator.setReactionArmsRotationsCMD(
+                        Constants.ElevatorConstants.ReactionArmConstants
+                            .REACTION_ARM_HOME_ROTATIONS)));
 
     driverController
         .y()
@@ -803,9 +813,10 @@ public class RobotContainer {
                       boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Coast);
                       boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Coast);
                       boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Coast);
-                      elevator.setReactionArmIdleMode(IdleMode.kCoast);
+                      boolean reactionArmSuccess = elevator.setReactionArmIdleMode(IdleMode.kCoast);
 
-                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+                      brakeModeFailure =
+                          !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
 
                       //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
@@ -823,9 +834,10 @@ public class RobotContainer {
                       boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Brake);
                       boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Brake);
                       boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Brake);
-                      elevator.setReactionArmIdleMode(IdleMode.kBrake);
+                      boolean reactionArmSuccess = elevator.setReactionArmIdleMode(IdleMode.kBrake);
 
-                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+                      brakeModeFailure =
+                          !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
                       //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },

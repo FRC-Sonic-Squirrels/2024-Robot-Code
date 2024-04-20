@@ -198,7 +198,7 @@ public class AutosManager {
   private Auto sourceAutoPlop() {
     List<PathDescriptor> paths = new ArrayList<>();
     paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
-    paths.add(new PathDescriptor("S3-G4", "G4-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G4", "G4-S3", false, false, false, false));
     paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(

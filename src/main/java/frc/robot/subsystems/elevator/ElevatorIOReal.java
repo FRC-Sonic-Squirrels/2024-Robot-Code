@@ -18,6 +18,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -102,7 +103,7 @@ public class ElevatorIOReal implements ElevatorIO {
           rotorPosition, rotorVelocity, appliedVolts, currentAmps, tempCelsius
         };
 
-    reactionArmPIDController.setP(0.1);
+    reactionArmPIDController.setP(0.15);
     reactionArmPIDController.setOutputRange(-8, 8);
     reactionArmMotor.setSmartCurrentLimit(20);
     reactionArmMotor.setSoftLimit(
@@ -202,7 +203,8 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
-  public void setReactionArmIdleMode(IdleMode idleMode) {
-    reactionArmMotor.setIdleMode(idleMode);
+  public boolean setReactionArmIdleMode(IdleMode idleMode) {
+    REVLibError errorCode = reactionArmMotor.setIdleMode(idleMode);
+    return errorCode == REVLibError.kOk;
   }
 }

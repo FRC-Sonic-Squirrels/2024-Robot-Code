@@ -345,7 +345,7 @@ public class CommandComposer {
 
     Command stageAlign =
         rotateToAngle
-            .alongWith(alignWithChain)
+            // .alongWith(alignWithChain)
             .alongWith(
                 Commands.run(
                     () -> {
