@@ -62,7 +62,6 @@ public class GyroIOPigeon2 implements GyroIO {
     yAcceleration = pigeon.getAccelerationY();
     zAcceleration = pigeon.getAccelerationZ();
 
-    
     yaw.setUpdateFrequency(SwerveModule.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
     xAcceleration.setUpdateFrequency(100.0);
@@ -102,6 +101,6 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public void reconfigurePigeon() {
-      pigeon.getConfigurator().apply(pigeonConfiguration);
+    pigeon.getConfigurator().apply(pigeonConfiguration);
   }
 }

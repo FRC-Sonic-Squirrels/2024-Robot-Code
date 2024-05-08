@@ -243,7 +243,7 @@ public class SwerveModule {
     return inputs.driveAppliedVolts;
   }
 
-  public void reconfigureMotors(){
+  public void reconfigureMotors() {
     io.reconfigureMotors();
   }
 }

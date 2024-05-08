@@ -60,7 +60,7 @@ public interface SwerveModuleIO {
         double kP, double kD, double cruiseVelocity, double acceleration) {}
 
     @Override
-    public void reconfigureMotors(){}
+    public void reconfigureMotors() {}
   }
 
   public static class Inputs {
