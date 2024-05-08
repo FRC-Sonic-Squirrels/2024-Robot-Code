@@ -54,12 +54,13 @@ public class Arm extends SubsystemBase {
 
   static {
     if (Constants.RobotMode.getRobot() == RobotType.ROBOT_2024_MAESTRO) {
-      kP.initDefault(70.0);
+      // LOWERED FOR OUTREACH PURPOSES.
+      kP.initDefault(20.0);
       kD.initDefault(1.6);
       kG.initDefault(0.0);
 
-      closedLoopMaxVelocityConstraint.initDefault(10);
-      closedLoopMaxAccelerationConstraint.initDefault(10);
+      closedLoopMaxVelocityConstraint.initDefault(3);
+      closedLoopMaxAccelerationConstraint.initDefault(3);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
 
       kP.initDefault(2.5);

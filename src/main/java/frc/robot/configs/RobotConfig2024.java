@@ -123,7 +123,8 @@ public class RobotConfig2024 extends RobotConfig {
   private static final Measure<Distance> TRACK_WIDTH_Y = Units.Inches.of(21.75);
 
   // ------- ROBOT MAX SPEED --------
-  private static final double MAX_VELOCITY_METERS_PER_SECOND = 5.0;
+  // LOWERED FOR OUTREACH PURPOSES
+  private static final double MAX_VELOCITY_METERS_PER_SECOND = 2.0;
   private static final double MAX_COAST_VELOCITY_METERS_PER_SECOND = 0.05;
 
   // ------- AUTONOMOUS CONSTANTS -------
