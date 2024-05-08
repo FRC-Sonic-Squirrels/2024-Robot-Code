@@ -89,8 +89,12 @@ public class RotateToAngle extends Command {
     return false;
   }
 
+  public boolean withinTolerance(double yawToleranceDegrees) {
+    return Math.abs(Math.toDegrees(rotationalPID.getPositionError())) <= yawToleranceDegrees;
+  }
+
   public boolean withinTolerance() {
-    return Math.abs(Math.toDegrees(rotationalPID.getPositionError())) <= toleranceDegrees.get();
+    return withinTolerance(toleranceDegrees.get());
   }
 
   public double getError() {

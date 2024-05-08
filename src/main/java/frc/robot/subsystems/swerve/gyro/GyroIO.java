@@ -41,6 +41,9 @@ public interface GyroIO {
 
     @Override
     public void updateInputs(Inputs inputs) {}
+
+    @Override
+    public void reconfigurePigeon() {}
   }
 
   void registerSignalForOdometry(List<BaseStatusSignal> signal);
@@ -48,4 +51,6 @@ public interface GyroIO {
   Rotation2d updateOdometry(Inputs inputs);
 
   void updateInputs(Inputs inputs);
+
+  void reconfigurePigeon();
 }

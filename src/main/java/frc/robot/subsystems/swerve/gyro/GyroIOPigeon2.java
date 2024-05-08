@@ -17,6 +17,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.configs.Pigeon2Configurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.configs.RobotConfig;
@@ -35,6 +36,8 @@ public class GyroIOPigeon2 implements GyroIO {
 
   private final BaseStatusSignal[] refreshSet;
 
+  private final Pigeon2Configuration pigeonConfiguration;
+
   public GyroIOPigeon2(RobotConfig config) {
     Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
     pigeonConfig.MountPose.MountPosePitch = config.getGyroMountingPitch();
@@ -43,7 +46,13 @@ public class GyroIOPigeon2 implements GyroIO {
 
     pigeon = new Pigeon2(config.getGyroCANID(), config.getCANBusName());
 
-    pigeon.getConfigurator().apply(pigeonConfig);
+    pigeonConfiguration = pigeonConfig;
+
+    Pigeon2Configurator pigeonConfigurator = pigeon.getConfigurator();
+
+    pigeonConfigurator.apply(pigeonConfig);
+
+    pigeonConfigurator.setYaw(0.0);
 
     yaw = pigeon.getYaw();
     // FIXME: is this the correct method call
@@ -53,8 +62,6 @@ public class GyroIOPigeon2 implements GyroIO {
     yAcceleration = pigeon.getAccelerationY();
     zAcceleration = pigeon.getAccelerationZ();
 
-    pigeon.getConfigurator().apply(new Pigeon2Configuration());
-    pigeon.getConfigurator().setYaw(0.0);
     yaw.setUpdateFrequency(SwerveModule.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
     xAcceleration.setUpdateFrequency(100.0);
@@ -90,5 +97,10 @@ public class GyroIOPigeon2 implements GyroIO {
     inputs.zAcceleration = zAcceleration.getValueAsDouble();
     inputs.statusCode = statusCode.getName();
     inputs.description = statusCode.getDescription();
+  }
+
+  @Override
+  public void reconfigurePigeon() {
+    pigeon.getConfigurator().apply(pigeonConfiguration);
   }
 }

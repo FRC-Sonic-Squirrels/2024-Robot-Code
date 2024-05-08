@@ -16,7 +16,12 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.StateMachine;
 import frc.robot.Constants;
-import frc.robot.autonomous.substates.DriveAfterSimpleShot;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.PathDescriptor;
+import frc.robot.autonomous.stateMachines.AutoStateMachine;
+import frc.robot.autonomous.stateMachines.substateMachines.DriveAfterSimpleShot;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.MechanismActionsSafe;
 import frc.robot.configs.RobotConfig;
@@ -64,6 +69,11 @@ public class AutosManager {
     list.add(this::sourceG4FirstAuto3GP);
     list.add(this::sourceG4FirstAuto4GP);
     list.add(this::sourceG4FirstAuto5GP);
+    list.add(this::rushCenterGP1FirstThenClose);
+    list.add(this::rushCenterGP2FirstThenClose);
+    list.add(this::cornerAuto);
+    // list.add(this::sourceAutoPlopThenClose);
+    list.add(this::sourceAutoFarClosePlop);
     // list.add(this::simpleShootAuto);
 
     if (includeDebugPaths) {
@@ -138,9 +148,9 @@ public class AutosManager {
 
   private Auto sourceAuto() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false));
-    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false));
+    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false, false, false));
+    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_3GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
@@ -148,9 +158,9 @@ public class AutosManager {
 
   private Auto sourceG4FirstAuto3GP() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false));
-    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false));
-    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false));
+    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_G4FIRST_3GP",
@@ -160,10 +170,10 @@ public class AutosManager {
 
   private Auto sourceG4FirstAuto4GP() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false));
-    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false));
-    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G2", "G2-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_G4FIRST_4GP",
@@ -173,11 +183,11 @@ public class AutosManager {
 
   private Auto sourceG4FirstAuto5GP() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false));
-    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false));
-    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G2", "G2-S1", true, false));
-    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false));
+    paths.add(new PathDescriptor("Ssource-G4", "G4-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G3", "G3-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_G4FIRST_5GP",
@@ -187,9 +197,9 @@ public class AutosManager {
 
   private Auto sourceAutoPlop() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G4", "G4-S3", true, false));
-    paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true));
+    paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G4", "G4-S3", false, false, false, false));
+    paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
         "sourceAutoPlop",
@@ -197,12 +207,40 @@ public class AutosManager {
         Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
   }
 
+  private Auto sourceAutoPlopThenClose() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    // paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
+    // paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
+    // paths.add(new PathDescriptor("S3-CG3", "CG3-CS2", true, false, false, false));
+    // paths.add(new PathDescriptor("CS2-CG2", null, true, false, false, false));
+    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
+    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
+    return new Auto(
+        "sourceAutoPlopThenClose",
+        state.asCommand(),
+        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
+  }
+
+  private Auto sourceAutoFarClosePlop() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("SsourcePlop-G5", "G5-CS4", true, false, false, false));
+    paths.add(new PathDescriptor("CS4-CG3", "CG3-CS2", true, true, true, true));
+    paths.add(new PathDescriptor("CS2-PG1", "PG1-CS5", true, false, false, false));
+    paths.add(new PathDescriptor("CS5-R1", "R1-CS5", true, true, true, true));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
+    return new Auto(
+        "SOURCE_AUTO_FAR_CLOSE_PLOP",
+        state.asCommand(),
+        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
+  }
+
   private Auto sourceAuto4GP() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false));
-    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false));
-    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false, false, false));
+    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_4GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
@@ -210,11 +248,11 @@ public class AutosManager {
 
   private Auto sourceAuto5GP() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false));
-    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false));
-    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false));
-    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
-    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false));
+    paths.add(new PathDescriptor("Ssource-G5", "G5-S3", true, false, false, false));
+    paths.add(new PathDescriptor("S3-G4", "G4-S2", true, false, false, false));
+    paths.add(new PathDescriptor("S2-G3", "G3-S2", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SOURCE_5GP", state.asCommand(), Choreo.getTrajectory("Ssource-G5").getInitialPose());
@@ -222,9 +260,9 @@ public class AutosManager {
 
   private Auto rushCenterGP1First() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true, false));
-    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
-    paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false));
+    paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
     return new Auto(
         "RUSH_CENTER_GP_1_FIRST",
@@ -234,9 +272,9 @@ public class AutosManager {
 
   private Auto rushCenterGP2First() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Samp2-G2", "G2-S1", true, false));
-    paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false));
-    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false));
+    paths.add(new PathDescriptor("Samp2-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G3", "G3-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
     return new Auto(
         "RUSH_CENTER_GP_2_FIRST",
@@ -244,13 +282,41 @@ public class AutosManager {
         Choreo.getTrajectory("Samp-Samp2").getInitialPose());
   }
 
+  private Auto rushCenterGP1FirstThenClose() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp2-G1", "G1-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-CG1", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG1-CG2", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false, false, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
+    return new Auto(
+        "RUSH_CENTER_GP_1_THEN_CLOSE",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+  }
+
+  private Auto rushCenterGP2FirstThenClose() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Samp2-G2", "G2-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G1", "G1-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-CG1", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG1-CG2", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false, false, false));
+    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, "Samp-Samp2", paths);
+    return new Auto(
+        "RUSH_CENTER_GP_2_THEN_CLOSE",
+        state.asCommand(),
+        Choreo.getTrajectory("Samp-Samp2").getInitialPose());
+  }
+
   private Auto subWooferCloseFirst() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("Smiddle-CG3", "CG3-CS2", false, false));
-    paths.add(new PathDescriptor("CG3-CG2", null, false, false));
-    paths.add(new PathDescriptor("CG2-CG1", null, false, false));
-    paths.add(new PathDescriptor("CG1-G1", "G1-S1", true, false));
-    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false));
+    paths.add(new PathDescriptor("Smiddle-CG3", "CG3-CS2", false, false, false, false));
+    paths.add(new PathDescriptor("CG3-CG2", null, false, false, false, false));
+    paths.add(new PathDescriptor("CG2-CG1", null, false, false, false, false));
+    paths.add(new PathDescriptor("CG1-G1", "G1-S1", true, false, false, false));
+    paths.add(new PathDescriptor("S1-G2", "G2-S1", true, false, false, false));
     AutoStateMachine state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "SUBWOOFER_CLOSE_FIRST",
@@ -260,11 +326,25 @@ public class AutosManager {
 
   private Auto portableAuto() {
     List<PathDescriptor> paths = new ArrayList<>();
-    paths.add(new PathDescriptor("TestPortable1", "TestPortable2", true, false));
-    paths.add(new PathDescriptor("TestPortable3", "TestPortable4", true, false));
+    paths.add(new PathDescriptor("TestPortable1", "TestPortable2", true, false, false, false));
+    paths.add(new PathDescriptor("TestPortable3", "TestPortable4", true, false, false, false));
     var state = new AutoStateMachine(subsystems, config, paths);
     return new Auto(
         "TestPortable", state.asCommand(), Choreo.getTrajectory("TestPortable1").getInitialPose());
+  }
+
+  private Auto cornerAuto() {
+    List<PathDescriptor> paths = new ArrayList<>();
+    paths.add(new PathDescriptor("Scorner2-CG1", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG1-CG2", null, true, false, false, false));
+    paths.add(new PathDescriptor("CG2-CG3", "CG3-CS2", true, false, false, false));
+    paths.add(new PathDescriptor("CS2-Srebound", "Grebound-Srebound2", true, true, true, true));
+    AutoStateMachine state =
+        new AutoStateMachine(subsystems, config, true, "Scorner-Scorner2", paths);
+    return new Auto(
+        "CORNER_AUTO",
+        state.asCommand(),
+        Choreo.getTrajectory("Scorner-Scorner2").getInitialPose());
   }
 
   private Auto simpleShootAuto() {

@@ -50,7 +50,7 @@ import frc.robot.Constants.RobotMode.RobotType;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
-import frc.robot.autonomous.AutosSubsystems;
+import frc.robot.autonomous.records.AutosSubsystems;
 import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
 import frc.robot.commands.ScoreSpeaker;
@@ -318,12 +318,6 @@ public class RobotContainer {
           // uncomment the empty IO's as a replacement
 
           // -- All real IO's
-          drivetrain =
-              new Drivetrain(
-                  config,
-                  new GyroIOPigeon2(config),
-                  config.getSwerveModuleObjects(),
-                  () -> is_autonomous);
 
           // vision =
           // new Vision(
@@ -345,7 +339,14 @@ public class RobotContainer {
           // drivetrain =
           // new Drivetrain(config, new GyroIO() {},
           // config.getReplaySwerveModuleObjects());
-
+          elevator = new Elevator(new ElevatorIOReal());
+          arm = new Arm(new ArmIOReal());
+          drivetrain =
+              new Drivetrain(
+                  config,
+                  new GyroIOPigeon2(config),
+                  config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
           vision =
               new Vision(
                   aprilTagLayout,
@@ -359,8 +360,7 @@ public class RobotContainer {
                   new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
 
           // intake = new Intake(new IntakeIO() {});
-          elevator = new Elevator(new ElevatorIOReal());
-          arm = new Arm(new ArmIOReal());
+
           // endEffector = new EndEffector(new EndEffectorIO() {});
           // shooter = new Shooter(new ShooterIO() {});
 
@@ -625,8 +625,8 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(8700, 8000);
-                  if (shooter.getRPM() > 8500) {
+                  shooter.setLauncherRPM(6000, 5000);
+                  if (shooter.getRPM() > 5500) {
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
                     intake.setVelocity(passThroughVel.get());
@@ -649,7 +649,17 @@ public class RobotContainer {
                 endEffector,
                 intake));
 
-    driverController.povDown().onTrue(MechanismActions.loadingPosition(elevator, arm));
+    driverController
+        .povDown()
+        .onTrue(
+            elevator
+                .setReactionArmsRotationsCMD(
+                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
+                .andThen(MechanismActions.loadingPosition(elevator, arm))
+                .andThen(
+                    elevator.setReactionArmsRotationsCMD(
+                        Constants.ElevatorConstants.ReactionArmConstants
+                            .REACTION_ARM_HOME_ROTATIONS)));
 
     driverController
         .y()
@@ -803,9 +813,10 @@ public class RobotContainer {
                       boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Coast);
                       boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Coast);
                       boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Coast);
-                      elevator.setReactionArmIdleMode(IdleMode.kCoast);
+                      boolean reactionArmSuccess = elevator.setReactionArmIdleMode(IdleMode.kCoast);
 
-                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+                      brakeModeFailure =
+                          !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
 
                       //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
@@ -823,9 +834,10 @@ public class RobotContainer {
                       boolean armSuccess = arm.setNeutralMode(NeutralModeValue.Brake);
                       boolean elevatorSuccess = elevator.setNeutralMode(NeutralModeValue.Brake);
                       boolean shooterSuccess = shooter.setNeutralMode(NeutralModeValue.Brake);
-                      elevator.setReactionArmIdleMode(IdleMode.kBrake);
+                      boolean reactionArmSuccess = elevator.setReactionArmIdleMode(IdleMode.kBrake);
 
-                      brakeModeFailure = !armSuccess || !elevatorSuccess || !shooterSuccess;
+                      brakeModeFailure =
+                          !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
                       //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
@@ -858,6 +870,10 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
+
+    // SmartDashboard.putData(
+    //     "ReconfigureSwerveAndGyro",
+    //     new RunsWhenDisabledInstantCommand(drivetrain::reconfigureDevices));
   }
 
   /**
@@ -925,7 +941,7 @@ public class RobotContainer {
 
     led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
 
-    visionGamepiece.setPipelineIndex(1);
+    visionGamepiece.setPipelineIndex(2);
 
     is_teleop = true;
     is_autonomous = false;

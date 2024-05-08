@@ -164,4 +164,12 @@ public class DrivetrainWrapper {
   public void setPose(Pose2d pose) {
     drivetrain.setPose(pose);
   }
+
+  /**
+   * WARNING - THIS IS THE RAW *ODOMETRY* POSE, THIS DOES NOT ACCOUNT FOR VISION DATA & SHOULD
+   * EXCLUSIVELY BE USED FOR LOGGING AND ANALYSIS
+   */
+  public Pose2d getRawOdometryPose() {
+    return drivetrain.getRawOdometryPose();
+  }
 }

@@ -242,4 +242,8 @@ public class SwerveModule {
   public double getAppliedVoltage() {
     return inputs.driveAppliedVolts;
   }
+
+  public void reconfigureMotors() {
+    io.reconfigureMotors();
+  }
 }

@@ -149,4 +149,10 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   @Override
   public void setTurnClosedLoopConstraints(
       double kP, double kD, double cruiseVelocity, double acceleration) {}
+
+  @Override
+  public void reconfigureMotors() {
+    // TODO Auto-generated method stub
+
+  }
 }

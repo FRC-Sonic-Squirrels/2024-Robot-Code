@@ -2,12 +2,17 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.autonomous;
+package frc.robot.autonomous.stateMachines;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.team2930.StateMachine;
-import frc.robot.autonomous.substates.AutoSubstateMachineChoreo;
-import frc.robot.autonomous.substates.AutoSubstateMachineDriveTranslation;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.robot.autonomous.helpers.ChoreoHelper;
+import frc.robot.autonomous.records.AutosSubsystems;
+import frc.robot.autonomous.records.ChoreoTrajectoryWithName;
+import frc.robot.autonomous.records.PathDescriptor;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineChoreo;
+import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineDriveTranslation;
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED;
@@ -20,6 +25,7 @@ import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.visionGamepiece.VisionGamepiece;
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class AutoStateMachine extends StateMachine {
   private Command scoreSpeaker;
@@ -36,15 +42,21 @@ public class AutoStateMachine extends StateMachine {
   private final ChoreoTrajectoryWithName[] intakingTrajs;
   private final ChoreoTrajectoryWithName[] shootingTrajs;
   private final Boolean[] useVision;
-  private final Boolean[] ploppedGamepeice;
+  private final Boolean[] doGamepieceDistanceCheck;
+  private final Boolean[] waitForVisionGamepiece;
+  private final Boolean[] substatePlopping;
   private final StateMachine[] overrideStateMachines;
   private ChoreoHelper initialPathChoreoHelper;
   private final ChoreoTrajectoryWithName initPath;
   private int currentSubState;
+  public static final TunableNumberGroup group = new TunableNumberGroup("Autonomous");
+
+  public final LoggedDashboardNumber tunableWait =
+      new LoggedDashboardNumber("Autonomous/tunableWait", 0.0);
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, StateMachine[] overrideStateMachines) {
-    this(subsystems, config, false, null, null, overrideStateMachines);
+    this(subsystems, config, false, null, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
@@ -53,12 +65,12 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       StateMachine[] overrideStateMachines) {
-    this(subsystems, config, doInitialPath, initPath, null, overrideStateMachines);
+    this(subsystems, config, doInitialPath, initPath, false, null, overrideStateMachines);
   }
 
   public AutoStateMachine(
       AutosSubsystems subsystems, RobotConfig config, List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, false, null, subStateTrajNames, null);
+    this(subsystems, config, false, null, false, subStateTrajNames, null);
   }
 
   public AutoStateMachine(
@@ -66,7 +78,7 @@ public class AutoStateMachine extends StateMachine {
       RobotConfig config,
       boolean plopFirstGamepiece,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, false, null, subStateTrajNames, null);
+    this(subsystems, config, false, null, plopFirstGamepiece, subStateTrajNames, null);
   }
 
   public AutoStateMachine(
@@ -75,7 +87,7 @@ public class AutoStateMachine extends StateMachine {
       boolean doInitialPath,
       String initPath,
       List<PathDescriptor> subStateTrajNames) {
-    this(subsystems, config, doInitialPath, initPath, subStateTrajNames, null);
+    this(subsystems, config, doInitialPath, initPath, false, subStateTrajNames, null);
   }
 
   /** Creates a new AutoSubstateMachine. */
@@ -84,6 +96,7 @@ public class AutoStateMachine extends StateMachine {
       RobotConfig config,
       boolean doInitDrive,
       String initPath,
+      boolean plopping,
       List<PathDescriptor> subStateTrajNames,
       StateMachine[] overrideStateMachines) {
     super("Auto");
@@ -108,28 +121,40 @@ public class AutoStateMachine extends StateMachine {
     intakingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     shootingTrajs = new ChoreoTrajectoryWithName[subStateTrajNames.size()];
     useVision = new Boolean[subStateTrajNames.size()];
-    ploppedGamepeice = new Boolean[subStateTrajNames.size()];
-    boolean plopping = false;
+    doGamepieceDistanceCheck = new Boolean[subStateTrajNames.size()];
+    waitForVisionGamepiece = new Boolean[subStateTrajNames.size()];
+    substatePlopping = new Boolean[subStateTrajNames.size()];
 
     for (int i = 0; i < subStateTrajNames.size(); i++) {
       var path = subStateTrajNames.get(i);
       useVision[i] = path.useVision();
-      ploppedGamepeice[i] = path.ploppedGamepiece();
-      if (path.ploppedGamepiece()) plopping = true;
+      doGamepieceDistanceCheck[i] = path.dontDoDistanceCheck();
+      waitForVisionGamepiece[i] = path.waitForVisionGamepiece();
+      substatePlopping[i] = path.ploppedGamepiece();
       intakingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.intakingTraj());
       shootingTrajs[i] = ChoreoTrajectoryWithName.getTrajectory(path.shootingTraj());
     }
 
     if (doInitDrive) {
       this.initPath = ChoreoTrajectoryWithName.getTrajectory(initPath);
-      setInitialState(stateWithName("driveOutState", this::driveOutStateInit));
+      setInitialState(initInitialWait(stateWithName("driveOutState", this::driveOutStateInit)));
     } else if (plopping) {
       this.initPath = null;
-      setInitialState(() -> this.nextSubState(true));
+      setInitialState(() -> initInitialWait(() -> this.nextSubState(true)));
     } else {
       this.initPath = null;
-      setInitialState(stateWithName("autoInitialState", this::autoInitialState));
+      setInitialState(
+          () -> initInitialWait(stateWithName("autoInitialState", this::autoInitialState)));
     }
+  }
+
+  private StateHandler initInitialWait(StateHandler firstState) {
+    return stateWithName("initialWait", () -> initialWait(firstState));
+  }
+
+  private StateHandler initialWait(StateHandler nextState) {
+    if (timeFromStartOfState() > tunableWait.get()) return nextState;
+    return null;
   }
 
   private StateHandler driveOutStateInit() {
@@ -185,7 +210,12 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
-                    ploppedGamepeice[currentSubState],
+                    doGamepieceDistanceCheck[currentSubState],
+                    waitForVisionGamepiece[currentSubState],
+                    // currentSubState == intakingTrajs.length
+                    //     ? false
+                    //     : substatePlopping[currentSubState + 1]
+                    false,
                     intakingTrajs[currentSubState],
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece,
@@ -198,7 +228,12 @@ public class AutoStateMachine extends StateMachine {
                     subsystems,
                     config,
                     useVision[currentSubState],
-                    ploppedGamepeice[currentSubState],
+                    doGamepieceDistanceCheck[currentSubState],
+                    waitForVisionGamepiece[currentSubState],
+                    // currentSubState == intakingTrajs.length
+                    //     ? false
+                    //     : substatePlopping[currentSubState + 1]
+                    false,
                     targetGPPose,
                     shootingTrajs[currentSubState],
                     visionGamepiece::getClosestGamepiece),

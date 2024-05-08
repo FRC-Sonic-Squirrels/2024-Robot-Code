@@ -58,6 +58,9 @@ public interface SwerveModuleIO {
     @Override
     public void setTurnClosedLoopConstraints(
         double kP, double kD, double cruiseVelocity, double acceleration) {}
+
+    @Override
+    public void reconfigureMotors() {}
   }
 
   public static class Inputs {
@@ -103,4 +106,6 @@ public interface SwerveModuleIO {
 
   /** Enable or disable brake mode on the turn motor. */
   void setTurnBrakeMode(boolean enable);
+
+  void reconfigureMotors();
 }

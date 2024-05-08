@@ -229,8 +229,8 @@ public class Elevator extends SubsystemBase {
     return inputs.reactionArmRotations;
   }
 
-  public void setReactionArmIdleMode(IdleMode idleMode) {
-    io.setReactionArmIdleMode(idleMode);
+  public boolean setReactionArmIdleMode(IdleMode idleMode) {
+    return io.setReactionArmIdleMode(idleMode);
   }
 
   public Command setReactionArmsRotationsCMD(double rotations) {

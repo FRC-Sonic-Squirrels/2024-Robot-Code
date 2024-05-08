@@ -345,13 +345,14 @@ public class CommandComposer {
 
     Command stageAlign =
         rotateToAngle
-            .alongWith(alignWithChain)
+            // .alongWith(alignWithChain)
             .alongWith(
                 Commands.run(
                     () -> {
                       if (!alignWithChain.driving()) {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE1);
-                      } else if (Math.abs(visionGamepiece.getTagYaw()) > 1) {
+                      } else if (Math.abs(visionGamepiece.getTagYaw()) > 1
+                          || !visionGamepiece.isValidTarget()) {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE2);
                       } else {
                         led.setBaseRobotState(BaseRobotState.CLIMB_ALIGN_STAGE3);
@@ -436,7 +437,11 @@ public class CommandComposer {
                 () ->
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
-                            rotateToAngle.withinTolerance() ? stageApproachSpeed.get() : 0.0,
+
+                            // rotateToAngle.withinTolerance() ?
+                            stageApproachSpeed.get()
+                            // : 0.0
+                            ,
                             visionGamepiece.seesStageTags()
                                 ? yOffsetController.calculate(visionGamepiece.getTagYaw(), 0)
                                 : 0.0,
