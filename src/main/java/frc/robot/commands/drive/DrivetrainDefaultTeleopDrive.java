@@ -56,7 +56,6 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
     addRequirements(drivetrain.getRequirements());
     setName("DrivetrainDefaultTeleopDrive");
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.

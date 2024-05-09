@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 import frc.robot.configs.RobotConfig;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -30,7 +29,6 @@ public class VisionGamepieceIOSim implements VisionGamepieceIO {
 
     this.poseSupplier = poseSupplier;
     var cameraProp = new SimCameraProperties();
-    // FIXME: get these values for the cameras we use
     cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(128.2));
     cameraProp.setCalibError(0.35, 0.10);
     cameraProp.setFPS(15);
@@ -69,16 +67,9 @@ public class VisionGamepieceIOSim implements VisionGamepieceIO {
       if (DriverStation.getAlliance().isPresent()) {
         boolean isRed = DriverStation.getAlliance().get().equals(Alliance.Red);
         boolean isBlue = DriverStation.getAlliance().get().equals(Alliance.Blue);
-        boolean condition1 = (isRed && (targetID >= 11 && targetID <= 13));
-        boolean condition2 = (isBlue && (targetID >= 14 && targetID <= 16));
 
-        Logger.recordOutput("VisionGamepiece/isBlue", isBlue);
-        Logger.recordOutput("VisionGamepiece/isRed", isRed);
-
-        Logger.recordOutput("VisionGamepiece/condition1", condition1);
-        Logger.recordOutput("VisionGamepiece/condition2", condition2);
-
-        if (condition1 || condition2) {
+        if ((isRed && (targetID >= 11 && targetID <= 13))
+            || (isBlue && (targetID >= 14 && targetID <= 16))) {
           aprilTagYaw = target.getYaw();
           seesStageTags = true;
         }

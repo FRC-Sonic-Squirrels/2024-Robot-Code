@@ -44,6 +44,10 @@ public class GeometryUtil {
     return false;
   }
 
+  /**
+   * @param theta rotation measure radians
+   * @return rotation between positive and negative PI radians
+   */
   public static double optimizeRotation(double theta) {
     while (theta <= -Math.PI) theta += Math.PI * 2;
     while (theta >= Math.PI) theta -= Math.PI * 2;

@@ -16,8 +16,9 @@ public class EndEffectorPercentOut extends Command {
   public EndEffectorPercentOut(EndEffector endEffector, DoubleSupplier percentSupplier) {
     this.endEffector = endEffector;
     this.percentSupplier = percentSupplier;
-    // Use addRequirements() here to declare subsystem dependencies.
+
     addRequirements(endEffector);
+    setName("EndEffectorPercentOut");
   }
 
   public EndEffectorPercentOut(EndEffector endEffector, double percent) {

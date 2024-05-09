@@ -49,7 +49,8 @@ public class RotateToAngle extends Command {
     this.wrapper = wrapper;
     this.angle = angle;
     this.currentPose = currentPose;
-    // Use addRequirements() here to declare subsystem dependencies.
+
+    setName("RotateToAngle");
   }
 
   // Called when the command is initially scheduled.

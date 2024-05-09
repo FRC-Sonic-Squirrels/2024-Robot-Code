@@ -72,7 +72,6 @@ public final class Constants {
       }
     }
 
-    // FIXME: update for various robots
     public static Mode getMode() {
       if (isSimBot()) {
         return Mode.SIM;
@@ -94,7 +93,6 @@ public final class Constants {
       return ROBOT;
     }
 
-    // FIXME: update for various robots
     public enum RobotType {
       // use supplier because if we just create the object, the fields in the
       // config classes are also created. Meaning tunableNumber values are stuck to
@@ -128,10 +126,8 @@ public final class Constants {
     public static double FIELD_LENGTH = 16.541;
     public static double FIELD_WIDTH = 8.211;
 
-    // FIXME: double check this number
     public static final Measure<Distance> SPEAKER_HEIGHT = Units.Inches.of(6 * 12.0 + 12.5);
 
-    // TODO: move to right
     public static final Translation2d BLUE_SPEAKER_TRANSLATION = new Translation2d(0.0, 5.6);
     public static final Translation2d RED_SPEAKER_TRANSLATION =
         AllianceFlipUtil.mirrorTranslation2DOverCenterLine(BLUE_SPEAKER_TRANSLATION);
@@ -259,9 +255,9 @@ public final class Constants {
     // https://ss2930.sharepoint.com/:x:/s/Engineering/ETkKz1CrsINGj5Ia29ENxT4BE_Iqd_kAK_04iaW3kLqPuQ?clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yMzExMzAyODcyNCJ9
     public static final double GEAR_RATIO = 23.05;
     public static final double PULLEY_DIAMETER = 2.256;
-    public static final double CARRIAGE_MASS = 10.0; // arbitrary
+    public static final double CARRIAGE_MASS = 10.0;
     public static final Measure<Distance> MAX_HEIGHT = Units.Inches.of(26.2);
-    public static final Measure<Distance> MAX_LEGAL_HEIGHT = Units.Inches.of(26.2); // FIXME
+    public static final Measure<Distance> MAX_LEGAL_HEIGHT = Units.Inches.of(26.2);
     public static final Measure<Distance> TRUE_TOP_HARD_STOP = Units.Inches.of(26.5);
 
     public static final Measure<Distance> SAFE_HEIGHT = Units.Inches.of(15.491);
@@ -270,10 +266,8 @@ public final class Constants {
     public static final Measure<Distance> MAX_HEIGHT_BELOW_STAGE = Units.Inches.of(0.0);
     public static final Measure<Distance> HEIGHT_ABOVE_CHAIN = Units.Inches.of(25.5);
 
-    // FIXME: home position needs to be changed now that we added spacers to
-    // swerveModule
     public static final Measure<Distance> HOME_POSITION = Units.Inches.of(7.35);
-    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.35); // was 7.5
+    public static final Measure<Distance> LOADING_POSITION = Units.Inches.of(7.35);
 
     public static class ReactionArmConstants {
       public static final double REACTION_ARM_HOME_ROTATIONS = 0;
@@ -303,27 +297,6 @@ public final class Constants {
             SHOOTER_OFFSET.getX(), SHOOTER_OFFSET.getY(), Units.Inches.of(5).in(Units.Meters));
 
     public static class Pivot {
-      // Old Calculations:
-      // public static final Rotation2d DISTANCE_TO_SHOOTING_PITCH(double
-      // distanceMeters) {
-      // return new Rotation2d(
-      // Math.atan2(
-      // FieldConstants.SPEAKER_HEIGHT_METERS - SHOOTER_BASE_HEIGHT_METERS,
-      // distanceMeters));
-      // }
-
-      // public static final double PITCH_VEL_RAD_PER_SEC(
-      // double velMetersPerSecond, double distanceMeters) {
-      // // velocity times derivative of distance to shooting pitch formula to get
-      // pitch velocity
-      // return velMetersPerSecond
-      // * -FieldConstants.SPEAKER_HEIGHT_METERS
-      // / (Math.pow(distanceMeters - SHOOTER_OFFSET_METERS.getY(), 2)
-      // + Math.pow(FieldConstants.SPEAKER_HEIGHT_METERS, 2));
-      // }
-
-      // public static final double GEARING = (40.0 / 12.0) * (40.0 / 20.0) * (120.0 /
-      // 10.0);
       public static final double GEARING = 125.0;
 
       public static final Rotation2d MIN_ANGLE_RAD = Rotation2d.fromDegrees(12.0);
@@ -348,25 +321,6 @@ public final class Constants {
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(106.3).in(Units.Meters), 4.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(114.2).in(Units.Meters), 4.5);
         PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(145.7).in(Units.Meters), 4.25);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(50).in(Units.Meters), 1.75); // 3.5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(70).in(Units.Meters), 1.75);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(80).in(Units.Meters), 1.75);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(90.0).in(Units.Meters), 1.75); // 3.5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(133).in(Units.Meters), 3.05); // 5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(177).in(Units.Meters), 4.25); // 6.7
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(202).in(Units.Meters), 5.55); // 7.5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(218).in(Units.Meters), 6.35); // 8.3
-
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(100.0).in(Units.Meters), 3.0);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(110.0).in(Units.Meters), 3.5); // 4.0
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(120.0).in(Units.Meters), 4.0); // 4.5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(130.0).in(Units.Meters), 4.5); // 5.0
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(140.0).in(Units.Meters), 5.0); // 5.5
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(150.0).in(Units.Meters), 5.25); // 5.75
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(160.0).in(Units.Meters), 7.0);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(170.0).in(Units.Meters), 7.25);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(180.0).in(Units.Meters), 7.5);
-        // PITCH_ADJUSTMENT_MAP.put(Units.Inches.of(210.0).in(Units.Meters), 7.75);
       }
 
       public static double getPitchOffset(Measure<Distance> distance) {
@@ -379,7 +333,6 @@ public final class Constants {
 
     public static class Launcher {
       public static final double MOI = 5.0;
-      // FIX ME: THIS VALUE HAS TO BE CONFIRMED
       public static final double GEARING = (18.0 / 30.0);
       public static final Measure<Distance> WHEEL_DIAMETER = Units.Inches.of(2.0);
     }
@@ -404,7 +357,6 @@ public final class Constants {
     // 4, 14, 24, 34
     // all these CAN ID's are reserved for the Drivetrain
 
-    // TODO: get actual can ids
     public static final int INTAKE_CAN_ID = 34;
 
     public static final int SHOOTER_LEAD_CAN_ID = 33;
@@ -423,9 +375,7 @@ public final class Constants {
     public static final int END_EFFECTOR_SHOOTER_SIDE_TOF_CAN_ID = 40;
   }
 
-  public static class DIOPorts {
-    // TODO: get actual DIO ports
-  }
+  public static class DIOPorts {}
 
   public enum ControlMode {
     POSITION,

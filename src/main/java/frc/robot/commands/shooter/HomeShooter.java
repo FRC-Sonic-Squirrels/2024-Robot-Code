@@ -19,10 +19,10 @@ public class HomeShooter extends Command {
   private final Shooter shooter;
   private boolean shooterReset = false;
 
-  /** Creates a new HomeMechanism. */
+  /** Creates a new HomeShooter. */
   public HomeShooter(Shooter shooter) {
     this.shooter = shooter;
-    // Use addRequirements() here to declare subsystem dependencies.
+
     addRequirements(shooter);
     setName("HomeShooter");
   }

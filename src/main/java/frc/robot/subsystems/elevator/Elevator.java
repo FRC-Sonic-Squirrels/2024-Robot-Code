@@ -6,7 +6,6 @@ package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase.IdleMode;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
@@ -89,10 +88,6 @@ public class Elevator extends SubsystemBase {
       motionMagicDefaultConstraints = new Constraints(640.0, 640.0);
     }
   }
-
-  private double lastServoActivationTime = 0.0;
-  private boolean rightServoActive = false;
-  private Rotation2d targetServoAngle = Constants.zeroRotation2d;
 
   private final ElevatorIO io;
   private final ElevatorIO.Inputs inputs = new ElevatorIO.Inputs();

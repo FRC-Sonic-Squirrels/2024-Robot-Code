@@ -58,7 +58,6 @@ public class Arm extends SubsystemBase {
       kD.initDefault(1.6);
       kG.initDefault(0.0);
 
-      // FIXME: find the theoritical from the JVN docs
       closedLoopMaxVelocityConstraint.initDefault(10);
       closedLoopMaxAccelerationConstraint.initDefault(10);
     } else if (Constants.RobotMode.getRobot() == RobotType.ROBOT_SIMBOT) {
@@ -77,7 +76,6 @@ public class Arm extends SubsystemBase {
 
   private ControlMode currentControlMode = ControlMode.OPEN_LOOP;
   private Rotation2d closedLoopTargetAngle = Constants.zeroRotation2d;
-  // FIXME: tune this value
   private final Rotation2d closedLoopTolerance = Rotation2d.fromDegrees(1);
   private static final double MAX_VOLTAGE = 12;
 
@@ -85,7 +83,6 @@ public class Arm extends SubsystemBase {
   public Arm(ArmIO io) {
     this.io = io;
 
-    // io.resetSensorPosition(Constants.ArmConstants.HOME_POSITION);
     io.setVoltage(0.0);
 
     io.setClosedLoopConstants(

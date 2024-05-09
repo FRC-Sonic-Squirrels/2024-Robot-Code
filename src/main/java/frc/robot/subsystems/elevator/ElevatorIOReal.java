@@ -42,7 +42,7 @@ public class ElevatorIOReal implements ElevatorIO {
   private static final double inchesToMotorRot =
       Constants.ElevatorConstants.GEAR_RATIO
           / (Math.PI * Constants.ElevatorConstants.PULLEY_DIAMETER);
-  // FIXME: add FOC
+
   private final MotionMagicVoltage closedLoopControl =
       new MotionMagicVoltage(0.0).withEnableFOC(true);
   private final VoltageOut openLoopControl = new VoltageOut(0.0).withEnableFOC(true);
@@ -61,15 +61,11 @@ public class ElevatorIOReal implements ElevatorIO {
   public ElevatorIOReal() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // FIXME: maybe make this more aggressive?
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    // config.Voltage.PeakForwardVoltage = 2.0;
-    // config.Voltage.PeakReverseVoltage = -2.0;
 
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
         ElevatorConstants.MAX_HEIGHT.in(Units.Inches) * inchesToMotorRot;
@@ -96,8 +92,6 @@ public class ElevatorIOReal implements ElevatorIO {
 
     motor.optimizeBusUtilization();
 
-    // leftServo.setAlwaysHighMode();
-    // rightServo.setAlwaysHighMode();
     refreshSet =
         new BaseStatusSignal[] {
           rotorPosition, rotorVelocity, appliedVolts, currentAmps, tempCelsius

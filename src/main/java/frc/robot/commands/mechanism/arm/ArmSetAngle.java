@@ -24,6 +24,7 @@ public class ArmSetAngle extends Command {
     this.angleSupplier = angleSupplier;
 
     addRequirements(arm);
+    setName("ArmSetAngle");
   }
 
   @Override

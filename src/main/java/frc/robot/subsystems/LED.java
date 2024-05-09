@@ -35,8 +35,8 @@ public class LED extends SubsystemBase {
   private AddressableLEDBuffer ledBuffer = new AddressableLEDBuffer(13);
   private AddressableLEDBuffer previousBuffer = new AddressableLEDBuffer(13);
 
-  private int snakeShade = 0;
-  private int rainbowFirstPixelHue = 0;
+  // private int snakeShade = 0;
+  // private int rainbowFirstPixelHue = 0;
   private int levelMeterCount = 0;
   private RobotState robotState = RobotState.BASE;
   private BaseRobotState baseRobotState = BaseRobotState.NOTE_STATUS;
@@ -206,19 +206,19 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setSnake(Color color1, Color color2) {
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
-      ledBuffer.setRGB(
-          i,
-          (int) (shade * color1.red + color2.red * (255 - shade)),
-          (int) (shade * color1.green + color2.green * (255 - shade)),
-          (int) (shade * color1.blue + color2.blue * (255 - shade)));
+  // private void setSnake(Color color1, Color color2) {
+  //   for (int i = 0; i < ledBuffer.getLength(); i++) {
+  //     final var shade = (snakeShade + (i * 255 / ledBuffer.getLength())) % 255;
+  //     ledBuffer.setRGB(
+  //         i,
+  //         (int) (shade * color1.red + color2.red * (255 - shade)),
+  //         (int) (shade * color1.green + color2.green * (255 - shade)),
+  //         (int) (shade * color1.blue + color2.blue * (255 - shade)));
 
-      snakeShade += 0.5;
-      snakeShade %= 255;
-    }
-  }
+  //     snakeShade += 0.5;
+  //     snakeShade %= 255;
+  //   }
+  // }
 
   private void setSnake2(Color color1, Color color2) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
@@ -231,15 +231,15 @@ public class LED extends SubsystemBase {
     }
   }
 
-  private void setRainbow() {
-    for (var i = 0; i < ledBuffer.getLength(); i++) {
-      final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
-      ledBuffer.setHSV(i, hue, 255, 128);
-    }
+  // private void setRainbow() {
+  //   for (var i = 0; i < ledBuffer.getLength(); i++) {
+  //     final var hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180;
+  //     ledBuffer.setHSV(i, hue, 255, 128);
+  //   }
 
-    rainbowFirstPixelHue += 3;
-    rainbowFirstPixelHue %= 180;
-  }
+  //   rainbowFirstPixelHue += 3;
+  //   rainbowFirstPixelHue %= 180;
+  // }
 
   public void setRobotState(RobotState robotState) {
     this.robotState = robotState;
@@ -280,9 +280,9 @@ public class LED extends SubsystemBase {
     // System.out.println("LED: count=" + levelMeterCount + " vol=" + volume + " theta=" + theta);
   }
 
-  private void setNothing() {
-    setSolidColor(Color.kBlack);
-  }
+  // private void setNothing() {
+  //   setSolidColor(Color.kBlack);
+  // }
 
   public RobotState getCurrentState() {
     return robotState;

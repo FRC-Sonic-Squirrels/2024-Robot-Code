@@ -18,13 +18,10 @@ import com.playingwithfusion.TimeOfFlight;
 import com.playingwithfusion.TimeOfFlight.RangingMode;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
-  private static final LoggedTunableNumber tunableMultiplier =
-      Shooter.group.build("tunableMultiplier", 1.0);
 
   TalonFX launcher_lead = new TalonFX(Constants.CanIDs.SHOOTER_LEAD_CAN_ID);
   TalonFX launcher_follower = new TalonFX(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID);
@@ -74,7 +71,6 @@ public class ShooterIOReal implements ShooterIO {
     // --- launcher config ---
     TalonFXConfiguration launcherConfig = new TalonFXConfiguration();
 
-    // FIXME: get true current limits
     launcherConfig.CurrentLimits.SupplyCurrentLimit = 40;
     launcherConfig.CurrentLimits.SupplyCurrentThreshold = 60.0;
     launcherConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
@@ -101,9 +97,6 @@ public class ShooterIOReal implements ShooterIO {
     pivotConfig.Feedback.SensorToMechanismRatio = Constants.ShooterConstants.Pivot.GEARING;
     pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-    // pivotConfig.Voltage.PeakForwardVoltage = 3.0;
-    // pivotConfig.Voltage.PeakReverseVoltage = -3.0;
 
     pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
         Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.getRotations();

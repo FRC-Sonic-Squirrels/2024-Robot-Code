@@ -16,7 +16,7 @@ public class LedSetBaseState extends Command {
   public LedSetBaseState(LED led, BaseRobotState state) {
     this.led = led;
     this.state = state;
-    // Use addRequirements() here to declare subsystem dependencies.
+    setName("LedSetBaseState");
   }
 
   // Called when the command is initially scheduled.

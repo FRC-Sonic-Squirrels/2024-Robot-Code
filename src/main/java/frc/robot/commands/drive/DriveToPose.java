@@ -182,6 +182,8 @@ public class DriveToPose extends Command {
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     withinTolerance =
         new Trigger(() -> driveController.atGoal() && thetaController.atGoal()).debounce(0.3);
+
+    setName("DriveToPose");
   }
 
   @Override
@@ -215,9 +217,7 @@ public class DriveToPose extends Command {
         new TrapezoidProfile.Constraints(
             slowMode ? driveMaxVelocitySlow.get() : driveMaxVelocity.get(),
             driveMaxAcceleration.get()));
-    driveController.setTolerance(
-        // slowMode ? driveToleranceSlow.get() : driveTolerance.get()
-        driveToleranceValue);
+    driveController.setTolerance(driveToleranceValue);
     thetaController.setP(thetaKp.get());
     thetaController.setD(thetaKd.get());
     thetaController.setConstraints(
@@ -311,9 +311,7 @@ public class DriveToPose extends Command {
 
   /** Checks if the robot is stopped at the final pose. */
   public boolean atGoal() {
-    return
-    // isScheduled() &&
-    withinTolerance.getAsBoolean();
+    return withinTolerance.getAsBoolean();
   }
 
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */

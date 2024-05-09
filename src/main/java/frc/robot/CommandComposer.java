@@ -5,10 +5,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,9 +15,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.GeometryUtil;
-import frc.lib.team6328.GeomUtil;
+import frc.lib.team2930.LoggerEntry;
+import frc.lib.team2930.LoggerGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.commands.AutoClimb;
 import frc.robot.commands.drive.AlignWithChain;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.RotateToAngle;
@@ -44,70 +43,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class CommandComposer {
-  //   public static Command autoClimb(
-  //       AprilTagFieldLayout aprilTagFieldLayout,
-  //       DrivetrainWrapper drivetrainWrapper,
-  //       Elevator elevator,
-  //       Arm arm,
-  //       EndEffector endEffector,
-  //       Shooter shooter,
-  //       Intake intake) {
-  //     /*
-  //      * Step 1: drive to in front of the chain,
-  //      * at the same time, if the robot is within 2 meters of the stage:
-  //      * if the robot is under the stage
-  //      * bring mech into under stage prep,
-  //      * else
-  //      * bring the mech into climb prep positon,
-  //      * if we are farther than 2 meters,
-  //      * stay in stow/loading position
-  //      * Step 2: run climb command
-  //      */
-
-  //     DriveToPose driveToClimbPos =
-  //         new DriveToPose(
-  //             drivetrainWrapper,
-  //             () ->
-  //                 AutoClimb.getTargetPose(
-  //                     aprilTagFieldLayout, drivetrainWrapper.getPoseEstimatorPose(true)),
-  //             () -> drivetrainWrapper.getPoseEstimatorPose(true));
-
-  //     BooleanSupplier withinRangeOfStage =
-  //         () ->
-  //             GeometryUtil.getDist(
-  //                     Constants.FieldConstants.getStageCenter(),
-  //                     drivetrainWrapper.getPoseEstimatorPose(false).getTranslation())
-  //                 <= 2.0;
-
-  //     BooleanSupplier underStage =
-  //         () -> AutoClimb.underStage(drivetrainWrapper.getPoseEstimatorPose(false));
-
-  //     Supplier<Command> prepForClimb =
-  //         () ->
-  //             new ConditionalCommand(
-  //                 MechanismActions.climbPrepUnderStagePosition(elevator, arm)
-  //                     .until(() -> !underStage.getAsBoolean())
-  //                     .andThen(
-  //                         MechanismActions.climbPrepPosition(
-  //                             elevator, arm, endEffector, shooter, intake)),
-  //                 MechanismActions.climbPrepPosition(elevator, arm, endEffector, shooter,
-  // intake),
-  //                 underStage);
-
-  //     Command climbCommand =
-  //         (driveToClimbPos.alongWith(
-  //                 new ConditionalCommand(
-  //                     prepForClimb.get(),
-  //                     MechanismActions.loadingPosition(elevator, arm)
-  //                         .until(withinRangeOfStage)
-  //                         .andThen(prepForClimb.get()),
-  //                     withinRangeOfStage)))
-  //             .until(driveToClimbPos::atGoal)
-  //             .andThen(new AutoClimb(drivetrainWrapper, elevator, arm, endEffector));
-
-  //     climbCommand.setName("AutoClimb");
-  //     return climbCommand;
-  //   }
 
   public static Command scoreAmp(
       EndEffector endEffector,
@@ -138,34 +73,6 @@ public class CommandComposer {
             Constants.FieldConstants::getAmpScoringPose,
             () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
-    DriveToPose driveToPrep =
-        new DriveToPose(
-            drivetrainWrapper,
-            () ->
-                GeomUtil.transformToPose(
-                    Constants.FieldConstants.getAmpScoringPose()
-                        .minus(new Pose2d(0.0, 0.5, new Rotation2d()))),
-            () -> drivetrainWrapper.getPoseEstimatorPose(true));
-
-    Measure<Distance> distToElevateMech = Units.Meters.of(3.5);
-
-    BooleanSupplier withinRangeOfAmp =
-        () ->
-            GeometryUtil.getDist(
-                    drivetrainWrapper.getPoseEstimatorPose(false),
-                    Constants.FieldConstants.getAmpScoringPose())
-                <= distToElevateMech.in(Units.Meters);
-
-    Command goToAmpPosition =
-        new ReactionArmsSetAngle(
-                elevator,
-                Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
-            .andThen(MechanismActions.ampPrepPosition(elevator, arm))
-            .andThen(
-                new ReactionArmsSetAngle(
-                    elevator,
-                    Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS));
-
     Command scoreAmp =
         new ConditionalCommand(
                 driveToAmp
@@ -195,36 +102,6 @@ public class CommandComposer {
                     .until(noGamepieceInEE))
             .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
             .finallyDo(() -> rumbleCommand.accept(0.0));
-
-    // Command scoreAmp =
-    // goToAmpPosition
-    //     .deadlineWith(driveToPrep)
-    //     .andThen(
-    //         (driveToAmp
-    //             .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
-    //             .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
-    //             .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
-    //             .finallyDo(() ->
-    // rumbleCommand.accept(0.0))).until(confirmation::getAsBoolean)
-    //             .asProxy()
-    //             .deadlineWith(
-    //                 new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-    //             .andThen(
-    //                 MechanismActions.ampPosition(elevator, arm)
-    //                     .andThen(Commands.run(() -> endEffector.setVelocity(2500),
-    // endEffector))
-    //                     .until(noGamepieceInEE))
-    //             .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP))
-    //             .finallyDo(() -> rumbleCommand.accept(0.0)));
-    // goToAmpPosition
-    //     .andThen(new WaitUntilCommand(confirmation))
-    //     .andThen(
-    //         MechanismActions.ampPosition(elevator, arm)
-    //             .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))
-    //             .until(noGamepieceInEE)
-    //             .andThen(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1)))
-    //     .alongWith(new LedSetBaseState(led, BaseRobotState.AMP_LINE_UP));
-    // .andThen(cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm));
 
     scoreAmp.setName("ScoreAmp");
 
@@ -272,6 +149,47 @@ public class CommandComposer {
     return cancelScoreAmp;
   }
 
+  private static final LoggerGroup logGroupAutoClimb = LoggerGroup.build("AutoClimb");
+
+  private static final LoggedTunableNumber distFromStage =
+      new LoggedTunableNumber("StageAlign/distFromStage", 1.738);
+
+  private static final LoggerEntry.Struct<Pose2d> log_closestPose =
+      logGroupAutoClimb.buildStruct(Pose2d.class, "closestPose");
+
+  public static Pose2d getTargetPose(AprilTagFieldLayout aprilTagFieldLayout, Pose2d robotPose) {
+    int[] tags;
+
+    if (Constants.isRedAlliance()) {
+      tags = new int[] {11, 12, 13};
+    } else {
+      tags = new int[] {14, 15, 16};
+    }
+
+    var offset = new Translation2d(distFromStage.get(), Constants.zeroRotation2d);
+    var offset_transform = new Transform2d(offset, Constants.zeroRotation2d);
+
+    Pose2d closestPose = null;
+    for (int tag : tags) {
+      var tagPose = aprilTagFieldLayout.getTagPose(tag);
+      if (tagPose.isEmpty()) continue;
+
+      var tagPose2d = tagPose.get().toPose2d();
+      var tagPose2d_offset = tagPose2d.transformBy(offset_transform);
+      if (closestPose == null) {
+        closestPose = tagPose2d_offset;
+      } else {
+        if (GeometryUtil.getDist(tagPose2d_offset, robotPose)
+            < GeometryUtil.getDist(closestPose, robotPose)) {
+          closestPose = tagPose2d_offset;
+        }
+      }
+    }
+
+    log_closestPose.info(closestPose);
+    return closestPose;
+  }
+
   public static Command stageAlign(
       AprilTagFieldLayout aprilTagLayout,
       DrivetrainWrapper wrapper,
@@ -282,8 +200,7 @@ public class CommandComposer {
             Constants.isRedAlliance()
                 ? wrapper.getPoseEstimatorPoseStageRed(false)
                 : wrapper.getPoseEstimatorPoseStageBlue(false);
-    Supplier<Pose2d> targetPose =
-        () -> AutoClimb.getTargetPose(aprilTagLayout, robotLocalization.get());
+    Supplier<Pose2d> targetPose = () -> getTargetPose(aprilTagLayout, robotLocalization.get());
     DriveToPose driveCommand = new DriveToPose(wrapper, targetPose, robotLocalization, true, 0.02);
     Command stageAlign =
         driveCommand
@@ -345,7 +262,7 @@ public class CommandComposer {
 
     Command stageAlign =
         rotateToAngle
-            // .alongWith(alignWithChain)
+            .alongWith(alignWithChain)
             .alongWith(
                 Commands.run(
                     () -> {
@@ -437,11 +354,7 @@ public class CommandComposer {
                 () ->
                     wrapper.setVelocityOverride(
                         new ChassisSpeeds(
-
-                            // rotateToAngle.withinTolerance() ?
-                            stageApproachSpeed.get()
-                            // : 0.0
-                            ,
+                            stageApproachSpeed.get(),
                             visionGamepiece.seesStageTags()
                                 ? yOffsetController.calculate(visionGamepiece.getTagYaw(), 0)
                                 : 0.0,
@@ -452,6 +365,7 @@ public class CommandComposer {
                   wrapper.resetVelocityOverride();
                   wrapper.resetRotationOverride();
                   led.setBaseRobotState(BaseRobotState.NOTE_STATUS);
+                  yOffsetController.close();
                 })
             .alongWith(new LedSetBaseState(led, BaseRobotState.CLIMB_LINE_UP));
 
@@ -464,21 +378,9 @@ public class CommandComposer {
       Elevator elevator, Arm arm, EndEffector endEffector, Shooter shooter, Intake intake) {
     return MechanismActions.climbDownPosition(elevator, arm)
         .andThen(Commands.waitSeconds(0.2))
-        // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
         .andThen(
             new ConditionalCommand(
-                    MechanismActions.climbTrapPosition(elevator, arm)
-                    // .andThen(
-                    //     // Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector)
-                    //     //     .until(() -> !endEffector.noteInEndEffector())
-                    //     //     .andThen(Commands.waitSeconds(0.5))
-                    //         // .deadlineWith(new EndEffectorPrepareNoteForTrap(endEffector))
-                    //         // .andThen(
-                    //         //     Commands.runOnce(
-                    //         //         () -> endEffector.setPercentOut(0.0), endEffector))
-                    //         // .andThen(MechanismActions.climbFinalRestPosition(elevator, arm))
-                    //         )
-                    ,
+                    MechanismActions.climbTrapPosition(elevator, arm),
                     Commands.none(),
                     () ->
                         endEffector.intakeSideTOFDetectGamepiece()

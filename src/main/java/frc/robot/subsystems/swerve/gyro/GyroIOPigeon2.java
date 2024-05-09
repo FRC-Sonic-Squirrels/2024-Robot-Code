@@ -55,7 +55,6 @@ public class GyroIOPigeon2 implements GyroIO {
     pigeonConfigurator.setYaw(0.0);
 
     yaw = pigeon.getYaw();
-    // FIXME: is this the correct method call
     yawVelocity = pigeon.getAngularVelocityZDevice();
 
     xAcceleration = pigeon.getAccelerationX();

@@ -25,8 +25,6 @@ public class VisionGamepiece extends SubsystemBase {
       logInputs.buildBoolean("IsConnected");
   private static final LoggerEntry.Bool logInputs_validTarget =
       logInputs.buildBoolean("ValidTarget");
-  private static final LoggerEntry.Decimal logInputs_totalLatencyMs =
-      logInputs.buildDecimal("TotalLatencyMs");
   private static final LoggerEntry.Decimal logInputs_timestamp =
       logInputs.buildDecimal("Timestamp");
   private static final LoggerEntry.DecimalArray logInputs_pitch =

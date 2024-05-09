@@ -63,7 +63,6 @@ public class ShooterIOSim implements ShooterIO {
   private Rotation2d pivotClosedLoopTargetAngle = Constants.zeroRotation2d;
   private double pivotControlEffort = 0.0;
   private double pivotOpenLoopVolts = 0.0;
-  private double pivotKg = 0.0;
   private double kickerVolts = 0.0;
 
   private double launcherOpenLoopVolts = 0.0;
@@ -107,7 +106,6 @@ public class ShooterIOSim implements ShooterIO {
       }
     }
 
-    // double ff = Math.cos(pivot.getAngleRads()) * pivotKg;
     double ff = 0.0;
 
     if (pivotControlMode.equals(ControlMode.POSITION)) {
@@ -153,7 +151,6 @@ public class ShooterIOSim implements ShooterIO {
   public void setPivotClosedLoopConstants(
       double kP, double kD, double kG, double maxProfiledVelocity, double maxProfiledAcceleration) {
 
-    this.pivotKg = kG;
     pivotFeedback.setP(kP);
     pivotFeedback.setD(kD);
     pivotFeedback.setConstraints(new Constraints(maxProfiledVelocity, maxProfiledAcceleration));

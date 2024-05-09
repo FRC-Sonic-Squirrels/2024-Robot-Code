@@ -151,8 +151,5 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
       double kP, double kD, double cruiseVelocity, double acceleration) {}
 
   @Override
-  public void reconfigureMotors() {
-    // TODO Auto-generated method stub
-
-  }
+  public void reconfigureMotors() {}
 }
