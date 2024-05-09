@@ -13,8 +13,8 @@ public class DeployReactionArms extends Command {
   /** Creates a new DeployReactionArms. */
   public DeployReactionArms(Elevator elevator) {
     this.elevator = elevator;
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
+    setName("DeployReactionArms");
   }
 
   // Called when the command is initially scheduled.

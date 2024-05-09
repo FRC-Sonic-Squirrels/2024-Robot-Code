@@ -22,7 +22,7 @@ public class LoadGamepieceToShooter extends Command {
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
-    // Use addRequirements() here to declare subsystem dependencies.
+
     addRequirements(shooter, endEffector, intake);
   }
 

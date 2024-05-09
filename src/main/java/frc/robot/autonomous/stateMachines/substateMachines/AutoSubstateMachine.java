@@ -60,8 +60,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
       logGroupGPVision.buildDecimal("detectedNoteDistanceFromExpectedTarget");
   private static final LoggerEntry.Decimal log_GPVisionDistanceFromRobot =
       logGroupGPVision.buildDecimal("distanceFromRobot");
-  // private static final LoggerEntry.Bool log_GPVisionWithinDistanceToRobot =
-  //     logGroupGPVision.buildBoolean("withinDistanceToRobot");
   private static final LoggerEntry.Bool log_GPVisionDetectedNoteWithinExpectedRange =
       logGroupGPVision.buildBoolean("detectedNoteWithinExpectedRange");
   private static final LoggerEntry.Bool log_GPVisionSameSideAsGamepiece =
@@ -69,8 +67,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
 
   private static final TunableNumberGroup groupTunable =
       new TunableNumberGroup("AutoSubstateMachine");
-  private static final LoggedTunableNumber distToBeginDriveToGamepiece =
-      groupTunable.build("distToBeginDriveToGamepiece", 2.0);
   private static final LoggedTunableNumber confirmationTime =
       groupTunable.build("confirmationTime", 0.4);
   protected static final LoggedTunableNumber slowDownFactor =
@@ -80,7 +76,10 @@ public abstract class AutoSubstateMachine extends StateMachine {
   protected static final LoggedTunableNumber minVelToPause =
       groupTunable.build("minVelToPause", 2.0);
 
-  /** Creates a new AutoSubstateMachine. */
+  /**
+   * Creates a new AutoSubstateMachine. SubstateMachines are responsible for picking up and shooting
+   * a gamepiece. If no gamepiece is recieved, it will quit early.
+   */
   protected AutoSubstateMachine(
       String name,
       AutosSubsystems subsystems,
@@ -209,7 +208,6 @@ public abstract class AutoSubstateMachine extends StateMachine {
     double distanceToRobot = gamepieceData.getDistance(robotPose).in(Units.Meters);
     double distanceToTarget = gamepieceData.getDistance(gamepieceTranslation).in(Units.Meters);
 
-    // var withInBeginDriveDistance = distanceToRobot <= distToBeginDriveToGamepiece.get();
     var withInExpectedTargetDistance =
         distanceToTarget <= distFromExpectedToAcceptVisionGamepiece.get();
 
@@ -221,21 +219,14 @@ public abstract class AutoSubstateMachine extends StateMachine {
     boolean gamepieceIsPastWingLine = flippedGamepieceTranslation.getX() > 5.572144031524658;
     boolean sameSideAsGamepiece = poseIsPastWingLine == gamepieceIsPastWingLine;
 
-    // log_GPVisionStatus.info(
-    //     withInBeginDriveDistance && withInExpectedTargetDistance ? "SUCCESSFUL" :
-    // "FAILED_CHECKS");
-
     log_GPVisionStatus.info(
         sameSideAsGamepiece && withInExpectedTargetDistance ? "SUCCESSFUL" : "FAILED_CHECKS");
 
     log_GPVisionDetectedNoteDistanceFromExpectedTarget.info(distanceToTarget);
     log_GPVisionDistanceFromRobot.info(distanceToRobot);
-    // log_GPVisionWithinDistanceToRobot.info(withInBeginDriveDistance);
     log_GPVisionDetectedNoteWithinExpectedRange.info(withInExpectedTargetDistance);
     log_GPVisionSameSideAsGamepiece.info(sameSideAsGamepiece);
 
-    return
-    // withInBeginDriveDistance
-    (withInExpectedTargetDistance || dontDoDistanceCheck) && sameSideAsGamepiece;
+    return (withInExpectedTargetDistance || dontDoDistanceCheck) && sameSideAsGamepiece;
   }
 }

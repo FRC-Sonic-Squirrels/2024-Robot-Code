@@ -24,6 +24,11 @@ public class DrivetrainWrapper {
   private ChassisSpeeds chassisSpeedsOverride;
   private double omegaOverride = Double.NaN;
 
+  /**
+   * Class for sending and recieving drive information with the drivetrain subsystem.
+   *
+   * @param drivetrain
+   */
   public DrivetrainWrapper(Drivetrain drivetrain) {
     this.drivetrain = drivetrain;
   }

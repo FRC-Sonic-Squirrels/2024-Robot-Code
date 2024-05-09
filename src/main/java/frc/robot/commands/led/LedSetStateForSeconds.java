@@ -20,6 +20,7 @@ public class LedSetStateForSeconds extends Command {
     this.led = led;
     this.state = state;
     this.seconds = seconds;
+    setName("LedSetStateForSeconds");
   }
 
   // Called when the command is initially scheduled.

@@ -52,7 +52,6 @@ public class SimpleMechanismVisualization {
   static MechanismLigament2d elevator =
       elevatorRoot.append(new MechanismLigament2d("elevator", 0.0, 90.0));
 
-  // FIXME: get correct numbers from CAD
   static MechanismLigament2d armConnectionToElevator =
       elevator.append(
           new MechanismLigament2d("armConnection", Units.Inches.of(3).in(Units.Meters), 40.0));

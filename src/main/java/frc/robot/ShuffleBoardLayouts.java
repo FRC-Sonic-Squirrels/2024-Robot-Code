@@ -56,7 +56,7 @@ public class ShuffleBoardLayouts {
     // systemsCheck();
   }
 
-  private void armDebugLayout() {
+  public void armDebugLayout() {
     var armTab = Shuffleboard.getTab("Arm_Debug");
     var armCommandsLayout =
         armTab
@@ -145,10 +145,6 @@ public class ShuffleBoardLayouts {
     var tunableHeight =
         elevatorTab.add("tunableHeight", 0.0).withPosition(2, 1).withSize(2, 1).getEntry();
 
-    // elevatorCommandsLayout.add(
-    //     new ConsumeSuppliedValue(
-    //         elevator, () -> tunableVoltage.getDouble(0.0), elevator::setVoltage));
-
     elevatorCommandsLayout.add(
         new ElevatorManualControl(elevator, () -> tunableVoltage.getDouble(0.0)));
 
@@ -164,10 +160,8 @@ public class ShuffleBoardLayouts {
     elevatorCommandsLayout.add(stopCommand);
   }
 
-  // FIXME: add the rest of the shooter debug logic
   public void shooterDebugLayout() {
     var shooterTab = Shuffleboard.getTab("Shooter_Debug");
-    // FIXME: change layout position
     var shooterCommandsLayout =
         shooterTab
             .getLayout("ShooterCommands", BuiltInLayouts.kList)
@@ -188,7 +182,6 @@ public class ShuffleBoardLayouts {
     shooterCommandsLayout.add(stopCommand);
   }
 
-  // FIXME: add drive and turn commands
   public void systemsCheck() {
     var systemsCheckTab = Shuffleboard.getTab("Systems_Check");
     var systemsCheckCommandsLayout =

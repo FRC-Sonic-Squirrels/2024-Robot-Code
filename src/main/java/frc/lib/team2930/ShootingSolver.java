@@ -56,6 +56,8 @@ public class ShootingSolver {
   }
 
   /**
+   * Accepts current robot geometry and returns shooting parameters
+   *
    * @return robot theta and shooter pitch
    */
   public Solution computeAngles(double currentTime, Pose2d robotPose, Translation2d robotVel) {

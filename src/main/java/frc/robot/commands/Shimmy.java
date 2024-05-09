@@ -16,12 +16,13 @@ public class Shimmy extends Command {
   private EndEffector endEffector;
   private Shooter shooter;
 
-  /** Creates a new Shimmy. */
+  /** Creates a new Shimmy. UNUSED IN FINAL COMP CODE */
   public Shimmy(Intake intake, EndEffector endEffector, Shooter shooter) {
     this.intake = intake;
     this.endEffector = endEffector;
     this.shooter = shooter;
-    // Use addRequirements() here to declare subsystem dependencies.
+
+    addRequirements(intake, endEffector, shooter);
   }
 
   // Called when the command is initially scheduled.

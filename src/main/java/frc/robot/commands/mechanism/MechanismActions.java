@@ -61,12 +61,6 @@ public class MechanismActions {
     return goToPositionParallel(elevator, arm, MechanismPositions::ampPosition);
   }
 
-  // public static Command ampPosition(Elevator elevator, Arm arm) {
-  // return ampStage3Position(elevator, arm)
-  // .andThen(ampStage2Position(elevator, arm))
-  // .andThen(ampStage1Position(elevator, arm));
-  // }
-
   public static Command ampPositionToLoadPosition(Elevator elevator, Arm arm) {
     return ampStage1Position(elevator, arm)
         .andThen(ampStage2Position(elevator, arm))
@@ -211,7 +205,6 @@ public class MechanismActions {
                             && position.get().armAngle().getRadians()
                                 >= Constants.ArmConstants.ARM_SAFE_ANGLE.getRadians()));
             if (ignoreSafety) runningElevatorSafety = false;
-            // && targetPosition.armAngle().getRadians() >= Math.toRadians(60.0)
 
             if (runningElevatorSafety) {
               elevator.setHeight(safeHeight);
@@ -229,7 +222,6 @@ public class MechanismActions {
 
           @Override
           public boolean isFinished() {
-            // TODO Auto-generated method stub
             return elevatorInPosition && armInPosition;
           }
         };

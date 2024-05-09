@@ -40,7 +40,7 @@ public class HomeMechanism extends Command {
   public HomeMechanism(Elevator elevator, Arm arm) {
     this.elevator = elevator;
     this.arm = arm;
-    // Use addRequirements() here to declare subsystem dependencies.
+
     addRequirements(elevator, arm);
     setName("HomeMechanism");
   }

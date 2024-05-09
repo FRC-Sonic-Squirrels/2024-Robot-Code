@@ -15,6 +15,13 @@ public class ConsumeSuppliedValue extends Command {
 
   private final Supplier<Double> supplier;
 
+  /**
+   * Command to periodically accept supplied value
+   *
+   * @param subsystem
+   * @param supplier
+   * @param consumer
+   */
   public ConsumeSuppliedValue(
       Subsystem subsystem, Supplier<Double> supplier, Consumer<Double> consumer) {
     this.consumer = consumer;

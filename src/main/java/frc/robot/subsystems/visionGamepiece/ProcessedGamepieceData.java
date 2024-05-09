@@ -11,10 +11,6 @@ import frc.robot.Constants;
 import frc.robot.Constants.FieldConstants.Gamepieces;
 
 public class ProcessedGamepieceData {
-  private Rotation2d targetYaw;
-  private Rotation2d targetPitch;
-  private double distance;
-  private Pose2d pose;
   public Pose2d globalPose;
   public double timestamp_RIOFPGA_capture;
 
@@ -25,10 +21,6 @@ public class ProcessedGamepieceData {
       Pose2d pose,
       Pose2d globalPose,
       double timestamp_RIOFPGA_capture) {
-    this.targetYaw = targetYaw;
-    this.targetPitch = targetPitch;
-    this.distance = distance;
-    this.pose = pose;
     this.globalPose = globalPose;
     this.timestamp_RIOFPGA_capture = timestamp_RIOFPGA_capture;
   }

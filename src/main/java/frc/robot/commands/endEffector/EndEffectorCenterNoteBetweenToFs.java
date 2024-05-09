@@ -11,7 +11,6 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
-import frc.robot.Constants;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -61,26 +60,6 @@ public class EndEffectorCenterNoteBetweenToFs extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // Old Centering Code
-    if (Constants.unusedCode) {
-      var intakeSideTofSeenGamepiece = endEffector.intakeSideTOFDetectGamepiece();
-      var shooterSideTofSeenGamepiece = endEffector.shooterSideTOFDetectGamepiece();
-
-      // maybe note backed up into intake?
-      if (!intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-        endEffector.setVelocity(1200);
-
-      } else if (intakeSideTofSeenGamepiece && !shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(0.3);
-
-      } else if (!intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(-0.3);
-
-      } else if (intakeSideTofSeenGamepiece && shooterSideTofSeenGamepiece) {
-        endEffector.setPercentOut(0.0);
-      }
-    }
-    // New Centering Code
     double difference = endEffector.noteOffsetInches();
     log_difference.info(difference);
     if (Double.isFinite(difference)) {

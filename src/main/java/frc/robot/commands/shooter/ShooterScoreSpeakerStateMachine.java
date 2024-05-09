@@ -8,8 +8,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -113,7 +111,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final EndEffector endEffector;
   private final Intake intake;
   private final LED led;
-  // such as driver confirmation, in auto this is always true
   private final Consumer<Double> rumbleConsumer;
   private final BooleanSupplier externalConfirmation;
   private final double forceShotIn;
@@ -143,7 +140,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
   private final LoggerEntry.Condition.State state_allOtherConditionsGood;
   private final LoggerEntry.Condition.State state_shootingDelayDueToVision;
 
-  // FIXME: are these constants correct?
   private final ShootingSolver solver =
       new ShootingSolver(
           Constants.FieldConstants.getSpeakerTranslation3D(),
@@ -267,9 +263,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
                 endEffector)
             .finallyDo(() -> led.setBaseRobotState(BaseRobotState.NOTE_STATUS));
 
-    // FIXME: probably dont need this add requirments here once we add the
-    // asCommand(Subsytem...
-    // requirments) method to the StateMachine class
     command.addRequirements(shooter, endEffector, intake);
     command.setName("ShooterScoreSpeakerStateMachine");
 
@@ -361,10 +354,7 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
 
     // ramp up rpm
     double targetRPM = tunableRPM.get();
-    shooter.setLauncherRPM(
-        // ShooterConstants.SHOOTING_RPM
-        targetRPM + 150, targetRPM);
-    // shooter.setLauncherVoltage(10.0);
+    shooter.setLauncherRPM(targetRPM + 150, targetRPM);
 
     if (shooter.noteInShooter()) {
       shooter.setKickerPercentOut(0.0);
@@ -374,8 +364,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
           "finalConfirmationsBeforeShooting", this::finalConfirmationsBeforeShooting);
     }
 
-    // FIXME: look into calculating gear ratio to make it so kicker and EE spin at
-    // same speed
     shooter.setPivotPosition(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD);
     if (shooter.isPivotIsAtTarget(Constants.ShooterConstants.Pivot.MIN_ANGLE_RAD)) {
       shooter.markStartOfNoteLoading();
@@ -594,15 +582,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       return false;
     }
 
-    // check if distance is less than max shooting distance - REMOVED TO ALLOW FOR
-    // CLUTCH SHOTS IN
-    // TELEOP
-    // var maxDistance = Constants.ShooterConstants.MAX_SHOOTING_DISTANCE.in(Units.Meters);
-    // if (solverResult == null
-    //     || solverResult.xyDistance() > maxDistance && DriverStation.isAutonomous()) {
-    //   return false;
-    // }
-
     return true;
   }
 
@@ -637,21 +616,6 @@ public class ShooterScoreSpeakerStateMachine extends StateMachine {
       double pivotError = desiredShootingPitch.getDegrees() - shooter.getPitch().getDegrees();
       log_shooterPitchError.info(pivotError);
     }
-  }
-
-  private Rotation2d getPitchTolerance(Measure<Distance> distance) {
-    return Rotation2d.fromRadians(
-        Math.max(
-            Math.atan2(
-                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters)
-                        + Constants.FieldConstants.SPEAKER_GOAL_HEIGHT.in(Units.Meters),
-                    distance.in(Units.Meters)
-                        - Constants.FieldConstants.SPEAKER_GOAL_LENGTH.in(Units.Meters))
-                - Math.atan2(
-                    Constants.FieldConstants.SPEAKER_HEIGHT.in(Units.Meters),
-                    distance.in(Units.Meters))
-                - Math.toRadians(0.3),
-            Math.toRadians(0.2)));
   }
 
   private Rotation2d getYawTolerance(Translation2d offset) {

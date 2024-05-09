@@ -3,7 +3,6 @@ package frc.robot.subsystems.endEffector;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.lib.team2930.TunableNumberGroup;
 import frc.robot.Constants;
 
 public class EndEffectorIOSim implements EndEffectorIO {
@@ -13,8 +12,6 @@ public class EndEffectorIOSim implements EndEffectorIO {
           DCMotor.getFalcon500(1),
           Constants.EndEffectorConstants.GEARING,
           Constants.EndEffectorConstants.MOI);
-
-  private static final TunableNumberGroup group = new TunableNumberGroup("sim_EndEffector");
 
   private double timeMarkForNoteIntakingDone = Double.NaN;
   private double timeMarkForNoteDroppingDone = Double.NaN;

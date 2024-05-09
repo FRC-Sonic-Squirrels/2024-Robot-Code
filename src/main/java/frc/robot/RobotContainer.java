@@ -51,9 +51,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.autonomous.AutosManager;
 import frc.robot.autonomous.AutosManager.Auto;
 import frc.robot.autonomous.records.AutosSubsystems;
-import frc.robot.commands.AutoClimb;
 import frc.robot.commands.LoadGamepieceToShooter;
-import frc.robot.commands.ScoreSpeaker;
 import frc.robot.commands.drive.DrivetrainDefaultTeleopDrive;
 import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
@@ -136,15 +134,11 @@ public class RobotContainer {
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup("Speaker");
-  private static final LoggedTunableNumber tunableX = groupTunable.build("dX", 50.0);
-  private static final LoggedTunableNumber tunableY = groupTunable.build("dY", 0);
   private static final LoggedTunableNumber passThroughVel =
       groupTunable.build("PlopThroughVel", 5000);
 
   private static final LoggedTunableNumber passThroughPivotPitch =
       groupTunable.build("plopThroughPivotPitch", 12.0);
-
-  private final ShuffleBoardLayouts shuffleBoardLayouts;
 
   private final LoggedDashboardChooser<String> autoChooser =
       new LoggedDashboardChooser<>("Auto Routine");
@@ -163,19 +157,8 @@ public class RobotContainer {
   Trigger homeSensorsButtonTrigger =
       new Trigger(() -> !homeSensorsButton.get() && !DriverStation.isEnabled());
 
-  // private LoggedTunableNumber tunableX = new
-  // LoggedTunableNumber("Localization/tunableXPose",
-  // 0.0);
-  // private LoggedTunableNumber tunableY = new
-  // LoggedTunableNumber("Localization/tunableYPose",
-  // 0.0);
-
   boolean brakeModeTriggered = true;
 
-  ScoreSpeaker scoreSpeaker;
-  AutoClimb autoClimb;
-
-  private boolean is_teleop;
   private boolean is_autonomous;
 
   private boolean reactionArmsDown = false;
@@ -312,33 +295,9 @@ public class RobotContainer {
           break;
 
         case ROBOT_2024_MAESTRO:
-          // README: for development purposes, comment any of the real IO's you DON'T want
-          // to use
-          // and
-          // uncomment the empty IO's as a replacement
-
-          // -- All real IO's
-
-          // vision =
-          // new Vision(
-          // aprilTagLayout,
-          // drivetrain::getPoseEstimatorPose,
-          // drivetrain::addVisionEstimate,
-          // config.getVisionModuleObjects());
-          // visionGamepiece =
-          // new VisionGamepiece(new VisionGamepieceIOReal(),
-          // drivetrain::getPoseEstimatorPose);
-
           intake = new Intake(new IntakeIOReal());
-          // elevator = new Elevator(new ElevatorIOReal());
-          // arm = new Arm(new ArmIOReal());
           endEffector = new EndEffector(new EndEffectorIOReal());
           shooter = new Shooter(new ShooterIOReal());
-
-          // -- All empty IO's
-          // drivetrain =
-          // new Drivetrain(config, new GyroIO() {},
-          // config.getReplaySwerveModuleObjects());
           elevator = new Elevator(new ElevatorIOReal());
           arm = new Arm(new ArmIOReal());
           drivetrain =
@@ -354,16 +313,9 @@ public class RobotContainer {
                   drivetrain::getRotationGyroOnly,
                   drivetrain::addVisionEstimate,
                   config.getVisionModuleObjects());
-
           visionGamepiece =
               new VisionGamepiece(
                   new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
-
-          // intake = new Intake(new IntakeIO() {});
-
-          // endEffector = new EndEffector(new EndEffectorIO() {});
-          // shooter = new Shooter(new ShooterIO() {});
-
           led =
               new LED(
                   elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
@@ -401,7 +353,6 @@ public class RobotContainer {
 
     drivetrainWrapper = new DrivetrainWrapper(drivetrain);
 
-    // FIXME: remove once we are happy with path planner based swerve
     // characterization
     AutoBuilder.configureHolonomic(
         drivetrain::getPoseEstimatorPose,
@@ -436,10 +387,6 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    shuffleBoardLayouts =
-        new ShuffleBoardLayouts(arm, elevator, endEffector, intake, shooter, drivetrain);
-
-    scoreSpeaker = new ScoreSpeaker(drivetrainWrapper, shooter, endEffector, () -> true);
     twenty_Second_Warning = new Trigger(() -> DriverStation.getMatchTime() > 115);
 
     noteInRobot =
@@ -457,6 +404,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // ----------- DRIVER CONTROLS ------------
 
+    // AUTO DRIVE TO GAMEPIECE
     // driverController
     //     .leftTrigger()
     //     .whileTrue(
@@ -467,6 +415,7 @@ public class RobotContainer {
     //             endEffector::intakeSideTOFDetectGamepiece,
     //             () -> drivetrainWrapper.getPoseEstimatorPose(true)));
 
+    // RESET POSE ROTATION (REZERO)
     driverController
         .back()
         .onTrue(
@@ -478,6 +427,7 @@ public class RobotContainer {
                 },
                 drivetrain));
 
+    // INTAKE GAMEPIECE
     driverController
         .rightBumper()
         .whileTrue(
@@ -506,10 +456,6 @@ public class RobotContainer {
                       driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
                       led.setRobotState(RobotState.BASE);
                     }))
-        // .onFalse(
-        //     new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter)
-        //         .withTimeout(2.0));
-
         .onFalse(
             Commands.run(
                     () -> {
@@ -549,6 +495,7 @@ public class RobotContainer {
                     elevator),
                 () -> reactionArmsDown);
 
+    // STAGE ALIGN
     driverController
         .povUp()
         .whileTrue(
@@ -566,11 +513,13 @@ public class RobotContainer {
                 () -> reactionArmsDown,
                 toggleReactionArms));
 
+    // DRIVE INTO CHAIN
     driverController
         .povLeft()
         .whileTrue(
             CommandComposer.driveToChain(aprilTagLayout, drivetrainWrapper, led, visionGamepiece));
 
+    // SHOOT INTO SPEAKER
     driverController
         .rightTrigger()
         .whileTrue(
@@ -585,6 +534,7 @@ public class RobotContainer {
                     (rumble) -> driverController.getHID().setRumble(RumbleType.kBothRumble, rumble))
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
+    // SCORE INTO AMP
     driverController
         .leftBumper()
         .onTrue(
@@ -599,14 +549,10 @@ public class RobotContainer {
                 true,
                 driverController.a(),
                 (r) -> driverController.getHID().setRumble(RumbleType.kBothRumble, r)))
-        // .whileTrue(
-        //     new RotateToAngle(
-        //         drivetrainWrapper,
-        //         () -> Rotation2d.fromDegrees(90),
-        //         () -> drivetrainWrapper.getPoseEstimatorPose(true)))
         .onFalse(
             CommandComposer.cancelScoreAmp(drivetrainWrapper, endEffector, elevator, arm, led));
 
+    // ROTATE TO PASS SHOT ANGLE
     driverController
         .leftTrigger()
         .whileTrue(
@@ -620,12 +566,14 @@ public class RobotContainer {
                         .getAngle(),
                 () -> drivetrainWrapper.getGlobalPoseEstimatorPose(true)));
 
+    // SHOOT PASS SHOT
     driverController
         .x()
         .onTrue(
             Commands.run(
                 () -> {
                   shooter.setLauncherRPM(6000, 5000);
+                  // FIXME: Wait until pivot position is correct
                   if (shooter.getRPM() > 5500) {
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
@@ -649,6 +597,7 @@ public class RobotContainer {
                 endEffector,
                 intake));
 
+    // STOW MECHANISM
     driverController
         .povDown()
         .onTrue(
@@ -661,6 +610,7 @@ public class RobotContainer {
                         Constants.ElevatorConstants.ReactionArmConstants
                             .REACTION_ARM_HOME_ROTATIONS)));
 
+    // SUBWOOFER SHOT
     driverController
         .y()
         .whileTrue(
@@ -676,24 +626,13 @@ public class RobotContainer {
                 true,
                 Constants.ShooterConstants.Pivot.MAX_ANGLE_RAD.minus(Rotation2d.fromDegrees(3.0))));
 
-    // driverController
-    //     .povRight()
-    //     .whileTrue(
-    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> 1.0, () -> 0.0, () ->
-    // 0.0));
-
-    // driverController
-    //     .povDown()
-    //     .whileTrue(
-    //         new DrivetrainDefaultTeleopDrive(drivetrainWrapper, () -> -1.0, () -> 0.0, () ->
-    // 0.0));
-
     // ---------- OPERATOR CONTROLS -----------
     DoubleSupplier elevatorDelta =
         () -> MathUtil.applyDeadband(-operatorController.getLeftY() * 1, 0.3) / 5.0;
     DoubleSupplier armDelta =
         () -> MathUtil.applyDeadband(operatorController.getRightY() * -1, 0.3) * 10.0;
 
+    // MECHANISM MANUAL CONTROL
     operatorController
         .leftTrigger()
         .whileTrue(
@@ -706,8 +645,10 @@ public class RobotContainer {
                     arm,
                     () -> arm.getAngle().plus(Rotation2d.fromDegrees(armDelta.getAsDouble())))));
 
+    // TOGGLE REACTION ARMS
     operatorController.leftBumper().onTrue(toggleReactionArms.get());
 
+    // PREP MECHANISM FOR CLIMB
     operatorController
         .povUp()
         .onTrue(
@@ -719,14 +660,22 @@ public class RobotContainer {
                 intake,
                 () -> reactionArmsDown,
                 toggleReactionArms));
+
+    // CLIMB AND TRAP (if gamepiece is possessed)
     operatorController
         .povLeft()
         .onTrue(CommandComposer.autoClimb(elevator, arm, endEffector, shooter, intake));
+
+    // JUST BRING MECHANISM DOWN
     operatorController.povDown().onTrue(MechanismActions.climbDownPosition(elevator, arm));
+
+    // JUST BRING MECHANISM TO TRAP POSITION
     operatorController.povRight().onTrue(MechanismActions.climbTrapPosition(elevator, arm));
 
+    // PULL MECHANISM OUT OF TRAP TO STAY LEGAL
     operatorController.x().onTrue(MechanismActions.climbFinalRestPosition(elevator, arm));
 
+    // ATTEMPT TO GET STUCK NOTE OUT OF ROBOT
     operatorController
         .y()
         .onTrue(
@@ -761,21 +710,26 @@ public class RobotContainer {
                     elevator.setReactionArmsRotationsCMD(
                         ElevatorConstants.ReactionArmConstants.REACTION_ARM_HOME_ROTATIONS)));
 
+    // RUN END EFFECTOR
     operatorController
         .b()
         .onTrue(Commands.runOnce(() -> endEffector.setVelocity(2500), endEffector))
         .onFalse(Commands.runOnce(() -> endEffector.setPercentOut(0.0), endEffector));
 
+    // CENTER NOTE BETWEEN TIME OF FLIGHTS
     operatorController
         .a()
         .whileTrue(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter));
 
+    // LOAD GAMEPIECE FOR SHOT
     operatorController
         .rightBumper()
         .onTrue(new LoadGamepieceToShooter(shooter, endEffector, intake));
 
+    // EJECT GAMEPIECE
     operatorController.rightTrigger().whileTrue(new IntakeEject(shooter, endEffector, intake));
 
+    // PREP NOTE FOR TRAP
     operatorController.start().onTrue(new EndEffectorPrepareNoteForTrap(endEffector));
 
     // --- SIM ONLY --
@@ -818,7 +772,6 @@ public class RobotContainer {
                       brakeModeFailure =
                           !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
 
-                      //   drivetrain.setNeturalMode(NeutralModeValue.Coast);
                       brakeModeTriggered = false;
                     },
                     elevator,
@@ -838,7 +791,6 @@ public class RobotContainer {
 
                       brakeModeFailure =
                           !armSuccess || !elevatorSuccess || !shooterSuccess || !reactionArmSuccess;
-                      //   drivetrain.setNeturalMode(NeutralModeValue.Brake);
                       brakeModeTriggered = true;
                     },
                     elevator,
@@ -870,10 +822,6 @@ public class RobotContainer {
     SmartDashboard.putData(
         "PV REBOOT 2_Shooter_Right",
         new RunsWhenDisabledInstantCommand(() -> Vision.rebootPhotonVision("10.29.30.14")));
-
-    // SmartDashboard.putData(
-    //     "ReconfigureSwerveAndGyro",
-    //     new RunsWhenDisabledInstantCommand(drivetrain::reconfigureDevices));
   }
 
   /**
@@ -912,29 +860,23 @@ public class RobotContainer {
   }
 
   public void enterDisabled() {
-    // FIXME: need to remove max distance away from current estimate restriction for
-    // vision
     resetSubsystems();
     vision.useMaxDistanceAwayFromExistingEstimate(false);
     vision.useGyroBasedFilteringForVision(false);
 
-    is_teleop = false;
     is_autonomous = false;
   }
 
   public void enterAutonomous() {
-    // setBrakeMode();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
 
     visionGamepiece.setPipelineIndex(0);
 
-    is_teleop = false;
     is_autonomous = true;
   }
 
   public void enterTeleop() {
-    // setBrakeMode();
     resetDrivetrainResetOverrides();
     vision.useMaxDistanceAwayFromExistingEstimate(true);
     vision.useGyroBasedFilteringForVision(true);
@@ -943,7 +885,6 @@ public class RobotContainer {
 
     visionGamepiece.setPipelineIndex(2);
 
-    is_teleop = true;
     is_autonomous = false;
   }
 

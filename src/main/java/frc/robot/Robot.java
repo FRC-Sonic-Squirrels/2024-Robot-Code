@@ -74,7 +74,6 @@ public class Robot extends LoggedRobot {
   private boolean hasEnteredTeleAtSomePoint = false;
   private boolean hasEnteredAutoAtSomePoint = false;
 
-  private boolean isAutonomousPrev = false;
   private boolean teleopPrepped = false;
 
   // Enables power distribution logging
@@ -121,7 +120,6 @@ public class Robot extends LoggedRobot {
         if (Constants.unusedCode) {
           LoggerGroup.setDataLog("logs");
         }
-        // FIXME: add a git ignored folder where logs are saved
         break;
 
       case REPLAY:

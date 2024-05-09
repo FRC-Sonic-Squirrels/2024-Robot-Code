@@ -27,8 +27,6 @@ public class GamepieceVisualization {
   private static Translation2d robotVelOfShot = Constants.zeroTranslation2d;
   private static Rotation2d shooterAngleOfShot = Constants.zeroRotation2d;
   private static double shooterRPMofShot = 0.0;
-  private static final boolean shootingPrev = false;
-  private static final boolean gamepieceShot = false;
   private static boolean showingPath = false;
   private static boolean prevShowingPath = false;
   private static boolean showPath = false;

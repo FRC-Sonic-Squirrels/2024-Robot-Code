@@ -387,7 +387,6 @@ public class Drivetrain extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds, boolean prioritizeRotation) {
-    // new Double().compareTo(null)
     if (prioritizeRotation
         && speeds.vxMetersPerSecond > 0.001
         && speeds.vyMetersPerSecond > 0.001) {
@@ -607,10 +606,6 @@ public class Drivetrain extends SubsystemBase {
       return poseEstimatorGlobal.getLatestPose();
     }
   }
-
-  // public Rotation2d getRotation() {
-  //   return getPoseEstimatorPose().getRotation();
-  // }
 
   public Rotation2d getRotationGyroOnly() {
     return rawOdometryPose.getRotation();

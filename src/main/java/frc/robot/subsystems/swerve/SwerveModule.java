@@ -152,11 +152,7 @@ public class SwerveModule {
 
   private void updateConstants() {
     io.setDriveClosedLoopConstraints(
-        driveKP.get(),
-        driveKD.get(),
-        driveKS.get(),
-        driveKV.get(),
-        driveKA.get()); // FIXME: do we need need ks?
+        driveKP.get(), driveKD.get(), driveKS.get(), driveKV.get(), driveKA.get());
 
     io.setTurnClosedLoopConstraints(
         angleKP.get(), angleKD.get(), turnCruiseVelocity.get(), turnAcceleration.get());

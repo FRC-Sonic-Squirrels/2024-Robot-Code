@@ -72,7 +72,6 @@ public class AutosManager {
     list.add(this::rushCenterGP1FirstThenClose);
     list.add(this::rushCenterGP2FirstThenClose);
     list.add(this::cornerAuto);
-    // list.add(this::sourceAutoPlopThenClose);
     list.add(this::sourceAutoFarClosePlop);
     // list.add(this::simpleShootAuto);
 
@@ -130,8 +129,6 @@ public class AutosManager {
       var supplier = compAutos.get(i);
       var name = supplier.get().name;
       if (i == 0) {
-        // FIXME: maybe we dont want do nothing as our default auto? maybe shoot and mobility as
-        // default?
         // Do nothing command must be first in list.
         chooser.addDefaultOption(name, name);
       } else {
@@ -203,21 +200,6 @@ public class AutosManager {
     AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
     return new Auto(
         "sourceAutoPlop",
-        state.asCommand(),
-        Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
-  }
-
-  private Auto sourceAutoPlopThenClose() {
-    List<PathDescriptor> paths = new ArrayList<>();
-    // paths.add(new PathDescriptor("SsourcePlop-G5", "G5-S3", true, false, false, false));
-    // paths.add(new PathDescriptor("S3-PG1", "PG1-S3", true, true, true, true));
-    // paths.add(new PathDescriptor("S3-CG3", "CG3-CS2", true, false, false, false));
-    // paths.add(new PathDescriptor("CS2-CG2", null, true, false, false, false));
-    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
-    // paths.add(new PathDescriptor("CG2-CG1", null, true, false, false, false));
-    AutoStateMachine state = new AutoStateMachine(subsystems, config, true, paths);
-    return new Auto(
-        "sourceAutoPlopThenClose",
         state.asCommand(),
         Choreo.getTrajectory("SsourcePlop-G5").getInitialPose());
   }
@@ -464,6 +446,7 @@ public class AutosManager {
   CS3: {"dataType":"choreo/waypoint","x":2.110,"y":4.438,"heading":-0.390,"isInitialGuess":false,
   "translationConstrained":true,"headingConstrained":true,"controlIntervalCount":40}
   */
+
   public static Pose2d getPoseFromString(String string) {
     if (string.charAt(0) == 'G') {
       double y = string.charAt(1) * (-841.0 / 500.0) + (2289.0 / 250.0);

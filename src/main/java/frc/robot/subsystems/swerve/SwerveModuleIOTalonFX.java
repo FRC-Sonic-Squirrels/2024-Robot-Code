@@ -93,8 +93,6 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
   private MotionMagicVoltage turnMotionMagicVoltageRequest =
       new MotionMagicVoltage(0.0).withEnableFOC(true);
 
-  private final IndividualSwerveModuleConfig moduleSpecificConfig;
-
   private Rotation2d turnRelativeOffset; // Relative + Offset = Absolute
   private double lastPositionMeters;
 
@@ -107,7 +105,6 @@ public class SwerveModuleIOTalonFX implements SwerveModuleIO {
       RobotConfig globalConfig, IndividualSwerveModuleConfig moduleSpecificConfig) {
 
     // --- define constants ---
-    this.moduleSpecificConfig = moduleSpecificConfig;
 
     this.distanceToRotation =
         1.0 / globalConfig.getWheelRadius().in(edu.wpi.first.units.Units.Meters);

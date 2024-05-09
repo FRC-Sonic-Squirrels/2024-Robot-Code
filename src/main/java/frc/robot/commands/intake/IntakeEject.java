@@ -19,8 +19,9 @@ public class IntakeEject extends Command {
     this.shooter = shooter;
     this.endEffector = endEffector;
     this.intake = intake;
-    // Use addRequirements() here to declare subsystem dependencies.
+
     addRequirements(shooter, endEffector, intake);
+    setName("IntakeEject");
   }
 
   // Called when the command is initially scheduled.

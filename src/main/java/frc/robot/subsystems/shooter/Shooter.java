@@ -86,7 +86,7 @@ public class Shooter extends SubsystemBase {
   private static final LoggedTunableNumber pivotToleranceDegrees =
       group.build("pivotToleranceDegrees", 0.5);
   private static final LoggedTunableNumber launcherToleranceRPM =
-      group.build("launcherToleranceRPM", 150); // TODO: tune for better tolerance
+      group.build("launcherToleranceRPM", 150);
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
       group.build("distanceToTriggerNote", 10.0);
 
@@ -139,7 +139,6 @@ public class Shooter extends SubsystemBase {
 
   private Rotation2d targetPivotPosition = Constants.zeroRotation2d;
   private double topRollerTargetLauncherRPM = 0.0;
-  private double bottomRollerTargetLauncherRPM = 0.0;
 
   /** Creates a new ShooterSubsystem. */
   public Shooter(ShooterIO io) {
@@ -274,13 +273,11 @@ public class Shooter extends SubsystemBase {
   public void setLauncherRPM(double topRollerRPM, double bottomRollerRPM) {
     io.setLauncherRPM(topRollerRPM, bottomRollerRPM);
     topRollerTargetLauncherRPM = topRollerRPM;
-    bottomRollerTargetLauncherRPM = bottomRollerRPM;
   }
 
   public void setLauncherRPM(double rpm) {
     io.setLauncherRPM(rpm, rpm);
     topRollerTargetLauncherRPM = rpm;
-    bottomRollerTargetLauncherRPM = rpm;
   }
 
   public double getRPM() {

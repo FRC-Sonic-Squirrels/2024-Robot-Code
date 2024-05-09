@@ -16,8 +16,6 @@ import frc.robot.autonomous.stateMachines.substateMachines.AutoSubstateMachineDr
 import frc.robot.commands.shooter.ShooterScoreSpeakerStateMachine;
 import frc.robot.configs.RobotConfig;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -33,8 +31,6 @@ public class AutoStateMachine extends StateMachine {
   private final DrivetrainWrapper drive;
   private final Shooter shooter;
   private final EndEffector endEffector;
-  private final Elevator elevator;
-  private final Arm arm;
   private final Intake intake;
   private final VisionGamepiece visionGamepiece;
   private final LED led;
@@ -105,8 +101,6 @@ public class AutoStateMachine extends StateMachine {
     this.drive = subsystems.drivetrain();
     this.shooter = subsystems.shooter();
     this.endEffector = subsystems.endEffector();
-    this.elevator = subsystems.elevator();
-    this.arm = subsystems.arm();
     this.intake = subsystems.intake();
     this.visionGamepiece = subsystems.visionGamepiece();
     this.led = subsystems.led();

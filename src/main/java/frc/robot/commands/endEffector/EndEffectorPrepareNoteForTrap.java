@@ -24,7 +24,6 @@ public class EndEffectorPrepareNoteForTrap extends Command {
 
     addRequirements(endEffector);
     setName("endEffectorPrepareForTrap");
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.

@@ -172,12 +172,6 @@ public class MechanismPositions {
         Rotation2d.fromDegrees(ampStage3ArmAngleDegrees.get()));
   }
 
-  //   public static MechanismPosition trapPosition() {
-  //     return new MechanismPosition(
-  //         Units.Inches.of(trapElevatorHeightInches.get()),
-  //         Rotation2d.fromDegrees(trapArmAngleDegrees.get()));
-  //   }
-
   public static MechanismPosition climbPrepUnderStagePosition() {
     return new MechanismPosition(
         Units.Inches.of(climbPrepUnderStageElevatorHeightInches.get()),
