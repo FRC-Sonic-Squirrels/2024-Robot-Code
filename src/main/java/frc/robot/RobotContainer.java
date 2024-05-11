@@ -133,12 +133,16 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
+  public boolean shooting = false;
+
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup("Speaker");
   private static final LoggedTunableNumber passThroughVel =
-      groupTunable.build("PlopThroughVel", 5000);
+      groupTunable.build("PlopThrough/Vel", 1000);
+  private static final LoggedTunableNumber passThroughRPM =
+      groupTunable.build("PlopThrough/RPM", 500);
 
   private static final LoggedTunableNumber passThroughPivotPitch =
-      groupTunable.build("plopThroughPivotPitch", 12.0);
+      groupTunable.build("PlopThrough/PivotPitch", 18.0);
 
   private final LoggedDashboardChooser<String> autoChooser =
       new LoggedDashboardChooser<>("Auto Routine");
@@ -572,14 +576,28 @@ public class RobotContainer {
         .onTrue(
             Commands.run(
                 () -> {
-                  shooter.setLauncherRPM(6000, 5000);
+                  shooter.setLauncherRPM(passThroughRPM.get());
+                  if (!shooter.noteInShooter()) {
+                    shooter.setKickerVelocity(passThroughVel.get());
+                    endEffector.setVelocity(passThroughVel.get());
+                    intake.setVelocity(passThroughVel.get());
+                  } else {
+                    shooter.setPivotPosition(Rotation2d.fromDegrees(passThroughPivotPitch.get()));
+                    if (shooting == false) {
+                      shooter.setKickerPercentOut(0);
+                      endEffector.setPercentOut(0);
+                      intake.setPercentOut(0);
+                    }
+                  }
                   // FIXME: Wait until pivot position is correct
-                  if (shooter.getRPM() > 5500) {
+                  if (shooter.getRPM() > passThroughRPM.get() - passThroughRPM.get() / 5.0
+                      && shooter.isPivotIsAtTarget(
+                          Rotation2d.fromDegrees(passThroughPivotPitch.get()))) {
+                    shooting = true;
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
                     intake.setVelocity(passThroughVel.get());
                   }
-                  shooter.setPivotPosition(Rotation2d.fromDegrees(passThroughPivotPitch.get()));
                 },
                 shooter,
                 endEffector,
@@ -587,6 +605,7 @@ public class RobotContainer {
         .onFalse(
             Commands.runOnce(
                 () -> {
+                  shooting = false;
                   shooter.setPercentOut(0);
                   shooter.setKickerPercentOut(0.0);
                   endEffector.setPercentOut(0.0);
