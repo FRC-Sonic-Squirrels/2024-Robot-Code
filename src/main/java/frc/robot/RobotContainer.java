@@ -137,12 +137,12 @@ public class RobotContainer {
 
   private static final TunableNumberGroup groupTunable = new TunableNumberGroup("Speaker");
   private static final LoggedTunableNumber passThroughVel =
-      groupTunable.build("PlopThrough/Vel", 1000);
+      groupTunable.build("PlopThrough/Vel", 300);
   private static final LoggedTunableNumber passThroughRPM =
-      groupTunable.build("PlopThrough/RPM", 500);
+      groupTunable.build("PlopThrough/RPM", 2500);
 
   private static final LoggedTunableNumber passThroughPivotPitch =
-      groupTunable.build("PlopThrough/PivotPitch", 18.0);
+      groupTunable.build("PlopThrough/PivotPitch", 60.0);
 
   private final LoggedDashboardChooser<String> autoChooser =
       new LoggedDashboardChooser<>("Auto Routine");
@@ -459,28 +459,28 @@ public class RobotContainer {
                     () -> {
                       driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
                       led.setRobotState(RobotState.BASE);
-                    }))
-        .onFalse(
-            Commands.run(
-                    () -> {
-                      endEffector.setVelocity(500);
-                      intake.setVelocity(500);
-                      shooter.setKickerVelocity(500);
-                    },
-                    endEffector,
-                    intake,
-                    shooter)
-                .until(
-                    () ->
-                        !endEffector.intakeSideTOFDetectGamepiece()
-                            && endEffector.shooterSideTOFDetectGamepiece())
-                .withTimeout(4.0)
-                .andThen(
-                    new IntakeEject(shooter, endEffector, intake)
-                        .until(() -> !endEffector.shooterSideTOFDetectGamepiece()))
-                .withTimeout(1.5)
-                .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
-                .withTimeout(2.0));
+                    }));
+    // .onFalse(
+    //     Commands.run(
+    //             () -> {
+    //               endEffector.setVelocity(500);
+    //               intake.setVelocity(500);
+    //               shooter.setKickerVelocity(500);
+    //             },
+    //             endEffector,
+    //             intake,
+    //             shooter)
+    //         .until(
+    //             () ->
+    //                 !endEffector.intakeSideTOFDetectGamepiece()
+    //                     && endEffector.shooterSideTOFDetectGamepiece())
+    //         .withTimeout(4.0)
+    //         .andThen(
+    //             new IntakeEject(shooter, endEffector, intake)
+    //                 .until(() -> !endEffector.shooterSideTOFDetectGamepiece()))
+    //         .withTimeout(1.5)
+    //         .andThen(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+    //         .withTimeout(2.0));
 
     Supplier<Command> toggleReactionArms =
         () ->
@@ -590,9 +590,10 @@ public class RobotContainer {
                     }
                   }
                   // FIXME: Wait until pivot position is correct
-                  if (shooter.getRPM() > passThroughRPM.get() - passThroughRPM.get() / 5.0
+                  if (shooter.getRPM() > passThroughRPM.get() - 100
                       && shooter.isPivotIsAtTarget(
-                          Rotation2d.fromDegrees(passThroughPivotPitch.get()))) {
+                          Rotation2d.fromDegrees(passThroughPivotPitch.get()),
+                          Rotation2d.fromDegrees(5))) {
                     shooting = true;
                     shooter.setKickerVelocity(passThroughVel.get());
                     endEffector.setVelocity(passThroughVel.get());
@@ -750,6 +751,12 @@ public class RobotContainer {
 
     // PREP NOTE FOR TRAP
     operatorController.start().onTrue(new EndEffectorPrepareNoteForTrap(endEffector));
+
+    // SET USA
+    operatorController
+        .back()
+        .onTrue(Commands.runOnce(() -> led.setBaseRobotState(BaseRobotState.USA)))
+        .onFalse(Commands.runOnce(() -> led.setBaseRobotState(BaseRobotState.NOTE_STATUS)));
 
     // --- SIM ONLY --
 

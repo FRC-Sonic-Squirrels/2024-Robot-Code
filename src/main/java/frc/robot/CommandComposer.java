@@ -24,12 +24,10 @@ import frc.robot.commands.drive.RotateToAngle;
 import frc.robot.commands.endEffector.EndEffectorCenterNoteBetweenToFs;
 import frc.robot.commands.endEffector.EndEffectorPercentOut;
 import frc.robot.commands.led.LedSetBaseState;
-import frc.robot.commands.led.LedSetStateForSeconds;
 import frc.robot.commands.mechanism.MechanismActions;
 import frc.robot.commands.mechanism.elevator.ReactionArmsSetAngle;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.LED.BaseRobotState;
-import frc.robot.subsystems.LED.RobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.endEffector.EndEffector;
@@ -74,18 +72,8 @@ public class CommandComposer {
             () -> drivetrainWrapper.getPoseEstimatorPose(true));
 
     Command scoreAmp =
-        new ConditionalCommand(
-                driveToAmp
-                    .alongWith(Commands.runOnce(() -> rumbleCommand.accept(0.5)))
-                    .alongWith(new LedSetStateForSeconds(led, RobotState.AMP_READY_TO_SCORE, 1))
-                    .until(() -> driveToAmp.withinTolerance(0.1, Rotation2d.fromDegrees(10.0)))
-                    .finallyDo(() -> rumbleCommand.accept(0.0))
-                    .andThen(Commands.waitUntil(() -> false))
-                    .until(() -> confirmation.getAsBoolean()),
-                Commands.waitUntil(() -> confirmation.getAsBoolean()),
-                () -> doDrive)
-            .asProxy()
-            .alongWith(
+        Commands.waitUntil(() -> confirmation.getAsBoolean())
+            .deadlineWith(
                 new ReactionArmsSetAngle(
                         elevator,
                         Constants.ElevatorConstants.ReactionArmConstants.REACTION_ARM_AMP_ROTATIONS)
@@ -94,8 +82,9 @@ public class CommandComposer {
                         new ReactionArmsSetAngle(
                             elevator,
                             Constants.ElevatorConstants.ReactionArmConstants
-                                .REACTION_ARM_HOME_ROTATIONS)))
-            .deadlineWith(new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter))
+                                .REACTION_ARM_HOME_ROTATIONS))
+                    .deadlineWith(
+                        new EndEffectorCenterNoteBetweenToFs(endEffector, intake, shooter)))
             .andThen(
                 MechanismActions.ampPosition(elevator, arm)
                     .andThen(Commands.run(() -> endEffector.setVelocity(2500), endEffector))

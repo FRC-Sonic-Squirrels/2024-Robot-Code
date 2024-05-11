@@ -125,6 +125,9 @@ public class LED extends SubsystemBase {
             case CLIMB_ALIGN_STAGE3:
               setSolidColor(Color.kBlueViolet);
               break;
+            case USA:
+              setUSA();
+              break;
             default:
               setAudioLevelMeter(100);
               break;
@@ -175,6 +178,20 @@ public class LED extends SubsystemBase {
 
   private void setSolidColor(Color color) {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
+      ledBuffer.setLED(i, color);
+    }
+  }
+
+  private void setUSA() {
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      Color color = Color.kBlack;
+      int indicator = i;
+      indicator += Timer.getFPGATimestamp() * 8;
+      int length = ledBuffer.getLength();
+      indicator %= length;
+      if (indicator < length / 3.0) color = Color.kRed;
+      if (indicator > length / 3.0 && indicator < length / 3.0 * 2.0) color = Color.kWhite;
+      if (indicator > length / 3.0 * 2.0) color = Color.kBlue;
       ledBuffer.setLED(i, color);
     }
   }
@@ -326,7 +343,8 @@ public class LED extends SubsystemBase {
     SHOOTER_SUCCESS,
     CLIMB_ALIGN_STAGE1,
     CLIMB_ALIGN_STAGE2,
-    CLIMB_ALIGN_STAGE3
+    CLIMB_ALIGN_STAGE3,
+    USA
   }
 
   public boolean sameAsPrevBuffer() {
