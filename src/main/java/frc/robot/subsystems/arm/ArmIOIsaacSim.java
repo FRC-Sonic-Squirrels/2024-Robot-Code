@@ -13,12 +13,12 @@ public class ArmIOIsaacSim implements ArmIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.armPosition = new Rotation2d();
-    inputs.armAngleDegrees = 0;
+    inputs.armPosition = Rotation2d.fromRadians(dispatcher.recieveMotorPos(Constants.CanIDs.ARM_CAN_ID));
+    inputs.armAngleDegrees = inputs.armPosition.getDegrees();
     inputs.armAppliedVolts = 0;
     inputs.armCurrentAmps = 0;
     inputs.armTempCelsius = 0;
-    inputs.armVelocity = 0;
+    inputs.armVelocity = dispatcher.recieveMotorVel(Constants.CanIDs.ARM_CAN_ID);
   }
 
   @Override

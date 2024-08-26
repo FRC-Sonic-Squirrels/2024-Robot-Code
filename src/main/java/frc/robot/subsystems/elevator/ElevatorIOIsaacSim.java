@@ -16,8 +16,8 @@ public class ElevatorIOIsaacSim implements ElevatorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.heightInches = 0;
-    inputs.velocityInchesPerSecond = 0;
+    inputs.heightInches = Units.Meters.of(dispatcher.recieveMotorPos(Constants.CanIDs.ELEVATOR_CAN_ID)).in(Units.Inches);
+    inputs.velocityInchesPerSecond = Units.MetersPerSecond.of(dispatcher.recieveMotorVel(Constants.CanIDs.ELEVATOR_CAN_ID)).in(Units.InchesPerSecond);
     inputs.appliedVolts = 0;
     inputs.currentAmps = 0;
     inputs.tempCelsius = 0;

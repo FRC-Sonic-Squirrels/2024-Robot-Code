@@ -17,7 +17,7 @@ public class IntakeIOIsaacSim implements IntakeIO {
     inputs.currentAmps = 0;
     inputs.tempCelsius = 0;
     inputs.appliedVolts = 0;
-    inputs.velocityRPM = 0;
+    inputs.velocityRPM = Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.INTAKE_CAN_ID));
   }
 
   @Override

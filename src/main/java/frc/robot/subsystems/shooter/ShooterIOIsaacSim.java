@@ -15,18 +15,20 @@ public class ShooterIOIsaacSim implements ShooterIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.pivotPosition = Constants.zeroRotation2d;
+    inputs.pivotPosition = Rotation2d.fromRadians(dispatcher.recieveMotorPos(Constants.CanIDs.SHOOTER_PIVOT_CAN_ID));
     inputs.pivotVelocityRadsPerSec = 0.0;
     inputs.pivotAppliedVolts = 0.0;
     inputs.pivotCurrentAmps = 0.0;
 
-    inputs.launcherRPM = new double[2];
+    inputs.launcherRPM = new double[]{
+      Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.SHOOTER_LEAD_CAN_ID)), 
+      Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.SHOOTER_FOLLOW_CAN_ID))};
     inputs.launcherAppliedVolts = new double[2];
     inputs.launcherCurrentAmps = new double[2];
 
     inputs.kickerAppliedVolts = 0.0;
     inputs.kickerCurrentAmps = 0.0;
-    inputs.kickerVelocityRPM = 0.0;
+    inputs.kickerVelocityRPM = Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.SHOOTER_KICKER_CAN_ID));
 
     // launcher lead, launcher follower, pivot, kicker
     inputs.tempsCelcius = new double[4];

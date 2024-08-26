@@ -19,7 +19,9 @@ public class IsaacSimDispatcher {
     private NetworkTable table;
 
     private ArrayList<DoublePublisher> publishers;
-    private ArrayList<DoubleSubscriber> subscribers;
+    private ArrayList<DoubleSubscriber> motorPosSubscribers;
+    private ArrayList<DoubleSubscriber> motorVelSubscribers;
+    private ArrayList<DoubleSubscriber> sensorSubscribers;
 
     private int[] motorIDs;
     private String[] sensorNames;
@@ -33,13 +35,17 @@ public class IsaacSimDispatcher {
         inst.startDSClient();
         table = inst.getTable("Sonic Sim");
         publishers = new ArrayList<>(motorIDs.length);
-        subscribers = new ArrayList<>(sensorNames.length);
+        motorPosSubscribers = new ArrayList<>(motorIDs.length);
+        motorVelSubscribers = new ArrayList<>(motorIDs.length);
+        sensorSubscribers = new ArrayList<>(sensorNames.length);
         for (int motorID : motorIDs) {
-            publishers.add(table.getDoubleTopic("motor" + motorID).publish());
+            publishers.add(table.getDoubleTopic("motor" + motorID + "/input").publish());
+            motorPosSubscribers.add(table.getDoubleTopic("motor" + motorID + "/output/pos").subscribe(0));
+            motorVelSubscribers.add(table.getDoubleTopic("motor" + motorID + "/output/vel").subscribe(0));
         }
 
         for (String sensorName : sensorNames) {
-            subscribers.add(table.getDoubleTopic(sensorName).subscribe(0));
+            sensorSubscribers.add(table.getDoubleTopic(sensorName).subscribe(0));
         }
     }
 
@@ -47,8 +53,16 @@ public class IsaacSimDispatcher {
         publishers.get(indexOfIntArray(motorIDs, canID)).set(value);
     }
 
+    public double recieveMotorPos(int canID){
+        return motorPosSubscribers.get(indexOfIntArray(motorIDs, canID)).get();
+    }
+
+    public double recieveMotorVel(int canID){
+        return motorVelSubscribers.get(indexOfIntArray(motorIDs, canID)).get();
+    }
+
     public double recieveSensorInfo(String ID){
-        return subscribers.get(indexOfStringArray(sensorNames, ID)).get();
+        return sensorSubscribers.get(indexOfStringArray(sensorNames, ID)).get();
     }
 
     private int indexOfIntArray(int[] array, int integer){
