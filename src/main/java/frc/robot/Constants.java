@@ -56,7 +56,7 @@ public final class Constants {
   }
 
   public static class RobotMode {
-    private static final RobotType ROBOT = RobotType.ROBOT_2024_MAESTRO;
+    private static final RobotType ROBOT = RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM;
 
     private static final Alert invalidRobotAlert =
         new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR);
@@ -64,6 +64,7 @@ public final class Constants {
     public static boolean isSimBot() {
       switch (getRobot()) {
         case ROBOT_SIMBOT:
+        case ROBOT_2024_MAESTRO_ISAAC_SIM:
         case ROBOT_SIMBOT_REAL_CAMERAS:
           return true;
 
@@ -81,11 +82,11 @@ public final class Constants {
     }
 
     public static RobotType getRobot() {
-      if (!RobotBase.isReal()) {
+      if (!RobotBase.isReal()&&ROBOT!=RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
         return RobotType.ROBOT_SIMBOT;
       }
 
-      if (ROBOT != RobotType.ROBOT_2024_MAESTRO) {
+      if (ROBOT != RobotType.ROBOT_2024_MAESTRO && ROBOT != RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
         invalidRobotAlert.set(true);
         return RobotType.ROBOT_2024_MAESTRO;
       }
@@ -102,7 +103,8 @@ public final class Constants {
       ROBOT_SIMBOT(SimulatorRobotConfig::new),
       ROBOT_SIMBOT_REAL_CAMERAS(SimulatorRobotConfig::new),
       ROBOT_2023_RETIRED_ROBER(RobotConfig2023Rober::new),
-      ROBOT_2024_MAESTRO(RobotConfig2024::new);
+      ROBOT_2024_MAESTRO(RobotConfig2024::new),
+      ROBOT_2024_MAESTRO_ISAAC_SIM(RobotConfig2024::new);
 
       public final Supplier<RobotConfig> config;
 

@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModules;
@@ -153,6 +154,8 @@ public abstract class RobotConfig {
 
   // return IO layers needed for subsystems
   public abstract SwerveModules getSwerveModuleObjects();
+
+  public abstract SwerveModules getSwerveModuleObjectsIsaacSim(IsaacSimDispatcher dispatcher);
 
   public abstract SwerveModules getReplaySwerveModuleObjects();
 

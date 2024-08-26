@@ -177,16 +177,6 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
-  public void setLeftServoAngle(Rotation2d angle) {
-    leftServo.setAngle(angle.getDegrees());
-  }
-
-  @Override
-  public void setRightServoAngle(Rotation2d angle) {
-    rightServo.setAngle(angle.getDegrees());
-  }
-
-  @Override
   public void setReactionArmPosition(double rotations) {
     reactionArmPIDController.setReference(rotations, ControlType.kPosition);
   }

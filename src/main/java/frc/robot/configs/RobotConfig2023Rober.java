@@ -13,9 +13,11 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
+import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.swerve.SwerveModuleIOIsaacSim;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -183,6 +185,20 @@ public class RobotConfig2023Rober extends RobotConfig {
     var front_right = new SwerveModuleIOTalonFX(this, FRONT_RIGHT_MODULE_CONFIG);
     var back_left = new SwerveModuleIOTalonFX(this, BACK_LEFT_MODULE_CONFIG);
     var back_right = new SwerveModuleIOTalonFX(this, BACK_RIGHT_MODULE_CONFIG);
+
+    return new SwerveModules(
+        new SwerveModule(0, this, front_left),
+        new SwerveModule(1, this, front_right),
+        new SwerveModule(2, this, back_left),
+        new SwerveModule(3, this, back_right));
+  }
+
+  @Override
+  public SwerveModules getSwerveModuleObjectsIsaacSim(IsaacSimDispatcher dispatcher) {
+    var front_left = new SwerveModuleIOIsaacSim(this, FRONT_LEFT_MODULE_CONFIG, dispatcher);
+    var front_right = new SwerveModuleIOIsaacSim(this, FRONT_RIGHT_MODULE_CONFIG, dispatcher);
+    var back_left = new SwerveModuleIOIsaacSim(this, BACK_LEFT_MODULE_CONFIG, dispatcher);
+    var back_right = new SwerveModuleIOIsaacSim(this, BACK_RIGHT_MODULE_CONFIG, dispatcher);
 
     return new SwerveModules(
         new SwerveModule(0, this, front_left),

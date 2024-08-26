@@ -13,9 +13,11 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
+import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.swerve.SwerveModuleIOIsaacSim;
 import frc.robot.subsystems.swerve.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.SwerveModules;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -64,6 +66,44 @@ public class RobotConfig2024 extends RobotConfig {
           14,
           24,
           Rotation2d.fromRotations(0.448),
+          InvertedValue.CounterClockwise_Positive,
+          InvertedValue.Clockwise_Positive);
+
+  // ------ ISAAC SIM SWERVE MODULE CONFIGURATIONS: CANID + OFFSET + INVERTS --------------
+  // 0
+  private static final IndividualSwerveModuleConfig FRONT_LEFT_MODULE_CONFIG_ISAAC_SIM =
+      new IndividualSwerveModuleConfig(
+          1,
+          11,
+          21,
+          Rotation2d.fromDegrees(-1.5), 
+          InvertedValue.CounterClockwise_Positive,
+          InvertedValue.Clockwise_Positive);
+  // 1
+  private static final IndividualSwerveModuleConfig FRONT_RIGHT_MODULE_CONFIG_ISAAC_SIM =
+      new IndividualSwerveModuleConfig(
+          2,
+          12,
+          22,
+          Rotation2d.fromDegrees(78.4), 
+          InvertedValue.CounterClockwise_Positive,
+          InvertedValue.Clockwise_Positive);
+  // 2
+  private static final IndividualSwerveModuleConfig BACK_LEFT_MODULE_CONFIG_ISAAC_SIM =
+      new IndividualSwerveModuleConfig(
+          3,
+          13,
+          23,
+          Rotation2d.fromDegrees(0.0), 
+          InvertedValue.CounterClockwise_Positive,
+          InvertedValue.Clockwise_Positive);
+  // 3
+  private static final IndividualSwerveModuleConfig BACK_RIGHT_MODULE_CONFIG_ISAAC_SIM =
+      new IndividualSwerveModuleConfig(
+          4,
+          14,
+          24,
+          Rotation2d.fromDegrees(-11.4),
           InvertedValue.CounterClockwise_Positive,
           InvertedValue.Clockwise_Positive);
 
@@ -200,6 +240,15 @@ public class RobotConfig2024 extends RobotConfig {
         new SwerveModule(1, this, new SwerveModuleIOTalonFX(this, FRONT_RIGHT_MODULE_CONFIG)),
         new SwerveModule(2, this, new SwerveModuleIOTalonFX(this, BACK_LEFT_MODULE_CONFIG)),
         new SwerveModule(3, this, new SwerveModuleIOTalonFX(this, BACK_RIGHT_MODULE_CONFIG)));
+  }
+
+  @Override
+  public SwerveModules getSwerveModuleObjectsIsaacSim(IsaacSimDispatcher dispatcher) {
+    return new SwerveModules(
+        new SwerveModule(0, this, new SwerveModuleIOIsaacSim(this, FRONT_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(1, this, new SwerveModuleIOIsaacSim(this, FRONT_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(2, this, new SwerveModuleIOIsaacSim(this, BACK_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(3, this, new SwerveModuleIOIsaacSim(this, BACK_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)));
   }
 
   @Override

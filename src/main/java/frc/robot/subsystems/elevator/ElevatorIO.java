@@ -34,10 +34,6 @@ public interface ElevatorIO {
     return false;
   }
 
-  public default void setRightServoAngle(Rotation2d angle) {}
-
-  public default void setLeftServoAngle(Rotation2d angle) {}
-
   public default void setReactionArmPosition(double rotations) {}
 
   public default void resetReactionArmPosition() {}

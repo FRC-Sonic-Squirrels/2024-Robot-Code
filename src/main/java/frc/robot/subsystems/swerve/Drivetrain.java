@@ -298,8 +298,11 @@ public class Drivetrain extends SubsystemBase {
           StatusCode statusCode;
 
           try (var ignored = timing_wait.start()) {
-            statusCode =
-                BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
+            if(Robot.isSimulation()){
+              statusCode = StatusCode.OK;
+            } else {
+              statusCode = BaseStatusSignal.waitForAll(2.0 / SwerveModule.ODOMETRY_FREQUENCY, signalsArray);
+            }
           }
 
           if (statusCode != lastStatusCode) {

@@ -11,6 +11,7 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import frc.lib.constants.SwerveModuleConstants;
+import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
@@ -136,6 +137,12 @@ public class SimulatorRobotConfig extends RobotConfig {
         new SwerveModule(1, this, new SwerveModuleIOSim()),
         new SwerveModule(2, this, new SwerveModuleIOSim()),
         new SwerveModule(3, this, new SwerveModuleIOSim()));
+  }
+
+  @Override
+  public SwerveModules getSwerveModuleObjectsIsaacSim(IsaacSimDispatcher dispatcher) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

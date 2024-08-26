@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.team2930.ArrayUtil;
 import frc.lib.team2930.GeometryUtil;
+import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
@@ -69,27 +70,33 @@ import frc.robot.subsystems.LED.BaseRobotState;
 import frc.robot.subsystems.LED.RobotState;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOIsaacSim;
 import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOIsaacSim;
 import frc.robot.subsystems.elevator.ElevatorIOReal;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.endEffector.EndEffectorIO;
+import frc.robot.subsystems.endEffector.EndEffectorIOIsaacSim;
 import frc.robot.subsystems.endEffector.EndEffectorIOReal;
 import frc.robot.subsystems.endEffector.EndEffectorIOSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOIsaacSim;
 import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOIsaacSim;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.swerve.Drivetrain;
 import frc.robot.subsystems.swerve.DrivetrainWrapper;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
+import frc.robot.subsystems.swerve.gyro.GyroIOIsaacSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionModuleConfiguration;
@@ -164,6 +171,8 @@ public class RobotContainer {
   private boolean reactionArmsDown = false;
 
   private boolean brakeModeFailure = false;
+
+  private IsaacSimDispatcher dispatcher = new IsaacSimDispatcher(new int[]{1, 2, 3, 4, 11, 12, 13, 14, 17, 30, 32, 33, 34, 35, 36}, new String[]{"imu"});
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -305,6 +314,33 @@ public class RobotContainer {
                   config,
                   new GyroIOPigeon2(config),
                   config.getSwerveModuleObjects(),
+                  () -> is_autonomous);
+          vision =
+              new Vision(
+                  aprilTagLayout,
+                  drivetrain::getPoseEstimatorPose,
+                  drivetrain::getRotationGyroOnly,
+                  drivetrain::addVisionEstimate,
+                  config.getVisionModuleObjects());
+          visionGamepiece =
+              new VisionGamepiece(
+                  new VisionGamepieceIOReal(), drivetrain::getPoseEstimatorPoseAtTimestamp);
+          led =
+              new LED(
+                  elevator::getHeightInches, () -> brakeModeTriggered, drivetrain::isGyroConnected);
+          break;
+
+          case ROBOT_2024_MAESTRO_ISAAC_SIM:
+          intake = new Intake(new IntakeIOIsaacSim(dispatcher));
+          endEffector = new EndEffector(new EndEffectorIOIsaacSim(dispatcher));
+          shooter = new Shooter(new ShooterIOIsaacSim(dispatcher));
+          elevator = new Elevator(new ElevatorIOIsaacSim(dispatcher));
+          arm = new Arm(new ArmIOIsaacSim(dispatcher));
+          drivetrain =
+              new Drivetrain(
+                  config,
+                  new GyroIOIsaacSim(config, dispatcher),
+                  config.getSwerveModuleObjectsIsaacSim(dispatcher),
                   () -> is_autonomous);
           vision =
               new Vision(
