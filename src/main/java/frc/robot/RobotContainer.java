@@ -172,7 +172,7 @@ public class RobotContainer {
 
   private boolean brakeModeFailure = false;
 
-  private IsaacSimDispatcher dispatcher = new IsaacSimDispatcher(new int[]{1, 2, 3, 4, 11, 12, 13, 14, 17, 30, 32, 33, 34, 35, 36}, new String[]{"imu"});
+  private IsaacSimDispatcher dispatcher = new IsaacSimDispatcher(new int[]{1, 2, 3, 4, 7, 11, 12, 13, 14, 17, 30, 32, 33, 34, 35, 36, 37}, new String[]{"imu"});
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

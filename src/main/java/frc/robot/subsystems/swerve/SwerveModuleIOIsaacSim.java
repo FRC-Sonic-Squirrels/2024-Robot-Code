@@ -19,9 +19,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.networktables.DoublePublisher;
 import frc.lib.team2930.IsaacSimDispatcher;
-import frc.robot.RobotContainer;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
 
