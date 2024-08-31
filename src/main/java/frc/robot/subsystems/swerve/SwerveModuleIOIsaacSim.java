@@ -19,11 +19,15 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.IsaacSimDispatcher;
+import frc.lib.team2930.TunableNumberGroup;
+import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
 
@@ -46,7 +50,12 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
     private int lastUpdatedLoops = 0;
     private double deltaTime = 0;
 
-    private double lastTurnPosition = 0;
+    private TunableNumberGroup group = new TunableNumberGroup("turnGroup");
+    private LoggedTunableNumber tunable;
+
+    private double lastRotation;
+
+    private boolean driveFlipped = false;
 
     public SwerveModuleIOIsaacSim(RobotConfig globalConfig, IndividualSwerveModuleConfig moduleSpecificConfig, IsaacSimDispatcher dispatcher){
         this.distanceToRotation =
@@ -56,6 +65,7 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
         this.dispatcher = dispatcher;
 
         absoluteEncoderOffset = moduleSpecificConfig.absoluteEncoderOffset();
+        tunable = group.build("turn" + moduleSpecificConfig.steerMotorCANID(), 0);
     }
 
     @Override
@@ -75,7 +85,8 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
         drivePositionRaw += inputs.driveVelocityRadPerSec * deltaTime;
         inputs.drivePositionRad = drivePositionRaw;
         
-        var angleRelative = Rotation2d.fromRadians(dispatcher.recieveMotorPos(moduleSpecificConfig.steerMotorCANID()));
+        var angleRelative = Rotation2d.fromRadians(GeometryUtil.optimizeRotation(dispatcher.recieveMotorPos(moduleSpecificConfig.steerMotorCANID())));
+        Logger.recordOutput("steer" + moduleSpecificConfig.steerMotorCANID() + "position", angleRelative.getRadians());
         inputs.turnPosition = angleRelative;
 
         // Process turn encoder position.
@@ -105,27 +116,30 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
         double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {
         // m/s -> divide by wheel radius to get radians/s -> convert to rotations
         var velocityRadiansPerSecond =
-            velocityMetersPerSec * distanceToRotation;
+            velocityMetersPerSec * distanceToRotation * (driveFlipped ? -1.0 : 1.0);
     
         dispatcher.sendMotorInfo(moduleSpecificConfig.driveMotorCANID(), velocityRadiansPerSecond);
     }
   
     @Override
     public void setTurnPosition(Rotation2d position) {
-        double turnPosition = position.getRadians();
-        dispatcher.sendMotorInfo(moduleSpecificConfig.steerMotorCANID(), getClosestPositionRadians(turnPosition, lastTurnPosition) + absoluteEncoderOffset.getRadians());
-        lastTurnPosition = turnPosition;
+        double turnPosition = findclosestrotation(position.getRadians() + absoluteEncoderOffset.getRadians(), lastRotation);
+        Logger.recordOutput("targetSteerPosition" + moduleSpecificConfig.steerMotorCANID(), GeometryUtil.optimizeRotation(turnPosition));
+        Logger.recordOutput("currentSteerPosition" + moduleSpecificConfig.steerMotorCANID(), GeometryUtil.optimizeRotation(turnPosition));
+        dispatcher.sendMotorInfo(moduleSpecificConfig.steerMotorCANID(), turnPosition);
+        lastRotation = turnPosition;
     }
 
-    private double getClosestPositionRadians(double input, double lastInput){
-        double attempt = 0;
-        double previousAttempt = input;
-        for (int i = 1; true; i++) {
-            attempt = i * Math.PI * 2 * (lastInput > input ? 1.0 : -1.0);
-            if(Math.abs(attempt - lastInput) > Math.abs(previousAttempt - lastInput)){
-                return previousAttempt;
+    private double findclosestrotation(double currentTarget, double lastTarget){
+        double attempt = currentTarget;
+        double lastAttempt = currentTarget;
+        for (int i = 0; true; i++) {
+            attempt += Math.PI * (lastTarget > currentTarget ? 1.0 : -1.0);
+            if(Math.abs(lastAttempt - lastTarget) < Math.abs(attempt - lastTarget)){
+                driveFlipped = !(Math.round(currentTarget - lastAttempt) % 2 == 0);
+                return lastAttempt;
             }
-            previousAttempt = attempt;
+            lastAttempt = attempt;
         }
     }
 

@@ -51,6 +51,8 @@ public class IsaacSimDispatcher {
 
     public void sendMotorInfo(int canID, double value){
         publishers.get(indexOfIntArray(motorIDs, canID)).set(value);
+        inst.flushLocal();
+        inst.flush();
     }
 
     public double recieveMotorPos(int canID){

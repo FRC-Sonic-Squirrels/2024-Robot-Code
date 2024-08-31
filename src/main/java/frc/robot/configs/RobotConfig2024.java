@@ -76,7 +76,7 @@ public class RobotConfig2024 extends RobotConfig {
           1,
           11,
           21,
-          Rotation2d.fromDegrees(-1.5), 
+          Rotation2d.fromDegrees(-181.5), 
           InvertedValue.CounterClockwise_Positive,
           InvertedValue.Clockwise_Positive);
   // 1
