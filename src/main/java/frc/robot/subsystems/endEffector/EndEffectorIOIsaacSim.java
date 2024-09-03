@@ -14,7 +14,9 @@ public class EndEffectorIOIsaacSim implements EndEffectorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.velocityRPM = Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.END_EFFECTOR_CAN_ID));
+    inputs.velocityRPM =
+        Units.radiansPerSecondToRotationsPerMinute(
+            dispatcher.recieveMotorVel(Constants.CanIDs.END_EFFECTOR_CAN_ID));
     inputs.currentAmps = 0;
     inputs.appliedVolts = 0;
     inputs.tempCelsius = 0;
@@ -29,6 +31,8 @@ public class EndEffectorIOIsaacSim implements EndEffectorIO {
 
   @Override
   public void setVelocity(double revPerMin) {
-    dispatcher.sendMotorInfo(Constants.CanIDs.END_EFFECTOR_CAN_ID, Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
+    dispatcher.sendMotorInfo(
+        Constants.CanIDs.END_EFFECTOR_CAN_ID,
+        Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
   }
 }

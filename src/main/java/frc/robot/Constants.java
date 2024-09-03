@@ -82,11 +82,12 @@ public final class Constants {
     }
 
     public static RobotType getRobot() {
-      if (!RobotBase.isReal()&&ROBOT!=RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
+      if (!RobotBase.isReal() && ROBOT != RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
         return RobotType.ROBOT_SIMBOT;
       }
 
-      if (ROBOT != RobotType.ROBOT_2024_MAESTRO && ROBOT != RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
+      if (ROBOT != RobotType.ROBOT_2024_MAESTRO
+          && ROBOT != RobotType.ROBOT_2024_MAESTRO_ISAAC_SIM) {
         invalidRobotAlert.set(true);
         return RobotType.ROBOT_2024_MAESTRO;
       }

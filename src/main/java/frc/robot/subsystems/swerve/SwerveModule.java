@@ -26,8 +26,6 @@ import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
 
-import org.littletonrobotics.junction.Logger;
-
 public class SwerveModule {
   public static final int ODOMETRY_FREQUENCY = 250;
 

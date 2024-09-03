@@ -7,7 +7,7 @@ import frc.lib.team2930.IsaacSimDispatcher;
 import frc.robot.Constants;
 
 public class ElevatorIOIsaacSim implements ElevatorIO {
-  
+
   private IsaacSimDispatcher dispatcher;
 
   public ElevatorIOIsaacSim(IsaacSimDispatcher dispatcher) {
@@ -16,8 +16,12 @@ public class ElevatorIOIsaacSim implements ElevatorIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.heightInches = Units.Meters.of(dispatcher.recieveMotorPos(Constants.CanIDs.ELEVATOR_CAN_ID)).in(Units.Inches);
-    inputs.velocityInchesPerSecond = Units.MetersPerSecond.of(dispatcher.recieveMotorVel(Constants.CanIDs.ELEVATOR_CAN_ID)).in(Units.InchesPerSecond);
+    inputs.heightInches =
+        Units.Meters.of(dispatcher.recieveMotorPos(Constants.CanIDs.ELEVATOR_CAN_ID))
+            .in(Units.Inches);
+    inputs.velocityInchesPerSecond =
+        Units.MetersPerSecond.of(dispatcher.recieveMotorVel(Constants.CanIDs.ELEVATOR_CAN_ID))
+            .in(Units.InchesPerSecond);
     inputs.appliedVolts = 0;
     inputs.currentAmps = 0;
     inputs.tempCelsius = 0;
@@ -31,15 +35,14 @@ public class ElevatorIOIsaacSim implements ElevatorIO {
   }
 
   @Override
-  public void setSensorPosition(Measure<Distance> position) {
-  }
+  public void setSensorPosition(Measure<Distance> position) {}
 
   @Override
   public void setReactionArmPosition(double rotations) {
-    dispatcher.sendMotorInfo(Constants.CanIDs.REACTION_ARM_CAN_ID, Units.Rotations.of(rotations).in(Units.Radians));
+    dispatcher.sendMotorInfo(
+        Constants.CanIDs.REACTION_ARM_CAN_ID, Units.Rotations.of(rotations).in(Units.Radians));
   }
 
   @Override
-  public void resetReactionArmPosition() {
-  }
+  public void resetReactionArmPosition() {}
 }

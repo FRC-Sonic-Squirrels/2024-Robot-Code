@@ -1,4 +1,5 @@
 package frc.robot.subsystems.arm;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.team2930.IsaacSimDispatcher;
 import frc.robot.Constants;
@@ -13,7 +14,8 @@ public class ArmIOIsaacSim implements ArmIO {
 
   @Override
   public void updateInputs(Inputs inputs) {
-    inputs.armPosition = Rotation2d.fromRadians(dispatcher.recieveMotorPos(Constants.CanIDs.ARM_CAN_ID));
+    inputs.armPosition =
+        Rotation2d.fromRadians(dispatcher.recieveMotorPos(Constants.CanIDs.ARM_CAN_ID));
     inputs.armAngleDegrees = inputs.armPosition.getDegrees();
     inputs.armAppliedVolts = 0;
     inputs.armCurrentAmps = 0;
@@ -27,6 +29,5 @@ public class ArmIOIsaacSim implements ArmIO {
   }
 
   @Override
-  public void resetSensorPosition(Rotation2d angle) {
-  }
+  public void resetSensorPosition(Rotation2d angle) {}
 }

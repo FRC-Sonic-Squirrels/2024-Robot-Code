@@ -76,7 +76,7 @@ public class RobotConfig2024 extends RobotConfig {
           1,
           11,
           21,
-          Rotation2d.fromDegrees(-181.5), 
+          Rotation2d.fromDegrees(-181.5),
           InvertedValue.CounterClockwise_Positive,
           InvertedValue.Clockwise_Positive);
   // 1
@@ -85,7 +85,7 @@ public class RobotConfig2024 extends RobotConfig {
           2,
           12,
           22,
-          Rotation2d.fromDegrees(78.4), 
+          Rotation2d.fromDegrees(78.4),
           InvertedValue.CounterClockwise_Positive,
           InvertedValue.Clockwise_Positive);
   // 2
@@ -94,7 +94,7 @@ public class RobotConfig2024 extends RobotConfig {
           3,
           13,
           23,
-          Rotation2d.fromDegrees(0.0), 
+          Rotation2d.fromDegrees(0.0),
           InvertedValue.CounterClockwise_Positive,
           InvertedValue.Clockwise_Positive);
   // 3
@@ -245,10 +245,22 @@ public class RobotConfig2024 extends RobotConfig {
   @Override
   public SwerveModules getSwerveModuleObjectsIsaacSim(IsaacSimDispatcher dispatcher) {
     return new SwerveModules(
-        new SwerveModule(0, this, new SwerveModuleIOIsaacSim(this, FRONT_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
-        new SwerveModule(1, this, new SwerveModuleIOIsaacSim(this, FRONT_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
-        new SwerveModule(2, this, new SwerveModuleIOIsaacSim(this, BACK_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
-        new SwerveModule(3, this, new SwerveModuleIOIsaacSim(this, BACK_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)));
+        new SwerveModule(
+            0,
+            this,
+            new SwerveModuleIOIsaacSim(this, FRONT_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(
+            1,
+            this,
+            new SwerveModuleIOIsaacSim(this, FRONT_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(
+            2,
+            this,
+            new SwerveModuleIOIsaacSim(this, BACK_LEFT_MODULE_CONFIG_ISAAC_SIM, dispatcher)),
+        new SwerveModule(
+            3,
+            this,
+            new SwerveModuleIOIsaacSim(this, BACK_RIGHT_MODULE_CONFIG_ISAAC_SIM, dispatcher)));
   }
 
   @Override

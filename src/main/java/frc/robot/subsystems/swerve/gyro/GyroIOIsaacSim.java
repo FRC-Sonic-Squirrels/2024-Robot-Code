@@ -52,6 +52,5 @@ public class GyroIOIsaacSim implements GyroIO {
   }
 
   @Override
-  public void reconfigurePigeon() {
-  }
+  public void reconfigurePigeon() {}
 }

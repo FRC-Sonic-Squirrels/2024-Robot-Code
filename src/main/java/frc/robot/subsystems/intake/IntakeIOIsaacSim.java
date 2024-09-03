@@ -17,7 +17,9 @@ public class IntakeIOIsaacSim implements IntakeIO {
     inputs.currentAmps = 0;
     inputs.tempCelsius = 0;
     inputs.appliedVolts = 0;
-    inputs.velocityRPM = Units.radiansPerSecondToRotationsPerMinute(dispatcher.recieveMotorVel(Constants.CanIDs.INTAKE_CAN_ID));
+    inputs.velocityRPM =
+        Units.radiansPerSecondToRotationsPerMinute(
+            dispatcher.recieveMotorVel(Constants.CanIDs.INTAKE_CAN_ID));
   }
 
   @Override
@@ -27,6 +29,7 @@ public class IntakeIOIsaacSim implements IntakeIO {
 
   @Override
   public void setVelocity(double revPerMin) {
-    dispatcher.sendMotorInfo(Constants.CanIDs.INTAKE_CAN_ID, Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
+    dispatcher.sendMotorInfo(
+        Constants.CanIDs.INTAKE_CAN_ID, Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
   }
 }
