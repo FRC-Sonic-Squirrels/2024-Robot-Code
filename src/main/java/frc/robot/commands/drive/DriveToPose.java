@@ -95,7 +95,7 @@ public class DriveToPose extends Command {
   private final Supplier<Pose2d> poseSupplier;
   private final Supplier<Pose2d> currentRobotPose;
   private final boolean finish;
-  private final Supplier<Boolean> move;
+  private final Supplier<Double> magnitude;
   private final double driveToleranceValue;
   private final Trigger withinTolerance;
 
@@ -110,24 +110,7 @@ public class DriveToPose extends Command {
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, boolean slowMode, Pose2d pose, Supplier<Pose2d> currentPose) {
-    this(drive, slowMode, () -> pose, currentPose, true, () -> true, driveTolerance.get());
-  }
-
-  public DriveToPose(
-      DrivetrainWrapper drive,
-      Supplier<Pose2d> poseSupplier,
-      Supplier<Pose2d> currentRobotPose,
-      Supplier<Boolean> move,
-      double driveTolerance) {
-    this(drive, false, poseSupplier, currentRobotPose, true, move, driveTolerance);
-  }
-
-  public DriveToPose(
-      DrivetrainWrapper drive,
-      Supplier<Pose2d> poseSupplier,
-      Supplier<Pose2d> currentRobotPose,
-      Supplier<Boolean> move) {
-    this(drive, false, poseSupplier, currentRobotPose, true, move, driveTolerance.get());
+    this(drive, slowMode, () -> pose, currentPose, true, () -> 1.0, driveTolerance.get());
   }
 
   /** Drives to the specified pose under full software control. */
@@ -136,13 +119,22 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       double driveTolerance) {
-    this(drive, false, poseSupplier, currentRobotPose, true, () -> true, driveTolerance);
+    this(drive, false, poseSupplier, currentRobotPose, true, () -> 1.0, driveTolerance);
   }
 
   /** Drives to the specified pose under full software control. */
   public DriveToPose(
       DrivetrainWrapper drive, Supplier<Pose2d> poseSupplier, Supplier<Pose2d> currentRobotPose) {
-    this(drive, false, poseSupplier, currentRobotPose, true, () -> true, driveTolerance.get());
+    this(drive, false, poseSupplier, currentRobotPose, true, () -> 1.0, driveTolerance.get());
+  }
+
+  /** Drives to the specified pose under full software control. */
+  public DriveToPose(
+      DrivetrainWrapper drive,
+      Supplier<Pose2d> poseSupplier,
+      Supplier<Pose2d> currentRobotPose,
+      Supplier<Double> magnitude) {
+    this(drive, false, poseSupplier, currentRobotPose, true, magnitude, driveTolerance.get());
   }
 
   public DriveToPose(
@@ -151,7 +143,7 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> currentRobotPose,
       boolean finish,
       double driveTolerance) {
-    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true, driveTolerance);
+    this(drive, false, poseSupplier, currentRobotPose, finish, () -> 1.0, driveTolerance);
   }
 
   /** Drives to the specified pose under full software control. */
@@ -160,7 +152,7 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       boolean finish) {
-    this(drive, false, poseSupplier, currentRobotPose, finish, () -> true, driveTolerance.get());
+    this(drive, false, poseSupplier, currentRobotPose, finish, () -> 1.0, driveTolerance.get());
   }
 
   /** Drives to the specified pose under full software control. */
@@ -170,14 +162,14 @@ public class DriveToPose extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> currentRobotPose,
       boolean finish,
-      Supplier<Boolean> move,
+      Supplier<Double> magnitude,
       double driveTolerance) {
     this.drive = drive;
     this.slowMode = slowMode;
     this.poseSupplier = poseSupplier;
     this.currentRobotPose = currentRobotPose;
     this.finish = finish;
-    this.move = move;
+    this.magnitude = magnitude;
     this.driveToleranceValue = driveTolerance;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     withinTolerance =
@@ -270,18 +262,12 @@ public class DriveToPose extends Command {
         new Pose2d(
                 Constants.zeroTranslation2d,
                 currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
-            .transformBy(GeomUtil.translationToTransform(driveVelocityScalar, 0.0))
+            .transformBy(
+                GeomUtil.translationToTransform(driveVelocityScalar * magnitude.get(), 0.0))
             .getTranslation();
-    if (move.get()) {
-      drive.setVelocityOverride(
-          ChassisSpeeds.fromFieldRelativeSpeeds(
-              driveVelocity.getX(),
-              driveVelocity.getY(),
-              thetaVelocity,
-              currentPose.getRotation()));
-    } else {
-      drive.resetVelocityOverride();
-    }
+    drive.setVelocityOverride(
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            driveVelocity.getX(), driveVelocity.getY(), thetaVelocity, currentPose.getRotation()));
 
     // Log data
     log_DistanceMeasured.info(currentDistance);

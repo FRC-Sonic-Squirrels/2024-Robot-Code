@@ -71,7 +71,15 @@ public class CommandComposer {
         new DriveToPose(
             drivetrainWrapper,
             Constants.FieldConstants::getAmpScoringPose,
-            () -> drivetrainWrapper.getPoseEstimatorPose(true));
+            () -> drivetrainWrapper.getPoseEstimatorPose(true),
+            () -> {
+              double angle = arm.getAngle().getDegrees();
+              double ampPosition = 43.0;
+              if (angle < 0.0) {
+                return 0.5;
+              }
+              return (ampPosition - angle) / (ampPosition * 2.0) + 0.5;
+            });
 
     Command scoreAmp =
         new ConditionalCommand(
