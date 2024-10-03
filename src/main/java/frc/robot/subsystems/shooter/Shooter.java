@@ -84,7 +84,7 @@ public class Shooter extends SubsystemBase {
       groupKicker.build("ClosedLoopMaxAccelerationConstraint");
 
   private static final LoggedTunableNumber pivotToleranceDegrees =
-      group.build("pivotToleranceDegrees", 0.5);
+      group.build("pivotToleranceDegrees", 2);
   private static final LoggedTunableNumber launcherToleranceRPM =
       group.build("launcherToleranceRPM", 150);
   public static final LoggedTunableNumber distanceToTriggerNoteDetection =
