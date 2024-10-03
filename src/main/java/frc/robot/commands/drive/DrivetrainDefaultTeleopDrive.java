@@ -42,6 +42,8 @@ public class DrivetrainDefaultTeleopDrive extends Command {
 
   private double DEADBAND = 0.1;
 
+  private double speedMultiplier = 0.8;
+
   public DrivetrainDefaultTeleopDrive(
       DrivetrainWrapper drivetrain,
       DoubleSupplier xSupplier,
@@ -94,9 +96,13 @@ public class DrivetrainDefaultTeleopDrive extends Command {
     // Convert to field relative speeds & send command
     ChassisSpeeds chassisSpeeds =
         new ChassisSpeeds(
-            correctedLinearVelocity.getX() * drivetrain.getMaxLinearSpeedMetersPerSec(),
-            correctedLinearVelocity.getY() * drivetrain.getMaxLinearSpeedMetersPerSec(),
-            omega * drivetrain.getMaxAngularSpeedRadPerSec());
+            correctedLinearVelocity.getX()
+                * drivetrain.getMaxLinearSpeedMetersPerSec()
+                * speedMultiplier,
+            correctedLinearVelocity.getY()
+                * drivetrain.getMaxLinearSpeedMetersPerSec()
+                * speedMultiplier,
+            omega * drivetrain.getMaxAngularSpeedRadPerSec() * speedMultiplier);
 
     drivetrain.setVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, drivetrain.getRotationGyroOnly()));
