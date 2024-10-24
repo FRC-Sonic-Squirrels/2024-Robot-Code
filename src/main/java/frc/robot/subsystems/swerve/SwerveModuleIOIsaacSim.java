@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,6 +23,7 @@ import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.IsaacSimDispatcher;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Constants;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
@@ -46,12 +48,9 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
   private int lastUpdatedLoops = 0;
   private double deltaTime = 0;
 
-  private TunableNumberGroup group = new TunableNumberGroup("turnGroup");
-  private LoggedTunableNumber tunable;
-
   private double lastRotation;
 
-  private boolean driveFlipped = false;
+  private Rotation2d targetRotation = Constants.zeroRotation2d;
 
   public SwerveModuleIOIsaacSim(
       RobotConfig globalConfig,
@@ -64,7 +63,6 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
     this.dispatcher = dispatcher;
 
     absoluteEncoderOffset = moduleSpecificConfig.absoluteEncoderOffset();
-    tunable = group.build("turn" + moduleSpecificConfig.steerMotorCANID(), 0);
   }
 
   @Override
@@ -106,6 +104,7 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
     var res = new SwerveModulePosition(positionMeters - lastPositionMeters, inputs.angle);
     lastPositionMeters = positionMeters;
 
+    inputs.targetTurnAngle = targetRotation;
     return res;
   }
 
@@ -122,16 +121,17 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
       double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {
     // m/s -> divide by wheel radius to get radians/s -> convert to rotations
     var velocityRadiansPerSecond =
-        velocityMetersPerSec * distanceToRotation * (driveFlipped ? -1.0 : 1.0);
+        velocityMetersPerSec * distanceToRotation;
 
     dispatcher.sendMotorInfo(moduleSpecificConfig.driveMotorCANID(), velocityRadiansPerSecond);
   }
 
   @Override
   public void setTurnPosition(Rotation2d position) {
+    double rawTurnPosition = position.getRadians() + absoluteEncoderOffset.getRadians();
     double turnPosition =
         findclosestrotation(
-            position.getRadians() + absoluteEncoderOffset.getRadians(), lastRotation);
+            rawTurnPosition, lastRotation);
     Logger.recordOutput(
         "targetSteerPosition" + moduleSpecificConfig.steerMotorCANID(),
         GeometryUtil.optimizeRotation(turnPosition));
@@ -139,6 +139,7 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
         "currentSteerPosition" + moduleSpecificConfig.steerMotorCANID(),
         GeometryUtil.optimizeRotation(turnPosition));
     dispatcher.sendMotorInfo(moduleSpecificConfig.steerMotorCANID(), turnPosition);
+    targetRotation = Rotation2d.fromRadians(rawTurnPosition);
     lastRotation = turnPosition;
   }
 
@@ -146,9 +147,8 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
     double attempt = currentTarget;
     double lastAttempt = currentTarget;
     for (int i = 0; true; i++) {
-      attempt += Math.PI * (lastTarget > currentTarget ? 1.0 : -1.0);
+      attempt += Math.PI * 2 * (lastTarget > currentTarget ? 1.0 : -1.0);
       if (Math.abs(lastAttempt - lastTarget) < Math.abs(attempt - lastTarget)) {
-        driveFlipped = !(Math.round(currentTarget - lastAttempt) % 2 == 0);
         return lastAttempt;
       }
       lastAttempt = attempt;

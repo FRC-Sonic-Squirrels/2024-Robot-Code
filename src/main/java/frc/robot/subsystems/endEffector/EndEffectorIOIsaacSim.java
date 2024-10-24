@@ -20,8 +20,8 @@ public class EndEffectorIOIsaacSim implements EndEffectorIO {
     inputs.currentAmps = 0;
     inputs.appliedVolts = 0;
     inputs.tempCelsius = 0;
-    inputs.intakeSideTOFDistanceInches = 10;
-    inputs.shooterSideTOFDistanceInches = 10;
+    inputs.intakeSideTOFDistanceInches = 12;
+    inputs.shooterSideTOFDistanceInches = 12;
   }
 
   @Override

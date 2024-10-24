@@ -30,6 +30,6 @@ public class IntakeIOIsaacSim implements IntakeIO {
   @Override
   public void setVelocity(double revPerMin) {
     dispatcher.sendMotorInfo(
-        Constants.CanIDs.INTAKE_CAN_ID, Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
+        Constants.CanIDs.INTAKE_CAN_ID, -Units.rotationsPerMinuteToRadiansPerSecond(revPerMin));
   }
 }

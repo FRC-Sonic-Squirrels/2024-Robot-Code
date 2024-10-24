@@ -68,6 +68,7 @@ public interface SwerveModuleIO {
     public double driveVelocityRadPerSec;
     public double driveAppliedVolts;
     public double driveCurrentAmps;
+    public Rotation2d targetTurnAngle = Constants.zeroRotation2d;
 
     public Rotation2d turnAbsolutePosition = Constants.zeroRotation2d;
     public Rotation2d turnPosition = Constants.zeroRotation2d;

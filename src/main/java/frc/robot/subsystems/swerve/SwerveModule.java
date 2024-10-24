@@ -23,6 +23,7 @@ import frc.lib.team2930.LoggerEntry;
 import frc.lib.team2930.LoggerGroup;
 import frc.lib.team2930.TunableNumberGroup;
 import frc.lib.team6328.LoggedTunableNumber;
+import frc.robot.Robot;
 import frc.robot.configs.RobotConfig;
 import java.util.List;
 
@@ -167,7 +168,13 @@ public class SwerveModule {
       SwerveModuleState state, double driveMotorMotionMagicAcceleration) {
     // Optimize state based on current angle
     // Controllers run in "periodic" when the setpoint is not null
-    var optimizedState = SwerveModuleState.optimize(state, getAngle());
+    // TODO: find a better way to do this:
+    SwerveModuleState optimizedState;
+    if(Robot.isSimulation()){
+      optimizedState = state;
+    } else {
+      optimizedState = SwerveModuleState.optimize(state, getAngle());
+    }
 
     // Update setpoints, controllers run in "periodic"
     angleSetpoint = optimizedState.angle;
