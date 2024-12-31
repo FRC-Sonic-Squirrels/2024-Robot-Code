@@ -14,15 +14,12 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.team2930.GeometryUtil;
 import frc.lib.team2930.IsaacSimDispatcher;
-import frc.lib.team2930.TunableNumberGroup;
-import frc.lib.team6328.LoggedTunableNumber;
 import frc.robot.Constants;
 import frc.robot.configs.IndividualSwerveModuleConfig;
 import frc.robot.configs.RobotConfig;
@@ -120,8 +117,7 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
   public void setDriveVelocity(
       double velocityMetersPerSec, double accelerationMetersPerSecondSquared) {
     // m/s -> divide by wheel radius to get radians/s -> convert to rotations
-    var velocityRadiansPerSecond =
-        velocityMetersPerSec * distanceToRotation;
+    var velocityRadiansPerSecond = velocityMetersPerSec * distanceToRotation;
 
     dispatcher.sendMotorInfo(moduleSpecificConfig.driveMotorCANID(), velocityRadiansPerSecond);
   }
@@ -129,9 +125,7 @@ public class SwerveModuleIOIsaacSim implements SwerveModuleIO {
   @Override
   public void setTurnPosition(Rotation2d position) {
     double rawTurnPosition = position.getRadians() + absoluteEncoderOffset.getRadians();
-    double turnPosition =
-        findclosestrotation(
-            rawTurnPosition, lastRotation);
+    double turnPosition = findclosestrotation(rawTurnPosition, lastRotation);
     Logger.recordOutput(
         "targetSteerPosition" + moduleSpecificConfig.steerMotorCANID(),
         GeometryUtil.optimizeRotation(turnPosition));

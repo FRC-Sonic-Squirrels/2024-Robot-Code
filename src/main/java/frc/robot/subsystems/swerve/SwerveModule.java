@@ -170,7 +170,7 @@ public class SwerveModule {
     // Controllers run in "periodic" when the setpoint is not null
     // TODO: find a better way to do this:
     SwerveModuleState optimizedState;
-    if(Robot.isSimulation()){
+    if (Robot.isSimulation()) {
       optimizedState = state;
     } else {
       optimizedState = SwerveModuleState.optimize(state, getAngle());
